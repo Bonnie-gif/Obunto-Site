@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NEWTON OS // TSC</title>
+    <title>NEWTON OS // TSC MAINFRAME</title>
     <style>
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; }
-        .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
+        .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
         .hidden { display: none !important; }
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
-        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; }
         .win-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; }
         .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); }
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
-        .profile-img { width: 100px; height: 100px; border: 2px solid var(--border); object-fit: cover; background: #9da690; }
         .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
+        .profile-img { width: 100px; height: 100px; border: 2px solid var(--border); background: #9da690; }
     </style>
 </head>
 <body>
@@ -29,10 +29,10 @@
             <div class="window" style="width:300px; margin:auto;">
                 <div class="win-header"><span>AUTHENTICATION</span></div>
                 <div class="win-body">
-                    <input type="text" id="inpId" placeholder="ROBLOX ID">
+                    <input type="text" id="inpId" placeholder="USER ID">
                     <input type="text" id="inpUser" placeholder="USERNAME">
-                    <button id="btnLogin" class="os-btn">ACCESS SYSTEM</button>
-                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:5px;">AWAITING INPUT</div>
+                    <button id="btnLogin" class="os-btn">ACCESS</button>
+                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:5px;">AWAITING...</div>
                 </div>
             </div>
         </div>
@@ -40,15 +40,24 @@
         <div id="desktop-screen" class="full-screen">
             <div class="top-bar"><span>TSC_INTRANET</span><span id="clock">00:00</span></div>
             <div style="flex:1; padding:20px;">
-                <div onclick="document.getElementById('profile-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
+                <div onclick="document.getElementById('p-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
                     <img src="assets/icon-large-owner_info-28x14.png" width="40"><br><span style="font-size:12px;">PROFILE</span>
                 </div>
-                <div id="profile-win" class="window hidden" style="position:absolute; top:80px; left:40px; width:420px;">
-                    <div class="win-header"><span>PERSONNEL_FILE</span><button onclick="document.getElementById('profile-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
+                <div id="p-win" class="window hidden" style="position:absolute; top:80px; left:40px; width:400px;">
+                    <div class="win-header"><span>PERSONNEL_FILE</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
                     <div class="win-body" id="profileData"></div>
                 </div>
             </div>
             <div class="os-dock"><img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;"></div>
+        </div>
+
+        <div id="admin-screen" class="full-screen" style="background:#2b3323; color:#89937a;">
+            <div class="top-bar" style="background:transparent; color:#89937a;"><span>OBUNTO_CORE</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">EXIT</button></div>
+            <div style="padding:20px;">
+                <p>BROADCAST:</p>
+                <textarea id="adminMsg" style="height:100px; width:100%; background:transparent; border:1px solid #89937a; color:#89937a; outline:none; padding:10px;"></textarea>
+                <button id="btnSend" class="os-btn" style="margin-top:10px; width:100%; background:#89937a; color:#2b3323;">TRANSMIT</button>
+            </div>
         </div>
     </div>
 
@@ -61,32 +70,29 @@
             const id = document.getElementById('inpId').value.trim();
             const user = document.getElementById('inpUser').value.trim();
             const status = document.getElementById('loginStatus');
-            status.innerText = "QUERYING DATABASE...";
+            status.innerText = "QUERYING...";
 
-            try {
-                const res = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({userId: id, usernameInput: user})
-                });
-                const data = await res.json();
+            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, usernameInput:user}) });
+            const data = await res.json();
 
-                if (data.success) {
-                    document.getElementById('login-screen').classList.remove('active');
+            if (data.success) {
+                document.getElementById('login-screen').classList.remove('active');
+                if (data.userData.id === "000") {
+                    document.getElementById('admin-screen').classList.add('active');
+                } else {
                     document.getElementById('desktop-screen').classList.add('active');
-                    const u = data.userData;
                     document.getElementById('profileData').innerHTML = `
                         <div style="display:flex; gap:20px; align-items:center;">
-                            <img src="${u.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/100'">
-                            <div style="font-size:13px; line-height:1.6;">
-                                <p><b>IDENTITY:</b> ${u.username}</p>
-                                <p><b>DEPT:</b> ${u.dept}</p>
-                                <p><b>RANK:</b> ${u.rank}</p>
-                                <p><b>CLEARANCE:</b> LEVEL ${u.clearance}</p>
+                            <img src="${data.userData.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/100'">
+                            <div style="font-size:13px;">
+                                <p><b>IDENTITY:</b> ${data.userData.username}</p>
+                                <p><b>DEPT:</b> ${data.userData.dept}</p>
+                                <p><b>RANK:</b> ${data.userData.rank}</p>
+                                <p><b>CLEARANCE:</b> ${data.userData.clearance}</p>
                             </div>
                         </div>`;
-                } else { status.innerText = "ACCESS DENIED"; }
-            } catch (e) { status.innerText = "CONNECTION ERROR"; }
+                }
+            } else { status.innerText = "DENIED"; }
         };
     </script>
 </body>
