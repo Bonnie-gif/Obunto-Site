@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEWTON OS // TSC MAINFRAME</title>
+    <title>TSC // MAINFRAME</title>
     <style>
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -16,9 +15,8 @@
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
         .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; }
         .win-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        input, textarea { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; width: 100%; padding: 5px; }
+        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; width: 100%; padding: 5px; }
         .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; box-shadow: 3px 3px 0 var(--border); font-weight: bold; }
-        .os-btn:active { transform: translate(2px, 2px); box-shadow: none; }
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
         .desktop-content { flex: 1; position: relative; padding: 20px; }
         .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 30px; }
@@ -42,7 +40,7 @@
                     <input type="text" id="inpId" placeholder="USER ID">
                     <input type="text" id="inpUser" placeholder="USERNAME">
                     <button id="btnLogin" class="os-btn">ACCESS</button>
-                    <div id="loginStatus" style="text-align:center; font-size:10px;">SYSTEM READY</div>
+                    <div id="loginStatus" style="text-align:center; font-size:10px;">READY</div>
                 </div>
             </div>
         </div>
@@ -51,9 +49,9 @@
             <div class="top-bar"><span>TSC_INTRANET</span><span id="clock">00:00</span></div>
             <div class="desktop-content">
                 <div onclick="document.getElementById('profile-window').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
-                    <img src="assets/icon-large-owner_info-28x14.png" width="40"><br><span style="font-size:12px;">PROFILE</span>
+                    <img src="assets/icon-large-owner_info-28x14.png" width="40" onerror="this.src='https://via.placeholder.com/40'"><br><span style="font-size:12px;">PROFILE</span>
                 </div>
-                <div id="profile-window" class="window hidden" style="position:absolute; top:40px; left:40px; width:350px;">
+                <div id="profile-window" class="window hidden" style="position:absolute; top:40px; left:40px; width:400px;">
                     <div class="win-header"><span>PERSONNEL_FILE</span><button onclick="document.getElementById('profile-window').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
                     <div class="win-body" id="profileData"></div>
                 </div>
@@ -62,12 +60,12 @@
         </div>
 
         <div id="admin-screen" class="full-screen" style="background:#2b3323; color:#89937a;">
-            <div class="top-bar" style="background:transparent; color:#89937a;"><span>OBUNTO_CORE</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">LOGOUT</button></div>
+            <div class="top-bar" style="background:transparent; color:#89937a;"><span>OBUNTO_CORE</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">EXIT</button></div>
             <div style="padding:20px;">
-                <p>EXPRESSION:</p>
+                <p>EMOTION:</p>
                 <div id="moodGrid" class="mood-grid"></div>
-                <p>BROADCAST:</p>
-                <textarea id="adminMsg" style="height:80px; color:#89937a; border-color:#89937a;"></textarea>
+                <p>SYSTEM BROADCAST:</p>
+                <textarea id="adminMsg" style="height:80px; width:100%; color:#89937a; border:1px solid #89937a; background:transparent; outline:none;"></textarea>
                 <button id="btnSend" class="os-btn" style="margin-top:10px; width:100%; background:#89937a; color:#2b3323;">TRANSMIT</button>
             </div>
         </div>
@@ -89,7 +87,7 @@
             const grid = document.getElementById('moodGrid');
             if(grid) moods.forEach(m => {
                 const d = document.createElement('div'); d.className = 'mood-item';
-                d.innerHTML = `<img src="obunto/${m}.png" width="30">`;
+                d.innerHTML = `<img src="obunto/${m}.png" width="30" onerror="this.src='https://via.placeholder.com/30'">`;
                 d.onclick = () => { selMood = m; document.querySelectorAll('.mood-item').forEach(i=>i.classList.remove('selected')); d.classList.add('selected'); };
                 grid.appendChild(d);
             });
@@ -97,18 +95,38 @@
         };
 
         document.getElementById('btnLogin').onclick = async () => {
-            const id = document.getElementById('inpId').value;
-            const user = document.getElementById('inpUser').value;
-            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, usernameInput:user}) });
-            const data = await res.json();
-            if(data.success) {
-                document.getElementById('login-screen').classList.remove('active');
-                if(data.userData.id === "000") { document.getElementById('admin-screen').classList.add('active'); }
-                else {
-                    document.getElementById('desktop-screen').classList.add('active');
-                    document.getElementById('profileData').innerHTML = `<div style="display:flex; gap:15px;"><img src="${data.userData.avatar}" width="80"><div style="font-size:12px;"><p><b>ID:</b> ${data.userData.id}</p><p><b>NAME:</b> ${data.userData.username}</p><p><b>DEPT:</b> ${data.userData.department}</p><p><b>RANK:</b> ${data.userData.rank}</p></div></div>`;
-                }
-            } else { alert("ACCESS DENIED"); }
+            const id = document.getElementById('inpId').value.trim();
+            const user = document.getElementById('inpUser').value.trim();
+            const status = document.getElementById('loginStatus');
+            status.innerText = "AUTHENTICATING...";
+
+            try {
+                const res = await fetch('/api/login', { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify({userId:id, usernameInput:user}) 
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    document.getElementById('login-screen').classList.remove('active');
+                    if(data.userData.id === "000") {
+                        document.getElementById('admin-screen').classList.add('active');
+                    } else {
+                        document.getElementById('desktop-screen').classList.add('active');
+                        document.getElementById('profileData').innerHTML = `
+                            <div style="display:flex; gap:15px; align-items:center;">
+                                <img src="${data.userData.avatar}" width="100" style="border:2px solid #2b3323;" onerror="this.src='https://via.placeholder.com/100'">
+                                <div style="font-size:12px;">
+                                    <p><b>IDENTITY:</b> ${data.userData.username}</p>
+                                    <p><b>DEPT:</b> ${data.userData.department}</p>
+                                    <p><b>RANK:</b> ${data.userData.rank}</p>
+                                    <p><b>CLEARANCE:</b> LEVEL ${data.userData.clearance}</p>
+                                </div>
+                            </div>`;
+                    }
+                } else { status.innerText = "ACCESS DENIED"; }
+            } catch(e) { status.innerText = "OFFLINE"; }
         };
 
         document.getElementById('btnSend')?.addEventListener('click', () => {
