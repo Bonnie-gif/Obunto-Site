@@ -7,36 +7,21 @@
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; --danger: #6b2828; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); overflow: hidden; }
-        
-        /* EFEITO CRT / SCANLINES */
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; z-index: 9999; pointer-events: none; }
-        
         .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
-        
-        /* TELAS */
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
         .center-flex { justify-content: center; align-items: center; }
-
-        /* JANELAS ESTILO NEWTON */
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); transition: all 0.2s; }
         .win-header { background: var(--border); color: var(--bg); padding: 6px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; letter-spacing: 1px; }
         .win-body { padding: 25px; }
-
-        /* INPUTS E BOTÕES */
         input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 8px; width: 100%; margin-bottom: 15px; font-family: inherit; font-size: 16px; font-weight: bold; }
         input::placeholder { color: rgba(43, 51, 35, 0.5); }
-        
         .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-weight: bold; box-shadow: 4px 4px 0 var(--border); font-family: inherit; text-transform: uppercase; }
         .os-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--border); }
-        .os-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* MENSAGENS DE SEGURANÇA */
         .sec-msg { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
         .msg-alert { color: var(--danger); }
         .msg-ok { color: var(--ink); }
-
-        /* DESKTOP UI */
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
         .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
         .profile-img { width: 130px; height: 130px; border: 2px solid var(--border); background: #9da690; margin-right: 25px; image-rendering: pixelated; }
@@ -44,8 +29,6 @@
         .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 5px; }
         .group-table td { padding: 5px; border-bottom: 1px dashed var(--border); }
         .hidden { display: none !important; }
-
-        /* ANIMAÇÕES (GLITCH & BOOT) */
         @keyframes glitch-anim {
             0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 1px); }
             20% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -1px); }
@@ -55,7 +38,6 @@
             100% { clip-path: inset(40% 0 60% 0); transform: translate(1px, -1px); }
         }
         .glitch-effect { position: relative; animation: glitch-anim 2s infinite linear alternate-reverse; }
-        
         .boot-bar-container { width: 100%; height: 20px; border: 2px solid var(--border); padding: 2px; margin-top: 10px; }
         .boot-fill { height: 100%; background: var(--ink); width: 0%; transition: width 0.1s; }
     </style>
@@ -63,45 +45,32 @@
 <body>
     <div class="scanlines"></div>
     <div class="app-container">
-
         <div id="boot-1" class="full-screen active center-flex" style="background:#111;">
             <div style="text-align:center;">
                 <img src="obunto/normal.png" width="100" class="glitch-effect" style="filter: grayscale(1) sepia(1) hue-rotate(50deg);">
-                <div style="margin-top:20px; font-size:14px; color:#89937a; font-weight:bold;">
-                    INITIALIZING OBUNTO_CORE<span id="dots-1">...</span>
-                </div>
+                <div style="margin-top:20px; font-size:14px; color:#89937a; font-weight:bold;">INITIALIZING OBUNTO_CORE<span id="dots-1">...</span></div>
             </div>
         </div>
-
         <div id="boot-2" class="full-screen center-flex" style="gap:20px;">
             <div style="font-size:20px; font-weight:bold; letter-spacing:2px;">TSC MAINFRAME v5.0</div>
             <div class="window" style="width:350px;">
                 <div class="win-header"><span>SYSTEM_CHECK</span></div>
                 <div class="win-body" style="font-size:11px; line-height:1.6;">
-                    <div id="boot-log">
-                        > Establishing secure link... OK<br>
-                        > Verifying MongoDB connection... OK<br>
-                        > Loading personnel database... OK
-                    </div>
-                    <div class="boot-bar-container">
-                        <div class="boot-fill" id="boot-progress"></div>
-                    </div>
+                    <div id="boot-log">> Establishing secure link... OK<br>> Verifying MongoDB connection... OK<br>> Loading personnel database... OK</div>
+                    <div class="boot-bar-container"><div class="boot-fill" id="boot-progress"></div></div>
                     <div style="text-align:right; margin-top:5px; font-weight:bold;" id="boot-pct">0%</div>
                 </div>
             </div>
         </div>
-
         <div id="login-screen" class="full-screen center-flex">
             <div class="window" style="width:380px;">
                 <div class="win-header"><span>SECURE_ACCESS_TERMINAL</span></div>
                 <div class="win-body">
-                    
                     <div id="auth-step-1">
                         <p class="sec-msg msg-ok">ENTER PERSONNEL ID:</p>
                         <input type="text" id="inpId" placeholder="ROBLOX ID" autocomplete="off">
                         <button id="btnCheck" class="os-btn" style="width:100%">VERIFY IDENTITY</button>
                     </div>
-
                     <div id="auth-step-2" class="hidden">
                         <p id="auth-msg" class="sec-msg">SECURITY CLEARANCE:</p>
                         <input type="password" id="inpPass" placeholder="PASSPHRASE" autocomplete="off">
@@ -110,53 +79,32 @@
                             <button id="btnFinal" class="os-btn" style="width:70%">ACCESS</button>
                         </div>
                     </div>
-
                     <div id="statusMsg" style="text-align:center; font-size:10px; margin-top:15px; opacity:0.6;">SYSTEM READY</div>
                 </div>
             </div>
         </div>
-
         <div id="desktop-screen" class="full-screen">
             <div class="top-bar"><span>TSC_INTRANET</span><span id="clock">00:00</span></div>
             <div style="flex:1; padding:30px; position:relative;">
-                
                 <div onclick="toggleWindow('p-win')" style="cursor:pointer; width:80px; text-align:center;">
-                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br>
-                    <span style="font-size:11px; font-weight:bold;">DOSSIER</span>
+                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br><span style="font-size:11px; font-weight:bold;">DOSSIER</span>
                 </div>
-
                 <div id="p-win" class="window hidden" style="position:absolute; top:50px; left:50px; width:650px; z-index:100;">
-                    <div class="win-header">
-                        <span>PERSONNEL_RECORD</span>
-                        <button onclick="toggleWindow('p-win')" style="background:none; border:none; color:inherit; cursor:pointer;">[X]</button>
-                    </div>
+                    <div class="win-header"><span>PERSONNEL_RECORD</span><button onclick="toggleWindow('p-win')" style="background:none; border:none; color:inherit; cursor:pointer;">[X]</button></div>
                     <div class="win-body" id="profileData">Loading...</div>
                 </div>
-
             </div>
-            <div class="os-dock">
-                <img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;" title="REBOOT SYSTEM">
-            </div>
+            <div class="os-dock"><img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;" title="REBOOT SYSTEM"></div>
         </div>
-
     </div>
-
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let currentMode = 'login'; // 'login' ou 'register'
+        let currentMode = 'login'; 
 
-        // --- SISTEMA DE BOOT ---
         window.onload = () => {
-            // Animação dos pontinhos ...
             let d=0; setInterval(()=>{ d=(d+1)%4; document.getElementById('dots-1').innerText='.'.repeat(d); }, 500);
-
-            // Troca da tela 1 para 2 após 3 segundos
-            setTimeout(() => {
-                document.getElementById('boot-1').classList.remove('active');
-                document.getElementById('boot-2').classList.add('active');
-                runBootBar();
-            }, 3000);
+            setTimeout(() => { document.getElementById('boot-1').classList.remove('active'); document.getElementById('boot-2').classList.add('active'); runBootBar(); }, 3000);
         };
 
         function runBootBar() {
@@ -164,50 +112,28 @@
             const bar = document.getElementById('boot-progress');
             const txt = document.getElementById('boot-pct');
             const int = setInterval(() => {
-                width += Math.random() * 8;
-                if(width > 100) width = 100;
-                bar.style.width = width + '%';
-                txt.innerText = Math.floor(width) + '%';
-                
-                if(width === 100) {
-                    clearInterval(int);
-                    setTimeout(() => {
-                        document.getElementById('boot-2').classList.remove('active');
-                        document.getElementById('login-screen').classList.add('active');
-                    }, 800);
-                }
+                width += Math.random() * 8; if(width > 100) width = 100;
+                bar.style.width = width + '%'; txt.innerText = Math.floor(width) + '%';
+                if(width === 100) { clearInterval(int); setTimeout(() => { document.getElementById('boot-2').classList.remove('active'); document.getElementById('login-screen').classList.add('active'); }, 800); }
             }, 150);
         }
 
-        // --- LÓGICA DE LOGIN ---
-        
-        // Passo 1: Verificar ID
         document.getElementById('btnCheck').onclick = async () => {
             const id = document.getElementById('inpId').value.trim();
             const status = document.getElementById('statusMsg');
-            
             if(!id) return;
             status.innerText = "SEARCHING DATABASE...";
 
-            // Admin Bypass
-            if(id === "000") {
-                setupAuth("login", "⚠ MAINFRAME ACCESS // ENTER KEY:", true);
-                return;
-            }
+            if(id === "000") { setupAuth("login", "⚠ MAINFRAME ACCESS // ENTER KEY:", true); return; }
 
             try {
-                const res = await fetch('/api/check-user', { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({userId: id}) 
-                });
+                const res = await fetch('/api/check-user', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: id}) });
                 const data = await res.json();
-
-                if(data.registered) {
-                    setupAuth("login", "⚠ SECURE LOGIN // ENTER PASSWORD:", true);
-                } else {
-                    setupAuth("register", "★ NEW RECRUIT // CREATE PASSWORD:", false);
-                }
+                
+                // SE O USUÁRIO EXISTIR, MODO LOGIN. SE NÃO, MODO REGISTRO.
+                if(data.registered) { setupAuth("login", "⚠ SECURE LOGIN // ENTER PASSWORD:", true); } 
+                else { setupAuth("register", "★ NEW RECRUIT // CREATE PASSWORD:", false); }
+                
                 status.innerText = "WAITING FOR CREDENTIALS...";
             } catch(e) { status.innerText = "CONNECTION ERROR"; }
         };
@@ -216,11 +142,9 @@
             currentMode = mode;
             document.getElementById('auth-step-1').classList.add('hidden');
             document.getElementById('auth-step-2').classList.remove('hidden');
-            
             const msgEl = document.getElementById('auth-msg');
             msgEl.innerText = msg;
             msgEl.className = isAlert ? "sec-msg msg-alert" : "sec-msg msg-ok";
-            
             document.getElementById('btnFinal').innerText = mode === 'register' ? "REGISTER" : "ACCESS";
         }
 
@@ -231,7 +155,7 @@
             document.getElementById('statusMsg').innerText = "SYSTEM READY";
         };
 
-        // Passo 2: Finalizar
+        // --- AQUI ESTÁ A CORREÇÃO DE LOG IN ---
         document.getElementById('btnFinal').onclick = async () => {
             const id = document.getElementById('inpId').value.trim();
             const pass = document.getElementById('inpPass').value.trim();
@@ -240,40 +164,49 @@
             if(!pass) return;
             status.innerText = "PROCESSING...";
 
-            const endpoint = currentMode === 'register' ? '/api/register' : '/api/login';
+            // Se o sistema acha que é registro, tenta registrar
+            if (currentMode === 'register') {
+                try {
+                    const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: id, password: pass}) });
+                    const data = await res.json();
 
+                    if(data.success) {
+                        alert("ID REGISTERED. PLEASE LOGIN.");
+                        location.reload();
+                    } else if (data.message === "ID_TAKEN") {
+                        // O PULO DO GATO: Se der erro que já existe, tenta logar direto!
+                        status.innerText = "ACCOUNT EXISTS. ATTEMPTING LOGIN...";
+                        attemptLogin(id, pass, status);
+                    } else {
+                        status.innerText = "REGISTRATION FAILED";
+                    }
+                } catch(e) { status.innerText = "ERROR"; }
+            } else {
+                // Se o sistema já sabe que é login
+                attemptLogin(id, pass, status);
+            }
+        };
+
+        async function attemptLogin(id, pass, status) {
             try {
-                const res = await fetch(endpoint, { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({userId: id, password: pass}) 
-                });
+                const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: id, password: pass}) });
                 const data = await res.json();
 
-                if(currentMode === 'register') {
-                    if(data.success) {
-                        alert("ID REGISTERED SUCCESSFULLY. PLEASE LOGIN.");
-                        location.reload();
-                    } else { status.innerText = "REGISTRATION FAILED: ID TAKEN"; }
+                if(data.success) {
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('desktop-screen').classList.add('active');
+                    renderProfile(data.userData);
                 } else {
-                    // LOGIN SUCESSO
-                    if(data.success) {
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('desktop-screen').classList.add('active');
-                        renderProfile(data.userData);
-                    } else {
-                        status.innerText = "ACCESS DENIED: " + (data.message || "INVALID");
-                        document.getElementById('inpPass').value = "";
-                    }
+                    status.innerText = "ACCESS DENIED: " + (data.message || "INVALID PASS");
+                    document.getElementById('inpPass').value = "";
                 }
-            } catch(e) { status.innerText = "SYSTEM CRITICAL ERROR"; }
-        };
+            } catch(e) { status.innerText = "LOGIN FAILED"; }
+        }
 
         function renderProfile(u) {
             let table = `<table class="group-table"><tr><th>TSC_DIVISION</th><th>RANK_STATUS</th></tr>`;
             u.affiliations.forEach(g => { table += `<tr><td>${g.name}</td><td>${g.role}</td></tr>`; });
             table += `</table>`;
-
             document.getElementById('profileData').innerHTML = `
                 <div style="display:flex; margin-bottom:20px; border-bottom: 2px solid var(--border); padding-bottom:20px; align-items:center;">
                     <img src="${u.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/140'">
@@ -283,16 +216,10 @@
                         <p><b>AUTHORITY:</b> <span style="background:var(--border); color:var(--bg); padding:3px 8px; font-weight:bold;">${u.clearance} // ${u.rank}</span></p>
                     </div>
                 </div>
-                <div>
-                    <p style="font-size:10px; font-weight:bold; letter-spacing:1px; text-decoration:underline;">AUTHORIZED_AFFILIATIONS:</p>
-                    ${table}
-                </div>`;
+                <div><p style="font-size:10px; font-weight:bold; letter-spacing:1px; text-decoration:underline;">AUTHORIZED_AFFILIATIONS:</p>${table}</div>`;
         }
 
-        function toggleWindow(id) {
-            document.getElementById(id).classList.toggle('hidden');
-        }
-
+        function toggleWindow(id) { document.getElementById(id).classList.toggle('hidden'); }
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
     </script>
 </body>
