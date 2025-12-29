@@ -2,27 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>TSC // PERSONNEL DATABASE</title>
+    <title>NEWTON OS // TSC MAINFRAME</title>
     <style>
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); }
-        .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
+        .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; overflow: hidden; }
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
-        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
-        .win-body { padding: 20px; }
-        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; margin-bottom: 10px; }
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); }
+        .win-header { background: var(--border); color: var(--bg); padding: 6px 12px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
+        .win-body { padding: 25px; }
+        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; margin-bottom: 15px; font-family: inherit; }
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 10px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); font-family: inherit; }
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
-        .profile-img { width: 140px; height: 140px; border: 2px solid var(--border); background: #9da690; margin-right: 25px; image-rendering: pixelated; }
-        .group-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 10px; }
-        .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 5px; text-transform: uppercase; }
+        .profile-img { width: 130px; height: 130px; border: 2px solid var(--border); background: #9da690; margin-right: 25px; image-rendering: pixelated; }
+        .group-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
+        .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 5px; }
         .group-table td { padding: 5px; border-bottom: 1px dashed var(--border); }
         .hidden { display: none !important; }
-        .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
+        .os-dock { height: 55px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
     </style>
 </head>
 <body>
@@ -30,13 +30,13 @@
     <div class="app-container">
         
         <div id="login-screen" class="full-screen active">
-            <div class="window" style="width:300px; margin:auto;">
-                <div class="win-header"><span>SECURE_LOGIN</span></div>
+            <div class="window" style="width:320px; margin:auto;">
+                <div class="win-header"><span>LOGIN_TERMINAL</span></div>
                 <div class="win-body">
                     <input type="text" id="inpId" placeholder="REGISTRY ID">
                     <input type="text" id="inpUser" placeholder="IDENTITY NAME">
-                    <button id="btnLogin" class="os-btn" style="width:100%">ACCESS DATA</button>
-                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:10px;">SYSTEM READY</div>
+                    <button id="btnLogin" class="os-btn" style="width:100%">EXECUTE ACCESS</button>
+                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:10px;">AWAITING SECURITY CLEARANCE</div>
                 </div>
             </div>
         </div>
@@ -45,9 +45,9 @@
             <div class="top-bar"><span>TSC_NETWORK_v5.0</span><span id="clock">00:00</span></div>
             <div style="flex:1; padding:30px;">
                 <div onclick="document.getElementById('p-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
-                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br><span style="font-size:11px;">DOSSIER</span>
+                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br><span style="font-size:11px; font-weight:bold;">DOSSIER</span>
                 </div>
-                <div id="p-win" class="window hidden" style="position:absolute; top:60px; left:60px; width:620px; z-index:100;">
+                <div id="p-win" class="window hidden" style="position:absolute; top:60px; left:60px; width:650px; z-index:100;">
                     <div class="win-header"><span>PERSONNEL_RECORD_FILE</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer; font-weight:bold;">[X]</button></div>
                     <div class="win-body" id="profileData"></div>
                 </div>
@@ -66,7 +66,7 @@
             const id = document.getElementById('inpId').value.trim();
             const user = document.getElementById('inpUser').value.trim();
             const status = document.getElementById('loginStatus');
-            status.innerText = "QUERYING TSC_DATABASE...";
+            status.innerText = "SEARCHING DATABASE...";
 
             try {
                 const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({userId: id, usernameInput: user}) });
@@ -77,31 +77,26 @@
                     document.getElementById('desktop-screen').classList.add('active');
                     const u = data.userData;
                     
-                    let table = `<table class="group-table"><tr><th>GROUP</th><th>ROLE / RANK</th><th>DIVISION</th></tr>`;
+                    let table = `<table class="group-table"><tr><th>TSC_GROUP</th><th>ROLE_RANK</th><th>DIVISION</th></tr>`;
                     u.affiliations.forEach(g => { table += `<tr><td>${g.name}</td><td>${g.role}</td><td>${g.div}</td></tr>`; });
                     table += `</table>`;
 
                     document.getElementById('profileData').innerHTML = `
                         <div style="display:flex; margin-bottom:20px; border-bottom: 2px solid var(--border); padding-bottom:20px;">
-                            <img src="${u.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/140'">
-                            <div style="font-size:12px; line-height:2.0; flex:1;">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <p><b>REGISTRY ID:</b><br>${u.id}</p>
-                                    <p><b>CLEARANCE LEVEL:</b><br><b>${u.clearance}</b></p>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; margin-top:10px;">
-                                    <p><b>RECRUITMENT DATE:</b><br>${u.created}</p>
-                                    <p><b>PRIMARY ASSIGNMENT:</b><br>${u.rank}</p>
-                                </div>
-                                <p style="margin-top:10px;"><b>IDENTITY:</b> ${u.username}</p>
+                            <img src="${u.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/130'">
+                            <div style="font-size:13px; line-height:2.2; flex:1;">
+                                <p><b>REGISTRY ID:</b> ${u.id}</p>
+                                <p><b>IDENTITY:</b> ${u.username}</p>
+                                <p><b>AUTHORITY:</b> <span style="background:var(--border); color:var(--bg); padding:2px 5px;">${u.clearance} // ${u.rank}</span></p>
+                                <p><b>ASSIGNMENT:</b> ${u.dept}</p>
                             </div>
                         </div>
                         <div>
-                            <p style="font-size:10px; font-weight:bold; text-decoration:underline;">AUTHORIZED GROUP AFFILIATIONS:</p>
+                            <p style="font-size:10px; font-weight:bold; letter-spacing:1px;">AUTHORIZED_GROUP_AFFILIATIONS:</p>
                             ${table}
                         </div>`;
                 } else { status.innerText = "ACCESS DENIED: " + (data.message || "UNAUTHORIZED"); }
-            } catch (e) { status.innerText = "CONNECTION_ERR"; }
+            } catch (e) { status.innerText = "CONNECTION_FAIL"; }
         };
     </script>
 </body>
