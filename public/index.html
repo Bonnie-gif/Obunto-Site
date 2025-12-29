@@ -26,7 +26,7 @@
 
         .hidden { display: none !important; }
 
-        /* ADMIN PANEL - ESTILO PAPEL/RETRO (NADA DE NEON) */
+        /* ADMIN PANEL - ESTILO PAPEL/RETRO (LIMPO) */
         .adm-container { display: grid; grid-template-columns: 250px 1fr 250px; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; }
         
         .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
@@ -147,9 +147,9 @@
             document.getElementById('login-screen').classList.add('active');
         }, 2000);
 
-        // LOGIN
+        // LOGIN CORRIGIDO (COM TRIM)
         async function checkId() {
-            const id = document.getElementById('inpId').value;
+            const id = document.getElementById('inpId').value.trim(); // <--- CORREÇÃO
             if(!id) return;
             const res = await fetch('/api/check-user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) });
             const data = await res.json();
@@ -161,8 +161,8 @@
         }
 
         async function doLogin() {
-            const id = document.getElementById('inpId').value;
-            const pass = document.getElementById('inpPass').value;
+            const id = document.getElementById('inpId').value.trim(); // <--- CORREÇÃO
+            const pass = document.getElementById('inpPass').value.trim(); // <--- CORREÇÃO
             const endpoint = isRegistering ? '/api/register' : '/api/login';
 
             const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, password:pass}) });
