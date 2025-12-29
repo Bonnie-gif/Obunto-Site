@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OBUNTO CONTROL STATION // TSC MAINFRAME</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #0a0e0a; color: #33ff33; font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; }
+        .admin-container { display: flex; flex-direction: column; height: 100vh; }
+        
+        /* HEADER */
+        .control-header { background: #1a1a1a; border-bottom: 3px solid #0f0; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 5px 20px rgba(0, 255, 0, 0.3); }
+        .header-title { display: flex; align-items: center; gap: 15px; font-size: 18px; font-weight: bold; letter-spacing: 2px; }
+        .obunto-icon { width: 40px; height: 40px; image-rendering: pixelated; filter: drop-shadow(0 0 8px #0f0); }
+        .system-stats { display: flex; gap: 20px; font-size: 11px; }
+        .stat-item { display: flex; align-items: center; gap: 5px; }
+
+        /* GRID */
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; padding: 15px; flex: 1; overflow: hidden; }
+        
+        .monitor { background: #1a1a1a; border: 3px solid #333; border-radius: 8px; box-shadow: inset 0 0 30px rgba(0,0,0,0.8), 0 0 20px rgba(51, 255, 51, 0.2); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .monitor::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px); pointer-events: none; z-index: 10; }
+        
+        .monitor-header { background: #0a0a0a; border-bottom: 2px solid #0f0; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; }
+        .monitor-body { flex: 1; padding: 12px; overflow-y: auto; background: radial-gradient(ellipse at center, #0f1f0f 0%, #000 100%); }
+        .monitor-body::-webkit-scrollbar { width: 6px; }
+        .monitor-body::-webkit-scrollbar-thumb { background: #0f0; border-radius: 3px; }
+
+        /* USERS */
+        .user-card { background: rgba(0, 255, 0, 0.05); border: 1px solid #0f0; padding: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .user-card:hover { background: rgba(0, 255, 0, 0.15); box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); transform: translateX(5px); }
+        .user-card.selected { background: rgba(0, 255, 0, 0.25); border-color: #fff; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .user-avatar { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #0f0; }
+
+        /* LOGS */
+        .log-entry { font-size: 11px; margin-bottom: 5px; padding: 5px; border-left: 2px solid #0f0; padding-left: 8px; }
+        .log-entry.new { animation: log-flash 0.5s; }
+        @keyframes log-flash { 0%, 100% { background: transparent; } 50% { background: rgba(0, 255, 0, 0.3); } }
+        .log-timestamp { color: #0a0; margin-right: 8px; }
+
+        /* BROADCAST */
+        .broadcast-panel { grid-column: span 2; }
+        .mood-selector { display: flex; gap: 8px; margin-bottom: 15px; padding: 10px; background: rgba(0, 255, 0, 0.05); border: 1px dashed #0f0; overflow-x: auto; }
+        .mood-box { min-width: 50px; width: 50px; height: 50px; border: 2px solid #0f0; padding: 5px; cursor: pointer; background: #000; }
+        .mood-box.active { border-color: #fff; background: #0f0; box-shadow: 0 0 15px #0f0; }
+        .mood-box img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+        
+        .message-input { width: 100%; background: #000; border: 2px solid #0f0; color: #0f0; padding: 10px; font-family: inherit; font-size: 14px; min-height: 60px; margin-bottom: 10px; }
+        .broadcast-controls { display: flex; gap: 10px; }
+        
+        .hardware-btn { flex: 1; background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%); border: 2px solid #444; color: #0f0; padding: 12px; cursor: pointer; text-transform: uppercase; font-weight: bold; font-family: inherit; box-shadow: 0 2px 0 #000; }
+        .hardware-btn:active { transform: translateY(2px); box-shadow: none; }
+        .hardware-btn.danger { color: #f00; border-color: #600; }
+
+        /* SPY VIEW */
+        .spy-view { grid-column: span 2; }
+        .spy-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #0f0; }
+        .spy-screen { background: rgba(0, 0, 0, 0.8); border: 2px solid #0f0; padding: 15px; min-height: 200px; font-size: 12px; }
+        .mini-btn { background: #000; border: 1px solid #0f0; color: #0f0; padding: 4px 8px; font-size: 9px; cursor: pointer; font-family: inherit; margin-left: 5px; }
+        .mini-btn:hover { background: #0f0; color: #000; }
+
+        /* ALERT */
+        .new-user-alert { position: fixed; top: 20px; right: 20px; background: #1a1a1a; border: 3px solid #f00; padding: 15px; box-shadow: 0 0 30px rgba(255, 0, 0, 0.8); display: none; z-index: 1000; }
+        .new-user-alert.show { display: block; animation: alert-pulse 0.5s; }
+        @keyframes alert-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        
+        .status-led { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px currentColor; }
+        .led-green { background: #0f0; animation: pulse 2s infinite; }
+        .led-red { background: #f00; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="control-header">
+            <div class="header-title">
+                <img src="obunto/normal.png" class="obunto-icon">
+                <div>OBUNTO_COMMAND_CENTER<div style="font-size: 9px; opacity: 0.7;">TSC MAINFRAME v5.0 // OMEGA CLEARANCE</div></div>
+            </div>
+            <div class="system-stats">
+                <div class="stat-item"><span class="status-led led-green"></span> SYSTEM: ACTIVE</div>
+                <div class="stat-item" id="uptime">UPTIME: 00:00:00</div>
+            </div>
+        </div>
+
+        <div id="newUserAlert" class="new-user-alert">
+            <div style="color: #f00; font-weight: bold; margin-bottom: 5px;">⚠ NEW REGISTRATION</div>
+            <div id="newUserInfo"></div>
+        </div>
+
+        <div class="control-grid">
+            <div class="monitor">
+                <div class="monitor-header"><span><span class="status-led led-green"></span>ACTIVE USERS</span><span id="userCount">0</span></div>
+                <div class="monitor-body" id="onlineUsers"><div style="text-align:center; opacity:0.5; padding:20px;">NO ACTIVE CONNECTIONS</div></div>
+            </div>
+
+            <div class="monitor">
+                <div class="monitor-header"><span><span class="status-led led-green"></span>ACTIVITY LOG</span></div>
+                <div class="monitor-body" id="activityLog"></div>
+            </div>
+
+            <div class="monitor">
+                <div class="monitor-header"><span><span class="status-led led-green"></span>STATISTICS</span></div>
+                <div class="monitor-body" style="text-align:center;">
+                    <h1 id="totalUsers" style="font-size:40px; margin:20px 0;">0</h1>
+                    <p>TOTAL USERS</p>
+                </div>
+            </div>
+
+            <div class="monitor broadcast-panel">
+                <div class="monitor-header"><span><span class="status-led led-green"></span>BROADCAST SYSTEM</span></div>
+                <div class="monitor-body">
+                    <div style="margin-bottom:10px;">TARGET: <select id="targetSelect" style="background:#000; color:#0f0; border:1px solid #0f0;"><option value="all">⚡ GLOBAL</option><option value="selected">👁 SELECTED USER</option></select></div>
+                    <div class="mood-selector" id="moodSelector"></div>
+                    <textarea class="message-input" id="broadcastMsg" placeholder="ENTER MESSAGE..."></textarea>
+                    <div class="broadcast-controls">
+                        <button class="hardware-btn" onclick="sendBroadcast('normal')">📡 SEND</button>
+                        <button class="hardware-btn" onclick="sendBroadcast('glitch')">⚡ GLITCH</button>
+                        <button class="hardware-btn danger" onclick="sendBroadcast('urgent')">🚨 URGENT</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="monitor spy-view">
+                <div class="monitor-header"><span><span class="status-led led-red"></span>SURVEILLANCE MODE</span><span id="spyTarget">NO TARGET</span></div>
+                <div class="monitor-body">
+                    <div class="spy-header">
+                        <div id="targetStatus">IDLE</div>
+                        <div id="targetControls">
+                            <button class="mini-btn" onclick="kickUser()">KICK</button>
+                            <button class="mini-btn" onclick="freezeAccount()">FREEZE</button>
+                            <button class="mini-btn" onclick="deleteAccount()">DELETE</button>
+                        </div>
+                    </div>
+                    <div class="spy-screen" id="spyScreen"><div style="text-align:center; opacity:0.5; padding:40px;">SELECT A USER TO MONITOR</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let onlineUsers = new Map();
+        let selectedUser = null;
+        let currentMood = 'normal';
+        const MOODS = ['normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'];
+
+        window.onload = () => {
+            initMoodSelector();
+            updateClock();
+            requestOnlineUsers();
+            socket.emit('admin_connected');
+        };
+
+        function initMoodSelector() {
+            const container = document.getElementById('moodSelector');
+            MOODS.forEach(mood => {
+                const box = document.createElement('div');
+                box.className = 'mood-box';
+                if (mood === 'normal') box.classList.add('active');
+                box.innerHTML = `<img src="obunto/${mood}.png">`;
+                box.onclick = () => {
+                    document.querySelectorAll('.mood-box').forEach(b => b.classList.remove('active'));
+                    box.classList.add('active');
+                    currentMood = mood;
+                };
+                container.appendChild(box);
+            });
+        }
+
+        function requestOnlineUsers() { socket.emit('admin_request_users'); }
+
+        socket.on('users_list', (users) => {
+            onlineUsers = new Map(users.map(u => [u.userId, u]));
+            renderOnlineUsers();
+            document.getElementById('totalUsers').innerText = users.length; // Simplified stats
+        });
+
+        socket.on('user_connected', (user) => {
+            onlineUsers.set(user.userId, user);
+            renderOnlineUsers();
+            addLog(`USER CONNECTED: ${user.username}`, 'connect');
+        });
+
+        socket.on('user_disconnected', (userId) => {
+            const user = onlineUsers.get(userId);
+            if(user) addLog(`USER DISCONNECTED: ${user.username}`, 'disconnect');
+            onlineUsers.delete(userId);
+            renderOnlineUsers();
+        });
+
+        socket.on('new_registration', (data) => {
+            const alert = document.getElementById('newUserAlert');
+            document.getElementById('newUserInfo').innerHTML = `USER: ${data.userId}`;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
+            addLog(`NEW REGISTER: ${data.userId}`, 'register');
+        });
+
+        socket.on('user_activity', (data) => {
+            if (selectedUser && data.userId === selectedUser.userId) {
+                const feed = document.getElementById('spyScreen');
+                const line = document.createElement('div');
+                line.style.marginBottom = '5px';
+                line.innerHTML = `<span style="color:#0aa">[${new Date().toLocaleTimeString()}]</span> ${data.action}: ${data.details}`;
+                feed.appendChild(line);
+                feed.scrollTop = feed.scrollHeight;
+            }
+        });
+
+        function renderOnlineUsers() {
+            const container = document.getElementById('onlineUsers');
+            document.getElementById('userCount').innerText = onlineUsers.size;
+            container.innerHTML = '';
+            if(onlineUsers.size === 0) return container.innerHTML = '<div style="text-align:center; opacity:0.5; padding:20px;">NO ACTIVE CONNECTIONS</div>';
+
+            onlineUsers.forEach(user => {
+                const card = document.createElement('div');
+                card.className = 'user-card';
+                if(selectedUser && selectedUser.userId === user.userId) card.classList.add('selected');
+                card.innerHTML = `
+                    <div class="user-info">
+                        <img src="${user.avatar}" class="user-avatar" onerror="this.src='obunto/normal.png'">
+                        <div>
+                            <div style="font-weight:bold;">${user.username}</div>
+                            <div style="font-size:10px;">ID: ${user.userId}</div>
+                        </div>
+                    </div>
+                    <span class="status-led led-green"></span>
+                `;
+                card.onclick = () => selectUser(user);
+                container.appendChild(card);
+            });
+        }
+
+        function selectUser(user) {
+            selectedUser = user;
+            renderOnlineUsers();
+            document.getElementById('spyTarget').innerText = user.username;
+            document.getElementById('spyScreen').innerHTML = '<div style="opacity:0.7">WATCHING ACTIVITY...</div>';
+        }
+
+        function addLog(msg, type) {
+            const container = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry new';
+            entry.innerHTML = `<span class="log-timestamp">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+            container.insertBefore(entry, container.firstChild);
+            if(container.children.length > 50) container.removeChild(container.lastChild);
+        }
+
+        function sendBroadcast(type) {
+            const msg = document.getElementById('broadcastMsg').value;
+            if(!msg) return;
+            const target = document.getElementById('targetSelect').value;
+            socket.emit('admin_broadcast', {
+                message: msg, mood: currentMood, type: type,
+                target: target === 'selected' && selectedUser ? selectedUser.userId : 'all'
+            });
+            addLog(`BROADCAST SENT: ${type}`, 'broadcast');
+        }
+
+        function kickUser() {
+            if(!selectedUser) return;
+            if(confirm(`Kick ${selectedUser.username}?`)) socket.emit('admin_kick', { userId: selectedUser.userId });
+        }
+        function freezeAccount() {
+            if(!selectedUser) return;
+            if(confirm(`Freeze ${selectedUser.username}?`)) socket.emit('admin_freeze', { userId: selectedUser.userId });
+        }
+        function deleteAccount() {
+            if(!selectedUser) return;
+            if(confirm(`DELETE ${selectedUser.username}?`)) socket.emit('admin_delete', { userId: selectedUser.userId });
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('uptime').innerText = now.toLocaleTimeString();
+            setTimeout(updateClock, 1000);
+        }
+    </script>
+</body>
+</html>

@@ -14,18 +14,18 @@ const io = new Server(server);
 const MONGO_URI = process.env.MONGO_URI;
 
 const connectDB = async () => {
-    if (!MONGO_URI) return console.log("⚠️ MONGO_URI não configurada no Render!");
+    if (!MONGO_URI) return console.log("⚠️ MONGO_URI não configurada!");
     try {
         await mongoose.connect(MONGO_URI);
         console.log("✅ ACCESS GRANTED: Database Online");
     } catch (err) {
         console.error("❌ DB ERROR:", err.message);
-        setTimeout(connectDB, 5000); // Tenta reconectar em 5s
+        setTimeout(connectDB, 5000);
     }
 };
 connectDB();
 
-// Modelo de Usuário
+// --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true },
@@ -33,9 +33,19 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// Cache de Memória (Economiza Banco e API)
-const USER_CACHE = {}; 
-const CACHE_TIME = 1000 * 60 * 15; // 15 Minutos
+const ActivityLogSchema = new mongoose.Schema({
+    userId: String,
+    username: String,
+    action: String,
+    details: String,
+    timestamp: { type: Date, default: Date.now }
+});
+const ActivityLog = mongoose.model('ActivityLog', ActivityLogSchema);
+
+// Sessões ativas
+const activeSessions = new Map();
+const USER_CACHE = {};
+const CACHE_TIME = 1000 * 60 * 15;
 
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 12026513: "MEDICAL_DEPT", 11577231: "INTERNAL_SECURITY",
@@ -45,19 +55,23 @@ const TSC_GROUPS = {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Rota para manter o site acordado (UptimeRobot)
+// Rota para o Painel Admin (Proteja com senha se necessário no futuro)
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin-panel.html'));
+});
+
 app.get('/health', (req, res) => res.send('SYSTEM_ACTIVE'));
 
-// 1. CHECAR SE USUÁRIO EXISTE (Para a interface decidir se pede Login ou Registro)
 app.post('/api/check-user', async (req, res) => {
     const { userId } = req.body;
     try {
         const user = await User.findOne({ userId });
         res.json({ registered: !!user });
-    } catch (e) { res.status(500).json({ error: "DB_FAIL" }); }
+    } catch (e) {
+        res.status(500).json({ error: "DB_FAIL" });
+    }
 });
 
-// 2. REGISTRAR NOVA CONTA
 app.post('/api/register', async (req, res) => {
     const { userId, password } = req.body;
     try {
@@ -68,43 +82,44 @@ app.post('/api/register', async (req, res) => {
         const hash = await bcrypt.hash(password, salt);
         
         await new User({ userId, passwordHash: hash }).save();
+        await new ActivityLog({ userId, action: 'REGISTER', details: 'New account created' }).save();
+        
+        io.emit('new_registration', { userId: userId, username: "Unknown", timestamp: Date.now() });
         res.json({ success: true });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) {
+        res.status(500).json({ success: false });
+    }
 });
 
-// 3. LOGIN (Com Cache e Validação)
 app.post('/api/login', async (req, res) => {
     const { userId, password } = req.body;
 
-    // Admin Backdoor
     if (userId === "000" && password === "TSC-OMEGA") {
-        return res.json({ success: true, userData: { id: "000", username: "OBUNTO", dept: "CORE", rank: "MASTER_ADMIN", clearance: "OMEGA", avatar: "obunto/normal.png", affiliations: [] } });
+        return res.json({ 
+            success: true, 
+            userData: { id: "000", username: "OBUNTO", department: "CORE", rank: "MASTER_ADMIN", 
+                       clearance: "OMEGA", avatar: "obunto/normal.png", affiliations: [] } 
+        });
     }
 
     try {
-        // Verifica Senha no Banco
         const user = await User.findOne({ userId });
         if (!user) return res.status(404).json({ success: false, message: "NO_USER" });
 
         const isMatch = await bcrypt.compare(password, user.passwordHash);
         if (!isMatch) return res.status(401).json({ success: false, message: "WRONG_PASS" });
 
-        // Verifica Cache de Dados do Roblox
         const now = Date.now();
         if (USER_CACHE[userId] && (now - USER_CACHE[userId].timestamp < CACHE_TIME)) {
-            console.log(`⚡ Serving ${userId} from CACHE`);
+            await new ActivityLog({ userId, username: USER_CACHE[userId].data.username, action: 'LOGIN' }).save();
             return res.json({ success: true, userData: USER_CACHE[userId].data });
         }
 
-        // Busca Dados no Roblox (Se não estiver no cache)
-        console.log(`🌐 Fetching ${userId} from ROBLOX API`);
         const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
         const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
 
         const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-        
-        // Se não for TSC, nega acesso (Opcional - remova se quiser liberar para todos)
         if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "CIVILIAN_DETECTED" });
 
         const primary = tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0];
@@ -113,18 +128,17 @@ app.post('/api/login', async (req, res) => {
         const profileData = {
             id: userId,
             username: userRes.data.name,
-            dept: TSC_GROUPS[primary.group.id],
+            department: TSC_GROUPS[primary.group.id],
             rank: primary.role.name,
-            clearance: `CLEARANCE ${levelMatch ? levelMatch[0] : '0'}`,
+            clearance: `${levelMatch ? levelMatch[0] : '0'}`,
             avatar: thumbRes.data.data[0].imageUrl,
             affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name, div: TSC_GROUPS[g.group.id] }))
         };
 
-        // Salva no Cache
         USER_CACHE[userId] = { timestamp: now, data: profileData };
+        await new ActivityLog({ userId, username: profileData.username, action: 'LOGIN' }).save();
 
         res.json({ success: true, userData: profileData });
-
     } catch (e) {
         console.error(e);
         res.status(500).json({ success: false, message: "SYSTEM_FAIL" });
@@ -132,8 +146,86 @@ app.post('/api/login', async (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    socket.on('mascot_broadcast', (data) => io.emit('receive_mascot_msg', data));
+    let sessionUser = null;
+
+    // Conexão do Admin
+    socket.on('admin_connected', () => {
+        socket.join('admins');
+        updateAdminDashboard();
+    });
+
+    socket.on('user_connected', (userData) => {
+        sessionUser = userData;
+        activeSessions.set(socket.id, {
+            ...userData,
+            socketId: socket.id,
+            connectedAt: Date.now(),
+            lastAction: 'Connected',
+            currentWindow: 'DESKTOP'
+        });
+
+        new ActivityLog({ userId: userData.id, username: userData.username, action: 'CONNECT' }).save();
+        updateAdminDashboard();
+        io.to('admins').emit('user_connected', activeSessions.get(socket.id));
+    });
+
+    socket.on('user_activity', (data) => {
+        if (activeSessions.has(socket.id)) {
+            const session = activeSessions.get(socket.id);
+            session.lastAction = data.action;
+            session.currentWindow = data.window || session.currentWindow;
+            activeSessions.set(socket.id, session);
+            
+            // Envia atividade em tempo real para o admin
+            io.to('admins').emit('user_activity', { userId: session.id, ...data });
+        }
+    });
+
+    // Admin Events
+    socket.on('admin_request_users', () => updateAdminDashboard());
+    
+    socket.on('admin_broadcast', (data) => {
+        if (data.target === 'all') {
+            io.emit('receive_mascot_msg', data);
+        } else {
+            const targetSession = Array.from(activeSessions.values()).find(s => s.id === data.target);
+            if (targetSession) io.to(targetSession.socketId).emit('receive_mascot_msg', data);
+        }
+    });
+
+    socket.on('admin_kick', (data) => {
+        const targetSession = Array.from(activeSessions.values()).find(s => s.id === data.userId);
+        if (targetSession) {
+            io.to(targetSession.socketId).emit('force_disconnect', { reason: 'TERMINATED BY ADMIN' });
+            activeSessions.delete(targetSession.socketId);
+            updateAdminDashboard();
+        }
+    });
+
+    socket.on('admin_freeze', (data) => {
+        const targetSession = Array.from(activeSessions.values()).find(s => s.id === data.userId);
+        if (targetSession) io.to(targetSession.socketId).emit('account_frozen');
+    });
+
+    socket.on('admin_delete', async (data) => {
+        await User.findOneAndDelete({ userId: data.userId });
+        const targetSession = Array.from(activeSessions.values()).find(s => s.id === data.userId);
+        if (targetSession) io.to(targetSession.socketId).emit('account_deleted');
+    });
+
+    socket.on('disconnect', () => {
+        if (sessionUser) {
+            io.to('admins').emit('user_disconnected', sessionUser.id);
+        }
+        activeSessions.delete(socket.id);
+        updateAdminDashboard();
+    });
 });
 
+function updateAdminDashboard() {
+    const users = Array.from(activeSessions.values());
+    io.to('admins').emit('users_list', users);
+}
+
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SYSTEM ONLINE :${PORT}`));
+server.listen(PORT, () => console.log(`✅ SYSTEM ONLINE :${PORT}`));
