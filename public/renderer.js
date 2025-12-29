@@ -1,38 +1,12 @@
 const socket = io();
-const moods = ["annoyed", "bug", "dizzy", "happy", "hollow", "normal", "panic", "sad", "sleeping", "Smug", "stare", "suspicious", "werror"];
-let selectedMood = "normal";
-
-window.onload = () => {
-    updateClock();
-    setInterval(updateClock, 1000);
-    const grid = document.getElementById('moodGrid');
-    if (grid) {
-        moods.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'mood-item';
-            div.innerHTML = `<img src="obunto/${m}.png" width="40">`;
-            div.onclick = () => {
-                selectedMood = m;
-                document.querySelectorAll('.mood-item').forEach(i => i.classList.remove('selected'));
-                div.classList.add('selected');
-            };
-            grid.appendChild(div);
-        });
-    }
-};
 
 document.getElementById('btnLogin').onclick = async () => {
     const userId = document.getElementById('inpId').value.trim();
     const username = document.getElementById('inpUser').value.trim();
     const status = document.getElementById('loginStatus');
 
-    if (userId === "000" && username.toUpperCase() === "OBUNTO") {
-        document.getElementById('login-screen').classList.remove('active');
-        document.getElementById('admin-screen').classList.add('active');
-        return;
-    }
-
     status.innerText = "AUTHENTICATING...";
+
     try {
         const res = await fetch('/api/login', {
             method: 'POST',
@@ -40,15 +14,20 @@ document.getElementById('btnLogin').onclick = async () => {
             body: JSON.stringify({ userId, usernameInput: username })
         });
         const data = await res.json();
+
         if (data.success) {
             document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('desktop-screen').classList.add('active');
-            renderProfile(data.userData);
+            if (data.userData.id === "000") {
+                document.getElementById('admin-screen').classList.add('active');
+            } else {
+                document.getElementById('desktop-screen').classList.add('active');
+                renderProfile(data.userData);
+            }
         } else {
-            status.innerText = "ERR: " + data.message;
+            status.innerText = "ACCESS DENIED";
         }
     } catch (e) {
-        status.innerText = "CONNECTION FAILED";
+        status.innerText = "SERVER ERROR";
     }
 };
 
@@ -69,7 +48,8 @@ function renderProfile(u) {
 document.getElementById('btnSend')?.addEventListener('click', () => {
     const msg = document.getElementById('adminMsg').value;
     if (msg) {
-        socket.emit('mascot_broadcast', { mood: selectedMood, text: msg });
+        const mood = document.querySelector('.mood-item.selected img')?.src.split('/').pop().split('.')[0] || 'normal';
+        socket.emit('mascot_broadcast', { mood: mood, text: msg });
         document.getElementById('adminMsg').value = "";
     }
 });
@@ -90,3 +70,4 @@ function updateClock() {
     const el = document.getElementById('clock');
     if (el) el.innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
 }
+setInterval(updateClock, 1000);
