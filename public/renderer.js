@@ -1,4 +1,3 @@
-const SERVER_URL = "https://obunto.onrender.com"; 
 let socket;
 let currentUser = null;
 
@@ -7,14 +6,16 @@ const ui = {
     loginInput: document.getElementById('login-id'),
     loginBtn: document.getElementById('btn-login'),
     loginMsg: document.getElementById('login-msg'),
-    appContainer: document.getElementById('main-app'),
-    userContent: document.getElementById('user-content'),
-    adminPanel: document.getElementById('admin-panel')
+    appContainer: document.querySelector('.app-container'),
+    adminPanel: document.getElementById('admin-panel'),
+    userContent: document.getElementById('user-content')
 };
 
 window.onload = () => {
-    socket = io(SERVER_URL);
+    // Conecta ao Socket.io do próprio servidor (mesma origem)
+    socket = io();
     setupSocketListeners();
+    document.getElementById('login-id').focus();
 };
 
 ui.loginBtn.addEventListener('click', performLogin);
@@ -28,14 +29,14 @@ async function performLogin() {
     ui.loginBtn.disabled = true;
 
     try {
-        const response = await window.electronAPI.fetchData(`${SERVER_URL}/api/login`, {
+        // Fetch direto para a API do próprio site
+        const res = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: id })
         });
 
-        if (response.error) throw new Error(response.error);
-        const data = response.data;
+        const data = await res.json();
 
         if (data.success) {
             currentUser = data.userData;
@@ -47,6 +48,7 @@ async function performLogin() {
     } catch (err) {
         ui.loginMsg.innerText = "CONNECTION FAILED";
         ui.loginBtn.disabled = false;
+        console.error(err);
     }
 }
 
@@ -60,17 +62,23 @@ function setupSession() {
     if(currentUser.avatar) document.getElementById('profile-avatar').src = currentUser.avatar;
 
     if (currentUser.isAdmin) {
-        ui.userContent.classList.add('hidden');
-        ui.adminPanel.classList.remove('hidden');
-        initAdmin();
+        if(ui.userContent) ui.userContent.classList.add('hidden');
+        if(ui.adminPanel) {
+            ui.adminPanel.classList.remove('hidden');
+            initAdmin();
+        }
     } else {
         socket.emit('user_login', currentUser);
     }
+    
+    // Inicia sua lógica antiga se existir
+    if(window.init) window.init();
 }
 
 function setupSocketListeners() {
     socket.on('receive_mascot', d => {
-        alert(`[${d.type}] ${d.message}`);
+        if(window.Assistant) window.Assistant.speak(d.message, "normal");
+        else alert(d.message);
     });
     socket.on('force_disconnect', () => location.reload());
     socket.on('account_frozen', () => { alert("ID FROZEN"); location.reload(); });
@@ -81,19 +89,21 @@ function initAdmin() {
     socket.emit('admin_login');
     socket.on('users_list', list => {
         const c = document.getElementById('userList');
+        if(!c) return;
         c.innerHTML = '';
         list.forEach(u => {
             const d = document.createElement('div');
-            d.style.padding = '5px';
-            d.style.borderBottom = '1px dashed #333';
+            d.className = 'db-entry';
             d.innerHTML = `
-                <div style="font-size:10px; font-weight:bold; color:${u.frozen?'#b91c1c':'#15803d'}">
-                    ${u.username} [${u.dept}]
+                <div style="font-weight:bold; color:${u.frozen?'#b91c1c':'#15803d'}">
+                    ${u.username}
                 </div>
-                <div style="font-size:9px; color:#555">${u.id}</div>
-                ${u.online ? `<button onclick="act('kick','${u.id}')" style="font-size:8px">KICK</button>` : ''}
-                <button onclick="act('freeze','${u.id}')" style="font-size:8px">FRZ</button>
-                <button onclick="act('delete','${u.id}')" style="font-size:8px; color:red">DEL</button>
+                <div style="font-size:9px; opacity:0.7">${u.dept}</div>
+                <div style="margin-top:2px;">
+                    ${u.online ? `<button onclick="act('kick','${u.id}')" class="mini-btn">KICK</button>` : ''}
+                    <button onclick="act('freeze','${u.id}')" class="mini-btn">FRZ</button>
+                    <button onclick="act('delete','${u.id}')" class="mini-btn" style="color:#b91c1c">DEL</button>
+                </div>
             `;
             c.appendChild(d);
         });
@@ -104,5 +114,5 @@ function act(a, id) { if(confirm(a.toUpperCase()+"?")) socket.emit('admin_'+a, i
 function manualAction(a) { const id = document.getElementById('manualId').value.trim(); if(id) act(a, id); }
 function sendBc(type) { 
     const msg = document.getElementById('bcMsg').value; 
-    if(msg) { socket.emit('admin_broadcast', { message:msg, type, target:'all', mood:'normal' }); document.getElementById('bcMsg').value=''; }
+    if(msg) { socket.emit('admin_broadcast', { message:msg, type, target:'all' }); document.getElementById('bcMsg').value=''; }
 }

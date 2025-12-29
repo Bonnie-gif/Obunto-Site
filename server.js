@@ -3,38 +3,47 @@ const http = require('http');
 const { Server } = require("socket.io");
 const axios = require('axios');
 const mongoose = require('mongoose');
+const path = require('path');
 const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server);
 
 app.use(cors());
 app.use(express.json());
 
+// 1. SERVIR ARQUIVOS ESTÁTICOS (O SITE)
+// Diz ao servidor que a pasta 'public' contém o site
+app.use(express.static(path.join(__dirname, 'public')));
+
+// --- CONEXÃO BANCO ---
 const MONGO_URI = process.env.MONGO_URI;
 let isDbConnected = false;
 
 const connectDB = async () => {
-    if (!MONGO_URI) return;
+    if (!MONGO_URI) return console.log("⚠️ MODO SEM BANCO (MEMÓRIA)");
     try { 
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 }); 
         isDbConnected = true;
-        console.log("DB ONLINE"); 
+        console.log("✅ BANCO CONECTADO"); 
     } catch (err) { 
+        console.log("⚠️ ERRO BANCO - MODO OFFLINE");
         setTimeout(connectDB, 10000); 
     }
 };
 connectDB();
 
+// --- MODELOS ---
 const UserSchema = new mongoose.Schema({
-    userId: { type: String, required: true, unique: true },
+    userId: { type: String, unique: true },
     createdAt: { type: Date, default: Date.now },
     frozen: { type: Boolean, default: false }
 });
 let User;
 try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
+// --- MAPA TSC ---
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 
     12026513: "MEDICAL_DEPT", 
@@ -48,17 +57,19 @@ const TSC_GROUPS = {
 const activeSessions = new Map();
 const USER_CACHE = {}; 
 
+// --- ROTA DE LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
 
+    // Admin Master
     if (userId === "000") {
         return res.json({ 
             success: true, 
             userData: { 
                 id: "000", 
-                username: "OBUNTO_CORE", 
+                username: "SYS_ADMIN", 
                 dept: "MAINFRAME", 
-                rank: "MASTER_ADMIN", 
+                rank: "OMEGA", 
                 avatar: "https://tr.rbxcdn.com/30day-avatar-headshot/png", 
                 isAdmin: true 
             } 
@@ -66,6 +77,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
+        // Verifica Banco
         if (isDbConnected) {
             try {
                 let user = await User.findOne({ userId });
@@ -79,6 +91,7 @@ app.post('/api/login', async (req, res) => {
             } catch (e) {}
         }
 
+        // Verifica Cache ou Roblox
         let profile = USER_CACHE[userId]?.data;
         
         if (!profile || (Date.now() - USER_CACHE[userId].timestamp > 300000)) {
@@ -89,6 +102,7 @@ app.post('/api/login', async (req, res) => {
                     axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
                 ]);
 
+                // Lógica de Rank Real
                 const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
                 const primary = tscGroups.length > 0 ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
 
@@ -101,6 +115,7 @@ app.post('/api/login', async (req, res) => {
                     isAdmin: false
                 };
             } catch (apiErr) {
+                // Fallback se a API falhar
                 profile = {
                     id: userId,
                     username: `ID_${userId}`,
@@ -120,14 +135,12 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
+// --- SOCKETS ---
 io.on('connection', (socket) => {
-    let session = null;
-
     socket.on('admin_login', () => { socket.join('admins'); sendList(); });
     
     socket.on('user_login', (data) => {
-        session = { ...data, socketId: socket.id };
-        activeSessions.set(socket.id, session);
+        activeSessions.set(socket.id, data);
         sendList();
     });
 
@@ -154,6 +167,7 @@ io.on('connection', (socket) => {
         } catch(e) {}
     }
 
+    // Ações de Admin
     socket.on('admin_kick', (id) => {
         const t = Array.from(activeSessions.values()).find(s => s.id === id);
         if(t) { io.to(t.socketId).emit('force_disconnect'); activeSessions.delete(t.socketId); sendList(); }
@@ -183,9 +197,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        if(session) { activeSessions.delete(socket.id); sendList(); }
+        activeSessions.delete(socket.id);
+        sendList();
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SERVER RUNNING :${PORT}`));
+server.listen(PORT, () => console.log(`WEB SERVER ONLINE :${PORT}`));
