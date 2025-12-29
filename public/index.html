@@ -1,90 +1,166 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>TSC // ARCHIVE TERMINAL</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEWTON OS // TSC GATEWAY</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="noise-overlay"></div>
+    <div class="scanlines"></div>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <div class="login-header">
-                <span>SECURE_GATEWAY</span><span>v5.0</span>
-            </div>
-            <div class="login-body">
-                <div style="font-size: 24px; color: #b91c1c; margin-bottom: 10px;">❄️</div>
-                <p style="color: #545d69; font-size: 10px; margin-bottom: 15px;">TSC CLASSIFIED ARCHIVE</p>
-                <input id="login-id" type="text" class="retro-input" placeholder="ENTER ID">
-                <button id="btn-login" class="retro-btn">AUTHENTICATE</button>
-                <div id="login-msg"></div>
+    <div id="boot-screen-3" class="full-screen active" style="background:#1a1a1a; justify-content:center; align-items:center; flex-direction:column;">
+        <div style="position:relative;">
+            <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent 48%, rgba(137,147,122,0.3) 50%, transparent 52%); animation:glitch-scan 3s infinite linear;"></div>
+        </div>
+        <div style="margin-top:40px; font-size:20px; font-weight:bold; color:#89937a; letter-spacing:3px;">
+            OBUNTO SYSTEM LOADING
+            <span id="glitch-dots"></span>
+        </div>
+    </div>
+
+    <div id="boot-screen-2" class="full-screen" style="background:var(--bg); color:var(--ink); justify-content:center; align-items:center; flex-direction:column; gap:40px;">
+        <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">
+            TSC MAINFRAME
+        </div>
+        <div style="width:380px; background:var(--paper); border:2px solid var(--border); box-shadow:8px 8px 0 rgba(0,0,0,0.2); padding:20px;">
+            <div style="font-size:12px; line-height:2;">
+                <div style="text-align:center; margin-bottom:15px; font-weight:bold;">SECURE BOOT SEQUENCE</div>
+                <div>Verifying cryptographic signature........OK</div>
+                <div>Loading kernel modules..................OK</div>
+                <div>Initializing Newton MessagePad emulation...OK</div>
+                <div>Mounting secure datastore................<span id="boot-status">IN PROGRESS</span></div>
+                <div style="margin-top:20px; text-align:center;" id="boot-progress">■□□□□□□□□□ 10%</div>
             </div>
         </div>
     </div>
 
-    <div class="app-container blur-lock" id="main-app">
-        <aside class="sidebar">
-            <div class="sb-header">
-                <div class="brand-title">TSC_NET // ACCESS</div>
-                <div class="brand-sub">Thunder Scientific Corp.</div>
+    <div id="login-screen" class="full-screen center-flex">
+        <div class="window opening" style="width:320px;">
+            <div class="win-header">
+                <span>SECURE_GATEWAY</span>
+                <img src="assets/button-close-17x17.png" style="opacity:0.5;">
             </div>
-            
-            <div id="sidebar-profile" style="padding:15px; border-bottom:1px solid #333; text-align:center;">
-                <img id="profile-avatar" src="" style="width:60px; border-radius:4px; border:1px solid #333; display:block; margin:0 auto 10px;">
-                <div id="profile-name" style="font-weight:bold; color:#ccc; font-size:12px;">---</div>
-                <div id="profile-id" style="color:#545d69; font-size:10px;">---</div>
-                <span id="profile-rank" style="background:#1a1b1e; border:1px solid #333; padding:1px 4px; font-size:9px; color:#15803d;">---</span>
-            </div>
-
-            <div class="sb-controls">
-                <div class="brand-sub">Database Search</div>
-                <div class="search-box">
-                    <input id="search" class="input-dark" placeholder="USER ID / NAME">
-                    <button id="btnSearch" class="btn btn-primary">REQ</button>
+            <div class="win-body">
+                <div style="text-align:center; margin-bottom:15px;">
+                    <img src="assets/icon-large-freeze-27x26.png" width="40">
                 </div>
-            </div>
-        </aside>
-        
-        <main class="main-area">
-            <div class="top-bar">
-                <span id="dateDisplay">DATE: 2041-01-01</span>
-                <span>SESSION: <b style="color:#15803d">SECURE</b></span>
-            </div>
-            <div id="paperContent" class="paper-sheet">
+                <p style="font-size:11px; margin-bottom:5px; font-weight:bold;">PERSONNEL ID:</p>
+                <input type="text" id="inpId" placeholder="ENTER ID...">
                 
-                <div id="admin-panel" class="hidden" style="border:1px solid #444; padding:10px; background:#111; color:#ccc; margin-bottom: 20px;">
-                    <div style="border-bottom:1px solid #444; padding-bottom:5px; margin-bottom:10px; font-weight:bold;">COMMAND CONTROL</div>
-                    <div style="display:flex; gap:10px; height:300px;">
-                        <div style="flex:1; border:1px solid #333; padding:5px; overflow-y:auto;">
-                            <div style="font-size:10px; margin-bottom:5px; color:#888;">DATABASE</div>
-                            <div id="userList"></div>
-                        </div>
-                        <div style="flex:1; border:1px solid #333; padding:5px;">
-                            <div style="font-size:10px; margin-bottom:5px; color:#888;">ACTIONS</div>
-                            <input id="manualId" class="input-dark" placeholder="TARGET ID">
-                            <button onclick="manualAction('delete')" class="btn" style="color:#b91c1c; width:100%">DELETE ID</button>
-                            
-                            <div style="font-size:10px; margin:15px 0 5px; color:#888;">BROADCAST</div>
-                            <input id="bcMsg" class="input-dark" placeholder="MESSAGE">
-                            <button onclick="sendBc('normal')" class="btn" style="width:100%">TRANSMIT</button>
-                        </div>
+                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">
+                    <img src="assets/icon-small-arrow_up-18x15.png" width="12"> ACCESS SYSTEM
+                </button>
+                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000; height:15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop-screen" class="full-screen">
+        <div style="padding:30px; display:flex; flex-direction:column; gap:25px; align-items:flex-start;">
+            <div class="icon-btn" onclick="toggleWin('win-profile')">
+                <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); padding:5px; background:var(--paper); box-shadow:4px 4px 0 rgba(0,0,0,0.2);">
+                <div style="font-size:11px; font-weight:bold; background:var(--paper); padding:2px; margin-top:5px;">DOSSIER</div>
+            </div>
+        </div>
+
+        <div id="win-profile" class="window animate-up" style="position:absolute; top:60px; left:180px; width:350px; display:none;">
+            <div class="win-header"><span>PERSONNEL FILE // <span id="idHeader">---</span></span><img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')"></div>
+            <div class="win-body">
+                <div class="profile-card">
+                    <div class="profile-img-box"><img id="userAvatar" width="70" src=""></div>
+                    <div class="profile-info" style="flex:1;">
+                        <div style="margin-bottom:8px;"><span class="tag">IDENTITY</span> <b id="userName" style="font-size:14px;">---</b></div>
+                        <div><b>ID:</b> <span id="userId">---</span></div>
+                        <div><b>DEPT:</b> <span id="userDept">---</span></div>
+                        <div><b>RANK:</b> <span id="userRank" style="color:#2b3323; font-weight:bold;">---</span></div>
                     </div>
                 </div>
-
-                <div id="user-content" class="empty-state">
-                    <div style="font-size:64px; color:#222;">TSC</div>
-                    <div>SECURE ARCHIVE TERMINAL</div>
-                    <div style="font-size:12px; margin-top:10px; color:#444">WAITING FOR INPUT...</div>
-                </div>
-
             </div>
-        </main>
+        </div>
+
+        <div style="position:absolute; bottom:0; width:100%; border-top:2px solid var(--border); background:var(--paper); padding:5px 10px; display:flex; justify-content:space-between; align-items:center;">
+            <span><img src="assets/icon-tiny-dock-19x11.png" style="vertical-align:middle;"> <b>TSC INTRANET</b></span>
+            <span id="clock" style="font-size:12px;">00:00</span>
+        </div>
+    </div>
+
+    <div id="admin-screen" class="full-screen">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--border); padding-bottom:5px;">
+            <span><img src="assets/icon-tiny-person-13x11.png"> <b>COMMAND CONTROL</b></span>
+            <button class="os-btn" onclick="refreshList()" style="padding:2px 6px;">REFRESH</button>
+        </div>
+        <div class="adm-grid">
+            <div class="adm-panel" style="grid-row: span 2;">
+                <div class="adm-head">DATABASE (<span id="userCount">0</span>)</div>
+                <div style="padding:5px; overflow-y:auto; flex:1;" id="userList"></div>
+            </div>
+            <div class="adm-panel" style="grid-row: span 2;">
+                <div class="adm-head">BROADCAST</div>
+                <div style="padding:10px; flex:1; overflow-y:auto;">
+                    <p style="font-size:10px; margin-bottom:5px;">AVATAR:</p><div id="moodGrid" class="mood-grid"></div>
+                    <p style="font-size:10px; margin:10px 0 5px;">TARGET:</p><select id="bcTarget"><option value="all">ALL UNITS</option></select>
+                    <input type="text" id="bcMsg" placeholder="MESSAGE..." style="margin-top:5px;">
+                    <div style="display:flex; gap:5px; margin-top:10px;"><button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button><button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button></div>
+                </div>
+            </div>
+            <div class="adm-panel">
+                <div class="adm-head">MANUAL OVERRIDE</div>
+                <div style="padding:10px;">
+                    <input type="text" id="manualId" placeholder="TARGET ID...">
+                    <div style="display:flex; gap:5px; margin-top:5px;"><button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">DEL</button><button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">FRZ</button></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="assistant.js"></script>
     <script src="renderer.js"></script>
+    
+    <script>
+        window.addEventListener('load', () => {
+            const s1 = document.getElementById('boot-screen-3');
+            const s2 = document.getElementById('boot-screen-2');
+            const login = document.getElementById('login-screen');
+            
+            // Glitch Dots
+            let gdots = 0;
+            setInterval(() => {
+                gdots = (gdots + 1) % 4;
+                const el = document.getElementById('glitch-dots');
+                if(el) el.innerText = '.'.repeat(gdots);
+            }, 600);
+
+            // Sequência
+            setTimeout(() => {
+                if (s1) s1.classList.remove('active');
+                if (s2) s2.classList.add('active');
+                
+                // Barra de Progresso do TSC Boot
+                if (document.getElementById('boot-progress')) {
+                    let progress = 0;
+                    const interval = setInterval(() => {
+                        progress += Math.random() > 0.5 ? 5 : 10;
+                        if (progress >= 100) {
+                            progress = 100;
+                            clearInterval(interval);
+                            document.getElementById('boot-status').innerText = "COMPLETE";
+                            
+                            // Vai para Login
+                            setTimeout(() => {
+                                if (s2) s2.classList.remove('active');
+                                login.classList.add('active');
+                            }, 800);
+                        }
+                        const bars = '■■■■■■■■■■'.slice(0, Math.floor(progress/10));
+                        const empty = '□□□□□□□□□□'.slice(0, 10 - Math.floor(progress/10));
+                        const elProg = document.getElementById('boot-progress');
+                        if(elProg) elProg.innerText = bars + empty + ` ${progress}%`;
+                    }, 300);
+                }
+            }, 4000); // 4s na tela de glitch
+        });
+    </script>
 </body>
 </html>
