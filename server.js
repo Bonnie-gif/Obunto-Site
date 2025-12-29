@@ -106,6 +106,71 @@ app.post('/api/check-user', async (req, res) => {
     catch (e) { res.status(500).json({}); }
 });
 
+// --- ROTAS DE EMERGÊNCIA (FORCE DELETE) ---
+
+// 1. Ver quem é esse usuário no banco de verdade
+app.get('/debug/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findOne({ userId: id });
+        const cache = USER_CACHE[id] ? "SIM" : "NÃO";
+        
+        if (user) {
+            res.send(`
+                <h1>ENCONTRADO: ${id}</h1>
+                <p><b>ID no Banco:</b> ${user._id}</p>
+                <p><b>Frozen:</b> ${user.frozen}</p>
+                <p><b>Está no Cache (Memória):</b> ${cache}</p>
+                <br>
+                <a href="/nuke/${id}"><button style="background:red; color:white; padding:20px;">FORÇAR DELETAR AGORA</button></a>
+            `);
+        } else {
+            res.send(`<h1>NÃO ENCONTRADO: ${id}</h1><p>Esse ID não existe no Banco de Dados.</p>`);
+        }
+    } catch (e) { res.send("Erro: " + e.message); }
+});
+
+// 2. O botão nuclear (Apaga do Banco E da Memória)
+app.get('/nuke/:id', async (req, res) => {
+    try {
+        const id = req.params.id;
+        
+        // Apaga do MongoDB
+        const result = await User.deleteMany({ userId: id });
+        
+        // Apaga da Memória RAM (Cache)
+        delete USER_CACHE[id];
+        
+        // Derruba a conexão se estiver online
+        const target = Array.from(activeSessions.values()).find(s => s.id === id);
+        if(target) {
+            const socket = io.sockets.sockets.get(target.socketId);
+            if(socket) socket.disconnect(true);
+            activeSessions.delete(target.socketId);
+        }
+
+        res.send(`
+            <h1>EXTERMINADO: ${id}</h1>
+            <p>Registros apagados do banco: ${result.deletedCount}</p>
+            <p>Memória limpa.</p>
+            <p>Usuário desconectado.</p>
+            <br>
+            <a href="/">VOLTAR PARA HOME</a>
+        `);
+    } catch (e) { res.send("Erro ao deletar: " + e.message); }
+});
+
+// 3. Limpar TUDO (Reset de Fábrica - CUIDADO)
+app.get('/reset-all-users-danger', async (req, res) => {
+    try {
+        await User.deleteMany({}); // Apaga TODOS os usuários
+        for (let k in USER_CACHE) delete USER_CACHE[k];
+        activeSessions.clear();
+        
+        res.send("<h1>SISTEMA FORMATADO. TODOS OS USUÁRIOS FORAM APAGADOS.</h1>");
+    } catch(e) { res.send(e.message); }
+});
+
 // --- SOCKET.IO ---
 io.on('connection', (socket) => {
     let session = null;
