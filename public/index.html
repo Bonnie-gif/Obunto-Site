@@ -1,107 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' http://localhost:3000 https://* data: blob:;">
-    <title>NEWTON OS // TSC GATEWAY</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://obunto.onrender.com https://* data: blob:;">
+    <title>TSC // ARCHIVE TERMINAL</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="scanlines"></div>
 
-    <div id="boot-1" class="full-screen active center-flex" style="background:#111;">
-        <img src="assets/obunto/normal.png" width="100" style="filter: grayscale(1) invert(1);">
-        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:14px; letter-spacing: 2px;">INITIALIZING TSC MAINFRAME...</div>
-    </div>
-
-    <div id="boot-2" class="full-screen center-flex">
-        <div class="window" style="width:300px; text-align:center;">
-            <div class="win-header">SYSTEM CHECK</div>
-            <div class="win-body" style="text-align:left; font-size:11px; line-height:1.8;">
-                > SECURITY PROTOCOLS.....OK<br>
-                > ROBLOX API LINK........<span id="net-stat">WAIT</span>
-                <div style="border:2px solid var(--border); height:15px; margin-top:10px;"><div id="boot-bar" style="height:100%; background:var(--ink); width:0%;"></div></div>
+    <div id="login-overlay">
+        <div class="retro-window">
+            <div class="retro-header"><span>SECURE_GATEWAY</span><span>v4.0</span></div>
+            <div class="retro-body">
+                <div style="font-size: 24px; color: var(--accent-red); margin-bottom: 10px;">❄️</div>
+                <p style="color: var(--ink-dim); font-size: 10px; margin-bottom: 15px;">TSC CLASSIFIED ARCHIVE</p>
+                <input id="login-id" type="text" class="retro-input" placeholder="ENTER ID">
+                <button id="btn-login" class="retro-btn">AUTHENTICATE</button>
+                <div id="login-msg"></div>
             </div>
         </div>
     </div>
 
-    <div id="login-screen" class="full-screen center-flex">
-        <div class="window animate-up" style="width:340px;">
-            <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
-            <div class="win-body">
-                <div style="display:flex; gap:15px; margin-bottom:20px; align-items:center;">
-                    <img src="assets/icon-large-freeze-27x26.png" width="45">
-                    <div style="font-size:11px;"><b>RESTRICTED ACCESS</b><br>Identify yourself.</div>
+    <div class="app-container blur-lock" id="main-app">
+        <aside class="sidebar">
+            <div class="sb-header">
+                <div class="brand-title">TSC_NET // ACCESS</div>
+                <div class="brand-sub">Thunder Scientific Corp.</div>
+            </div>
+            
+            <div id="sidebar-profile" style="padding:15px; border-bottom:1px solid #333; text-align:center;">
+                <img id="profile-avatar" src="" style="width:60px; border-radius:4px; border:1px solid #333; display:block; margin:0 auto 10px;">
+                <div id="profile-name" style="font-weight:bold; color:#ccc; font-size:12px;">---</div>
+                <div id="profile-id" style="color:#545d69; font-size:10px;">---</div>
+                <span id="profile-rank" style="background:#1a1b1e; border:1px solid #333; padding:1px 4px; font-size:9px; color:#15803d;">---</span>
+            </div>
+
+            <div class="sb-controls">
+                <div class="brand-sub">Database Search</div>
+                <div class="search-box">
+                    <input id="search" class="input-dark" placeholder="USER ID / NAME">
+                    <button id="btnSearch" class="btn btn-primary">REQ</button>
                 </div>
-                <div class="login-field">
-                    <div class="login-label">PERSONNEL ID</div>
-                    <input type="text" id="inpId" placeholder="ENTER ID" autocomplete="off">
-                </div>
-                <button class="os-btn" onclick="login()"><img src="assets/icon-small-arrow_up-18x15.png"> AUTHENTICATE</button>
-                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#8b0000; font-weight:bold;"></div>
             </div>
-        </div>
-    </div>
-
-    <div id="desktop-screen" class="full-screen">
-        <div style="padding:30px; display:flex; flex-direction:column; gap:25px; align-items:flex-start;">
-            <div class="icon-btn" onclick="toggleWin('win-profile')">
-                <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); padding:5px; background:var(--paper);">
-                <div style="font-size:11px; font-weight:bold; background:var(--paper); padding:2px; margin-top:5px;">DOSSIER</div>
+        </aside>
+        
+        <main class="main-area">
+            <div class="top-bar">
+                <span id="dateDisplay">DATE: 2041-01-01</span>
+                <span>SESSION: <b style="color:#15803d">SECURE</b></span>
             </div>
-        </div>
-
-        <div id="win-profile" class="window animate-up" style="position:absolute; top:60px; left:180px; width:350px; display:none;">
-            <div class="win-header"><span>PERSONNEL FILE // <span id="idHeader">---</span></span><img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')"></div>
-            <div class="win-body">
-                <div class="profile-card">
-                    <div class="profile-img-box"><img id="userAvatar" width="70" src=""></div>
-                    <div class="profile-info" style="flex:1;">
-                        <div style="margin-bottom:8px;"><span class="tag">IDENTITY</span> <b id="userName" style="font-size:14px;">---</b></div>
-                        <div><b>ID:</b> <span id="userId">---</span></div>
-                        <div><b>DEPT:</b> <span id="userDept">---</span></div>
-                        <div><b>RANK:</b> <span id="userRank" style="color:#4a5e3a; font-weight:bold;">---</span></div>
+            <div id="paperContent" class="paper-sheet">
+                <div id="admin-panel" class="hidden">
+                    <div style="border-bottom:1px solid #333; padding:5px; margin-bottom:10px;">COMMAND CONTROL</div>
+                    <div class="adm-grid">
+                        <div class="adm-col">
+                            <div class="adm-head">DATABASE</div>
+                            <div id="userList"></div>
+                        </div>
+                        <div class="adm-col">
+                            <div class="adm-head">ACTIONS</div>
+                            <input id="manualId" class="input-dark" placeholder="TARGET ID">
+                            <button onclick="manualAction('delete')" class="btn" style="color:var(--accent-red); border-color:var(--accent-red)">DELETE</button>
+                            
+                            <div class="adm-head" style="margin-top:20px">BROADCAST</div>
+                            <input id="bcMsg" class="input-dark" placeholder="MESSAGE">
+                            <button onclick="sendBc('normal')" class="btn">SEND</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div style="position:absolute; bottom:0; width:100%; border-top:2px solid var(--border); background:var(--paper); padding:5px 10px; display:flex; justify-content:space-between; align-items:center;">
-            <span><img src="assets/icon-tiny-dock-19x11.png"> <b>TSC INTRANET</b></span>
-            <span id="clock" style="font-size:12px;">00:00</span>
-        </div>
-    </div>
-
-    <div id="admin-screen" class="full-screen">
-        <div style="display:flex; justify-content:space-between; border-bottom:2px solid var(--border); padding-bottom:5px;">
-            <span><img src="assets/icon-tiny-person-13x11.png"> <b>COMMAND</b></span>
-            <button class="os-btn" onclick="refreshList()" style="padding:2px 6px;">REFRESH</button>
-        </div>
-        <div class="adm-grid">
-            <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-head">DATABASE (<span id="userCount">0</span>)</div>
-                <div style="padding:5px; overflow-y:auto; flex:1;" id="userList"></div>
-            </div>
-            <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-head">BROADCAST</div>
-                <div style="padding:10px; flex:1; overflow-y:auto;">
-                    <p style="font-size:10px; margin-bottom:5px;">AVATAR:</p><div id="moodGrid" class="mood-grid"></div>
-                    <p style="font-size:10px; margin:10px 0 5px;">TARGET:</p><select id="bcTarget"><option value="all">ALL UNITS</option></select>
-                    <input type="text" id="bcMsg" placeholder="MESSAGE..." style="margin-top:5px; width:100%;">
-                    <div style="display:flex; gap:5px; margin-top:10px;"><button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button><button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button></div>
+                <div id="user-content">
+                    <div class="empty-state">SYSTEM READY. WAITING FOR INPUT.</div>
                 </div>
             </div>
-            <div class="adm-panel">
-                <div class="adm-head">MANUAL</div>
-                <div style="padding:10px;">
-                    <input type="text" id="manualId" placeholder="TARGET ID..." style="width:100%;">
-                    <div style="display:flex; gap:5px; margin-top:5px;"><button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">DEL</button><button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">FRZ</button></div>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
 
-    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script src="https://obunto.onrender.com/socket.io/socket.io.js"></script>
     <script src="renderer.js"></script>
 </body>
 </html>

@@ -7,9 +7,7 @@ const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
-});
+const io = new Server(server, { cors: { origin: "*" } });
 
 app.use(cors());
 app.use(express.json());
@@ -61,7 +59,7 @@ app.post('/api/login', async (req, res) => {
                 username: "OBUNTO_CORE", 
                 dept: "MAINFRAME", 
                 rank: "MASTER_ADMIN", 
-                avatar: "assets/obunto/normal.png", 
+                avatar: "https://tr.rbxcdn.com/30day-avatar-headshot/png", 
                 isAdmin: true 
             } 
         });
@@ -108,7 +106,7 @@ app.post('/api/login', async (req, res) => {
                     username: `ID_${userId}`,
                     dept: "UNKNOWN",
                     rank: "ERROR",
-                    avatar: "assets/icon-large-owner_info-28x14.png",
+                    avatar: "",
                     isAdmin: false
                 };
             }
@@ -126,6 +124,7 @@ io.on('connection', (socket) => {
     let session = null;
 
     socket.on('admin_login', () => { socket.join('admins'); sendList(); });
+    
     socket.on('user_login', (data) => {
         session = { ...data, socketId: socket.id };
         activeSessions.set(socket.id, session);

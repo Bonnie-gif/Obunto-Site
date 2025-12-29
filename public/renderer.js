@@ -1,110 +1,108 @@
-const SERVER_URL = "http://localhost:3000"; 
+const SERVER_URL = "https://obunto.onrender.com"; 
 let socket;
 let currentUser = null;
-let selectedMood = 'normal';
-const MOODS = ['normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'];
+
+const ui = {
+    loginOverlay: document.getElementById('login-overlay'),
+    loginInput: document.getElementById('login-id'),
+    loginBtn: document.getElementById('btn-login'),
+    loginMsg: document.getElementById('login-msg'),
+    appContainer: document.getElementById('main-app'),
+    userContent: document.getElementById('user-content'),
+    adminPanel: document.getElementById('admin-panel')
+};
 
 window.onload = () => {
     socket = io(SERVER_URL);
-    setTimeout(() => {
-        document.getElementById('boot-1').classList.remove('active');
-        document.getElementById('boot-2').classList.add('active');
-        let w=0, bar=document.getElementById('boot-bar');
-        let i=setInterval(()=>{ w+=5; bar.style.width=w+'%'; if(w>60) document.getElementById('net-stat').innerText="OK"; if(w>=100) { clearInterval(i); setTimeout(() => switchScreen('login-screen'), 500); } }, 80);
-    }, 2500);
+    setupSocketListeners();
 };
 
-function switchScreen(id) {
-    document.querySelectorAll('.full-screen').forEach(e => e.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-}
+ui.loginBtn.addEventListener('click', performLogin);
+ui.loginInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') performLogin() });
 
-function toggleWin(id) {
-    const el = document.getElementById(id);
-    el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
+async function performLogin() {
+    const id = ui.loginInput.value.trim();
+    if (!id) return;
 
-async function login() {
-    const id = document.getElementById('inpId').value.trim();
-    if(!id) return;
-    const status = document.getElementById('loginStatus');
-    status.innerText = "CONNECTING...";
+    ui.loginMsg.innerText = "CONNECTING...";
+    ui.loginBtn.disabled = true;
 
     try {
-        const res = await fetch(`${SERVER_URL}/api/login`, { 
-            method: 'POST', 
-            headers: {'Content-Type': 'application/json'}, 
-            body: JSON.stringify({userId: id}) 
+        const response = await window.electronAPI.fetchData(`${SERVER_URL}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: id })
         });
-        const data = await res.json();
+
+        if (response.error) throw new Error(response.error);
+        const data = response.data;
 
         if (data.success) {
             currentUser = data.userData;
-            if (currentUser.isAdmin) {
-                switchScreen('admin-screen');
-                initAdmin();
-            } else {
-                switchScreen('desktop-screen');
-                document.getElementById('userAvatar').src = currentUser.avatar;
-                document.getElementById('userName').innerText = currentUser.username;
-                document.getElementById('userId').innerText = currentUser.id;
-                document.getElementById('idHeader').innerText = currentUser.id;
-                document.getElementById('userDept').innerText = currentUser.dept;
-                document.getElementById('userRank').innerText = currentUser.rank;
-                socket.emit('user_login', currentUser);
-                initUser();
-                toggleWin('win-profile');
-            }
+            setupSession();
         } else {
-            status.innerText = "DENIED: " + data.message;
+            ui.loginMsg.innerText = "DENIED: " + (data.message || "UNKNOWN");
+            ui.loginBtn.disabled = false;
         }
-    } catch(e) {
-        status.innerText = "SERVER ERROR";
+    } catch (err) {
+        ui.loginMsg.innerText = "CONNECTION FAILED";
+        ui.loginBtn.disabled = false;
     }
 }
 
-function initUser() {
+function setupSession() {
+    ui.loginOverlay.style.display = 'none';
+    ui.appContainer.classList.remove('blur-lock');
+    
+    document.getElementById('profile-name').innerText = currentUser.username;
+    document.getElementById('profile-id').innerText = currentUser.id;
+    document.getElementById('profile-rank').innerText = currentUser.rank;
+    if(currentUser.avatar) document.getElementById('profile-avatar').src = currentUser.avatar;
+
+    if (currentUser.isAdmin) {
+        ui.userContent.classList.add('hidden');
+        ui.adminPanel.classList.remove('hidden');
+        initAdmin();
+    } else {
+        socket.emit('user_login', currentUser);
+    }
+}
+
+function setupSocketListeners() {
     socket.on('receive_mascot', d => {
-        const el = document.createElement('div'); el.className = 'mascot-overlay';
-        el.innerHTML = `<div class="mascot-msg">${d.message}</div><img src="assets/obunto/${d.mood}.png" width="70" style="background:#c8d1c0; border:2px solid #2b3323;">`;
-        document.body.appendChild(el); setTimeout(()=>el.remove(), 6000);
+        alert(`[${d.type}] ${d.message}`);
     });
     socket.on('force_disconnect', () => location.reload());
     socket.on('account_frozen', () => { alert("ID FROZEN"); location.reload(); });
     socket.on('account_deleted', () => { alert("ID DELETED"); location.reload(); });
-    setInterval(()=>document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),1000);
 }
 
 function initAdmin() {
     socket.emit('admin_login');
-    socket.on('users_list', renderList);
-    const g = document.getElementById('moodGrid');
-    g.innerHTML = '';
-    MOODS.forEach(m => {
-        const d = document.createElement('div'); d.className = 'mood-item';
-        d.innerHTML = `<img src="assets/obunto/${m}.png" title="${m}">`;
-        d.onclick = () => { document.querySelectorAll('.mood-item').forEach(x=>x.style.background='transparent'); d.style.background='var(--border)'; selectedMood=m; };
-        g.appendChild(d);
-    });
-}
-
-function renderList(list) {
-    const c = document.getElementById('userList');
-    document.getElementById('userCount').innerText = list.length;
-    c.innerHTML = '';
-    list.forEach(u => {
-        const d = document.createElement('div'); d.className = 'user-row';
-        let st = u.frozen ? 'frz' : (u.online ? 'on' : 'off');
-        d.innerHTML = `<div style="flex:1"><span class="status-dot ${st}"></span> <b>${u.username}</b> <span style="opacity:0.6; font-size:9px;">${u.dept}</span></div>
-            <div style="display:flex; gap:5px;">
-                ${u.online ? `<img src="assets/button-close-17x17.png" style="cursor:pointer" onclick="act('kick','${u.id}')">` : ''}
-                <img src="assets/icon-tiny-lock-10x12.png" style="cursor:pointer" onclick="act('freeze','${u.id}')">
-                <img src="assets/icon-small-delete-14x15.png" style="cursor:pointer" onclick="act('delete','${u.id}')"></div>`;
-        c.appendChild(d);
+    socket.on('users_list', list => {
+        const c = document.getElementById('userList');
+        c.innerHTML = '';
+        list.forEach(u => {
+            const d = document.createElement('div');
+            d.style.padding = '5px';
+            d.style.borderBottom = '1px dashed #333';
+            d.innerHTML = `
+                <div style="font-size:10px; font-weight:bold; color:${u.frozen?'#b91c1c':'#15803d'}">
+                    ${u.username} [${u.dept}]
+                </div>
+                <div style="font-size:9px; color:#555">${u.id}</div>
+                ${u.online ? `<button onclick="act('kick','${u.id}')" style="font-size:8px">KICK</button>` : ''}
+                <button onclick="act('freeze','${u.id}')" style="font-size:8px">FRZ</button>
+                <button onclick="act('delete','${u.id}')" style="font-size:8px; color:red">DEL</button>
+            `;
+            c.appendChild(d);
+        });
     });
 }
 
 function act(a, id) { if(confirm(a.toUpperCase()+"?")) socket.emit('admin_'+a, id); }
 function manualAction(a) { const id = document.getElementById('manualId').value.trim(); if(id) act(a, id); }
-function refreshList() { socket.emit('admin_refresh'); }
-function sendBc(type) { const msg = document.getElementById('bcMsg').value; if(msg) { socket.emit('admin_broadcast', { message:msg, type, target:document.getElementById('bcTarget').value, mood:selectedMood }); document.getElementById('bcMsg').value=''; }}
+function sendBc(type) { 
+    const msg = document.getElementById('bcMsg').value; 
+    if(msg) { socket.emit('admin_broadcast', { message:msg, type, target:'all', mood:'normal' }); document.getElementById('bcMsg').value=''; }
+}
