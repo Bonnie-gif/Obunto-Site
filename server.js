@@ -9,16 +9,22 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// --- CONEXÃO MONGODB ---
+// --- 1. CONEXÃO MONGODB (COM TRATAMENTO DE ERRO) ---
 const MONGO_URI = process.env.MONGO_URI;
+let isDbConnected = false;
+
 const connectDB = async () => {
-    if (!MONGO_URI) return console.log("⚠️ MONGO_URI OFF - MODO MEMÓRIA (Dados serão perdidos ao reiniciar)");
+    if (!MONGO_URI) return console.log("⚠️ AVISO: MONGO_URI não definida. Rodando em Modo Memória.");
     try { 
-        await mongoose.connect(MONGO_URI); 
-        console.log("✅ DB ONLINE"); 
+        await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 }); 
+        isDbConnected = true;
+        console.log("✅ DB ONLINE: Conectado ao MongoDB Atlas"); 
     } catch (err) { 
-        console.error("❌ DB ERROR:", err.message); 
-        setTimeout(connectDB, 5000); 
+        console.error("❌ DB OFFLINE: " + err.message); 
+        console.log("⚠️ SISTEMA RODANDO EM MODO DE EMERGÊNCIA (SEM BANCO)");
+        isDbConnected = false;
+        // Tenta reconectar em 10s sem travar o servidor
+        setTimeout(connectDB, 10000); 
     }
 };
 connectDB();
@@ -29,11 +35,13 @@ const UserSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
     frozen: { type: Boolean, default: false }
 });
-const User = mongoose.model('User', UserSchema);
+let User;
+try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
 // --- ESTADO GLOBAL ---
 const activeSessions = new Map();
-const USER_CACHE = {}; // Cache para economizar API do Roblox
+const USER_CACHE = {}; 
+
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 12026513: "MEDICAL_DEPT", 11577231: "INTERNAL_SECURITY",
     14159717: "INTELLIGENCE", 12026669: "SCIENCE_DIV", 12045419: "ENGINEERING", 12022092: "LOGISTICS"
@@ -42,13 +50,15 @@ const TSC_GROUPS = {
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota de saúde para o UptimeRobot
 app.get('/health', (req, res) => res.send('SYSTEM_OPERATIONAL'));
 
-// --- LOGIN DIRETO (SEM SENHA) ---
+// --- LOGIN QUE NUNCA FALHA ---
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
+    console.log(`[LOGIN ATTEMPT] ID: ${userId}`);
 
-    // 1. ADMIN MASTER (000)
+    // 1. ADMIN MASTER
     if (userId === "000") {
         return res.json({ 
             success: true, 
@@ -57,26 +67,29 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // 2. Busca ou Cria no Banco
-        let user = await User.findOne({ userId });
-        
-        if (!user) {
-            // Cria novo usuário automaticamente
-            user = new User({ userId });
-            await user.save();
-            io.to('admins').emit('new_registration', { userId });
-        } else {
-            // Checa bloqueio
-            if (user.frozen) return res.status(403).json({ success: false, message: "ACCOUNT_FROZEN" });
+        // 2. TENTA BANCO DE DADOS (SE ESTIVER ONLINE)
+        if (isDbConnected) {
+            try {
+                let user = await User.findOne({ userId });
+                if (!user) {
+                    user = new User({ userId });
+                    await user.save();
+                    io.to('admins').emit('new_registration', { userId });
+                    console.log(`[DB] Novo usuário criado: ${userId}`);
+                } else if (user.frozen) {
+                    return res.status(403).json({ success: false, message: "ACCOUNT_FROZEN" });
+                }
+            } catch (dbErr) {
+                console.error("[DB ERROR] Falha ao consultar banco, ignorando...", dbErr.message);
+                // Não retorna erro, continua o login em modo memória
+            }
         }
 
-        // 3. Obtém dados do Perfil (Roblox ou Cache)
+        // 3. TENTA PEGAR DADOS DO ROBLOX
         let profileData = USER_CACHE[userId]?.data;
         
-        // Se não tem no cache ou cache velho (>10min), busca na API
         if (!profileData || (Date.now() - USER_CACHE[userId].timestamp > 600000)) {
             try {
-                // Tenta pegar dados reais
                 const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
                 const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
                 const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
@@ -93,118 +106,113 @@ app.post('/api/login', async (req, res) => {
                     affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name })),
                     isAdmin: false
                 };
-            } catch (apiError) {
-                // Se der erro na API (ex: ID fake), cria um perfil básico
-                console.log(`API Error for ${userId}: using fallback.`);
-                profileData = {
-                    id: userId,
-                    username: `User_${userId}`,
-                    dept: "UNREGISTERED",
-                    rank: "APPLICANT",
-                    avatar: "assets/icon-large-owner_info-28x14.png", // Fallback asset
-                    affiliations: [],
-                    isAdmin: false
+            } catch (apiErr) {
+                console.log(`[API FAIL] Roblox API falhou para ${userId}. Usando perfil genérico.`);
+                // FALLBACK: Se o Roblox falhar, cria perfil genérico para não travar
+                profileData = { 
+                    id: userId, 
+                    username: `ID_${userId}`, 
+                    dept: "UNKNOWN", 
+                    rank: "VISITOR", 
+                    avatar: "assets/icon-large-person-13x11.png", // Asset genérico da sua lista
+                    affiliations: [], 
+                    isAdmin: false 
                 };
             }
-            // Salva no cache
             USER_CACHE[userId] = { timestamp: Date.now(), data: profileData };
         }
 
         res.json({ success: true, userData: profileData });
 
     } catch (e) {
-        console.error("Login Error:", e);
-        res.status(500).json({ success: false, message: "SERVER ERROR" });
+        // 4. A REDE DE SEGURANÇA FINAL
+        console.error("[CRITICAL ERROR]", e);
+        // Se tudo falhar, deixa entrar mesmo assim
+        return res.json({ 
+            success: true, 
+            userData: { id: userId, username: "Survivor", rank: "ERROR_MODE", avatar: "", isAdmin: false } 
+        });
     }
 });
 
-// --- SISTEMA EM TEMPO REAL (SOCKET.IO) ---
+// --- SOCKETS (COMUNICAÇÃO EM TEMPO REAL) ---
 io.on('connection', (socket) => {
     let session = null;
 
-    // Admin entra
-    socket.on('admin_login', () => {
-        socket.join('admins');
-        pushUserListToAdmin();
-    });
-
-    // Usuário entra
+    socket.on('admin_login', () => { socket.join('admins'); refreshAdminList(); });
     socket.on('user_login', (data) => {
         session = { ...data, socketId: socket.id };
         activeSessions.set(socket.id, session);
-        pushUserListToAdmin();
+        refreshAdminList();
     });
+    socket.on('admin_refresh_list', refreshAdminList);
 
-    // Atualização forçada da lista
-    socket.on('admin_refresh_list', pushUserListToAdmin);
-
-    async function pushUserListToAdmin() {
+    // FUNÇÃO ROBUSTA DE LISTAGEM
+    async function refreshAdminList() {
         try {
-            // Pega todos do banco
-            const allUsers = await User.find({}, 'userId frozen');
+            let allUsers = [];
+            // Tenta pegar do banco
+            if (isDbConnected) {
+                try { allUsers = await User.find({}, 'userId frozen'); } catch(e) { console.log("Erro ao listar DB"); }
+            }
             
-            // Cruza dados do banco com dados online
-            const list = allUsers.map(u => {
-                const onlineData = Array.from(activeSessions.values()).find(s => s.id === u.userId);
-                const cacheData = USER_CACHE[u.userId]?.data;
-                
-                return {
-                    id: u.userId,
-                    username: onlineData?.username || cacheData?.username || "Offline User",
-                    frozen: u.frozen,
-                    online: !!onlineData,
-                    socketId: onlineData?.socketId
-                };
+            // Mescla com quem está online na memória
+            const onlineIds = Array.from(activeSessions.values()).map(s => s.id);
+            
+            // Cria lista unificada
+            const map = new Map();
+            
+            // Adiciona do Banco
+            allUsers.forEach(u => map.set(u.userId, { id: u.userId, frozen: u.frozen, online: false, username: "Offline User" }));
+            
+            // Adiciona/Atualiza com Online
+            activeSessions.forEach(s => {
+                const existing = map.get(s.id) || { id: s.id, frozen: false };
+                map.set(s.id, { ...existing, username: s.username, online: true, socketId: s.socketId });
             });
-            io.to('admins').emit('users_list', list);
-        } catch (e) { console.error(e); }
+
+            // Tenta pegar nomes do cache para os offline
+            map.forEach(u => {
+                if (!u.online && USER_CACHE[u.id]) u.username = USER_CACHE[u.id].data.username;
+            });
+
+            io.to('admins').emit('users_list', Array.from(map.values()));
+        } catch(e) { console.error(e); }
     }
 
-    // Comandos de Admin
-    socket.on('admin_kick', (id) => {
-        const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) {
-            io.to(target.socketId).emit('force_disconnect');
-            activeSessions.delete(target.socketId);
-            pushUserListToAdmin();
-        }
-    });
-
-    socket.on('admin_freeze', async (id) => {
-        await User.findOneAndUpdate({ userId: id }, { frozen: true });
-        const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) io.to(target.socketId).emit('account_frozen');
-        pushUserListToAdmin();
-    });
-
-    socket.on('admin_delete', async (id) => {
-        await User.findOneAndDelete({ userId: id });
-        delete USER_CACHE[id]; // Limpa cache
-        const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) {
-            io.to(target.socketId).emit('account_deleted');
-            activeSessions.delete(target.socketId);
-        }
-        pushUserListToAdmin();
-    });
-
-    // Broadcast (Mascote)
+    // AÇÕES DE ADMIN
     socket.on('admin_broadcast', (data) => {
         if (data.target === 'all') io.emit('receive_mascot_msg', data);
         else {
-            const target = Array.from(activeSessions.values()).find(s => s.id === data.target);
-            if (target) io.to(target.socketId).emit('receive_mascot_msg', data);
+            const t = Array.from(activeSessions.values()).find(s => s.id === data.target);
+            if (t) io.to(t.socketId).emit('receive_mascot_msg', data);
         }
     });
 
-    // Desconexão
+    socket.on('admin_kick', (id) => {
+        const t = Array.from(activeSessions.values()).find(s => s.id === id);
+        if (t) { io.to(t.socketId).emit('force_disconnect'); activeSessions.delete(t.socketId); refreshAdminList(); }
+    });
+
+    socket.on('admin_freeze', async (id) => {
+        if(isDbConnected) await User.findOneAndUpdate({ userId: id }, { frozen: true });
+        const t = Array.from(activeSessions.values()).find(s => s.id === id);
+        if (t) io.to(t.socketId).emit('account_frozen');
+        refreshAdminList();
+    });
+
+    socket.on('admin_delete', async (id) => {
+        if(isDbConnected) await User.findOneAndDelete({ userId: id });
+        delete USER_CACHE[id];
+        const t = Array.from(activeSessions.values()).find(s => s.id === id);
+        if (t) { io.to(t.socketId).emit('account_deleted'); activeSessions.delete(t.socketId); }
+        refreshAdminList();
+    });
+
     socket.on('disconnect', () => {
-        if (session) {
-            activeSessions.delete(socket.id);
-            pushUserListToAdmin();
-        }
+        if (session) { activeSessions.delete(socket.id); refreshAdminList(); }
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SYSTEM ONLINE ON PORT ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 SERVIDOR BLINDADO ONLINE NA PORTA ${PORT}`));
