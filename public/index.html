@@ -6,35 +6,36 @@
     <style>
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; }
+        body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); }
         .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
-        .hidden { display: none !important; }
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
         .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
         .win-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; }
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); }
+        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; font-family: inherit; }
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); font-family: inherit; }
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
-        .profile-img { width: 120px; height: 120px; border: 2px solid var(--border); background: #9da690; margin-right: 20px; }
+        .profile-img { width: 120px; height: 120px; border: 2px solid var(--border); background: #9da690; margin-right: 20px; image-rendering: pixelated; }
         .group-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
         .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 4px; }
         .group-table td { padding: 4px; border-bottom: 1px dashed var(--border); }
+        .hidden { display: none !important; }
         .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
     <div class="app-container">
+        
         <div id="login-screen" class="full-screen active">
             <div class="window" style="width:300px; margin:auto;">
                 <div class="win-header"><span>AUTHENTICATION</span></div>
                 <div class="win-body">
-                    <input type="text" id="inpId" placeholder="USER ID">
+                    <input type="text" id="inpId" placeholder="ROBLOX ID">
                     <input type="text" id="inpUser" placeholder="USERNAME">
-                    <button id="btnLogin" class="os-btn">ACCESS</button>
+                    <button id="btnLogin" class="os-btn">ACCESS SYSTEM</button>
                     <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:5px;">READY</div>
                 </div>
             </div>
@@ -46,7 +47,7 @@
                 <div onclick="document.getElementById('p-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
                     <img src="assets/icon-large-owner_info-28x14.png" width="40"><br><span style="font-size:12px;">PROFILE</span>
                 </div>
-                <div id="p-win" class="window hidden" style="position:absolute; top:40px; left:40px; width:550px;">
+                <div id="p-win" class="window hidden" style="position:absolute; top:40px; left:40px; width:580px; z-index:100;">
                     <div class="win-header"><span>PERSONNEL_DOSSIER</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
                     <div class="win-body" id="profileData"></div>
                 </div>
@@ -54,13 +55,6 @@
             <div class="os-dock"><img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;"></div>
         </div>
 
-        <div id="admin-screen" class="full-screen" style="background:#2b3323; color:#89937a;">
-            <div class="top-bar" style="background:transparent; color:#89937a;"><span>CORE_OBUNTO</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">LOGOUT</button></div>
-            <div style="padding:20px;">
-                <textarea id="adminMsg" style="height:100px; width:100%; background:transparent; border:1px solid #89937a; color:#89937a; outline:none; padding:10px;"></textarea>
-                <button id="btnSend" class="os-btn" style="margin-top:10px; width:100%; background:#89937a; color:#2b3323;">TRANSMIT</button>
-            </div>
-        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -72,38 +66,44 @@
             const id = document.getElementById('inpId').value.trim();
             const user = document.getElementById('inpUser').value.trim();
             const status = document.getElementById('loginStatus');
-            status.innerText = "QUERYING...";
+            status.innerText = "QUERYING MAINFRAME...";
 
-            const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, usernameInput:user}) });
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({userId: id, usernameInput: user})
+                });
+                const data = await res.json();
 
-            if (data.success) {
-                document.getElementById('login-screen').classList.remove('active');
-                if (data.userData.id === "000") {
-                    document.getElementById('admin-screen').classList.add('active');
-                } else {
+                if (data.success) {
+                    document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('desktop-screen').classList.add('active');
                     const u = data.userData;
-                    let table = `<table class="group-table"><tr><th>GROUP</th><th>ROLE</th><th>DIVISION</th></tr>`;
-                    u.groups.forEach(g => { table += `<tr><td>${g.name}</td><td>${g.role}</td><td>${g.division}</td></tr>`; });
+                    
+                    let table = `<table class="group-table"><tr><th>GROUP</th><th>ROLE / RANK</th><th>DIVISION</th></tr>`;
+                    u.affiliations.forEach(g => {
+                        table += `<tr><td>${g.name}</td><td>${g.role}</td><td>${g.div}</td></tr>`;
+                    });
                     table += `</table>`;
 
                     document.getElementById('profileData').innerHTML = `
-                        <div style="display:flex; margin-bottom:15px;">
-                            <img src="${u.avatar}" class="profile-img">
+                        <div style="display:flex; margin-bottom:15px; border-bottom: 2px solid var(--border); padding-bottom:15px;">
+                            <img src="${u.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/120'">
                             <div style="font-size:12px; line-height:1.8;">
                                 <p><b>REGISTRY ID:</b> ${u.id}</p>
                                 <p><b>IDENTITY:</b> ${u.username}</p>
-                                <p><b>PRIMARY ASSIGNMENT:</b> ${u.rank}</p>
-                                <p><b>CLEARANCE LEVEL:</b> ${u.clearance}</p>
+                                <p><b>RECRUITMENT:</b> ${u.created}</p>
+                                <p><b>ASSIGNMENT:</b> ${u.rank}</p>
+                                <p><b>AUTHORITY:</b> ${u.clearance}</p>
                             </div>
                         </div>
-                        <div style="border-top:1px solid var(--border); padding-top:10px;">
-                            <p style="font-size:10px; font-weight:bold;">AUTHORIZED GROUP AFFILIATIONS:</p>
+                        <div>
+                            <p style="font-size:10px; font-weight:bold; text-transform:uppercase;">Authorized Group Affiliations:</p>
                             ${table}
                         </div>`;
-                }
-            } else { status.innerText = "DENIED"; }
+                } else { status.innerText = "ACCESS DENIED"; }
+            } catch (e) { status.innerText = "NETWORK ERROR"; }
         };
     </script>
 </body>

@@ -8,13 +8,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const TSC_DIVISIONS = {
-    11649027: "PERSONNEL",
-    12026513: "MEDICAL",
-    11577231: "SUBJECTS",
-    14159717: "INTELLIGENCE",
-    12026669: "SCIENCE",
-    12045419: "ENGINEERING"
+const TSC_MAP = {
+    11649027: "ADMINISTRATION",
+    11577231: "INTERNAL_SECURITY",
+    12026513: "MEDICAL_DEPT",
+    12022092: "LOGISTICS",
+    12026669: "SCIENCE_DIVISION",
+    12045419: "ENGINEERING",
+    14159717: "INTELLIGENCE_AGENCY",
+    11577231: "TEST_SUBJECT_ENCLAVE" 
 };
 
 app.use(express.json());
@@ -28,7 +30,7 @@ app.post('/api/login', async (req, res) => {
             success: true,
             userData: {
                 id: "000", username: "OBUNTO", display: "SYSTEM_CORE",
-                department: "MAINFRAME", rank: "MASTER_ADMIN", clearance: "OMEGA",
+                dept: "MAINFRAME", rank: "MASTER_ADMIN", clearance: "OMEGA",
                 avatar: "obunto/normal.png", groups: []
             }
         });
@@ -42,32 +44,36 @@ app.post('/api/login', async (req, res) => {
 
         const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
         const groups = groupsRes.data.data;
-        
-        let primary = groups.find(g => g.group.id === 11649027) || groups[0];
-        let clearance = "0";
-        const levelMatch = primary.role.name.match(/\d+/);
-        if (levelMatch) clearance = levelMatch[0];
 
-        const userGroups = groups.filter(g => TSC_DIVISIONS[g.group.id]).map(g => ({
-            name: g.group.name,
-            role: g.role.name,
-            division: TSC_DIVISIONS[g.group.id]
-        }));
+        // Filtra apenas grupos que pertencem à TSC
+        const tscGroups = groups.filter(g => TSC_MAP[g.group.id]);
+        
+        // Encontra o grupo com o maior Rank numérico (Hierarquia real do Roblox)
+        let primary = tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] || groups[0];
+
+        // Extrai o nível de autorização do nome do cargo (Ex: "L-3" -> "3")
+        const levelMatch = primary.role.name.match(/\d+/);
+        const clearance = levelMatch ? levelMatch[0] : "0";
 
         res.json({
             success: true,
             userData: {
                 id: userId,
                 username: userRes.data.name,
-                dept: TSC_DIVISIONS[primary.group.id] || "CIVILIAN",
+                created: new Date(userRes.data.created).toLocaleDateString('pt-BR'),
+                dept: TSC_MAP[primary.group.id] || "CIVILIAN",
                 rank: primary.role.name,
-                clearance: `LEVEL ${clearance}`,
+                clearance: `CLEARANCE ${clearance}`,
                 avatar: `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`,
-                groups: userGroups
+                affiliations: tscGroups.map(g => ({
+                    name: g.group.name,
+                    role: g.role.name,
+                    div: TSC_MAP[g.group.id]
+                }))
             }
         });
     } catch (e) {
-        res.status(500).json({ success: false, message: "OFFLINE" });
+        res.status(500).json({ success: false, message: "DATABASE_OFFLINE" });
     }
 });
 
