@@ -8,15 +8,15 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const TSC_MAP = {
-    11649027: "ADMINISTRATION",
+// BANCO DE DADOS DE DIVISÕES OFICIAIS TSC
+const TSC_OFFICIAL_GROUPS = {
+    11649027: "PERSONNEL",
+    12026513: "MEDICAL",
     11577231: "INTERNAL_SECURITY",
-    12026513: "MEDICAL_DEPT",
-    12022092: "LOGISTICS",
-    12026669: "SCIENCE_DIVISION",
+    14159717: "INTELLIGENCE",
+    12026669: "SCIENCE",
     12045419: "ENGINEERING",
-    14159717: "INTELLIGENCE_AGENCY",
-    11577231: "TEST_SUBJECT_ENCLAVE" 
+    12022092: "LOGISTICS"
 };
 
 app.use(express.json());
@@ -29,8 +29,8 @@ app.post('/api/login', async (req, res) => {
         return res.json({
             success: true,
             userData: {
-                id: "000", username: "OBUNTO", display: "SYSTEM_CORE",
-                dept: "MAINFRAME", rank: "MASTER_ADMIN", clearance: "OMEGA",
+                id: "000", username: "OBUNTO", created: "SYSTEM_START",
+                dept: "CORE", rank: "MAINFRAME", clearance: "OMEGA",
                 avatar: "obunto/normal.png", groups: []
             }
         });
@@ -39,21 +39,26 @@ app.post('/api/login', async (req, res) => {
     try {
         const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         if (!userRes.data || userRes.data.name.toLowerCase() !== usernameInput.toLowerCase()) {
-            return res.status(401).json({ success: false, message: "IDENTITY_MISMATCH" });
+            return res.status(401).json({ success: false, message: "ID_MISMATCH" });
         }
 
         const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
-        const groups = groupsRes.data.data;
+        const allGroups = groupsRes.data.data;
 
-        // Filtra apenas grupos que pertencem à TSC
-        const tscGroups = groups.filter(g => TSC_MAP[g.group.id]);
+        // FILTRO: Mantém apenas grupos que estão na lista TSC_OFFICIAL_GROUPS
+        const tscGroups = allGroups.filter(g => TSC_OFFICIAL_GROUPS[g.group.id]);
         
-        // Encontra o grupo com o maior Rank numérico (Hierarquia real do Roblox)
-        let primary = tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] || groups[0];
+        // Se não estiver em nenhum grupo TSC, o acesso é negado
+        if (tscGroups.length === 0) {
+            return res.status(403).json({ success: false, message: "NOT_TSC_PERSONNEL" });
+        }
 
-        // Extrai o nível de autorização do nome do cargo (Ex: "L-3" -> "3")
+        // Define o grupo principal (prioridade para o grupo ID 11649027 ou o de maior Rank)
+        let primary = tscGroups.find(g => g.group.id === 11649027) || tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0];
+
+        // Extração do Nível (ex: "L-3" vira "3")
         const levelMatch = primary.role.name.match(/\d+/);
-        const clearance = levelMatch ? levelMatch[0] : "0";
+        const clearanceLevel = levelMatch ? levelMatch[0] : "0";
 
         res.json({
             success: true,
@@ -61,19 +66,19 @@ app.post('/api/login', async (req, res) => {
                 id: userId,
                 username: userRes.data.name,
                 created: new Date(userRes.data.created).toLocaleDateString('pt-BR'),
-                dept: TSC_MAP[primary.group.id] || "CIVILIAN",
+                dept: TSC_OFFICIAL_GROUPS[primary.group.id],
                 rank: primary.role.name,
-                clearance: `CLEARANCE ${clearance}`,
+                clearance: `CLEARANCE ${clearanceLevel}`,
                 avatar: `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`,
                 affiliations: tscGroups.map(g => ({
                     name: g.group.name,
                     role: g.role.name,
-                    div: TSC_MAP[g.group.id]
+                    div: TSC_OFFICIAL_GROUPS[g.group.id]
                 }))
             }
         });
     } catch (e) {
-        res.status(500).json({ success: false, message: "DATABASE_OFFLINE" });
+        res.status(500).json({ success: false, message: "MAINFRAME_OFFLINE" });
     }
 });
 
