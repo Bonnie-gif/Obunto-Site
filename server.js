@@ -13,9 +13,9 @@ const io = new Server(server);
 // --- CONEXÃO BANCO ---
 const MONGO_URI = process.env.MONGO_URI;
 const connectDB = async () => {
-    if (!MONGO_URI) return console.log("MONGO_URI OFF");
-    try { await mongoose.connect(MONGO_URI); console.log("DB ONLINE"); } 
-    catch (err) { setTimeout(connectDB, 5000); }
+    if (!MONGO_URI) return console.log("⚠️ MONGO_URI OFF");
+    try { await mongoose.connect(MONGO_URI); console.log("✅ DB ONLINE"); } 
+    catch (err) { console.error("❌ DB ERROR:", err); setTimeout(connectDB, 5000); }
 };
 connectDB();
 
@@ -57,32 +57,39 @@ app.post('/api/login', async (req, res) => {
         if (user.frozen) return res.status(403).json({ success: false, message: "ACCOUNT_FROZEN" });
         if (!(await bcrypt.compare(password, user.passwordHash))) return res.status(401).json({ success: false, message: "WRONG_PASS" });
 
+        // Recupera dados
         let profileData = USER_CACHE[userId]?.data;
         if (!profileData || (Date.now() - USER_CACHE[userId].timestamp > 600000)) {
-            const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
-            const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
-            const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
-            
-            const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-            const primary = tscGroups.length ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : { group: {id:0}, role: {name: "CIVILIAN"} };
-            
-            profileData = {
-                id: userId,
-                username: userRes.data.name,
-                dept: TSC_GROUPS[primary.group.id] || "CIVILIAN",
-                rank: primary.role.name,
-                avatar: thumbRes.data.data[0].imageUrl,
-                affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name })),
-                isAdmin: false
-            };
+            try {
+                const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
+                const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
+                const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+                
+                const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
+                const primary = tscGroups.length ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : { group: {id:0}, role: {name: "CIVILIAN"} };
+                
+                profileData = {
+                    id: userId,
+                    username: userRes.data.name,
+                    dept: TSC_GROUPS[primary.group.id] || "CIVILIAN",
+                    rank: primary.role.name,
+                    avatar: thumbRes.data.data[0].imageUrl,
+                    affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name })),
+                    isAdmin: false
+                };
+            } catch (apiErr) {
+                // Fallback se a API do Roblox falhar
+                profileData = { id: userId, username: "Unknown", dept: "N/A", rank: "N/A", avatar: "", affiliations: [], isAdmin: false };
+            }
             USER_CACHE[userId] = { timestamp: Date.now(), data: profileData };
         }
+
         await new ActivityLog({ userId, username: profileData.username, action: 'LOGIN' }).save();
         res.json({ success: true, userData: profileData });
-    } catch (e) { res.status(500).json({ success: false }); }
+    } catch (e) { console.error(e); res.status(500).json({ success: false }); }
 });
 
-// REGISTRO E CHECK
+// REGISTRO
 app.post('/api/register', async (req, res) => {
     const { userId, password } = req.body;
     try {
@@ -119,24 +126,25 @@ io.on('connection', (socket) => {
     async function sendAllUsersToAdmin() {
         try {
             const allDbUsers = await User.find({}, 'userId frozen createdAt');
+            
+            // Mapeia usuários do DB + Memória
             const fullList = allDbUsers.map(dbUser => {
                 const onlineSession = Array.from(activeSessions.values()).find(s => s.id === dbUser.userId);
                 const cacheData = USER_CACHE[dbUser.userId]?.data;
                 return {
                     id: dbUser.userId,
-                    username: onlineSession?.username || cacheData?.username || "Unknown",
+                    username: onlineSession?.username || cacheData?.username || "Unknown (Offline)",
                     frozen: dbUser.frozen,
                     online: !!onlineSession,
                     socketId: onlineSession?.socketId
                 };
             });
+            
             io.to('admins').emit('users_list', fullList);
-        } catch(e) { console.error(e); }
+        } catch(e) { console.error("Error fetching users:", e); }
     }
 
-    // BROADCAST CORRIGIDO
     socket.on('admin_broadcast', (data) => {
-        // data: { message, type, mood, target }
         if (data.target === 'all') {
             io.emit('receive_mascot_msg', data);
         } else {
@@ -147,23 +155,66 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- AÇÕES DO ADMIN (COM LOGS) ---
+
     socket.on('admin_kick', (id) => {
+        console.log(`🔨 ADMIN KICK: ${id}`);
         const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) { io.to(target.socketId).emit('force_disconnect'); activeSessions.delete(target.socketId); sendAllUsersToAdmin(); }
+        if (target) {
+            io.to(target.socketId).emit('force_disconnect');
+            activeSessions.delete(target.socketId);
+            sendAllUsersToAdmin();
+        }
     });
+
     socket.on('admin_freeze', async (id) => {
-        await User.findOneAndUpdate({ userId: id }, { frozen: true });
-        const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) io.to(target.socketId).emit('account_frozen');
-        sendAllUsersToAdmin();
+        console.log(`🧊 ADMIN FREEZE: ${id}`);
+        try {
+            await User.findOneAndUpdate({ userId: id }, { frozen: true });
+            const target = Array.from(activeSessions.values()).find(s => s.id === id);
+            if (target) io.to(target.socketId).emit('account_frozen');
+            sendAllUsersToAdmin();
+        } catch (e) { console.error("Freeze Error:", e); }
     });
+
     socket.on('admin_delete', async (id) => {
-        await User.findOneAndDelete({ userId: id });
-        const target = Array.from(activeSessions.values()).find(s => s.id === id);
-        if (target) { io.to(target.socketId).emit('account_deleted'); activeSessions.delete(target.socketId); }
-        sendAllUsersToAdmin();
+        console.log(`🗑️ ADMIN DELETE ATTEMPT: [${id}]`);
+        
+        try {
+            // 1. Apaga do Banco de Dados
+            const deletedUser = await User.findOneAndDelete({ userId: id });
+            
+            if (deletedUser) {
+                console.log(`✅ DB DELETE SUCCESS: ${id}`);
+            } else {
+                console.log(`⚠️ DB DELETE WARN: User ${id} not found in DB (maybe only in memory?)`);
+            }
+
+            // 2. Apaga da Memória (Kick)
+            const targetSocket = Array.from(activeSessions.values()).find(s => s.id === id);
+            if (targetSocket) {
+                console.log(`🔌 KICKING SOCKET: ${targetSocket.socketId}`);
+                io.to(targetSocket.socketId).emit('account_deleted');
+                activeSessions.delete(targetSocket.socketId);
+            }
+
+            // 3. Limpa Cache
+            delete USER_CACHE[id];
+
+            // 4. Atualiza a lista do Admin
+            sendAllUsersToAdmin();
+
+        } catch (e) {
+            console.error("❌ DELETE CRITICAL ERROR:", e);
+        }
     });
-    socket.on('disconnect', () => { if (session) { activeSessions.delete(socket.id); sendAllUsersToAdmin(); } });
+
+    socket.on('disconnect', () => {
+        if (session) {
+            activeSessions.delete(socket.id);
+            sendAllUsersToAdmin();
+        }
+    });
 });
 
 const PORT = process.env.PORT || 3000;
