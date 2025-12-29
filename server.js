@@ -27,7 +27,7 @@ app.post('/api/login', async (req, res) => {
     if (userId === "000" && usernameInput.toUpperCase() === "OBUNTO") {
         return res.json({
             success: true,
-            userData: { id: "000", username: "OBUNTO", dept: "CORE", rank: "MASTER_ADMIN", clearance: "OMEGA", avatar: "obunto/normal.png", affiliations: [] }
+            userData: { id: "000", username: "OBUNTO", rank: "MASTER_ADMIN", clearance: "OMEGA", avatar: "obunto/normal.png", affiliations: [] }
         });
     }
 
@@ -42,9 +42,12 @@ app.post('/api/login', async (req, res) => {
 
         if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "UNAUTHORIZED" });
 
-        // Encontra o cargo com maior Rank numérico (0-255)
         const primary = tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0];
         const levelMatch = primary.role.name.match(/\d+/);
+
+        // BUSCA A URL REAL DA IMAGEM NA API DE THUMBNAILS
+        const thumbRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+        const avatarUrl = thumbRes.data.data[0].imageUrl;
 
         res.json({
             success: true,
@@ -53,12 +56,12 @@ app.post('/api/login', async (req, res) => {
                 username: userRes.data.name,
                 rank: primary.role.name,
                 clearance: `CLEARANCE ${levelMatch ? levelMatch[0] : '0'}`,
-                avatar: `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`,
-                affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name, div: TSC_GROUPS[g.group.id] }))
+                avatar: avatarUrl,
+                affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name }))
             }
         });
     } catch (e) {
-        res.status(500).json({ success: false, message: "DATABASE_ERROR" });
+        res.status(500).json({ success: false, message: "DATABASE_OFFLINE" });
     }
 });
 
