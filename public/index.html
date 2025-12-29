@@ -2,81 +2,133 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NEWTON OS // SECURE GATEWAY</title>
+    <title>NEWTON OS // TSC GATEWAY</title>
     <style>
-        :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; --danger: #6b2828; }
+        :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); overflow: hidden; }
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; z-index: 9999; pointer-events: none; }
-        .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
-        .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
-        .active { display: flex; }
-        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); transition: all 0.2s; }
-        .win-header { background: var(--border); color: var(--bg); padding: 6px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; }
-        .win-body { padding: 25px; }
-        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 8px; width: 100%; margin-bottom: 15px; font-family: inherit; font-size: 16px; font-weight: bold; }
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-weight: bold; box-shadow: 4px 4px 0 var(--border); text-transform: uppercase; }
-        .os-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--border); }
+        body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9999; }
+        
+        .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: relative; padding: 20px; }
+        .full-screen.active { display: flex; }
+        .center-flex { justify-content: center; align-items: center; }
+
+        /* ESTILO NEWTON (UNIFICADO) */
+        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
+        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; font-weight: bold; display: flex; justify-content: space-between; border-bottom: 2px solid var(--border); }
+        .win-body { padding: 15px; overflow-y: auto; color: var(--ink); }
+        
+        input, select, textarea { background: transparent; border: none; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-family: inherit; font-weight: bold; outline: none; margin-bottom: 10px; color: var(--ink); }
+        
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); margin-right: 5px; }
+        .os-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border); }
+        .os-btn.danger { border-color: #550000; color: #550000; }
+
         .hidden { display: none !important; }
 
-        /* NOVOS EFEITOS */
-        @keyframes handwrite { from { opacity: 0; transform: translateX(-2px) translateY(1px); } to { opacity: 1; transform: translateX(0) translateY(0); } }
-        input { animation: handwrite 0.1s ease-in; }
+        /* ADMIN PANEL - ESTILO PAPEL/RETRO (NADA DE NEON) */
+        .adm-container { display: grid; grid-template-columns: 250px 1fr 250px; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; }
         
-        @keyframes ink-spread { 0% { clip-path: circle(0% at 50% 0%); } 100% { clip-path: circle(150% at 50% 0%); } }
-        .window.opening { animation: ink-spread 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .adm-title { background: var(--border); color: var(--bg); padding: 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .adm-content { padding: 10px; overflow-y: auto; flex: 1; font-size: 11px; }
 
-        /* BOOT ANIMATION */
-        .boot-bar-container { width: 100%; height: 20px; border: 2px solid var(--border); padding: 2px; margin-top: 10px; }
-        .boot-fill { height: 100%; background: var(--ink); width: 0%; }
+        .user-row { padding: 5px; border-bottom: 1px dashed var(--border); cursor: pointer; display: flex; justify-content: space-between; }
+        .user-row:hover, .user-row.selected { background: var(--bg); color: var(--paper); }
+        .status-dot { display: inline-block; width: 6px; height: 6px; background: var(--ink); border-radius: 50%; margin-right: 5px; }
+
+        .log-line { margin-bottom: 3px; border-bottom: 1px dotted rgba(43, 51, 35, 0.3); padding-bottom: 2px; }
         
-        /* OBUNTO OVERLAY */
-        .obunto-overlay { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: flex-end; gap: 15px; z-index: 10000; animation: slideIn 0.3s ease-out; }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes glitch { 0% { transform: translate(0); } 20% { transform: translate(-2px, 2px); } 40% { transform: translate(-2px, -2px); } 60% { transform: translate(2px, 2px); } 80% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+        /* MENSAGEM DO OBUNTO */
+        .mascot-overlay { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: flex-end; gap: 15px; z-index: 9999; animation: slideIn 0.3s; }
+        .mascot-msg { background: var(--paper); color: var(--ink); padding: 15px; border: 2px solid var(--border); max-width: 250px; box-shadow: 5px 5px 0 rgba(0,0,0,0.2); font-weight: bold; font-size: 12px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
-    <div class="app-container">
-        <div id="boot-1" class="full-screen active" style="background:#111; justify-content:center; align-items:center;">
-            <div style="text-align:center;"><img src="obunto/normal.png" width="100" style="filter:grayscale(1);"><div>INITIALIZING...</div></div>
-        </div>
-        <div id="boot-2" class="full-screen" style="justify-content:center; align-items:center;">
-            <div class="window" style="width:300px;">
-                <div class="win-header">SYSTEM_CHECK</div>
-                <div class="win-body">
-                    <div>> Establishing link... OK</div>
-                    <div class="boot-bar-container"><div class="boot-fill" id="boot-progress"></div></div>
+
+    <div id="boot-screen" class="full-screen active center-flex" style="background:#1a1a1a;">
+        <img src="obunto/normal.png" width="80" style="filter:grayscale(1) contrast(1.2);">
+        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:12px;">SYSTEM_INITIALIZATION...</div>
+    </div>
+
+    <div id="login-screen" class="full-screen center-flex">
+        <div class="window" style="width:320px;">
+            <div class="win-header">SECURE_GATEWAY</div>
+            <div class="win-body">
+                <div id="step1">
+                    <p style="font-size:11px; margin-bottom:5px;">PERSONNEL ID:</p>
+                    <input type="text" id="inpId">
+                    <button class="os-btn" onclick="checkId()" style="width:100%">VERIFY</button>
                 </div>
+                <div id="step2" class="hidden">
+                    <p style="font-size:11px; margin-bottom:5px;">ACCESS CODE:</p>
+                    <input type="password" id="inpPass">
+                    <button class="os-btn" onclick="doLogin()" style="width:100%">LOGIN</button>
+                    <div style="text-align:center; margin-top:10px; font-size:10px; text-decoration:underline; cursor:pointer;" onclick="location.reload()">CANCEL</div>
+                </div>
+                <div id="loginStatus" style="text-align:center; margin-top:15px; font-size:10px;">STANDING BY</div>
             </div>
         </div>
+    </div>
 
-        <div id="login-screen" class="full-screen" style="justify-content:center; align-items:center;">
-            <div class="window opening" style="width:380px;">
-                <div class="win-header">SECURE_ACCESS</div>
-                <div class="win-body">
-                    <div id="auth-step-1">
-                        <p>ENTER ID:</p><input type="text" id="inpId">
-                        <button id="btnCheck" class="os-btn" style="width:100%">VERIFY</button>
-                    </div>
-                    <div id="auth-step-2" class="hidden">
-                        <p id="auth-msg">PASSWORD:</p><input type="password" id="inpPass">
-                        <button id="btnFinal" class="os-btn" style="width:100%">ACCESS</button>
-                    </div>
-                    <div id="statusMsg" style="text-align:center; font-size:10px; margin-top:10px;">READY</div>
-                </div>
+    <div id="desktop-screen" class="full-screen">
+        <div class="window" style="position:absolute; top:30px; left:30px; width:220px;">
+            <div class="win-header">PERSONNEL_FILE</div>
+            <div class="win-body" style="text-align:center;">
+                <img id="userAvatar" width="80" style="border:2px solid var(--border); margin-bottom:10px;">
+                <h3 id="userName" style="text-transform:uppercase;">User</h3>
+                <p id="userId" style="font-size:10px; margin-top:5px;"></p>
+                <p id="userRank" style="font-size:10px; margin-top:2px; font-weight:bold;"></p>
             </div>
         </div>
+        <div style="position:absolute; bottom:0; left:0; width:100%; background:var(--paper); border-top:2px solid var(--border); padding:5px 10px; font-size:11px; display:flex; justify-content:space-between;">
+            <span>TSC_INTRANET_v5.0</span>
+            <span id="clock">00:00</span>
+        </div>
+    </div>
 
-        <div id="desktop-screen" class="full-screen">
-            <div style="padding:20px;">
-                <div onclick="toggleWindow('p-win')" style="cursor:pointer; width:80px; text-align:center;">
-                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br><span>DOSSIER</span>
+    <div id="admin-screen" class="full-screen">
+        <div style="margin-bottom:10px; border-bottom:2px solid var(--border); padding-bottom:5px; display:flex; justify-content:space-between; font-weight:bold;">
+            <span>COMMAND_CONTROL // OBUNTO_CORE</span>
+            <span id="admClock">00:00:00</span>
+        </div>
+
+        <div class="adm-container">
+            <div class="adm-panel" style="grid-row: span 2;">
+                <div class="adm-title">ACTIVE_PERSONNEL (<span id="userCount">0</span>)</div>
+                <div class="adm-content" id="userList"></div>
+            </div>
+
+            <div class="adm-panel" style="grid-column: span 2;">
+                <div class="adm-title">ACTIVITY_LOG: <span id="spyTargetName">NONE</span></div>
+                <div class="adm-content" id="spyFeed" style="font-family:'Courier New'; line-height:1.4;">
+                    SYSTEM_READY. WAITING_FOR_SELECTION...
                 </div>
-                <div id="p-win" class="window hidden opening" style="position:absolute; top:50px; left:50px; width:600px;">
-                    <div class="win-header"><span>RECORD</span><button onclick="toggleWindow('p-win')">[X]</button></div>
-                    <div class="win-body" id="profileData"></div>
+            </div>
+
+            <div class="adm-panel">
+                <div class="adm-title">ACTIONS</div>
+                <div class="adm-content">
+                    <button class="os-btn" onclick="admAction('kick')" style="width:100%; margin-bottom:5px;">DISCONNECT</button>
+                    <button class="os-btn" onclick="admAction('freeze')" style="width:100%; margin-bottom:5px;">FREEZE_ID</button>
+                    <button class="os-btn danger" onclick="admAction('delete')" style="width:100%;">DELETE_ID</button>
+                </div>
+            </div>
+
+            <div class="adm-panel">
+                <div class="adm-title">TRANSMISSION</div>
+                <div class="adm-content">
+                    <select id="bcTarget">
+                        <option value="all">GLOBAL_CHANNEL</option>
+                        <option value="sel">DIRECT_LINK</option>
+                    </select>
+                    <input type="text" id="bcMsg" placeholder="TYPE MESSAGE...">
+                    <div style="display:flex;">
+                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button>
+                        <button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -85,104 +137,139 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         const socket = io();
-        let currentMode = 'login';
         let currentUser = null;
+        let selectedUserId = null;
+        let isRegistering = false;
 
-        // TRACKING FUNCTION
-        function track(action, details='') {
-            if(currentUser) socket.emit('user_activity', { action, details });
-        }
+        // BOOT
+        window.onload = () => setTimeout(() => {
+            document.getElementById('boot-screen').classList.remove('active');
+            document.getElementById('login-screen').classList.add('active');
+        }, 2000);
 
-        // BOOT SEQUENCE
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('boot-1').classList.remove('active');
-                document.getElementById('boot-2').classList.add('active');
-                let w=0, b=document.getElementById('boot-progress');
-                let i=setInterval(() => { w+=5; b.style.width=w+'%'; if(w>=100) { clearInterval(i); setTimeout(() => {
-                    document.getElementById('boot-2').classList.remove('active');
-                    document.getElementById('login-screen').classList.add('active');
-                }, 500); }}, 100);
-            }, 2000);
-        };
-
-        // LOGIN LOGIC
-        document.getElementById('btnCheck').onclick = async () => {
-            const id = document.getElementById('inpId').value.trim();
+        // LOGIN
+        async function checkId() {
+            const id = document.getElementById('inpId').value;
             if(!id) return;
-            document.getElementById('statusMsg').innerText = "CHECKING...";
-            try {
-                const res = await fetch('/api/check-user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) });
-                const data = await res.json();
-                if(data.registered) { setupAuth('login', "ENTER PASSWORD:"); } 
-                else { setupAuth('register', "CREATE PASSWORD:"); }
-            } catch(e) { document.getElementById('statusMsg').innerText = "ERROR"; }
-        };
-
-        function setupAuth(mode, msg) {
-            currentMode = mode;
-            document.getElementById('auth-step-1').classList.add('hidden');
-            document.getElementById('auth-step-2').classList.remove('hidden');
-            document.getElementById('auth-msg').innerText = msg;
-        }
-
-        document.getElementById('btnFinal').onclick = async () => {
-            const id = document.getElementById('inpId').value.trim();
-            const pass = document.getElementById('inpPass').value.trim();
-            const endpoint = currentMode === 'register' ? '/api/register' : '/api/login';
+            const res = await fetch('/api/check-user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) });
+            const data = await res.json();
             
-            try {
-                const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, password:pass}) });
-                const data = await res.json();
-                
-                if(data.success) {
-                    if(currentMode === 'register') { alert("REGISTERED!"); location.reload(); }
-                    else {
-                        currentUser = data.userData;
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('desktop-screen').classList.add('active');
-                        renderProfile(data.userData);
-                        socket.emit('user_connected', data.userData);
-                        track('LOGIN', 'User logged in');
-                    }
-                } else if (data.message === "ID_TAKEN") {
-                     // Auto-login fallback
-                     setupAuth('login', "EXISTS. LOGGING IN...");
-                     document.getElementById('btnFinal').click();
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('loginStatus').innerText = data.registered ? "ENTER CODE" : "CREATE NEW CODE";
+            isRegistering = !data.registered;
+        }
+
+        async function doLogin() {
+            const id = document.getElementById('inpId').value;
+            const pass = document.getElementById('inpPass').value;
+            const endpoint = isRegistering ? '/api/register' : '/api/login';
+
+            const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, password:pass}) });
+            const data = await res.json();
+
+            if (data.success) {
+                if (isRegistering) { location.reload(); return; }
+                currentUser = data.userData;
+
+                if (currentUser.isAdmin) {
+                    // ADMIN MODE (000)
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('admin-screen').classList.add('active');
+                    initAdmin();
                 } else {
-                    document.getElementById('statusMsg').innerText = "DENIED";
+                    // USER MODE
+                    document.getElementById('userAvatar').src = currentUser.avatar;
+                    document.getElementById('userName').innerText = currentUser.username;
+                    document.getElementById('userId').innerText = currentUser.id;
+                    document.getElementById('userRank').innerText = currentUser.rank;
+                    document.getElementById('login-screen').classList.remove('active');
+                    document.getElementById('desktop-screen').classList.add('active');
+                    
+                    socket.emit('user_login', currentUser);
+                    initTracking();
                 }
-            } catch(e) { console.log(e); }
-        };
-
-        function renderProfile(u) {
-            document.getElementById('profileData').innerHTML = `<img src="${u.avatar}" width="100"> <h2>${u.username}</h2> <p>${u.id}</p>`;
+            } else if (data.message === "ID_TAKEN") {
+                isRegistering = false; doLogin(); // Auto-retry login
+            } else {
+                document.getElementById('loginStatus').innerText = "DENIED: " + (data.message || "ERROR");
+                document.getElementById('inpPass').value = "";
+            }
         }
 
-        function toggleWindow(id) {
-            const el = document.getElementById(id);
-            const isClosed = el.classList.contains('hidden');
-            el.classList.toggle('hidden');
-            track(isClosed ? 'OPEN_WINDOW' : 'CLOSE_WINDOW', id);
+        // --- USER FUNCTIONS ---
+        function initTracking() {
+            ['click', 'mousemove', 'keypress'].forEach(evt => {
+                document.addEventListener(evt, () => {
+                    if(Math.random() < 0.05) socket.emit('activity_track', { action: evt.toUpperCase(), details: 'Active' });
+                });
+            });
+            socket.on('receive_mascot_msg', showMascot);
+            socket.on('force_disconnect', () => { alert("CONNECTION_TERMINATED"); location.reload(); });
+            socket.on('account_frozen', () => { alert("ID_FROZEN"); location.reload(); });
+            socket.on('account_deleted', () => { alert("ID_DELETED"); location.reload(); });
+            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 1000);
         }
 
-        // LISTENERS
-        document.addEventListener('click', (e) => { if(e.target.tagName==='BUTTON') track('CLICK', e.target.innerText); });
-        document.addEventListener('input', (e) => { if(e.target.tagName==='INPUT') track('TYPE', e.target.id); });
+        function showMascot(data) {
+            const el = document.createElement('div');
+            el.className = 'mascot-overlay';
+            el.innerHTML = `<img src="obunto/${data.mood || 'normal'}.png" width="60" style="background:#c8d1c0; border:2px solid #2b3323;">
+                            <div class="mascot-msg">${data.message}</div>`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 5000);
+        }
 
-        socket.on('receive_mascot_msg', (data) => {
-            const div = document.createElement('div');
-            div.className = 'obunto-overlay';
-            div.innerHTML = `<img src="obunto/${data.mood}.png" style="background:#c8d1c0; border:2px solid #2b3323; width:80px;">
-                             <div style="background:#2b3323; color:#c8d1c0; padding:15px; border-radius:10px 10px 0 10px;">${data.message}</div>`;
-            if(data.type === 'glitch') div.style.animation = 'glitch 0.3s infinite';
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 6000);
-        });
+        // --- ADMIN FUNCTIONS ---
+        function initAdmin() {
+            socket.emit('admin_login');
+            socket.on('users_list', renderUserList);
+            socket.on('spy_feed', updateSpyLog);
+            setInterval(() => document.getElementById('admClock').innerText = new Date().toLocaleTimeString(), 1000);
+        }
 
-        socket.on('force_disconnect', () => { alert("CONNECTION TERMINATED"); location.reload(); });
-        socket.on('account_frozen', () => { alert("ACCOUNT FROZEN"); location.reload(); });
-        socket.on('account_deleted', () => { alert("ACCOUNT DELETED"); location.reload(); });
+        function renderUserList(users) {
+            const list = document.getElementById('userList');
+            document.getElementById('userCount').innerText = users.length;
+            list.innerHTML = '';
+            users.forEach(u => {
+                const div = document.createElement('div');
+                div.className = `user-row ${selectedUserId === u.id ? 'selected' : ''}`;
+                div.innerHTML = `<span><span class="status-dot"></span>${u.username}</span> <span>${u.id}</span>`;
+                div.onclick = () => selectUser(u);
+                list.appendChild(div);
+            });
+        }
+
+        function selectUser(u) {
+            selectedUserId = u.id;
+            document.getElementById('spyTargetName').innerText = u.username;
+            document.getElementById('spyFeed').innerHTML = `<div class="log-line">LINK_ESTABLISHED: ${u.username}</div>`;
+            socket.emit('admin_login'); // Refresh list UI
+        }
+
+        function updateSpyLog(data) {
+            if (data.userId !== selectedUserId) return;
+            const feed = document.getElementById('spyFeed');
+            const line = document.createElement('div');
+            line.className = 'log-line';
+            line.innerText = `[${new Date().toLocaleTimeString()}] ${data.action}`;
+            feed.appendChild(line);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        function admAction(action) {
+            if(!selectedUserId) return;
+            if(confirm(`CONFIRM: ${action.toUpperCase()} ${selectedUserId}?`)) socket.emit('admin_'+action, selectedUserId);
+        }
+
+        function sendBc(type) {
+            const msg = document.getElementById('bcMsg').value;
+            if(!msg) return;
+            const target = document.getElementById('bcTarget').value === 'sel' ? selectedUserId : 'all';
+            socket.emit('admin_broadcast', { message: msg, type: type, mood: 'normal', target: target });
+            document.getElementById('bcMsg').value = "";
+        }
     </script>
 </body>
 </html>
