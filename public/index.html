@@ -8,38 +8,45 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; }
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9999; }
-        
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: relative; padding: 20px; }
         .full-screen.active { display: flex; }
         .center-flex { justify-content: center; align-items: center; }
 
-        /* ESTILO NEWTON (UNIFICADO) */
+        @keyframes ink-spread { 0% { clip-path: circle(0% at 50% 0%); opacity: 0; } 100% { clip-path: circle(150% at 50% 0%); opacity: 1; } }
+        .window.opening { animation: ink-spread 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes handwrite { 0% { opacity: 0; transform: translateX(-5px); } 100% { opacity: 1; transform: translateX(0); } }
+        input { animation: handwrite 0.3s ease-out; }
+
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
         .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; font-weight: bold; display: flex; justify-content: space-between; border-bottom: 2px solid var(--border); }
         .win-body { padding: 15px; overflow-y: auto; color: var(--ink); }
-        
         input, select, textarea { background: transparent; border: none; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-family: inherit; font-weight: bold; outline: none; margin-bottom: 10px; color: var(--ink); }
-        
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); margin-right: 5px; }
+        input:focus { border-bottom-width: 3px; }
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); margin-right: 5px; text-transform: uppercase; font-size: 11px; }
         .os-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border); }
         .os-btn.danger { border-color: #550000; color: #550000; }
-
+        .os-btn.small { padding: 2px 6px; box-shadow: 2px 2px 0 var(--border); }
         .hidden { display: none !important; }
 
-        /* ADMIN PANEL - ESTILO PAPEL/RETRO (LIMPO) */
-        .adm-container { display: grid; grid-template-columns: 250px 1fr 250px; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; }
-        
+        /* ADMIN PANEL LAYOUT */
+        .adm-container { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; }
         .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .adm-title { background: var(--border); color: var(--bg); padding: 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .adm-title { background: var(--border); color: var(--bg); padding: 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
         .adm-content { padding: 10px; overflow-y: auto; flex: 1; font-size: 11px; }
 
-        .user-row { padding: 5px; border-bottom: 1px dashed var(--border); cursor: pointer; display: flex; justify-content: space-between; }
-        .user-row:hover, .user-row.selected { background: var(--bg); color: var(--paper); }
-        .status-dot { display: inline-block; width: 6px; height: 6px; background: var(--ink); border-radius: 50%; margin-right: 5px; }
+        .user-row { padding: 8px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .user-row:hover { background: rgba(0,0,0,0.05); }
+        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; border: 1px solid var(--ink); }
+        .online { background: #0f0; } .offline { background: transparent; } .frozen { background: #f00; }
 
-        .log-line { margin-bottom: 3px; border-bottom: 1px dotted rgba(43, 51, 35, 0.3); padding-bottom: 2px; }
-        
-        /* MENSAGEM DO OBUNTO */
+        /* MOOD SELECTOR GRID */
+        .mood-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 5px; margin-bottom: 10px; border: 1px solid var(--border); padding: 5px; height: 100px; overflow-y: auto; }
+        .mood-item { width: 100%; aspect-ratio: 1; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0.6; transition: 0.2s; }
+        .mood-item:hover { opacity: 1; transform: scale(1.1); }
+        .mood-item.selected { opacity: 1; border: 2px solid var(--ink); box-shadow: 0 0 5px rgba(0,0,0,0.2); }
+        .mood-item img { width: 100%; height: 100%; object-fit: contain; }
+
+        /* MASCOT OVERLAY */
         .mascot-overlay { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: flex-end; gap: 15px; z-index: 9999; animation: slideIn 0.3s; }
         .mascot-msg { background: var(--paper); color: var(--ink); padding: 15px; border: 2px solid var(--border); max-width: 250px; box-shadow: 5px 5px 0 rgba(0,0,0,0.2); font-weight: bold; font-size: 12px; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
@@ -54,12 +61,12 @@
     </div>
 
     <div id="login-screen" class="full-screen center-flex">
-        <div class="window" style="width:320px;">
+        <div class="window opening" style="width:320px;">
             <div class="win-header">SECURE_GATEWAY</div>
             <div class="win-body">
                 <div id="step1">
                     <p style="font-size:11px; margin-bottom:5px;">PERSONNEL ID:</p>
-                    <input type="text" id="inpId">
+                    <input type="text" id="inpId" placeholder="ENTER ID">
                     <button class="os-btn" onclick="checkId()" style="width:100%">VERIFY</button>
                 </div>
                 <div id="step2" class="hidden">
@@ -74,7 +81,7 @@
     </div>
 
     <div id="desktop-screen" class="full-screen">
-        <div class="window" style="position:absolute; top:30px; left:30px; width:220px;">
+        <div class="window opening" style="position:absolute; top:30px; left:30px; width:220px;">
             <div class="win-header">PERSONNEL_FILE</div>
             <div class="win-body" style="text-align:center;">
                 <img id="userAvatar" width="80" style="border:2px solid var(--border); margin-bottom:10px;">
@@ -92,42 +99,48 @@
     <div id="admin-screen" class="full-screen">
         <div style="margin-bottom:10px; border-bottom:2px solid var(--border); padding-bottom:5px; display:flex; justify-content:space-between; font-weight:bold;">
             <span>COMMAND_CONTROL // OBUNTO_CORE</span>
-            <span id="admClock">00:00:00</span>
+            <div><button class="os-btn small" onclick="requestRefresh()">REFRESH_DB</button> <span id="admClock">00:00</span></div>
         </div>
 
         <div class="adm-container">
             <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-title">ACTIVE_PERSONNEL (<span id="userCount">0</span>)</div>
+                <div class="adm-title">
+                    <span>DATABASE (<span id="userCount">0</span>)</span>
+                    <input type="text" id="searchUser" placeholder="SEARCH..." style="width:100px; margin:0; padding:0 5px; height:15px; font-size:10px; border:none;" onkeyup="filterUsers()">
+                </div>
                 <div class="adm-content" id="userList"></div>
             </div>
 
-            <div class="adm-panel" style="grid-column: span 2;">
-                <div class="adm-title">ACTIVITY_LOG: <span id="spyTargetName">NONE</span></div>
-                <div class="adm-content" id="spyFeed" style="font-family:'Courier New'; line-height:1.4;">
-                    SYSTEM_READY. WAITING_FOR_SELECTION...
-                </div>
-            </div>
-
-            <div class="adm-panel">
-                <div class="adm-title">ACTIONS</div>
+            <div class="adm-panel" style="grid-row: span 2;">
+                <div class="adm-title">PERSONA_INTERFACE</div>
                 <div class="adm-content">
-                    <button class="os-btn" onclick="admAction('kick')" style="width:100%; margin-bottom:5px;">DISCONNECT</button>
-                    <button class="os-btn" onclick="admAction('freeze')" style="width:100%; margin-bottom:5px;">FREEZE_ID</button>
-                    <button class="os-btn danger" onclick="admAction('delete')" style="width:100%;">DELETE_ID</button>
-                </div>
-            </div>
+                    <p style="font-size:10px; margin-bottom:3px;">SELECT_AVATAR:</p>
+                    <div id="moodGrid" class="mood-grid">
+                        </div>
 
-            <div class="adm-panel">
-                <div class="adm-title">TRANSMISSION</div>
-                <div class="adm-content">
+                    <p style="font-size:10px; margin-bottom:3px; margin-top:10px;">TARGET:</p>
                     <select id="bcTarget">
                         <option value="all">GLOBAL_CHANNEL</option>
-                        <option value="sel">DIRECT_LINK</option>
                     </select>
+                    
+                    <p style="font-size:10px; margin-bottom:3px;">MESSAGE:</p>
                     <input type="text" id="bcMsg" placeholder="TYPE MESSAGE...">
-                    <div style="display:flex;">
-                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button>
+                    
+                    <div style="display:flex; margin-top:10px;">
+                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">TRANSMIT</button>
                         <button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="adm-panel">
+                <div class="adm-title">MANUAL_OVERRIDE</div>
+                <div class="adm-content">
+                    <p style="font-size:10px; margin-bottom:5px;">TARGET ID:</p>
+                    <input type="text" id="manualId">
+                    <div style="display:flex; gap:5px;">
+                        <button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">DELETE</button>
+                        <button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">FREEZE</button>
                     </div>
                 </div>
             </div>
@@ -138,22 +151,28 @@
     <script>
         const socket = io();
         let currentUser = null;
-        let selectedUserId = null;
         let isRegistering = false;
+        let allUsersData = [];
+        let selectedMood = 'normal';
 
-        // BOOT
+        // --- LISTA DE ÍCONES (ADICIONE SEUS 140 NOMES AQUI) ---
+        const MOOD_LIST = [
+            'normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 
+            'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'
+            // Exemplo: 'angry', 'confused', 'robot', 'glitch1', 'glitch2'...
+        ];
+
         window.onload = () => setTimeout(() => {
             document.getElementById('boot-screen').classList.remove('active');
             document.getElementById('login-screen').classList.add('active');
         }, 2000);
 
-        // LOGIN CORRIGIDO (COM TRIM)
+        // LOGIN
         async function checkId() {
-            const id = document.getElementById('inpId').value.trim(); // <--- CORREÇÃO
+            const id = document.getElementById('inpId').value.trim();
             if(!id) return;
             const res = await fetch('/api/check-user', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) });
             const data = await res.json();
-            
             document.getElementById('step1').classList.add('hidden');
             document.getElementById('step2').classList.remove('hidden');
             document.getElementById('loginStatus').innerText = data.registered ? "ENTER CODE" : "CREATE NEW CODE";
@@ -161,10 +180,9 @@
         }
 
         async function doLogin() {
-            const id = document.getElementById('inpId').value.trim(); // <--- CORREÇÃO
-            const pass = document.getElementById('inpPass').value.trim(); // <--- CORREÇÃO
+            const id = document.getElementById('inpId').value.trim();
+            const pass = document.getElementById('inpPass').value.trim();
             const endpoint = isRegistering ? '/api/register' : '/api/login';
-
             const res = await fetch(endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id, password:pass}) });
             const data = await res.json();
 
@@ -173,37 +191,25 @@
                 currentUser = data.userData;
 
                 if (currentUser.isAdmin) {
-                    // ADMIN MODE (000)
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('admin-screen').classList.add('active');
                     initAdmin();
                 } else {
-                    // USER MODE
                     document.getElementById('userAvatar').src = currentUser.avatar;
                     document.getElementById('userName').innerText = currentUser.username;
                     document.getElementById('userId').innerText = currentUser.id;
                     document.getElementById('userRank').innerText = currentUser.rank;
                     document.getElementById('login-screen').classList.remove('active');
                     document.getElementById('desktop-screen').classList.add('active');
-                    
                     socket.emit('user_login', currentUser);
-                    initTracking();
+                    initListeners();
                 }
-            } else if (data.message === "ID_TAKEN") {
-                isRegistering = false; doLogin(); // Auto-retry login
-            } else {
-                document.getElementById('loginStatus').innerText = "DENIED: " + (data.message || "ERROR");
-                document.getElementById('inpPass').value = "";
-            }
+            } else if (data.message === "ID_TAKEN") { isRegistering = false; doLogin(); 
+            } else { document.getElementById('loginStatus').innerText = "DENIED: " + (data.message || "ERROR"); document.getElementById('inpPass').value = ""; }
         }
 
-        // --- USER FUNCTIONS ---
-        function initTracking() {
-            ['click', 'mousemove', 'keypress'].forEach(evt => {
-                document.addEventListener(evt, () => {
-                    if(Math.random() < 0.05) socket.emit('activity_track', { action: evt.toUpperCase(), details: 'Active' });
-                });
-            });
+        // USER
+        function initListeners() {
             socket.on('receive_mascot_msg', showMascot);
             socket.on('force_disconnect', () => { alert("CONNECTION_TERMINATED"); location.reload(); });
             socket.on('account_frozen', () => { alert("ID_FROZEN"); location.reload(); });
@@ -214,60 +220,95 @@
         function showMascot(data) {
             const el = document.createElement('div');
             el.className = 'mascot-overlay';
+            // Usa o mood enviado pelo admin
             el.innerHTML = `<img src="obunto/${data.mood || 'normal'}.png" width="60" style="background:#c8d1c0; border:2px solid #2b3323;">
                             <div class="mascot-msg">${data.message}</div>`;
             document.body.appendChild(el);
-            setTimeout(() => el.remove(), 5000);
+            setTimeout(() => el.remove(), 6000);
         }
 
-        // --- ADMIN FUNCTIONS ---
+        // ADMIN
         function initAdmin() {
             socket.emit('admin_login');
-            socket.on('users_list', renderUserList);
-            socket.on('spy_feed', updateSpyLog);
+            socket.on('users_list', updateAdminTable);
+            renderMoodGrid();
             setInterval(() => document.getElementById('admClock').innerText = new Date().toLocaleTimeString(), 1000);
         }
 
-        function renderUserList(users) {
-            const list = document.getElementById('userList');
-            document.getElementById('userCount').innerText = users.length;
-            list.innerHTML = '';
-            users.forEach(u => {
-                const div = document.createElement('div');
-                div.className = `user-row ${selectedUserId === u.id ? 'selected' : ''}`;
-                div.innerHTML = `<span><span class="status-dot"></span>${u.username}</span> <span>${u.id}</span>`;
-                div.onclick = () => selectUser(u);
-                list.appendChild(div);
+        function renderMoodGrid() {
+            const grid = document.getElementById('moodGrid');
+            grid.innerHTML = '';
+            MOOD_LIST.forEach(mood => {
+                const btn = document.createElement('div');
+                btn.className = 'mood-item';
+                if(mood === 'normal') btn.classList.add('selected');
+                
+                // Tenta carregar a imagem, se falhar mostra texto
+                btn.innerHTML = `<img src="obunto/${mood}.png" onerror="this.style.display='none'; this.parentNode.innerText='${mood.substring(0,3)}'">`;
+                
+                btn.onclick = () => {
+                    document.querySelectorAll('.mood-item').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedMood = mood;
+                };
+                grid.appendChild(btn);
             });
         }
 
-        function selectUser(u) {
-            selectedUserId = u.id;
-            document.getElementById('spyTargetName').innerText = u.username;
-            document.getElementById('spyFeed').innerHTML = `<div class="log-line">LINK_ESTABLISHED: ${u.username}</div>`;
-            socket.emit('admin_login'); // Refresh list UI
+        function requestRefresh() {
+            document.getElementById('userList').innerHTML = '<div style="padding:10px;">FETCHING_DB...</div>';
+            socket.emit('admin_refresh_list');
         }
 
-        function updateSpyLog(data) {
-            if (data.userId !== selectedUserId) return;
-            const feed = document.getElementById('spyFeed');
-            const line = document.createElement('div');
-            line.className = 'log-line';
-            line.innerText = `[${new Date().toLocaleTimeString()}] ${data.action}`;
-            feed.appendChild(line);
-            feed.scrollTop = feed.scrollHeight;
+        function updateAdminTable(users) {
+            allUsersData = users;
+            renderList(users);
         }
 
-        function admAction(action) {
-            if(!selectedUserId) return;
-            if(confirm(`CONFIRM: ${action.toUpperCase()} ${selectedUserId}?`)) socket.emit('admin_'+action, selectedUserId);
+        function renderList(list) {
+            const container = document.getElementById('userList');
+            document.getElementById('userCount').innerText = list.length;
+            container.innerHTML = '';
+            list.forEach(u => {
+                const row = document.createElement('div');
+                row.className = 'user-row';
+                let statusClass = u.frozen ? 'frozen' : (u.online ? 'online' : 'offline');
+                row.innerHTML = `
+                    <div style="flex:1;">
+                        <span class="status-dot ${statusClass}"></span>
+                        <b>${u.username}</b> <span style="opacity:0.6; font-size:10px;">[${u.id}]</span>
+                    </div>
+                    <div>
+                        ${u.online ? `<button class="os-btn small" onclick="quickAction('kick', '${u.id}')">KICK</button>` : ''}
+                        <button class="os-btn small" onclick="quickAction('freeze', '${u.id}')">${u.frozen ? 'UNFREEZE' : 'FREEZE'}</button>
+                        <button class="os-btn small danger" onclick="quickAction('delete', '${u.id}')">DEL</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function filterUsers() {
+            const term = document.getElementById('searchUser').value.toLowerCase();
+            const filtered = allUsersData.filter(u => u.username.toLowerCase().includes(term) || u.id.includes(term));
+            renderList(filtered);
+        }
+
+        function quickAction(action, id) {
+            if(confirm(`CONFIRM: ${action.toUpperCase()} ${id}?`)) socket.emit('admin_'+action, id);
+        }
+
+        function manualAction(action) {
+            const id = document.getElementById('manualId').value.trim();
+            if(!id) return;
+            quickAction(action, id);
         }
 
         function sendBc(type) {
             const msg = document.getElementById('bcMsg').value;
             if(!msg) return;
-            const target = document.getElementById('bcTarget').value === 'sel' ? selectedUserId : 'all';
-            socket.emit('admin_broadcast', { message: msg, type: type, mood: 'normal', target: target });
+            // AGORA ENVIA O MOOD SELECIONADO
+            socket.emit('admin_broadcast', { message: msg, type: type, target: 'all', mood: selectedMood });
             document.getElementById('bcMsg').value = "";
         }
     </script>
