@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,66 +7,70 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="noise-overlay"></div>
-    
-    <div id="login-screen" class="full-screen active">
-        <div class="window login-win">
-            <div class="win-header">
-                <img src="assets/icon-tiny-lock-10x12.png">
-                <span>AUTHENTICATION</span>
-            </div>
-            <div class="win-body">
-                <input type="text" id="inpId" placeholder="ROBLOX ID">
-                <input type="text" id="inpUser" placeholder="USERNAME">
-                <button id="btnLogin" class="os-btn">ACCESS</button>
-                <div id="loginStatus"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="desktop-screen" class="full-screen hidden">
-        <div class="top-bar">
-            <div class="bar-left">
-                <img src="assets/icon-small-newton-17x12.png">
-                <span>TSC_INTRANET</span>
-            </div>
-            <span id="clock">00:00</span>
-        </div>
-        <div class="desktop-content">
-            <div class="icon-item" onclick="toggleWin('profile')">
-                <img src="assets/icon-large-owner_info-28x14.png">
-                <span>PROFILE</span>
-            </div>
-            <div id="profile-window" class="window hidden profile-pos">
-                <div class="win-header">
-                    <span>USER_DATA.DAT</span>
-                    <button class="close-btn" onclick="toggleWin('profile')">
-                        <img src="assets/button-close-17x17.png">
-                    </button>
+    <div class="scanlines"></div>
+    <div class="app-container">
+        
+        <div id="login-screen" class="full-screen active">
+            <div class="window" style="width:320px; margin:auto;">
+                <div class="win-header"><span>LOGIN_GATE</span></div>
+                <div class="win-body">
+                    <input type="text" id="inpId" placeholder="USER ID">
+                    <input type="text" id="inpUser" placeholder="USERNAME">
+                    <button id="btnLogin" class="os-btn">AUTHENTICATE</button>
+                    <div id="loginStatus" style="font-size:12px; text-align:center;">READY</div>
                 </div>
-                <div class="win-body" id="profileData"></div>
             </div>
         </div>
-        <div class="os-dock">
-            <img src="assets/icon-tiny-dock-19x11.png">
-            <div class="dock-sep"></div>
-            <img src="assets/button-note-15x15.png">
-            <img src="assets/icon-tiny-lock-10x12.png" onclick="location.reload()" style="cursor:pointer">
+
+        <div id="desktop-screen" class="full-screen">
+            <div class="top-bar">
+                <span>TSC_INTRANET</span>
+                <span id="clock">00:00</span>
+            </div>
+            <div class="desktop-content">
+                <div class="icon-item" onclick="toggleWin('profile')">
+                    <img src="assets/icon-large-owner_info-28x14.png">
+                    <span>PROFILE</span>
+                </div>
+                <div id="profile-window" class="window hidden" style="position:absolute; top:50px; left:50px; width:400px;">
+                    <div class="win-header">
+                        <span>PERSONNEL_FILE</span>
+                        <button onclick="toggleWin('profile')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button>
+                    </div>
+                    <div class="win-body" id="profileData"></div>
+                </div>
+            </div>
+            <div class="os-dock">
+                <img src="assets/icon-tiny-dock-19x11.png">
+                <button class="os-btn" onclick="location.reload()">LOCK</button>
+            </div>
         </div>
+
+        <div id="admin-screen" class="full-screen admin-panel">
+            <div class="top-bar" style="background:transparent; border-color:#89937a; color:#89937a;">
+                <span>⚠ OBUNTO_CORE_ACCESS</span>
+                <button onclick="location.reload()" style="background:none; border:1px solid #89937a; color:#89937a; padding:2px 5px; cursor:pointer;">EXIT</button>
+            </div>
+            <div style="padding:20px;">
+                <h3>SELECT EXPRESSION</h3>
+                <div id="moodGrid" class="mood-grid"></div>
+                <h3>SYSTEM BROADCAST</h3>
+                <textarea id="adminMsg" style="height:100px; color:#89937a; border-color:#89937a;"></textarea>
+                <button id="btnSend" class="os-btn" style="margin-top:10px; background:#89937a; color:#2b3323;">TRANSMIT</button>
+            </div>
+        </div>
+
     </div>
 
     <div id="obunto-popup" class="obunto-box hidden">
-        <div class="obunto-avatar">
-            <img id="obunto-face" src="obunto/normal.png">
-        </div>
+        <div class="obunto-avatar"><img id="obunto-face" src="obunto/normal.png"></div>
         <div class="obunto-speech">
-            <div class="speech-header">INCOMING_MSG</div>
+            <div style="font-size:10px; opacity:0.6; border-bottom:1px solid #89937a; margin-bottom:5px;">SYSTEM_NOTICE</div>
             <div id="obunto-text"></div>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="assistant.js"></script>
     <script src="renderer.js"></script>
 </body>
 </html>
