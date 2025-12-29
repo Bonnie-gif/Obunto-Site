@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const TSC_DIVISIONS = {
+const TSC_GROUPS = {
     11649027: "ADMINISTRATION",
     12026513: "MEDICAL_DEPT",
     11577231: "INTERNAL_SECURITY",
@@ -34,16 +34,15 @@ app.post('/api/login', async (req, res) => {
     try {
         const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         if (!userRes.data || userRes.data.name.toLowerCase() !== usernameInput.toLowerCase()) {
-            return res.status(401).json({ success: false, message: "IDENTITY_MISMATCH" });
+            return res.status(401).json({ success: false, message: "ID_MISMATCH" });
         }
 
         const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
-        const allGroups = groupsRes.data.data;
+        const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
 
-        // Filtra apenas grupos TSC e encontra o com maior rank numérico (0-255)
-        const tscGroups = allGroups.filter(g => TSC_DIVISIONS[g.group.id]);
-        if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "NOT_TSC_STAFF" });
+        if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "UNAUTHORIZED" });
 
+        // Encontra o cargo com maior Rank numérico (0-255)
         const primary = tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0];
         const levelMatch = primary.role.name.match(/\d+/);
 
@@ -52,15 +51,14 @@ app.post('/api/login', async (req, res) => {
             userData: {
                 id: userId,
                 username: userRes.data.name,
-                dept: TSC_DIVISIONS[primary.group.id],
                 rank: primary.role.name,
-                clearance: `LEVEL ${levelMatch ? levelMatch[0] : '0'}`,
+                clearance: `CLEARANCE ${levelMatch ? levelMatch[0] : '0'}`,
                 avatar: `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`,
-                affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name, div: TSC_DIVISIONS[g.group.id] }))
+                affiliations: tscGroups.map(g => ({ name: g.group.name, role: g.role.name, div: TSC_GROUPS[g.group.id] }))
             }
         });
     } catch (e) {
-        res.status(500).json({ success: false, message: "MAINFRAME_OFFLINE" });
+        res.status(500).json({ success: false, message: "DATABASE_ERROR" });
     }
 });
 
