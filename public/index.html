@@ -4,126 +4,208 @@
     <meta charset="UTF-8">
     <title>NEWTON OS // TSC GATEWAY</title>
     <style>
-        :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+        /* --- ESTÉTICA NEWTON OS --- */
+        :root { 
+            --bg: #89937a; 
+            --ink: #2b3323; 
+            --paper: #c8d1c0; 
+            --border: #2b3323; 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Courier New', monospace; }
+        body { background: #0f0f0f; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; color: var(--ink); }
+        
+        /* Scanlines TV */
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9999; }
-        .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: relative; padding: 20px; }
+
+        /* Telas */
+        .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; position: relative; background: var(--bg); }
         .full-screen.active { display: flex; }
         .center-flex { justify-content: center; align-items: center; }
 
-        @keyframes ink-spread { 0% { clip-path: circle(0% at 50% 0%); opacity: 0; } 100% { clip-path: circle(150% at 50% 0%); opacity: 1; } }
-        .window.opening { animation: ink-spread 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        @keyframes handwrite { 0% { opacity: 0; transform: translateX(-5px); } 100% { opacity: 1; transform: translateX(0); } }
+        /* Janelas e UI */
+        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); }
+        .win-header { background: var(--border); color: var(--bg); padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .win-body { padding: 20px; }
+
+        /* Inputs Manuscritos */
+        input, select { background: transparent; border: none; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-weight: bold; outline: none; margin-bottom: 10px; color: var(--ink); font-size: 16px; }
+        @keyframes handwrite { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
         input { animation: handwrite 0.3s ease-out; }
 
-        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
-        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; font-weight: bold; display: flex; justify-content: space-between; border-bottom: 2px solid var(--border); }
-        .win-body { padding: 15px; overflow-y: auto; color: var(--ink); }
-        input, select, textarea { background: transparent; border: none; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-family: inherit; font-weight: bold; outline: none; margin-bottom: 10px; color: var(--ink); }
-        input:focus { border-bottom-width: 3px; }
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); margin-right: 5px; text-transform: uppercase; font-size: 11px; }
+        /* Botões Newton */
+        .os-btn { 
+            background: var(--paper); 
+            border: 2px solid var(--border); 
+            padding: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 3px 3px 0 var(--border); 
+            color: var(--ink); 
+            text-transform: uppercase; 
+            font-size: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 5px;
+        }
         .os-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border); }
-        .os-btn.danger { border-color: #550000; color: #550000; }
-        .os-btn.small { padding: 2px 6px; box-shadow: 2px 2px 0 var(--border); }
-        .hidden { display: none !important; }
+        .os-btn.danger { border-color: #8b0000; color: #8b0000; }
 
-        /* ADMIN STYLES */
-        .adm-container { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; height: 100%; }
-        .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .adm-title { background: var(--border); color: var(--bg); padding: 5px; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; }
-        .adm-content { padding: 10px; overflow-y: auto; flex: 1; font-size: 11px; }
-        .user-row { padding: 8px; border-bottom: 1px dashed var(--border); display: flex; justify-content: space-between; align-items: center; }
+        /* Icones e Assets */
+        .icon-btn { cursor: pointer; text-align: center; }
+        .icon-btn img { margin-bottom: 2px; }
+        .dock { position: absolute; bottom: 0; width: 100%; height: 40px; background: url('assets/image-dock_gradient_horizontal-40x46.png'); background-size: cover; border-top: 2px solid var(--border); display: flex; align-items: center; justify-content: space-around; }
+
+        /* Efeitos de Boot */
+        @keyframes glitch-anim { 
+            0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 1px); }
+            100% { clip-path: inset(40% 0 60% 0); transform: translate(1px, -1px); }
+        }
+        .glitch img { animation: glitch-anim 0.2s infinite; }
+
+        /* Admin Panel */
+        .adm-grid { display: grid; grid-template-columns: 200px 1fr 200px; grid-template-rows: 1fr 1fr; gap: 10px; padding: 10px; height: calc(100% - 30px); }
+        .adm-box { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .adm-head { background: var(--border); color: var(--bg); padding: 3px 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .adm-content { padding: 5px; overflow-y: auto; flex: 1; font-size: 11px; }
+        
+        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 4px; border-bottom: 1px dashed var(--border); }
         .user-row:hover { background: rgba(0,0,0,0.05); }
-        .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; border: 1px solid var(--ink); }
-        .online { background: #0f0; } .offline { background: transparent; } .frozen { background: #f00; }
+        .status-led { width: 6px; height: 6px; border-radius: 50%; display: inline-block; border: 1px solid var(--ink); margin-right: 5px; }
+        .on { background: #0f0; } .off { background: #ccc; } .frz { background: #f00; }
 
-        /* MOOD GRID */
-        .mood-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 5px; margin-bottom: 10px; border: 1px solid var(--border); padding: 5px; height: 100px; overflow-y: auto; }
-        .mood-item { width: 100%; aspect-ratio: 1; border: 1px solid var(--border); cursor: pointer; display: flex; justify-content: center; align-items: center; overflow: hidden; opacity: 0.6; transition: 0.2s; }
-        .mood-item:hover { opacity: 1; transform: scale(1.1); }
-        .mood-item.selected { opacity: 1; border: 2px solid var(--ink); box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        .mood-item img { width: 100%; height: 100%; object-fit: contain; }
+        .mood-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin: 5px 0; }
+        .mood-item { border: 1px solid var(--border); cursor: pointer; padding: 2px; text-align: center; }
+        .mood-item:hover, .mood-item.selected { background: var(--border); }
+        .mood-item img { width: 30px; height: 30px; object-fit: contain; }
 
-        .mascot-overlay { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: flex-end; gap: 15px; z-index: 9999; animation: slideIn 0.3s; }
-        .mascot-msg { background: var(--paper); color: var(--ink); padding: 15px; border: 2px solid var(--border); max-width: 250px; box-shadow: 5px 5px 0 rgba(0,0,0,0.2); font-weight: bold; font-size: 12px; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        /* Mascote */
+        .mascot-overlay { position: fixed; bottom: 50px; right: 20px; display: flex; align-items: flex-end; gap: 10px; z-index: 9999; animation: slideUp 0.3s; }
+        .bubble { background: var(--paper); border: 2px solid var(--border); padding: 10px; border-radius: 8px 8px 0 8px; max-width: 200px; font-size: 12px; box-shadow: 4px 4px 0 rgba(0,0,0,0.2); }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
 
-    <div id="boot-screen" class="full-screen active center-flex" style="background:#1a1a1a;">
-        <img src="obunto/normal.png" width="80" style="filter:grayscale(1) contrast(1.2);">
-        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:12px;">SYSTEM_INITIALIZATION...</div>
+    <div id="boot-1" class="full-screen active center-flex" style="background:#111;">
+        <div class="glitch">
+            <img src="obunto/normal.png" width="100" style="filter: grayscale(1) invert(1);">
+        </div>
+        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:14px; letter-spacing: 2px;">
+            SYSTEM WAKE UP...
+        </div>
+    </div>
+
+    <div id="boot-2" class="full-screen center-flex">
+        <div style="width:300px; text-align:center;">
+            <h2 style="margin-bottom:20px; text-decoration: underline;">TSC MAINFRAME v5.0</h2>
+            <div style="text-align:left; font-size:11px; line-height:1.8; margin-bottom:20px;">
+                > MOUNTING SECURE VOLUME.....OK<br>
+                > LOADING NEWTON EMULATION...OK<br>
+                > CHECKING NETWORK...........<span id="net-stat">WAIT</span>
+            </div>
+            <div style="border:2px solid var(--border); height:20px; padding:2px;">
+                <div id="boot-bar" style="height:100%; background:var(--ink); width:0%;"></div>
+            </div>
+        </div>
     </div>
 
     <div id="login-screen" class="full-screen center-flex">
-        <div class="window opening" style="width:320px;">
-            <div class="win-header">SECURE_GATEWAY</div>
+        <div class="window" style="width:320px;">
+            <div class="win-header">
+                <span>SECURE GATEWAY</span>
+                <img src="assets/button-close-17x17.png" style="opacity:0.5;">
+            </div>
             <div class="win-body">
-                <div>
-                    <p style="font-size:11px; margin-bottom:5px;">PERSONNEL ID:</p>
-                    <input type="text" id="inpId" placeholder="ENTER ID HERE...">
-                    <button class="os-btn" onclick="directLogin()" style="width:100%">ACCESS SYSTEM</button>
+                <div style="text-align:center; margin-bottom:15px;">
+                    <img src="assets/icon-large-freeze-27x26.png" width="40" style="opacity:0.8;">
                 </div>
-                <div id="loginStatus" style="text-align:center; margin-top:15px; font-size:10px; color:var(--danger);"></div>
+                <p style="font-size:11px; font-weight:bold; margin-bottom:5px;">PERSONNEL ID:</p>
+                <input type="text" id="inpId" placeholder="ENTER ID..." autocomplete="off">
+                
+                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">
+                    <img src="assets/icon-small-arrow_up-18x15.png" width="12"> ACCESS SYSTEM
+                </button>
+                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#8b0000; height:15px;"></div>
             </div>
         </div>
     </div>
 
     <div id="desktop-screen" class="full-screen">
-        <div class="window opening" style="position:absolute; top:30px; left:30px; width:220px;">
-            <div class="win-header">PERSONNEL_FILE</div>
-            <div class="win-body" style="text-align:center;">
-                <img id="userAvatar" width="80" style="border:2px solid var(--border); margin-bottom:10px;">
-                <h3 id="userName" style="text-transform:uppercase;">User</h3>
-                <p id="userId" style="font-size:10px; margin-top:5px;"></p>
-                <p id="userRank" style="font-size:10px; margin-top:2px; font-weight:bold;"></p>
+        <div style="padding:20px; display:grid; grid-template-columns: repeat(auto-fill, 80px); gap:20px;">
+            <div class="icon-btn">
+                <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); background:var(--paper); padding:5px;"><br>
+                <span style="font-size:11px; font-weight:bold;">PERFIL</span>
+            </div>
+            <div class="icon-btn">
+                <img src="assets/icon-large-notes-17x22.png" width="35"><br>
+                <span style="font-size:11px; font-weight:bold;">NOTES</span>
             </div>
         </div>
-        <div style="position:absolute; bottom:0; left:0; width:100%; background:var(--paper); border-top:2px solid var(--border); padding:5px 10px; font-size:11px; display:flex; justify-content:space-between;">
-            <span>TSC_INTRANET_v5.0</span>
-            <span id="clock">00:00</span>
+
+        <div class="window" style="position:absolute; top:50px; left:120px; width:250px;">
+            <div class="win-header">
+                <span>PERSONNEL FILE</span>
+                <img src="assets/button-close-17x17.png" class="icon-btn" onclick="this.closest('.window').style.display='none'">
+            </div>
+            <div class="win-body" style="text-align:center;">
+                <img id="userAvatar" width="80" style="border:2px solid var(--border); padding:2px; margin-bottom:10px;">
+                <h3 id="userName" style="text-transform:uppercase; margin-bottom:5px;">USER</h3>
+                <div style="font-size:10px; border-top:1px dashed var(--border); padding-top:5px;">
+                    ID: <span id="userId"></span><br>
+                    RANK: <span id="userRank"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="dock">
+            <img src="assets/icon-tiny-dock-19x11.png">
+            <span style="font-weight:bold; font-size:12px;">TSC INTRANET</span>
+            <span id="clock" style="font-size:12px;">00:00</span>
         </div>
     </div>
 
     <div id="admin-screen" class="full-screen">
-        <div style="margin-bottom:10px; border-bottom:2px solid var(--border); padding-bottom:5px; display:flex; justify-content:space-between; font-weight:bold;">
-            <span>COMMAND_CONTROL // OBUNTO_CORE</span>
-            <div><button class="os-btn small" onclick="requestRefresh()">REFRESH_DB</button> <span id="admClock">00:00</span></div>
+        <div style="background:var(--paper); border-bottom:2px solid var(--border); padding:5px; display:flex; justify-content:space-between; align-items:center;">
+            <span><img src="assets/icon-tiny-person-13x11.png"> COMMAND CONTROL</span>
+            <button class="os-btn" style="padding:2px 5px;" onclick="refreshDb()">REFRESH</button>
         </div>
-        <div class="adm-container">
-            <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-title">
-                    <span>DATABASE (<span id="userCount">0</span>)</span>
-                    <input type="text" id="searchUser" placeholder="SEARCH..." style="width:100px; margin:0; padding:0 5px; height:15px; font-size:10px; border:none;" onkeyup="filterUsers()">
-                </div>
-                <div class="adm-content" id="userList"></div>
+
+        <div class="adm-grid">
+            <div class="adm-box" style="grid-row: span 2;">
+                <div class="adm-head">DATABASE (<span id="count">0</span>)</div>
+                <div class="adm-content" id="userList">
+                    </div>
             </div>
-            <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-title">PERSONA_INTERFACE</div>
+
+            <div class="adm-box" style="grid-row: span 2;">
+                <div class="adm-head">OBUNTO BROADCAST</div>
                 <div class="adm-content">
-                    <p style="font-size:10px; margin-bottom:3px;">SELECT_AVATAR:</p>
-                    <div id="moodGrid" class="mood-grid"></div>
-                    <p style="font-size:10px; margin-bottom:3px; margin-top:10px;">TARGET:</p>
-                    <select id="bcTarget"><option value="all">GLOBAL_CHANNEL</option></select>
-                    <p style="font-size:10px; margin-bottom:3px;">MESSAGE:</p>
-                    <input type="text" id="bcMsg" placeholder="TYPE MESSAGE...">
-                    <div style="display:flex; margin-top:10px;">
-                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">TRANSMIT</button>
+                    <p style="margin-bottom:5px;">SELECT AVATAR:</p>
+                    <div id="moodGrid" class="mood-grid">
+                        </div>
+                    
+                    <p style="margin-top:10px; margin-bottom:5px;">TARGET:</p>
+                    <select id="bcTarget"><option value="all">ALL UNITS</option></select>
+                    
+                    <input type="text" id="bcMsg" placeholder="MESSAGE...">
+                    
+                    <div style="display:flex; gap:5px;">
+                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button>
                         <button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button>
                     </div>
                 </div>
             </div>
-            <div class="adm-panel">
-                <div class="adm-title">MANUAL_OVERRIDE</div>
+
+            <div class="adm-box">
+                <div class="adm-head">MANUAL OVERRIDE</div>
                 <div class="adm-content">
-                    <p style="font-size:10px; margin-bottom:5px;">TARGET ID:</p>
-                    <input type="text" id="manualId">
+                    <input type="text" id="manualId" placeholder="TARGET ID...">
                     <div style="display:flex; gap:5px;">
-                        <button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">DELETE</button>
-                        <button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">FREEZE</button>
+                        <button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">
+                            <img src="assets/icon-small-delete-14x15.png"> DEL
+                        </button>
+                        <button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">
+                            <img src="assets/icon-tiny-lock-10x12.png"> FRZ
+                        </button>
                     </div>
                 </div>
             </div>
@@ -134,23 +216,43 @@
     <script>
         const socket = io();
         let currentUser = null;
-        let allUsersData = [];
         let selectedMood = 'normal';
+        let allUsers = [];
 
-        const MOOD_LIST = ['normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'];
+        // Lista dos seus arquivos .png na pasta /obunto
+        const MOODS = ['normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'];
 
-        window.onload = () => setTimeout(() => {
-            document.getElementById('boot-screen').classList.remove('active');
-            document.getElementById('login-screen').classList.add('active');
-        }, 2000);
+        // --- SEQUÊNCIA DE BOOT ---
+        window.onload = () => {
+            // 1. Glitch por 3 seg
+            setTimeout(() => {
+                document.getElementById('boot-1').classList.remove('active');
+                document.getElementById('boot-2').classList.add('active');
+                
+                // 2. Barra de progresso por 3 seg
+                let w = 0;
+                const bar = document.getElementById('boot-bar');
+                const i = setInterval(() => {
+                    w += 2; bar.style.width = w + '%';
+                    if(w >= 60) document.getElementById('net-stat').innerText = "OK";
+                    if(w >= 100) {
+                        clearInterval(i);
+                        setTimeout(() => {
+                            document.getElementById('boot-2').classList.remove('active');
+                            document.getElementById('login-screen').classList.add('active');
+                        }, 500);
+                    }
+                }, 30);
+            }, 3000);
+        };
 
-        // --- LOGIN SIMPLIFICADO ---
-        async function directLogin() {
+        // --- LOGIN SEM SENHA ---
+        async function login() {
             const id = document.getElementById('inpId').value.trim();
             if(!id) return;
-            
+
             document.getElementById('loginStatus').innerText = "CONNECTING...";
-            
+
             try {
                 const res = await fetch('/api/login', { 
                     method:'POST', 
@@ -159,127 +261,123 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if(data.success) {
                     currentUser = data.userData;
-
-                    if (currentUser.isAdmin) {
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('admin-screen').classList.add('active');
+                    
+                    // Verifica se é ADMIN (000)
+                    if(currentUser.isAdmin) {
+                        switchScreen('admin-screen');
                         initAdmin();
                     } else {
+                        // Usuário Comum
+                        switchScreen('desktop-screen');
                         document.getElementById('userAvatar').src = currentUser.avatar;
                         document.getElementById('userName').innerText = currentUser.username;
                         document.getElementById('userId').innerText = currentUser.id;
                         document.getElementById('userRank').innerText = currentUser.rank;
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('desktop-screen').classList.add('active');
                         socket.emit('user_login', currentUser);
-                        initUserListeners();
+                        initUser();
                     }
                 } else {
                     document.getElementById('loginStatus').innerText = "DENIED: " + (data.message || "ERROR");
                 }
             } catch(e) {
-                document.getElementById('loginStatus').innerText = "CONNECTION_FAIL";
+                document.getElementById('loginStatus').innerText = "CONNECTION FAILED";
             }
         }
 
-        function initUserListeners() {
-            socket.on('receive_mascot_msg', showMascot);
+        function switchScreen(id) {
+            document.querySelectorAll('.full-screen').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- LÓGICA DO USUÁRIO ---
+        function initUser() {
+            socket.on('receive_mascot_msg', (data) => {
+                const div = document.createElement('div');
+                div.className = 'mascot-overlay';
+                div.innerHTML = `
+                    <div class="bubble">${data.message}</div>
+                    <img src="obunto/${data.mood}.png" width="60" style="border:2px solid var(--border); background:var(--paper);">
+                `;
+                document.body.appendChild(div);
+                setTimeout(() => div.remove(), 6000);
+            });
+
             socket.on('force_disconnect', () => { alert("TERMINATED"); location.reload(); });
-            socket.on('account_frozen', () => { alert("FROZEN"); location.reload(); });
-            socket.on('account_deleted', () => { alert("DELETED"); location.reload(); });
-            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 1000);
+            socket.on('account_frozen', () => { alert("ACCOUNT FROZEN"); location.reload(); });
+            socket.on('account_deleted', () => { alert("ACCOUNT DELETED"); location.reload(); });
+            
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            }, 1000);
         }
 
-        function showMascot(data) {
-            const el = document.createElement('div');
-            el.className = 'mascot-overlay';
-            el.innerHTML = `<img src="obunto/${data.mood || 'normal'}.png" width="60" style="background:#c8d1c0; border:2px solid #2b3323;">
-                            <div class="mascot-msg">${data.message}</div>`;
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 6000);
-        }
-
-        // --- ADMIN ---
+        // --- LÓGICA DO ADMIN ---
         function initAdmin() {
             socket.emit('admin_login');
-            socket.on('users_list', updateAdminTable);
-            renderMoodGrid();
-            setInterval(() => document.getElementById('admClock').innerText = new Date().toLocaleTimeString(), 1000);
-        }
-
-        function renderMoodGrid() {
+            socket.on('users_list', updateList);
+            
+            // Renderiza Grid de Personagens
             const grid = document.getElementById('moodGrid');
             grid.innerHTML = '';
-            MOOD_LIST.forEach(mood => {
-                const btn = document.createElement('div');
-                btn.className = 'mood-item';
-                if(mood === 'normal') btn.classList.add('selected');
-                btn.innerHTML = `<img src="obunto/${mood}.png" onerror="this.style.display='none'; this.parentNode.innerText='${mood.substring(0,3)}'">`;
-                btn.onclick = () => {
-                    document.querySelectorAll('.mood-item').forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    selectedMood = mood;
+            MOODS.forEach(m => {
+                const el = document.createElement('div');
+                el.className = 'mood-item';
+                el.innerHTML = `<img src="obunto/${m}.png" title="${m}">`;
+                el.onclick = () => {
+                    document.querySelectorAll('.mood-item').forEach(x => x.style.background = 'transparent');
+                    el.style.background = 'var(--border)';
+                    selectedMood = m;
                 };
-                grid.appendChild(btn);
+                grid.appendChild(el);
             });
         }
 
-        function requestRefresh() {
-            document.getElementById('userList').innerHTML = '<div style="padding:10px;">FETCHING_DB...</div>';
-            socket.emit('admin_refresh_list');
-        }
-
-        function updateAdminTable(users) {
-            allUsersData = users;
-            renderList(users);
-        }
-
-        function renderList(list) {
+        function updateList(list) {
+            allUsers = list;
             const container = document.getElementById('userList');
-            document.getElementById('userCount').innerText = list.length;
+            document.getElementById('count').innerText = list.length;
             container.innerHTML = '';
+
             list.forEach(u => {
-                const row = document.createElement('div');
-                row.className = 'user-row';
-                let statusClass = u.frozen ? 'frozen' : (u.online ? 'online' : 'offline');
-                row.innerHTML = `
-                    <div style="flex:1;">
-                        <span class="status-dot ${statusClass}"></span>
-                        <b>${u.username}</b> <span style="opacity:0.6; font-size:10px;">[${u.id}]</span>
-                    </div>
+                const div = document.createElement('div');
+                div.className = 'user-row';
+                let stat = u.frozen ? 'frz' : (u.online ? 'on' : 'off');
+                div.innerHTML = `
+                    <div><span class="status-led ${stat}"></span> ${u.username} <span style="opacity:0.5">[${u.id}]</span></div>
                     <div>
-                        ${u.online ? `<button class="os-btn small" onclick="quickAction('kick', '${u.id}')">KICK</button>` : ''}
-                        <button class="os-btn small" onclick="quickAction('freeze', '${u.id}')">${u.frozen ? 'UNFREEZE' : 'FREEZE'}</button>
-                        <button class="os-btn small danger" onclick="quickAction('delete', '${u.id}')">DEL</button>
+                        ${u.online ? `<img src="assets/button-close-17x17.png" style="cursor:pointer" onclick="act('kick','${u.id}')" title="KICK">` : ''}
+                        <img src="assets/icon-tiny-lock-10x12.png" style="cursor:pointer; margin-left:5px;" onclick="act('freeze','${u.id}')" title="FREEZE">
+                        <img src="assets/icon-small-delete-14x15.png" style="cursor:pointer; margin-left:5px;" onclick="act('delete','${u.id}')" title="DELETE">
                     </div>
                 `;
-                container.appendChild(row);
+                container.appendChild(div);
             });
         }
 
-        function filterUsers() {
-            const term = document.getElementById('searchUser').value.toLowerCase();
-            const filtered = allUsersData.filter(u => u.username.toLowerCase().includes(term) || u.id.includes(term));
-            renderList(filtered);
-        }
-
-        function quickAction(action, id) {
-            if(confirm(`CONFIRM: ${action.toUpperCase()} ${id}?`)) socket.emit('admin_'+action, id);
+        function act(action, id) {
+            if(confirm(`${action.toUpperCase()} ${id}?`)) socket.emit('admin_'+action, id);
         }
 
         function manualAction(action) {
             const id = document.getElementById('manualId').value.trim();
-            if(!id) return;
-            quickAction(action, id);
+            if(id) act(action, id);
         }
 
         function sendBc(type) {
             const msg = document.getElementById('bcMsg').value;
-            if(!msg) return;
-            socket.emit('admin_broadcast', { message: msg, type: type, target: 'all', mood: selectedMood });
-            document.getElementById('bcMsg').value = "";
+            const target = document.getElementById('bcTarget').value;
+            if(msg) {
+                socket.emit('admin_broadcast', { message:msg, type:type, target:target, mood:selectedMood });
+                document.getElementById('bcMsg').value = "";
+            }
+        }
+
+        function refreshDb() {
+            document.getElementById('userList').innerHTML = 'LOADING...';
+            socket.emit('admin_refresh_list');
         }
     </script>
 </body>
