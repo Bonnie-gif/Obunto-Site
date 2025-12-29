@@ -2,81 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NEWTON OS // SECURE GATE</title>
+    <title>NEWTON OS // SECURE GATEWAY</title>
     <style>
-        :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; --danger: #571c1c; }
+        :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; --danger: #6b2828; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); overflow: hidden; }
+        body { background: #0f0f0f; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; color: var(--ink); overflow: hidden; }
+        
+        /* EFEITO CRT / SCANLINES */
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; z-index: 9999; pointer-events: none; }
+        
         .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
+        
+        /* TELAS */
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
-        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.15); }
-        .win-header { background: var(--border); color: var(--bg); padding: 8px 12px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
-        .win-body { padding: 30px; }
-        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 8px; width: 100%; margin-bottom: 15px; font-size: 16px; font-family: inherit; }
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 10px; cursor: pointer; font-weight: bold; box-shadow: 4px 4px 0 var(--border); font-family: inherit; }
-        .os-btn:active { transform: translate(2px, 2px); box-shadow: none; }
-        .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
-        .profile-img { width: 140px; height: 140px; border: 2px solid var(--border); background: #9da690; margin-right: 30px; }
-        .group-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; }
-        .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 6px; text-transform: uppercase; }
-        .group-table td { padding: 6px; border-bottom: 1px dashed var(--border); }
-        .hidden { display: none !important; }
-        .os-dock { height: 55px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
+        .center-flex { justify-content: center; align-items: center; }
+
+        /* JANELAS ESTILO NEWTON */
+        .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); transition: all 0.2s; }
+        .win-header { background: var(--border); color: var(--bg); padding: 6px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; letter-spacing: 1px; }
+        .win-body { padding: 25px; }
+
+        /* INPUTS E BOTÕES */
+        input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 8px; width: 100%; margin-bottom: 15px; font-family: inherit; font-size: 16px; font-weight: bold; }
+        input::placeholder { color: rgba(43, 51, 35, 0.5); }
         
-        /* SECURITY MODAL */
-        .sec-msg { font-size: 11px; margin-bottom: 15px; font-weight: bold; }
-        .mode-create .sec-msg { color: var(--ink); }
-        .mode-login .sec-msg { color: var(--danger); }
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 12px; cursor: pointer; font-weight: bold; box-shadow: 4px 4px 0 var(--border); font-family: inherit; text-transform: uppercase; }
+        .os-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--border); }
+        .os-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* MENSAGENS DE SEGURANÇA */
+        .sec-msg { font-size: 11px; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .msg-alert { color: var(--danger); }
+        .msg-ok { color: var(--ink); }
+
+        /* DESKTOP UI */
+        .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
+        .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
+        .profile-img { width: 130px; height: 130px; border: 2px solid var(--border); background: #9da690; margin-right: 25px; image-rendering: pixelated; }
+        .group-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
+        .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 5px; }
+        .group-table td { padding: 5px; border-bottom: 1px dashed var(--border); }
+        .hidden { display: none !important; }
+
+        /* ANIMAÇÕES (GLITCH & BOOT) */
+        @keyframes glitch-anim {
+            0% { clip-path: inset(10% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -1px); }
+            40% { clip-path: inset(30% 0 50% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 40% 0); transform: translate(-1px, 1px); }
+            100% { clip-path: inset(40% 0 60% 0); transform: translate(1px, -1px); }
+        }
+        .glitch-effect { position: relative; animation: glitch-anim 2s infinite linear alternate-reverse; }
+        
+        .boot-bar-container { width: 100%; height: 20px; border: 2px solid var(--border); padding: 2px; margin-top: 10px; }
+        .boot-fill { height: 100%; background: var(--ink); width: 0%; transition: width 0.1s; }
     </style>
 </head>
 <body>
     <div class="scanlines"></div>
     <div class="app-container">
-        
-        <div id="login-screen" class="full-screen active" style="justify-content:center; align-items:center;">
-            <div class="window" style="width:360px;">
-                <div class="win-header"><span>SECURE_GATEWAY</span></div>
+
+        <div id="boot-1" class="full-screen active center-flex" style="background:#111;">
+            <div style="text-align:center;">
+                <img src="obunto/normal.png" width="100" class="glitch-effect" style="filter: grayscale(1) sepia(1) hue-rotate(50deg);">
+                <div style="margin-top:20px; font-size:14px; color:#89937a; font-weight:bold;">
+                    INITIALIZING OBUNTO_CORE<span id="dots-1">...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="boot-2" class="full-screen center-flex" style="gap:20px;">
+            <div style="font-size:20px; font-weight:bold; letter-spacing:2px;">TSC MAINFRAME v5.0</div>
+            <div class="window" style="width:350px;">
+                <div class="win-header"><span>SYSTEM_CHECK</span></div>
+                <div class="win-body" style="font-size:11px; line-height:1.6;">
+                    <div id="boot-log">
+                        > Establishing secure link... OK<br>
+                        > Verifying MongoDB connection... OK<br>
+                        > Loading personnel database... OK
+                    </div>
+                    <div class="boot-bar-container">
+                        <div class="boot-fill" id="boot-progress"></div>
+                    </div>
+                    <div style="text-align:right; margin-top:5px; font-weight:bold;" id="boot-pct">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="login-screen" class="full-screen center-flex">
+            <div class="window" style="width:380px;">
+                <div class="win-header"><span>SECURE_ACCESS_TERMINAL</span></div>
                 <div class="win-body">
                     
-                    <div id="step-1">
-                        <p class="sec-msg">IDENTIFICATION REQUIRED:</p>
-                        <input type="text" id="inpId" placeholder="ROBLOX ID (NUMERIC)">
-                        <button id="btnCheck" class="os-btn" style="width:100%">VERIFY ID</button>
+                    <div id="auth-step-1">
+                        <p class="sec-msg msg-ok">ENTER PERSONNEL ID:</p>
+                        <input type="text" id="inpId" placeholder="ROBLOX ID" autocomplete="off">
+                        <button id="btnCheck" class="os-btn" style="width:100%">VERIFY IDENTITY</button>
                     </div>
 
-                    <div id="step-2" class="hidden">
-                        <p id="sec-status" class="sec-msg">SECURITY CHECK:</p>
-                        <input type="password" id="inpPass" placeholder="ACCESS_CODE">
-                        <button id="btnFinal" class="os-btn" style="width:100%">EXECUTE</button>
-                        <div style="text-align:center; margin-top:10px; font-size:10px; cursor:pointer; text-decoration:underline;" onclick="location.reload()">CANCEL_OPERATION</div>
+                    <div id="auth-step-2" class="hidden">
+                        <p id="auth-msg" class="sec-msg">SECURITY CLEARANCE:</p>
+                        <input type="password" id="inpPass" placeholder="PASSPHRASE" autocomplete="off">
+                        <div style="display:flex; gap:10px;">
+                            <button id="btnBack" class="os-btn" style="width:30%">BACK</button>
+                            <button id="btnFinal" class="os-btn" style="width:70%">ACCESS</button>
+                        </div>
                     </div>
 
-                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:15px; opacity:0.7;">SYSTEM STANDBY</div>
+                    <div id="statusMsg" style="text-align:center; font-size:10px; margin-top:15px; opacity:0.6;">SYSTEM READY</div>
                 </div>
             </div>
         </div>
 
         <div id="desktop-screen" class="full-screen">
-            <div class="top-bar"><span>TSC_NETWORK_v5.0</span><span id="clock">00:00</span></div>
-            <div style="flex:1; padding:30px;">
-                <div onclick="document.getElementById('p-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
-                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br><span style="font-size:11px; font-weight:bold;">DOSSIER</span>
+            <div class="top-bar"><span>TSC_INTRANET</span><span id="clock">00:00</span></div>
+            <div style="flex:1; padding:30px; position:relative;">
+                
+                <div onclick="toggleWindow('p-win')" style="cursor:pointer; width:80px; text-align:center;">
+                    <img src="assets/icon-large-owner_info-28x14.png" width="45"><br>
+                    <span style="font-size:11px; font-weight:bold;">DOSSIER</span>
                 </div>
-                <div id="p-win" class="window hidden" style="position:absolute; top:60px; left:60px; width:680px; z-index:100;">
-                    <div class="win-header"><span>PERSONNEL_RECORD</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">[X]</button></div>
-                    <div class="win-body" id="profileData"></div>
-                </div>
-            </div>
-            <div class="os-dock"><img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;"></div>
-        </div>
 
-        <div id="admin-screen" class="full-screen" style="background:#2b3323; color:#89937a;">
-            <div class="top-bar" style="background:transparent; color:#89937a;"><span>CORE_OBUNTO</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">LOGOUT</button></div>
-            <div style="padding:20px;">
-                <textarea id="adminMsg" style="height:100px; width:100%; background:transparent; border:1px solid #89937a; color:#89937a; outline:none; padding:10px;"></textarea>
-                <button id="btnSend" class="os-btn" style="margin-top:10px; width:100%; background:#89937a; color:#2b3323;">TRANSMIT</button>
+                <div id="p-win" class="window hidden" style="position:absolute; top:50px; left:50px; width:650px; z-index:100;">
+                    <div class="win-header">
+                        <span>PERSONNEL_RECORD</span>
+                        <button onclick="toggleWindow('p-win')" style="background:none; border:none; color:inherit; cursor:pointer;">[X]</button>
+                    </div>
+                    <div class="win-body" id="profileData">Loading...</div>
+                </div>
+
+            </div>
+            <div class="os-dock">
+                <img src="assets/icon-tiny-dock-19x11.png" onclick="location.reload()" style="cursor:pointer;" title="REBOOT SYSTEM">
             </div>
         </div>
 
@@ -87,19 +146,52 @@
         const socket = io();
         let currentMode = 'login'; // 'login' ou 'register'
 
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
+        // --- SISTEMA DE BOOT ---
+        window.onload = () => {
+            // Animação dos pontinhos ...
+            let d=0; setInterval(()=>{ d=(d+1)%4; document.getElementById('dots-1').innerText='.'.repeat(d); }, 500);
 
-        // PASSO 1: VERIFICAR ID
+            // Troca da tela 1 para 2 após 3 segundos
+            setTimeout(() => {
+                document.getElementById('boot-1').classList.remove('active');
+                document.getElementById('boot-2').classList.add('active');
+                runBootBar();
+            }, 3000);
+        };
+
+        function runBootBar() {
+            let width = 0;
+            const bar = document.getElementById('boot-progress');
+            const txt = document.getElementById('boot-pct');
+            const int = setInterval(() => {
+                width += Math.random() * 8;
+                if(width > 100) width = 100;
+                bar.style.width = width + '%';
+                txt.innerText = Math.floor(width) + '%';
+                
+                if(width === 100) {
+                    clearInterval(int);
+                    setTimeout(() => {
+                        document.getElementById('boot-2').classList.remove('active');
+                        document.getElementById('login-screen').classList.add('active');
+                    }, 800);
+                }
+            }, 150);
+        }
+
+        // --- LÓGICA DE LOGIN ---
+        
+        // Passo 1: Verificar ID
         document.getElementById('btnCheck').onclick = async () => {
             const id = document.getElementById('inpId').value.trim();
-            const status = document.getElementById('loginStatus');
-            if(!id) return;
-
-            status.innerText = "CHECKING REGISTRY...";
+            const status = document.getElementById('statusMsg');
             
-            // Bypass para o Admin
+            if(!id) return;
+            status.innerText = "SEARCHING DATABASE...";
+
+            // Admin Bypass
             if(id === "000") {
-                setupStep2("login", "CORE ACCESS REQUIRED:");
+                setupAuth("login", "⚠ MAINFRAME ACCESS // ENTER KEY:", true);
                 return;
             }
 
@@ -111,33 +203,39 @@
                 });
                 const data = await res.json();
 
-                if (data.registered) {
-                    setupStep2("login", "⚠ SECURE LOGIN // ENTER PASSWORD:");
+                if(data.registered) {
+                    setupAuth("login", "⚠ SECURE LOGIN // ENTER PASSWORD:", true);
                 } else {
-                    setupStep2("register", "★ NEW RECRUIT // CREATE PASSWORD:");
+                    setupAuth("register", "★ NEW RECRUIT // CREATE PASSWORD:", false);
                 }
-                status.innerText = "WAITING FOR INPUT...";
-            } catch(e) { status.innerText = "CONNECTION_FAIL"; }
+                status.innerText = "WAITING FOR CREDENTIALS...";
+            } catch(e) { status.innerText = "CONNECTION ERROR"; }
         };
 
-        function setupStep2(mode, msg) {
+        function setupAuth(mode, msg, isAlert) {
             currentMode = mode;
-            document.getElementById('step-1').classList.add('hidden');
-            document.getElementById('step-2').classList.remove('hidden');
-            document.getElementById('sec-status').innerText = msg;
+            document.getElementById('auth-step-1').classList.add('hidden');
+            document.getElementById('auth-step-2').classList.remove('hidden');
             
-            // Muda a cor do texto para indicar perigo/cuidado
-            const body = document.querySelector('.window');
-            if(mode === 'login') {
-                document.getElementById('sec-status').style.color = "#8f2f2f"; // Vermelho escuro
-            }
+            const msgEl = document.getElementById('auth-msg');
+            msgEl.innerText = msg;
+            msgEl.className = isAlert ? "sec-msg msg-alert" : "sec-msg msg-ok";
+            
+            document.getElementById('btnFinal').innerText = mode === 'register' ? "REGISTER" : "ACCESS";
         }
 
-        // PASSO 2: LOGIN OU REGISTRO
+        document.getElementById('btnBack').onclick = () => {
+            document.getElementById('auth-step-2').classList.add('hidden');
+            document.getElementById('auth-step-1').classList.remove('hidden');
+            document.getElementById('inpPass').value = "";
+            document.getElementById('statusMsg').innerText = "SYSTEM READY";
+        };
+
+        // Passo 2: Finalizar
         document.getElementById('btnFinal').onclick = async () => {
             const id = document.getElementById('inpId').value.trim();
             const pass = document.getElementById('inpPass').value.trim();
-            const status = document.getElementById('loginStatus');
+            const status = document.getElementById('statusMsg');
 
             if(!pass) return;
             status.innerText = "PROCESSING...";
@@ -154,30 +252,24 @@
 
                 if(currentMode === 'register') {
                     if(data.success) {
-                        alert("REGISTRATION COMPLETE. PLEASE LOGIN.");
+                        alert("ID REGISTERED SUCCESSFULLY. PLEASE LOGIN.");
                         location.reload();
-                    } else {
-                        status.innerText = "REGISTRATION FAILED";
-                    }
+                    } else { status.innerText = "REGISTRATION FAILED: ID TAKEN"; }
                 } else {
-                    // MODO LOGIN
-                    if (data.success) {
+                    // LOGIN SUCESSO
+                    if(data.success) {
                         document.getElementById('login-screen').classList.remove('active');
-                        if (data.userData.id === "000") {
-                            document.getElementById('admin-screen').classList.add('active');
-                        } else {
-                            loadDesktop(data.userData);
-                        }
-                    } else { 
-                        status.innerText = "ACCESS DENIED: INVALID CREDENTIALS"; 
+                        document.getElementById('desktop-screen').classList.add('active');
+                        renderProfile(data.userData);
+                    } else {
+                        status.innerText = "ACCESS DENIED: " + (data.message || "INVALID");
                         document.getElementById('inpPass').value = "";
                     }
                 }
-            } catch(e) { status.innerText = "SYSTEM ERROR"; }
+            } catch(e) { status.innerText = "SYSTEM CRITICAL ERROR"; }
         };
 
-        function loadDesktop(u) {
-            document.getElementById('desktop-screen').classList.add('active');
+        function renderProfile(u) {
             let table = `<table class="group-table"><tr><th>TSC_DIVISION</th><th>RANK_STATUS</th></tr>`;
             u.affiliations.forEach(g => { table += `<tr><td>${g.name}</td><td>${g.role}</td></tr>`; });
             table += `</table>`;
@@ -192,15 +284,16 @@
                     </div>
                 </div>
                 <div>
-                    <p style="font-size:10px; font-weight:bold; letter-spacing:1px; text-decoration:underline;">AUTHORIZED_TSC_AFFILIATIONS:</p>
+                    <p style="font-size:10px; font-weight:bold; letter-spacing:1px; text-decoration:underline;">AUTHORIZED_AFFILIATIONS:</p>
                     ${table}
                 </div>`;
         }
 
-        document.getElementById('btnSend')?.addEventListener('click', () => {
-            const t = document.getElementById('adminMsg').value;
-            if(t) { socket.emit('mascot_broadcast', { mood:'normal', text:t }); document.getElementById('adminMsg').value = ""; }
-        });
+        function toggleWindow(id) {
+            document.getElementById(id).classList.toggle('hidden');
+        }
+
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }, 1000);
     </script>
 </body>
 </html>
