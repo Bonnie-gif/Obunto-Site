@@ -7,19 +7,22 @@
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
         body { background: #1a1a1a; height: 100vh; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; }
-        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
         .app-container { width: 100%; height: 100%; background: var(--bg); display: flex; flex-direction: column; position: relative; }
+        .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; padding: 20px; }
         .active { display: flex; }
         .hidden { display: none !important; }
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.2); }
-        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; }
+        .win-header { background: var(--border); color: var(--bg); padding: 5px 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; }
         .win-body { padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         input { background: transparent; border: none; border-bottom: 2px solid var(--border); color: var(--ink); outline: none; padding: 5px; width: 100%; }
         .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 8px; cursor: pointer; font-weight: bold; box-shadow: 3px 3px 0 var(--border); }
         .top-bar { height: 35px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; font-size: 12px; }
+        .profile-img { width: 120px; height: 120px; border: 2px solid var(--border); background: #9da690; margin-right: 20px; }
+        .group-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
+        .group-table th { text-align: left; border-bottom: 2px solid var(--border); padding: 4px; }
+        .group-table td { padding: 4px; border-bottom: 1px dashed var(--border); }
         .os-dock { height: 50px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; margin-top: auto; }
-        .profile-img { width: 100px; height: 100px; border: 2px solid var(--border); background: #9da690; }
     </style>
 </head>
 <body>
@@ -32,7 +35,7 @@
                     <input type="text" id="inpId" placeholder="USER ID">
                     <input type="text" id="inpUser" placeholder="USERNAME">
                     <button id="btnLogin" class="os-btn">ACCESS</button>
-                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:5px;">AWAITING...</div>
+                    <div id="loginStatus" style="text-align:center; font-size:10px; margin-top:5px;">READY</div>
                 </div>
             </div>
         </div>
@@ -43,8 +46,8 @@
                 <div onclick="document.getElementById('p-win').classList.toggle('hidden')" style="cursor:pointer; width:80px; text-align:center;">
                     <img src="assets/icon-large-owner_info-28x14.png" width="40"><br><span style="font-size:12px;">PROFILE</span>
                 </div>
-                <div id="p-win" class="window hidden" style="position:absolute; top:80px; left:40px; width:400px;">
-                    <div class="win-header"><span>PERSONNEL_FILE</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
+                <div id="p-win" class="window hidden" style="position:absolute; top:40px; left:40px; width:550px;">
+                    <div class="win-header"><span>PERSONNEL_DOSSIER</span><button onclick="document.getElementById('p-win').classList.add('hidden')" style="background:none; border:none; color:inherit; cursor:pointer;">X</button></div>
                     <div class="win-body" id="profileData"></div>
                 </div>
             </div>
@@ -52,9 +55,8 @@
         </div>
 
         <div id="admin-screen" class="full-screen" style="background:#2b3323; color:#89937a;">
-            <div class="top-bar" style="background:transparent; color:#89937a;"><span>OBUNTO_CORE</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">EXIT</button></div>
+            <div class="top-bar" style="background:transparent; color:#89937a;"><span>CORE_OBUNTO</span><button onclick="location.reload()" style="color:#89937a; background:none; border:1px solid #89937a;">LOGOUT</button></div>
             <div style="padding:20px;">
-                <p>BROADCAST:</p>
                 <textarea id="adminMsg" style="height:100px; width:100%; background:transparent; border:1px solid #89937a; color:#89937a; outline:none; padding:10px;"></textarea>
                 <button id="btnSend" class="os-btn" style="margin-top:10px; width:100%; background:#89937a; color:#2b3323;">TRANSMIT</button>
             </div>
@@ -81,15 +83,24 @@
                     document.getElementById('admin-screen').classList.add('active');
                 } else {
                     document.getElementById('desktop-screen').classList.add('active');
+                    const u = data.userData;
+                    let table = `<table class="group-table"><tr><th>GROUP</th><th>ROLE</th><th>DIVISION</th></tr>`;
+                    u.groups.forEach(g => { table += `<tr><td>${g.name}</td><td>${g.role}</td><td>${g.division}</td></tr>`; });
+                    table += `</table>`;
+
                     document.getElementById('profileData').innerHTML = `
-                        <div style="display:flex; gap:20px; align-items:center;">
-                            <img src="${data.userData.avatar}" class="profile-img" onerror="this.src='https://via.placeholder.com/100'">
-                            <div style="font-size:13px;">
-                                <p><b>IDENTITY:</b> ${data.userData.username}</p>
-                                <p><b>DEPT:</b> ${data.userData.dept}</p>
-                                <p><b>RANK:</b> ${data.userData.rank}</p>
-                                <p><b>CLEARANCE:</b> ${data.userData.clearance}</p>
+                        <div style="display:flex; margin-bottom:15px;">
+                            <img src="${u.avatar}" class="profile-img">
+                            <div style="font-size:12px; line-height:1.8;">
+                                <p><b>REGISTRY ID:</b> ${u.id}</p>
+                                <p><b>IDENTITY:</b> ${u.username}</p>
+                                <p><b>PRIMARY ASSIGNMENT:</b> ${u.rank}</p>
+                                <p><b>CLEARANCE LEVEL:</b> ${u.clearance}</p>
                             </div>
+                        </div>
+                        <div style="border-top:1px solid var(--border); padding-top:10px;">
+                            <p style="font-size:10px; font-weight:bold;">AUTHORIZED GROUP AFFILIATIONS:</p>
+                            ${table}
                         </div>`;
                 }
             } else { status.innerText = "DENIED"; }
