@@ -1,0 +1,45 @@
+:root {
+    --bg: #89937a;
+    --ink: #2b3323;
+    --paper: #c8d1c0;
+    --border: #2b3323;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+body { background: #000; height: 100vh; font-family: sans-serif; overflow: hidden; color: var(--ink); }
+
+img { image-rendering: pixelated; }
+
+.scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.05) 50%); background-size: 100% 4px; z-index: 1000; pointer-events: none; }
+
+.full-screen { width: 100%; height: 100%; background: var(--bg); position: absolute; display: none; flex-direction: column; }
+.active { display: flex; }
+.hidden { display: none !important; }
+
+.window { background: var(--paper); border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0,0,0,0.15); display: flex; flex-direction: column; }
+.win-header { background: var(--border); color: var(--bg); padding: 4px 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+.win-header img { filter: invert(1); width: 12px; }
+
+.login-window { width: 300px; margin: auto; }
+.win-body { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+
+input { background: transparent; border: none; border-bottom: 2px solid var(--border); padding: 5px; color: var(--ink); outline: none; }
+
+.os-btn { background: var(--paper); border: 2px solid var(--border); padding: 6px; cursor: pointer; box-shadow: 3px 3px 0 var(--border); }
+.os-btn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+.top-bar { height: 32px; background: var(--paper); border-bottom: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 10px; }
+.bar-left { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+
+.desktop-content { flex: 1; padding: 20px; position: relative; }
+.icon-item { width: 70px; display: flex; flex-direction: column; align-items: center; cursor: pointer; text-align: center; }
+.profile-pos { position: absolute; top: 50px; left: 50px; width: 350px; }
+
+.os-dock { height: 45px; background: var(--paper); border-top: 2px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 20px; }
+
+.obunto-box { position: fixed; bottom: 60px; right: 20px; display: flex; align-items: flex-end; gap: 12px; z-index: 2000; animation: slideUp 0.4s ease-out; }
+.obunto-avatar { width: 70px; height: 70px; background: var(--paper); border: 2px solid var(--border); padding: 4px; }
+.obunto-speech { background: var(--border); color: var(--paper); padding: 12px; border-radius: 8px 8px 0 8px; min-width: 200px; font-size: 14px; }
+
+@keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
