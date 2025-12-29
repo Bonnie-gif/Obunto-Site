@@ -28,17 +28,13 @@ app.post('/api/login', async (req, res) => {
     try {
         const userRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         if (userRes.data.name.toLowerCase() !== usernameInput.toLowerCase()) {
-            return res.status(401).json({ success: false, message: "SECURITY_MISMATCH" });
+            return res.status(401).json({ success: false, message: "IDENTITY_MISMATCH" });
         }
         res.json({ 
             success: true, 
             userData: {
-                id: userId,
-                username: userRes.data.name,
-                display: userRes.data.displayName,
-                department: "PERSONNEL",
-                rank: "EMPLOYEE",
-                clearance: 1,
+                id: userId, username: userRes.data.name, display: userRes.data.displayName,
+                department: "PERSONNEL", rank: "EMPLOYEE", clearance: 1,
                 avatar: `https://www.roblox.com/headshot-thumbnail/image?userId=${userId}&width=420&height=420&format=png`
             }
         });
