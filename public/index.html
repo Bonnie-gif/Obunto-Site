@@ -2,48 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>NEWTON OS // TSC GATEWAY</title>
+    <title>NEWTON OS</title>
     <style>
         :root { --bg: #89937a; --ink: #2b3323; --paper: #c8d1c0; --border: #2b3323; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Courier New', monospace; }
         body { background: #0f0f0f; height: 100vh; overflow: hidden; display: flex; justify-content: center; align-items: center; color: var(--ink); }
         .scanlines { position: fixed; inset: 0; background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.1) 50%); background-size: 100% 4px; pointer-events: none; z-index: 9999; }
-        
         .full-screen { width: 100%; height: 100%; display: none; flex-direction: column; background: var(--bg); position: relative; padding: 20px; }
         .full-screen.active { display: flex; }
         .center-flex { justify-content: center; align-items: center; }
 
-        /* ESTILO NEWTON */
+        /* ESTILO JANELAS */
         .window { background: var(--paper); border: 2px solid var(--border); box-shadow: 8px 8px 0 rgba(0,0,0,0.2); display: flex; flex-direction: column; }
         .win-header { background: var(--border); color: var(--bg); padding: 4px 8px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
         .win-body { padding: 15px; overflow-y: auto; }
 
+        /* INPUTS & BOTS */
         input, select { background: transparent; border: none; border-bottom: 2px solid var(--border); width: 100%; padding: 5px; font-weight: bold; outline: none; margin-bottom: 10px; color: var(--ink); font-size: 16px; }
-        
-        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 6px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11px; }
+        .os-btn { background: var(--paper); border: 2px solid var(--border); padding: 6px; font-weight: bold; cursor: pointer; box-shadow: 3px 3px 0 var(--border); color: var(--ink); font-size: 11px; display: flex; align-items: center; justify-content: center; gap:5px; }
         .os-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--border); }
-        
-        /* ADMIN UI (USANDO SEUS ASSETS) */
-        .adm-grid { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; height: 100%; }
-        .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; }
-        .adm-head { background: var(--border); color: var(--bg); padding: 3px 6px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-        .adm-content { padding: 8px; overflow-y: auto; flex: 1; }
+        .icon-btn { cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .icon-btn img { transition: transform 0.1s; }
+        .icon-btn:active img { transform: scale(0.95); }
 
-        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 4px; border-bottom: 1px dashed var(--border); font-size: 11px; }
-        .user-row:hover { background: rgba(0,0,0,0.05); }
-        .status-led { width: 6px; height: 6px; border-radius: 50%; display: inline-block; border: 1px solid var(--ink); margin-right: 5px; }
+        /* ADMIN */
+        .adm-container { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; height: 100%; }
+        .adm-panel { background: var(--paper); border: 2px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        .adm-head { background: var(--border); color: var(--bg); padding: 4px; font-size: 10px; font-weight: bold; }
+        .user-row { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px dashed var(--border); font-size: 11px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; border: 1px solid var(--ink); }
         .on { background: #0f0; } .off { background: transparent; } .frz { background: #f00; }
-
-        /* MOOD SELECTOR */
-        .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 10px; border: 1px solid var(--border); padding: 4px; height: 80px; overflow-y: auto; }
-        .mood-item { border: 1px solid var(--border); cursor: pointer; text-align: center; padding: 2px; }
+        
+        .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 5px; height: 80px; overflow-y: auto; }
+        .mood-item { border: 1px solid var(--border); padding: 2px; cursor: pointer; text-align: center; }
         .mood-item:hover, .mood-item.selected { background: var(--border); }
         .mood-item img { width: 100%; height: 100%; object-fit: contain; }
 
         /* MASCOTE */
-        .mascot-overlay { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: flex-end; gap: 15px; z-index: 9999; animation: slideIn 0.3s; }
-        .mascot-msg { background: var(--paper); color: var(--ink); padding: 15px; border: 2px solid var(--border); max-width: 250px; box-shadow: 5px 5px 0 rgba(0,0,0,0.2); font-weight: bold; font-size: 12px; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        .mascot-overlay { position: fixed; bottom: 40px; right: 20px; display: flex; align-items: flex-end; gap: 10px; z-index: 9999; animation: slideIn 0.3s; }
+        .mascot-msg { background: var(--paper); color: var(--ink); padding: 10px; border: 2px solid var(--border); max-width: 200px; font-weight: bold; font-size: 12px; box-shadow: 4px 4px 0 rgba(0,0,0,0.2); }
+        @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -51,114 +49,104 @@
 
     <div id="boot-1" class="full-screen active center-flex" style="background:#111;">
         <img src="obunto/normal.png" width="100" style="filter: grayscale(1) invert(1);">
-        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:14px; letter-spacing: 2px;">
-            INITIALIZING CORE...
-        </div>
+        <div style="color:#89937a; font-weight:bold; margin-top:20px; font-size:14px; letter-spacing: 2px;">LOADING OS...</div>
     </div>
 
     <div id="boot-2" class="full-screen center-flex">
-        <div class="window" style="width:300px; padding:20px; text-align:center;">
-            <h2 style="margin-bottom:20px; text-decoration: underline;">TSC MAINFRAME v5.0</h2>
-            <div style="text-align:left; font-size:11px; line-height:1.8;">
-                > VERIFYING SIGNATURE........OK<br>
-                > LOADING EXTENSIONS.........OK<br>
-                > CONNECTING SECURE NET......<span id="net-stat">...</span>
-            </div>
-            <div style="border:2px solid var(--border); height:15px; margin-top:15px;">
-                <div id="boot-bar" style="height:100%; background:var(--ink); width:0%;"></div>
+        <div class="window" style="width:280px; text-align:center;">
+            <div class="win-header">SYSTEM CHECK</div>
+            <div class="win-body" style="font-size:11px; line-height:1.8; text-align:left;">
+                > MEMORY..........OK<br>> NETWORK.........<span id="net-stat">...</span><br>> ASSETS..........OK
+                <div style="border:2px solid var(--border); height:15px; margin-top:10px;"><div id="boot-bar" style="height:100%; background:var(--ink); width:0%;"></div></div>
             </div>
         </div>
     </div>
 
     <div id="login-screen" class="full-screen center-flex">
-        <div class="window" style="width:320px;">
-            <div class="win-header">
-                <span>SECURE GATEWAY</span>
-                <img src="assets/button-close-17x17.png" style="opacity:0.5;">
-            </div>
+        <div class="window" style="width:300px;">
+            <div class="win-header"><span>SECURE ACCESS</span><img src="assets/button-close-17x17.png"></div>
             <div class="win-body">
-                <div style="text-align:center; margin-bottom:15px;">
-                    <img src="assets/icon-large-freeze-27x26.png" width="40">
-                </div>
-                <p style="font-size:11px; margin-bottom:5px;">PERSONNEL ID:</p>
+                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x26.png"></div>
+                <p style="font-size:11px; font-weight:bold;">PERSONNEL ID:</p>
                 <input type="text" id="inpId" placeholder="ENTER ID...">
-                
-                <button class="os-btn" onclick="directLogin()" style="width:100%; margin-top:15px; justify-content:center;">
-                    <img src="assets/icon-small-arrow_up-18x15.png"> ACCESS SYSTEM
+                <button class="os-btn" onclick="login()" style="width:100%; margin-top:10px;">
+                    <img src="assets/icon-small-arrow_up-18x15.png"> ENTER SYSTEM
                 </button>
-                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#8b0000; height:15px;"></div>
+                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#8b0000;"></div>
             </div>
         </div>
     </div>
 
     <div id="desktop-screen" class="full-screen">
-        <div class="window" style="position:absolute; top:40px; left:40px; width:220px;">
-            <div class="win-header">
-                <span>PERSONNEL FILE</span>
-                <img src="assets/button-close-17x17.png" onclick="alert('Access Denied')">
+        <div style="padding:20px; display:flex; flex-direction:column; gap:20px; align-items:flex-start;">
+            <div class="icon-btn" onclick="toggleWin('win-profile')">
+                <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); padding:5px; background:var(--paper);">
+                <span style="font-size:11px; font-weight:bold; background:var(--paper); padding:2px;">DOSSIER</span>
             </div>
-            <div class="win-body" style="text-align:center;">
-                <img id="userAvatar" width="80" style="border:2px solid var(--border); margin-bottom:10px;">
-                <h3 id="userName" style="text-transform:uppercase;">User</h3>
-                <p id="userId" style="font-size:10px;"></p>
-                <p id="userRank" style="font-size:10px; font-weight:bold;"></p>
+            <div class="icon-btn">
+                <img src="assets/icon-large-notes-17x22.png">
+                <span style="font-size:11px; font-weight:bold; background:var(--paper); padding:2px;">LOGS</span>
+            </div>
+            <div class="icon-btn">
+                <img src="assets/icon-large-calls-26x26.png">
+                <span style="font-size:11px; font-weight:bold; background:var(--paper); padding:2px;">COMM</span>
             </div>
         </div>
-        <div style="position:absolute; bottom:0; width:100%; border-top:2px solid var(--border); background:var(--paper); display:flex; align-items:center; padding:5px;">
-            <img src="assets/icon-tiny-dock-19x11.png" style="margin-right:10px;">
-            <span style="font-size:12px; font-weight:bold;">TSC INTRANET</span>
-            <span id="clock" style="margin-left:auto; font-size:12px;">00:00</span>
+
+        <div id="win-profile" class="window" style="position:absolute; top:50px; left:150px; width:260px; display:none;">
+            <div class="win-header">
+                <span>PERSONNEL FILE</span>
+                <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')">
+            </div>
+            <div class="win-body" style="text-align:center;">
+                <img id="userAvatar" width="100" style="border:2px solid var(--border); margin-bottom:10px;">
+                <h3 id="userName" style="text-transform:uppercase;">User</h3>
+                <div style="font-size:11px; margin-top:5px; border-top:1px dashed var(--border); padding-top:5px;">
+                    ID: <span id="userId"></span><br>RANK: <span id="userRank"></span>
+                </div>
+            </div>
+        </div>
+
+        <div style="position:absolute; bottom:0; width:100%; border-top:2px solid var(--border); background:var(--paper); padding:5px; display:flex; justify-content:space-between; align-items:center;">
+            <span><img src="assets/icon-tiny-dock-19x11.png"> TSC INTRANET</span>
+            <span id="clock" style="font-size:12px;">00:00</span>
         </div>
     </div>
 
     <div id="admin-screen" class="full-screen">
-        <div style="margin-bottom:10px; border-bottom:2px solid var(--border); padding-bottom:5px; display:flex; justify-content:space-between; align-items:center;">
-            <span><img src="assets/icon-tiny-person-13x11.png"> <b>COMMAND CONTROL</b></span>
-            <button class="os-btn" onclick="requestRefresh()" style="padding:2px 5px;">
-                <img src="assets/icon-small-rotate_right-13x12.png"> REFRESH
-            </button>
+        <div style="border-bottom:2px solid var(--border); padding:5px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span><img src="assets/icon-tiny-person-13x11.png"> <b>COMMAND</b></span>
+            <button class="os-btn" onclick="refreshList()"><img src="assets/icon-small-rotate_right-13x12.png"> REFRESH</button>
         </div>
 
-        <div class="adm-grid">
+        <div class="adm-container">
             <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-head">
-                    <img src="assets/icon-tiny-group-17x11.png"> DATABASE (<span id="userCount">0</span>)
-                </div>
-                <div class="adm-content" id="userList"></div>
+                <div class="adm-head">DATABASE</div>
+                <div style="padding:10px; overflow-y:auto; flex:1;" id="userList"></div>
             </div>
 
             <div class="adm-panel" style="grid-row: span 2;">
-                <div class="adm-head"><img src="assets/icon-tiny-speaker-9x12.png"> BROADCAST</div>
-                <div class="adm-content">
+                <div class="adm-head">TRANSMISSION</div>
+                <div style="padding:10px; overflow-y:auto; flex:1;">
                     <p style="font-size:10px; margin-bottom:3px;">AVATAR:</p>
                     <div id="moodGrid" class="mood-grid"></div>
-                    
-                    <p style="font-size:10px; margin-bottom:3px; margin-top:5px;">TARGET:</p>
+                    <p style="font-size:10px; margin:5px 0 3px;">TARGET:</p>
                     <select id="bcTarget"><option value="all">GLOBAL</option></select>
-                    
-                    <input type="text" id="bcMsg" placeholder="MESSAGE...">
-                    <div style="display:flex; gap:5px;">
-                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">
-                            <img src="assets/icon-small-print-17x14.png"> SEND
-                        </button>
-                        <button class="os-btn" onclick="sendBc('urgent')" style="flex:1; border-color:#8b0000; color:#8b0000;">
-                            <img src="assets/icon-tiny-alarm-17x10.png"> ALERT
-                        </button>
+                    <input type="text" id="bcMsg" placeholder="MESSAGE..." style="margin-top:5px;">
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <button class="os-btn" onclick="sendBc('normal')" style="flex:1;">SEND</button>
+                        <button class="os-btn danger" onclick="sendBc('urgent')" style="flex:1;">ALERT</button>
                     </div>
                 </div>
             </div>
 
             <div class="adm-panel">
-                <div class="adm-head"><img src="assets/icon-tiny-worksite-11x11.png"> MANUAL OVERRIDE</div>
-                <div class="adm-content">
+                <div class="adm-head">OVERRIDE</div>
+                <div style="padding:10px;">
                     <input type="text" id="manualId" placeholder="TARGET ID...">
-                    <div style="display:flex; gap:5px;">
-                        <button class="os-btn" onclick="manualAction('delete')" style="flex:1; border-color:#8b0000; color:#8b0000;">
-                            <img src="assets/icon-small-delete-14x15.png"> DEL
-                        </button>
-                        <button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">
-                            <img src="assets/icon-tiny-lock-10x12.png"> FRZ
-                        </button>
+                    <div style="display:flex; gap:5px; margin-top:5px;">
+                        <button class="os-btn danger" onclick="manualAction('delete')" style="flex:1;">DEL</button>
+                        <button class="os-btn" onclick="manualAction('freeze')" style="flex:1;">FRZ</button>
                     </div>
                 </div>
             </div>
@@ -170,145 +158,112 @@
         const socket = io();
         let currentUser = null;
         let selectedMood = 'normal';
+        // LISTA DOS SEUS ASSETS DE HUMOR (Nome dos arquivos na pasta /obunto)
         const MOODS = ['normal', 'happy', 'annoyed', 'sad', 'bug', 'werror', 'stare', 'smug', 'suspicious', 'sleeping', 'panic', 'hollow', 'dizzy'];
 
-        // --- BOOT SEQUENCE ---
         window.onload = () => {
             setTimeout(() => {
                 document.getElementById('boot-1').classList.remove('active');
                 document.getElementById('boot-2').classList.add('active');
-                
-                let w = 0; 
-                const bar = document.getElementById('boot-bar');
-                const i = setInterval(() => {
-                    w += 2; bar.style.width = w + '%';
-                    if(w > 70) document.getElementById('net-stat').innerText = "OK";
-                    if(w >= 100) {
-                        clearInterval(i);
-                        setTimeout(() => {
-                            document.getElementById('boot-2').classList.remove('active');
-                            document.getElementById('login-screen').classList.add('active');
-                        }, 500);
-                    }
-                }, 30);
-            }, 3000);
+                let w=0, b=document.getElementById('boot-bar');
+                let i=setInterval(()=>{ w+=4; b.style.width=w+'%'; if(w>100){ clearInterval(i); document.getElementById('net-stat').innerText="OK"; setTimeout(()=>switchScreen('login-screen'),500); } },50);
+            }, 2500);
         };
 
-        // --- LOGIN DIRETO ---
-        async function directLogin() {
+        function switchScreen(id) {
+            document.querySelectorAll('.full-screen').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function toggleWin(id) {
+            const el = document.getElementById(id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        async function login() {
             const id = document.getElementById('inpId').value.trim();
             if(!id) return;
             document.getElementById('loginStatus').innerText = "CONNECTING...";
             
             try {
-                const res = await fetch('/api/login', { 
-                    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) 
-                });
+                const res = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id}) });
                 const data = await res.json();
 
-                if (data.success) {
+                if(data.success) {
                     currentUser = data.userData;
-                    if (currentUser.isAdmin) {
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('admin-screen').classList.add('active');
+                    if(currentUser.isAdmin) {
+                        switchScreen('admin-screen');
                         initAdmin();
                     } else {
+                        switchScreen('desktop-screen');
                         document.getElementById('userAvatar').src = currentUser.avatar;
                         document.getElementById('userName').innerText = currentUser.username;
                         document.getElementById('userId').innerText = currentUser.id;
                         document.getElementById('userRank').innerText = currentUser.rank;
-                        document.getElementById('login-screen').classList.remove('active');
-                        document.getElementById('desktop-screen').classList.add('active');
+                        toggleWin('win-profile'); // Abre perfil automaticamente
                         socket.emit('user_login', currentUser);
                         initUser();
                     }
                 } else {
-                    document.getElementById('loginStatus').innerText = "DENIED: " + (data.message || "ERROR");
+                    document.getElementById('loginStatus').innerText = "DENIED: " + data.message;
                 }
-            } catch(e) {
-                document.getElementById('loginStatus').innerText = "FATAL ERROR. CHECK CONSOLE.";
-            }
+            } catch(e) { document.getElementById('loginStatus').innerText = "FATAL ERROR"; }
         }
 
-        // --- ADMIN (USANDO SEUS PNGs) ---
+        function initUser() {
+            socket.on('receive_mascot', data => {
+                const el = document.createElement('div');
+                el.className = 'mascot-overlay';
+                el.innerHTML = `<div class="mascot-msg">${data.message}</div><img src="obunto/${data.mood}.png" width="60" style="background:#c8d1c0; border:2px solid #2b3323;">`;
+                document.body.appendChild(el);
+                setTimeout(()=>el.remove(), 6000);
+            });
+            socket.on('force_disconnect', () => { alert("DISCONNECTED"); location.reload(); });
+            socket.on('account_frozen', () => { alert("ID FROZEN"); location.reload(); });
+            socket.on('account_deleted', () => { alert("ID DELETED"); location.reload(); });
+            setInterval(()=>document.getElementById('clock').innerText=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}),1000);
+        }
+
         function initAdmin() {
             socket.emit('admin_login');
             socket.on('users_list', renderList);
-            
-            const grid = document.getElementById('moodGrid');
-            grid.innerHTML = '';
+            const g = document.getElementById('moodGrid');
+            g.innerHTML = '';
             MOODS.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'mood-item';
-                div.innerHTML = `<img src="obunto/${m}.png" title="${m}">`;
-                div.onclick = () => {
-                    document.querySelectorAll('.mood-item').forEach(x => x.style.background = 'transparent');
-                    div.style.background = 'var(--border)';
-                    selectedMood = m;
-                }
-                grid.appendChild(div);
+                const d = document.createElement('div');
+                d.className = 'mood-item';
+                d.innerHTML = `<img src="obunto/${m}.png">`;
+                d.onclick = () => { document.querySelectorAll('.mood-item').forEach(x=>x.style.background='transparent'); d.style.background='var(--border)'; selectedMood=m; };
+                g.appendChild(d);
             });
         }
 
         function renderList(list) {
-            const container = document.getElementById('userList');
-            document.getElementById('userCount').innerText = list.length;
-            container.innerHTML = '';
+            const c = document.getElementById('userList');
+            c.innerHTML = '';
             list.forEach(u => {
-                const div = document.createElement('div');
-                div.className = 'user-row';
-                let stat = u.frozen ? 'frz' : (u.online ? 'on' : 'off');
-                div.innerHTML = `
-                    <div><span class="status-led ${stat}"></span> ${u.username} <span style="opacity:0.5">[${u.id}]</span></div>
+                const d = document.createElement('div');
+                d.className = 'user-row';
+                let st = u.frozen ? 'frz' : (u.online ? 'on' : 'off');
+                d.innerHTML = `
+                    <div><span class="status-dot ${st}"></span> ${u.username} <span style="opacity:0.5">[${u.id}]</span></div>
                     <div style="display:flex; gap:5px;">
-                        ${u.online ? `<img src="assets/button-close-17x17.png" style="cursor:pointer" onclick="act('kick','${u.id}')" title="KICK">` : ''}
-                        <img src="assets/icon-tiny-lock-10x12.png" style="cursor:pointer" onclick="act('freeze','${u.id}')" title="FREEZE">
-                        <img src="assets/icon-small-delete-14x15.png" style="cursor:pointer" onclick="act('delete','${u.id}')" title="DELETE">
+                        ${u.online ? `<img src="assets/button-close-17x17.png" style="cursor:pointer" title="KICK" onclick="act('kick','${u.id}')">` : ''}
+                        <img src="assets/icon-tiny-lock-10x12.png" style="cursor:pointer" title="FREEZE" onclick="act('freeze','${u.id}')">
+                        <img src="assets/icon-small-delete-14x15.png" style="cursor:pointer" title="DELETE" onclick="act('delete','${u.id}')">
                     </div>
                 `;
-                container.appendChild(div);
+                c.appendChild(d);
             });
         }
 
-        function act(action, id) {
-            if(confirm(`${action.toUpperCase()} ${id}?`)) socket.emit('admin_'+action, id);
-        }
-
-        function manualAction(action) {
-            const id = document.getElementById('manualId').value.trim();
-            if(id) act(action, id);
-        }
-
+        function act(a, id) { if(confirm(a.toUpperCase()+"?")) socket.emit('admin_'+a, id); }
+        function manualAction(a) { const id = document.getElementById('manualId').value.trim(); if(id) act(a, id); }
+        function refreshList() { socket.emit('admin_refresh'); }
         function sendBc(type) {
             const msg = document.getElementById('bcMsg').value;
-            const target = document.getElementById('bcTarget').value;
-            if(msg) {
-                socket.emit('admin_broadcast', { message:msg, type:type, target:target, mood:selectedMood });
-                document.getElementById('bcMsg').value = "";
-            }
-        }
-
-        function requestRefresh() {
-            document.getElementById('userList').innerHTML = 'LOADING...';
-            socket.emit('admin_refresh_list');
-        }
-
-        // --- USER ---
-        function initUser() {
-            socket.on('receive_mascot_msg', (data) => {
-                const div = document.createElement('div');
-                div.className = 'mascot-overlay';
-                div.innerHTML = `
-                    <div class="mascot-msg">${data.message}</div>
-                    <img src="obunto/${data.mood}.png" width="60" style="border:2px solid var(--border); background:var(--paper);">
-                `;
-                document.body.appendChild(div);
-                setTimeout(() => div.remove(), 6000);
-            });
-            socket.on('force_disconnect', () => { alert("CONNECTION CLOSED"); location.reload(); });
-            socket.on('account_frozen', () => { alert("ID FROZEN"); location.reload(); });
-            socket.on('account_deleted', () => { alert("ID DELETED"); location.reload(); });
-            setInterval(() => document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 1000);
+            const tgt = document.getElementById('bcTarget').value;
+            if(msg) { socket.emit('admin_broadcast', { message:msg, type, target:tgt, mood:selectedMood }); document.getElementById('bcMsg').value=''; }
         }
     </script>
 </body>
