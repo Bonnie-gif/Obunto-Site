@@ -2,31 +2,33 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const axios = require('axios');
-const path = require('path');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: { origin: "*", methods: ["GET", "POST"] }
+});
 
-// --- CONEXÃO BANCO (Opcional para persistência) ---
+app.use(cors());
+app.use(express.json());
+
 const MONGO_URI = process.env.MONGO_URI;
 let isDbConnected = false;
 
 const connectDB = async () => {
-    if (!MONGO_URI) return console.log("⚠️ MODO MEMÓRIA (SEM BANCO)");
+    if (!MONGO_URI) return;
     try { 
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 }); 
         isDbConnected = true;
-        console.log("✅ BANCO ONLINE"); 
+        console.log("DB ONLINE"); 
     } catch (err) { 
-        console.log("⚠️ BANCO OFFLINE (SISTEMA SEGUE FUNCIONANDO)");
         setTimeout(connectDB, 10000); 
     }
 };
 connectDB();
 
-// --- MODELOS ---
 const UserSchema = new mongoose.Schema({
     userId: { type: String, required: true, unique: true },
     createdAt: { type: Date, default: Date.now },
@@ -35,8 +37,6 @@ const UserSchema = new mongoose.Schema({
 let User;
 try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
-// --- MAPA DE DEPARTAMENTOS TSC REAIS ---
-// Adicione/Remova IDs de grupo conforme necessário
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 
     12026513: "MEDICAL_DEPT", 
@@ -44,22 +44,15 @@ const TSC_GROUPS = {
     14159717: "INTELLIGENCE", 
     12026669: "SCIENCE_DIV", 
     12045419: "ENGINEERING", 
-    12022092: "LOGISTICS",
-    // Adicione outros IDs de grupo TSC aqui se houver
+    12022092: "LOGISTICS"
 };
 
-// --- CACHE E SESSÕES ---
 const activeSessions = new Map();
 const USER_CACHE = {}; 
 
-app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
-
-// --- LOGIN COM BUSCA DE RANK REAL ---
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
 
-    // 1. ADMIN MASTER (000)
     if (userId === "000") {
         return res.json({ 
             success: true, 
@@ -68,14 +61,13 @@ app.post('/api/login', async (req, res) => {
                 username: "OBUNTO_CORE", 
                 dept: "MAINFRAME", 
                 rank: "MASTER_ADMIN", 
-                avatar: "obunto/normal.png", // Use uma imagem local ou URL válida
+                avatar: "assets/obunto/normal.png", 
                 isAdmin: true 
             } 
         });
     }
 
     try {
-        // 2. VERIFICAÇÃO NO BANCO (Se disponível, para congelamento)
         if (isDbConnected) {
             try {
                 let user = await User.findOne({ userId });
@@ -86,70 +78,50 @@ app.post('/api/login', async (req, res) => {
                 } else if (user.frozen) {
                     return res.status(403).json({ success: false, message: "ACCOUNT FROZEN" });
                 }
-            } catch (e) { console.log("Erro DB ignorado no login"); }
+            } catch (e) {}
         }
 
-        // 3. BUSCA DADOS REAIS NO ROBLOX (Com Cache de 5 minutos)
         let profile = USER_CACHE[userId]?.data;
         
         if (!profile || (Date.now() - USER_CACHE[userId].timestamp > 300000)) {
             try {
-                console.log(`Buscando dados Roblox para ID: ${userId}...`);
-                // Busca Username, Grupos e Avatar em paralelo
                 const [userRes, groupsRes, thumbRes] = await Promise.all([
                     axios.get(`https://users.roblox.com/v1/users/${userId}`),
                     axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`),
                     axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
                 ]);
 
-                // --- LÓGICA DE RANK TSC ---
-                // Filtra apenas os grupos que estão no nosso mapa TSC_GROUPS
-                const tscGroupsFound = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-                
-                // Encontra o grupo com o maior rank (ordem decrescente)
-                const primaryGroup = tscGroupsFound.length > 0 
-                    ? tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0] 
-                    : null;
-
-                // Define Departamento e Rank baseados no grupo principal encontrado
-                const deptName = primaryGroup ? TSC_GROUPS[primaryGroup.group.id] : "CIVILIAN";
-                const rankName = primaryGroup ? primaryGroup.role.name.toUpperCase() : "N/A";
+                const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
+                const primary = tscGroups.length > 0 ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
 
                 profile = {
                     id: userId,
                     username: userRes.data.name,
-                    dept: deptName,
-                    rank: rankName, // Rank real do Roblox
+                    dept: primary ? TSC_GROUPS[primary.group.id] : "CIVILIAN",
+                    rank: primary ? primary.role.name.toUpperCase() : "N/A",
                     avatar: thumbRes.data.data[0].imageUrl,
                     isAdmin: false
                 };
-                console.log(`Dados encontrados para ${userId}: ${deptName} - ${rankName}`);
-
             } catch (apiErr) {
-                console.error(`Erro na API Roblox para ${userId}:`, apiErr.message);
-                // Fallback apenas se a API do Roblox falhar completamente
                 profile = {
                     id: userId,
                     username: `ID_${userId}`,
-                    dept: "API_ERROR",
-                    rank: "UNKNOWN",
-                    avatar: "assets/icon-large-owner_info-28x14.png", // Avatar genérico local
+                    dept: "UNKNOWN",
+                    rank: "ERROR",
+                    avatar: "assets/icon-large-owner_info-28x14.png",
                     isAdmin: false
                 };
             }
-            // Salva no cache
             USER_CACHE[userId] = { timestamp: Date.now(), data: profile };
         }
 
         res.json({ success: true, userData: profile });
 
     } catch (e) {
-        console.error("Erro Crítico no Login:", e);
-        res.status(500).json({ success: false, message: "SERVER SYSTEM ERROR" });
+        res.status(500).json({ success: false, message: "SYSTEM ERROR" });
     }
 });
 
-// --- SOCKETS (Painel Admin em Tempo Real) ---
 io.on('connection', (socket) => {
     let session = null;
 
@@ -173,14 +145,14 @@ io.on('connection', (socket) => {
                 return {
                     id: u.userId,
                     username: online?.username || cached?.username || "Offline",
-                    dept: online?.dept || cached?.dept || "---", // Mostra Dept no Admin
+                    dept: online?.dept || cached?.dept || "---",
                     frozen: u.frozen,
                     online: !!online,
                     socketId: online?.socketId
                 };
             });
             io.to('admins').emit('users_list', list);
-        } catch(e) { console.error(e); }
+        } catch(e) {}
     }
 
     socket.on('admin_kick', (id) => {
@@ -217,4 +189,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SYSTEM ONLINE :${PORT}`));
+server.listen(PORT, () => console.log(`SERVER RUNNING :${PORT}`));
