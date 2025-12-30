@@ -130,13 +130,24 @@
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body chat-body">
-        <div id="chat-history" class="chat-history">
-          <div class="chat-msg system">Connection established with TSC Mainframe...</div>
+        
+        <div id="help-request-form">
+          <div class="admin-section">
+            <label class="admin-label">REQUEST ASSISTANCE:</label>
+            <textarea id="help-msg" class="admin-textarea" placeholder="Describe your issue..."></textarea>
+            <button id="btnSendHelp" class="btn-newton">TRANSMIT REQUEST</button>
+          </div>
+          <div id="help-status" class="status-text hidden">REQUEST SENT. WAITING FOR OPERATOR...</div>
         </div>
-        <div class="chat-input-area">
-          <input id="help-msg" class="input-newton" placeholder="Type message..." />
-          <button id="btnSendHelp" class="btn-newton" style="width: auto;">SEND</button>
+
+        <div id="help-chat-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+          <div id="chat-history" class="chat-history"></div>
+          <div class="chat-input-area">
+            <input id="chat-input" class="input-newton" placeholder="Type message..." />
+            <button id="btnChatSend" class="btn-newton" style="width: auto;">SEND</button>
+          </div>
         </div>
+
       </div>
     </div>
 
@@ -154,26 +165,36 @@
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
+        
         <div class="admin-section">
-          <label class="admin-label">SYSTEM STATUS CONTROL:</label>
-          <button id="btnToggleStatus" class="btn-newton">TOGGLE SYSTEM STATUS</button>
+          <label class="admin-label">SYSTEM STATUS:</label>
+          <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
         </div>
+
         <div class="admin-section">
-          <label class="admin-label">1. SELECT AVATAR MOOD:</label>
-          <div id="mood-container" class="mood-grid"></div>
-        </div>
-        <div class="admin-section">
-          <label class="admin-label">2. SELECT TARGET:</label>
-          <div class="target-row">
-            <input id="targetId" class="input-newton" placeholder="User ID (Leave empty for GLOBAL BROADCAST)" />
-            <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">* Empty sends to everyone.</div>
+          <label class="admin-label">INCOMING TICKETS:</label>
+          <div id="ticket-list" class="ticket-list">
+            <div class="no-tickets">NO PENDING REQUESTS</div>
           </div>
         </div>
-        <div class="admin-section">
-          <label class="admin-label">3. MESSAGE PROTOCOL:</label>
-          <textarea id="adminMsg" class="admin-textarea" placeholder="Type message here..."></textarea>
-          <button id="btnBroadcast" class="btn-newton">TRANSMIT DATA</button>
+
+        <div id="admin-chat-area" class="admin-section hidden">
+          <label class="admin-label">ACTIVE CHAT (<span id="admin-chat-target"></span>):</label>
+          <div id="admin-chat-history" class="chat-history" style="height: 150px;"></div>
+          <div class="chat-input-area mt-1">
+            <input id="admin-chat-input" class="input-newton" placeholder="Reply..." />
+            <button id="admin-chat-send" class="btn-newton" style="width: auto;">SEND</button>
+            <button id="admin-chat-close" class="btn-newton" style="width: auto; background: #ef4444;">DONE</button>
+          </div>
         </div>
+
+        <div class="admin-section">
+          <label class="admin-label">GLOBAL BROADCAST:</label>
+          <div id="mood-container" class="mood-grid mb-1"></div>
+          <textarea id="adminMsg" class="admin-textarea" placeholder="Broadcast message..."></textarea>
+          <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
+        </div>
+
       </div>
     </div>
 

@@ -19,6 +19,7 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 
 let dataStore = { notes: {}, helpTickets: [] };
 let systemStatus = 'ONLINE'; 
+let activeChats = {}; 
 
 if (fs.existsSync(DATA_FILE)) {
     try {
@@ -90,16 +91,15 @@ io.on('connection', (socket) => {
     socket.on('register_user', (userId) => {
         currentUserId = userId;
         socket.join(userId); 
-        if (userId === "8989") adminSocketId = socket.id;
+        if (userId === "8989") {
+            adminSocketId = socket.id;
+            socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
+        }
         if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
     });
 
     socket.on('mascot_broadcast', (data) => {
         io.emit('display_mascot_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
-    });
-
-    socket.on('admin_chat_reply', (data) => {
-        io.to(data.targetId).emit('chat_reply', { message: data.message, sender: 'OBUNTO' });
     });
 
     socket.on('toggle_system_status', (status) => {
@@ -115,10 +115,47 @@ io.on('connection', (socket) => {
 
     socket.on('request_help', (msg) => {
         if (!currentUserId) return;
-        const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
-        dataStore.helpTickets.push(ticket);
+        
+        const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && t.status === 'open');
+        if (existingTicket) {
+            existingTicket.msg = msg; 
+            existingTicket.timestamp = new Date();
+        } else {
+            const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
+            dataStore.helpTickets.push(ticket);
+            if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
+        }
         saveData();
-        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
+    });
+
+    socket.on('admin_accept_ticket', (ticketId) => {
+        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
+        if (ticket) {
+            ticket.status = 'active';
+            activeChats[ticket.userId] = true;
+            saveData();
+            
+            io.to(ticket.userId).emit('chat_started');
+            if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
+        }
+    });
+
+    socket.on('admin_close_ticket', (userId) => {
+        const ticket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
+        if (ticket) {
+            ticket.status = 'closed';
+            delete activeChats[userId];
+            saveData();
+            
+            io.to(userId).emit('chat_ended');
+        }
+    });
+
+    socket.on('chat_message', (data) => {
+        const { targetId, message, sender } = data;
+        if (activeChats[targetId] || activeChats[currentUserId]) {
+            io.to(targetId).emit('chat_receive', { message, sender });
+        }
     });
 });
 

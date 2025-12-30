@@ -24,9 +24,29 @@ export const UI = {
         msg: document.getElementById('adminMsg'),
         btnSend: document.getElementById('btnBroadcast'),
         btnToggle: document.getElementById('btnToggleStatus'),
+        ticketList: document.getElementById('ticket-list'),
+        chatArea: document.getElementById('admin-chat-area'),
+        chatHistory: document.getElementById('admin-chat-history'),
+        chatInput: document.getElementById('admin-chat-input'),
+        chatSend: document.getElementById('admin-chat-send'),
+        chatClose: document.getElementById('admin-chat-close'),
+        chatTarget: document.getElementById('admin-chat-target'),
         bubble: document.getElementById('obunto-bubble'),
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text')
+    },
+    help: {
+        window: document.getElementById('help-window'),
+        reqForm: document.getElementById('help-request-form'),
+        chatInterface: document.getElementById('help-chat-interface'),
+        reqInput: document.getElementById('help-msg'),
+        reqBtn: document.getElementById('btnSendHelp'),
+        reqStatus: document.getElementById('help-status'),
+        history: document.getElementById('chat-history'),
+        input: document.getElementById('chat-input'),
+        send: document.getElementById('btnChatSend'),
+        btnOpen: document.getElementById('btnOpenHelp'),
+        btnClose: document.getElementById('closeHelp')
     },
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay')
@@ -39,4 +59,49 @@ export function switchScreen(screenName) {
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');
     }
+}
+
+export function makeDraggable(win) {
+    const header = win.querySelector('.win-header');
+    if (!header) return;
+    
+    let isDragging = false;
+    let startX, startY, initialLeft, initialTop;
+
+    header.addEventListener('mousedown', (e) => {
+        if(e.target.closest('.close-btn')) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialLeft = win.offsetLeft;
+        initialTop = win.offsetTop;
+        win.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        const maxLeft = window.innerWidth - win.offsetWidth;
+        const maxTop = window.innerHeight - win.offsetHeight;
+
+        win.style.left = `${Math.min(Math.max(0, newLeft), maxLeft)}px`;
+        win.style.top = `${Math.min(Math.max(0, newTop), maxTop)}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+        isDragging = false;
+        win.style.cursor = 'default';
+    });
+}
+
+export function initDraggables() {
+    document.querySelectorAll('.window-newton').forEach(win => {
+        makeDraggable(win);
+    });
 }

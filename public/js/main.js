@@ -1,4 +1,4 @@
-import { UI, switchScreen } from './modules/ui.js';
+import { UI, switchScreen, initDraggables } from './modules/ui.js';
 import { handleLogin } from './modules/auth.js';
 import { initAudio, playSound } from './modules/audio.js';
 import { initNotepad } from './modules/notepad.js';
@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initAudio();
     initNotepad(socket);
     initHelp(socket);
+    initDraggables(); // Enable dragging for windows
 
     setInterval(() => {
         const now = new Date();
