@@ -39,117 +39,96 @@ body.alarm-gamma {
   --alert-color: #ffdc00;
 }
 
-/* EPSILON - NEWTON SYSTEM FAILURE STYLE */
 body.alarm-epsilon {
-  --bg-main: #000000;
-  --bg-light: #0d1a0d;
-  --bg-dark: #000000;
-  --paper: #1a331a; 
-  --paper-dark: #000000;
-  --paper-light: #2a402a;
-  --ink: #00ff00;
-  --border: #00ff00;
-  --button: #002200;
-  --button-hover: #004400;
-  --alert-color: #00ff00;
-  
+  --bg-main: #7a836a;
+  --bg-light: #8d9886;
+  --bg-dark: #5a6452;
+  --ink: #1b2313;
+  --paper: #b8c1b0;
+  --border: #1b2313;
+  --alert-color: #2b3323;
+
+  animation: newtonRGBShift 0.1s infinite;
   overflow: hidden;
-  animation: epsilonSystemFailure 0.15s infinite;
 }
 
-/* Digital Distortion Layers (No CRT Scanlines) */
-body.alarm-epsilon .scanlines {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 255, 0, 0.1) 3px
-  );
-  animation: epsilonDigitalTear 3s infinite steps(1);
-  mix-blend-mode: hard-light;
-  opacity: 1;
-}
-
-body.alarm-epsilon .crt-overlay {
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0,
-    transparent 50px,
-    rgba(0, 0, 0, 0.5) 50px,
-    rgba(0, 0, 0, 0.5) 51px
-  );
-  background-size: 200% 100%;
-  animation: epsilonBarScroll 2s infinite linear;
-  mix-blend-mode: overlay;
-}
-
-body.alarm-epsilon .screen-flicker {
-  background: rgba(0, 255, 0, 0.1);
-  animation: epsilonGreenFlash 0.1s infinite;
-  mix-blend-mode: screen;
-}
-
-/* Layout Shifting - Glitch Effect */
-body.alarm-epsilon .workspace, 
 body.alarm-epsilon .sidebar,
-body.alarm-epsilon .dock-newton {
-  animation: epsilonLayoutShift 0.2s infinite steps(2);
+body.alarm-epsilon .workspace,
+body.alarm-epsilon .dock-newton,
+body.alarm-epsilon .window-newton {
+  animation: newtonLayoutJitter 0.15s infinite steps(2);
+  overflow: hidden;
 }
 
-/* Glitch Blocks Overlay */
 body.alarm-epsilon::after {
-  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10000;
   background: transparent;
-  animation: epsilonBlockGlitch 2s infinite steps(1);
+  background-image:
+    linear-gradient(transparent 90%, rgba(43, 51, 35, 0.2) 90%),
+    linear-gradient(90deg, transparent 90%, rgba(43, 51, 35, 0.2) 90%);
+  background-size: 20px 20px, 30px 30px;
+  animation: newtonBlockNoise 0.2s infinite steps(1);
+  opacity: 0.5;
+  mix-blend-mode: multiply;
 }
 
-/* ANIMAÇÕES EPSILON - ESTILO NEWTON BUGADO */
-
-@keyframes epsilonSystemFailure {
-  0% { filter: invert(0); }
-  90% { filter: invert(0); }
-  95% { filter: invert(1) hue-rotate(180deg); } /* Inversão brusca de cores */
-  100% { filter: invert(0); }
+body.alarm-epsilon .crt-overlay,
+body.alarm-epsilon .scanlines,
+body.alarm-epsilon .screen-flicker {
+  display: none;
 }
 
-@keyframes epsilonDigitalTear {
-  0% { transform: translateX(0); clip-path: inset(0 0 0 0); }
-  5% { transform: translateX(-10px); clip-path: inset(10% 0 80% 0); }
-  10% { transform: translateX(0); clip-path: inset(0 0 0 0); }
-  15% { transform: translateX(10px); clip-path: inset(40% 0 40% 0); }
-  20% { transform: translateX(0); clip-path: inset(0 0 0 0); }
-  60% { transform: translateX(-5px); clip-path: inset(80% 0 5% 0); }
-  65% { transform: translateX(0); clip-path: inset(0 0 0 0); }
+@keyframes newtonRGBShift {
+  0% { text-shadow: 1px 0 0 rgba(255,0,0,0.3), -1px 0 0 rgba(0,0,255,0.3); }
+  25% { text-shadow: -1px 0 0 rgba(255,0,0,0.3), 1px 0 0 rgba(0,0,255,0.3); }
+  50% { text-shadow: 0 1px 0 rgba(255,0,0,0.3), 0 -1px 0 rgba(0,0,255,0.3); }
+  75% { text-shadow: 0 -1px 0 rgba(255,0,0,0.3), 0 1px 0 rgba(0,0,255,0.3); }
+  100% { text-shadow: 1px 0 0 rgba(255,0,0,0.3), -1px 0 0 rgba(0,0,255,0.3); }
 }
 
-@keyframes epsilonLayoutShift {
-  0% { transform: translate(0,0); }
-  25% { transform: translate(-2px, 0); }
-  50% { transform: translate(2px, 0); }
-  75% { transform: translate(0, 2px); }
-  100% { transform: translate(0,0); }
+@keyframes newtonLayoutJitter {
+  0% { transform: translate(0, 0) skew(0deg); }
+  20% { transform: translate(-2px, 1px) skew(0.5deg); }
+  40% { transform: translate(1px, -2px) skew(-0.5deg); }
+  60% { transform: translate(-1px, 0) skew(0deg); }
+  80% { transform: translate(2px, 2px) skew(0.2deg); }
+  100% { transform: translate(0, 0) skew(0deg); }
 }
 
-@keyframes epsilonBarScroll {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 100% 0%; }
+@keyframes newtonBlockNoise {
+  0% { background-position: 0 0, 0 0; }
+  10% { background-position: 10px 5px, -5px 10px; }
+  20% { background-position: -10px -5px, 5px -10px; }
+  30% { background-position: 5px 15px, -15px 5px; }
+  40% { background-position: -5px -15px, 15px -5px; }
+  50% { background-position: 15px 0, 0 15px; }
+  60% { background-position: -15px 0, 0 -15px; }
+  70% { background-position: 0 20px, 20px 0; }
+  80% { background-position: 0 -20px, -20px 0; }
+  90% { background-position: 10px 10px, -10px -10px; }
+  100% { background-position: 0 0, 0 0; }
 }
 
-@keyframes epsilonGreenFlash {
-  0% { opacity: 0.1; }
-  50% { opacity: 0.3; }
-  100% { opacity: 0.1; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
+  font-size: 13px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
+  transition: background 0.5s ease;
 }
 
-@keyframes epsilonBlockGlitch {
-  0% { background: transparent; }
-  10% { background: linear-gradient(to bottom, transparent 40%, rgba(0,255,0,0.2) 40%, rgba(0,255,0,0.2) 45%, transparent 45%); }
-  20% { background: transparent; }
-  60% { background: linear-gradient(to right, transparent 20%, rgba(0,0,0,0.5) 20%, rgba(0,0,0,0.5) 25%, transparent 25%); }
-  65% { background: transparent; }
+.crt-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
 }
-
-/* OUTRAS ANIMAÇÕES */
+.screen-flicker {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background: rgba(255,255,255,0.02); opacity: 0; animation: flicker 0.15s infinite;
+}
 @keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
 
 body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
