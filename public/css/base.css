@@ -40,10 +40,18 @@ body.alarm-gamma {
 }
 
 body.alarm-epsilon {
-  --bg-main: #2b0a3d; --bg-light: #4b1e6e; --bg-dark: #1a0526;
-  --paper: #dec0e8; --paper-dark: #c0a8d0; --paper-light: #f0d0f8;
-  --ink: #2a003f; --border: #2a003f; --button: #a77fc3; --button-hover: #bd9bd8;
-  --alert-color: #b10dc9;
+  --bg-main: #0a1f0a;
+  --bg-light: #1e4b1e;
+  --bg-dark: #051005;
+  --paper: #b0d8b0;
+  --paper-dark: #90b090;
+  --paper-light: #c0e8c0;
+  --ink: #002000;
+  --border: #002000;
+  --button: #408040;
+  --button-hover: #60a060;
+  --alert-color: #0dc90d;
+  animation: epsilonBodyChaos 0.2s infinite;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -64,13 +72,11 @@ html, body {
 }
 @keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
 
-/* RED ALARM */
 body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
 body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
 @keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-/* GAMMA ALARM - "Meio Bugado" */
 body.alarm-gamma .screen-flicker { animation: gammaFlicker 0.2s infinite; background: rgba(255,165,0,0.1); }
 body.alarm-gamma .crt-overlay { animation: gammaOverlay 1s infinite; }
 body.alarm-gamma .workspace { animation: gammaShake 0.5s infinite; }
@@ -79,76 +85,26 @@ body.alarm-gamma::before {
   background: repeating-linear-gradient(0deg, rgba(255,140,0,0.05) 0px, transparent 2px, transparent 4px);
   animation: gammaScan 0.3s infinite linear; opacity: 0.3;
 }
+@keyframes gammaFlicker { 0% { opacity: 0.1; } 50% { opacity: 0.2; } 100% { opacity: 0.1; } }
+@keyframes gammaOverlay { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,140,0,0.2); filter: sepia(0.2); } 50% { box-shadow: inset 0 0 70px rgba(255,140,0,0.3); filter: sepia(0.4) hue-rotate(-10deg); } }
+@keyframes gammaShake { 0% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(1px, -2px); } 75% { transform: translate(-1px, 2px); } 100% { transform: translate(0,0); } }
+@keyframes gammaScan { from { background-position: 0 0; } to { background-position: 0 100%; } }
 
-@keyframes gammaFlicker {
-  0% { opacity: 0.1; } 50% { opacity: 0.2; } 100% { opacity: 0.1; }
-}
-@keyframes gammaOverlay {
-  0%, 100% { box-shadow: inset 0 0 50px rgba(255,140,0,0.2); filter: sepia(0.2); }
-  50% { box-shadow: inset 0 0 70px rgba(255,140,0,0.3); filter: sepia(0.4) hue-rotate(-10deg); }
-}
-@keyframes gammaShake {
-  0% { transform: translate(0,0); }
-  25% { transform: translate(-2px, 1px); }
-  50% { transform: translate(1px, -2px); }
-  75% { transform: translate(-1px, 2px); }
-  100% { transform: translate(0,0); }
-}
-@keyframes gammaScan {
-  from { background-position: 0 0; } to { background-position: 0 100%; }
-}
-
-/* EPSILON ALARM - "Caótico/Glitch" */
-body.alarm-epsilon {
-  animation: epsilonBodyChaos 0.2s infinite;
-}
 body.alarm-epsilon .crt-overlay { animation: epsilonOverlayChaos 0.5s infinite; }
-body.alarm-epsilon .screen-flicker { animation: epsilonFlickerChaos 0.1s infinite; background: rgba(177,13,201,0.25); }
-body.alarm-epsilon .workspace, body.alarm-epsilon .sidebar, body.alarm-epsilon .dock-newton {
-  animation: epsilonElementChaos 0.3s infinite;
-}
-body.alarm-epsilon::before, body.alarm-epsilon::after {
-  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9995;
-  mix-blend-mode: overlay;
-}
-body.alarm-epsilon::before {
-  background: repeating-linear-gradient(90deg, rgba(255,0,0,0.2) 0px, transparent 5px, rgba(0,0,255,0.2) 10px);
-  animation: epsilonHGlitch 0.1s infinite linear;
-}
-body.alarm-epsilon::after {
-  background: repeating-linear-gradient(0deg, rgba(0,255,0,0.2) 0px, transparent 5px, rgba(255,255,0,0.2) 10px);
-  animation: epsilonVGlitch 0.15s infinite linear;
-}
+body.alarm-epsilon .scanlines { animation: epsilonGlitch 0.15s infinite; }
+body.alarm-epsilon .screen-flicker { animation: epsilonFlickerChaos 0.1s infinite; background: rgba(13,201,13,0.25); }
+body.alarm-epsilon .workspace, body.alarm-epsilon .sidebar, body.alarm-epsilon .dock-newton { animation: epsilonElementChaos 0.3s infinite; }
+body.alarm-epsilon::before, body.alarm-epsilon::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9995; mix-blend-mode: overlay; }
+body.alarm-epsilon::before { background: repeating-linear-gradient(90deg, rgba(255,0,0,0.15) 0px, transparent 3px, rgba(0,0,255,0.15) 6px); animation: epsilonHGlitch 0.1s infinite linear; }
+body.alarm-epsilon::after { background: repeating-linear-gradient(0deg, rgba(0,255,0,0.15) 0px, transparent 3px, rgba(0,255,255,0.15) 6px); animation: epsilonVGlitch 0.15s infinite linear; }
 
-@keyframes epsilonBodyChaos {
-  0% { filter: hue-rotate(0deg) invert(0); transform: skewX(0); }
-  25% { filter: hue-rotate(90deg) invert(0.1); transform: skewX(2deg); }
-  50% { filter: hue-rotate(180deg) invert(0.2); transform: skewX(-2deg); }
-  75% { filter: hue-rotate(270deg) invert(0.1); transform: skewX(1deg); }
-  100% { filter: hue-rotate(0deg) invert(0); transform: skewX(0); }
-}
-@keyframes epsilonOverlayChaos {
-  0% { box-shadow: inset 0 0 50px rgba(177,13,201,0.5); }
-  50% { box-shadow: inset 0 0 150px rgba(255,0,0,0.5); }
-  100% { box-shadow: inset 0 0 50px rgba(177,13,201,0.5); }
-}
-@keyframes epsilonFlickerChaos {
-  0% { opacity: 0.2; } 100% { opacity: 0.5; }
-}
-@keyframes epsilonElementChaos {
-  0% { transform: translate(0,0) scale(1); }
-  20% { transform: translate(-5px, 3px) skewX(5deg); }
-  40% { transform: translate(3px, -5px) skewY(5deg); }
-  60% { transform: translate(-3px, 0) scale(0.98); }
-  80% { transform: translate(5px, 5px) scale(1.02); }
-  100% { transform: translate(0,0) scale(1); }
-}
-@keyframes epsilonHGlitch {
-  from { background-position: 0 0; } to { background-position: 100% 0; }
-}
-@keyframes epsilonVGlitch {
-  from { background-position: 0 0; } to { background-position: 0 100%; }
-}
+@keyframes epsilonBodyChaos { 0% { filter: hue-rotate(0deg) invert(0); transform: skewX(0); } 25% { filter: hue-rotate(120deg) invert(0.05); transform: skewX(1deg); } 50% { filter: hue-rotate(240deg) invert(0.1); transform: skewX(-1deg); } 75% { filter: hue-rotate(0deg) invert(0.05); transform: skewX(0.5deg); } 100% { filter: hue-rotate(120deg) invert(0); transform: skewX(0); } }
+@keyframes epsilonOverlayChaos { 0% { box-shadow: inset 0 0 40px rgba(13,201,13,0.4); } 50% { box-shadow: inset 0 0 120px rgba(0,255,0,0.4); } 100% { box-shadow: inset 0 0 40px rgba(13,201,13,0.4); } }
+@keyframes epsilonFlickerChaos { 0% { opacity: 0.15; } 50% { opacity: 0.4; } 100% { opacity: 0.15; } }
+@keyframes epsilonElementChaos { 0% { transform: translate(0,0) scale(1); } 20% { transform: translate(-4px, 2px) skewX(4deg); } 40% { transform: translate(2px, -4px) skewY(4deg); } 60% { transform: translate(-2px, 0) scale(0.99); } 80% { transform: translate(4px, 4px) scale(1.01); } 100% { transform: translate(0,0) scale(1); } }
+@keyframes epsilonGlitch { 0% { transform: translate(0,0) skewX(0) scaleY(1); filter: invert(0); } 10% { transform: translate(-8px,4px) skewX(50deg) scaleY(0.85); filter: invert(0.2); } 20% { transform: translate(8px,-4px) skewX(-50deg) scaleY(1.15); filter: invert(0); } 30% { transform: translate(0,8px) skewY(25deg) scaleX(0.95); filter: invert(0.1); } 40% { transform: translate(0,-8px) skewY(-25deg) scaleX(1.05); filter: invert(0); } 50% { transform: translate(6px,6px) rotate(8deg) scale(0.9); filter: invert(0.3); } 60% { transform: translate(-6px,-6px) rotate(-8deg) scale(1.1); filter: invert(0); } 70% { transform: translate(10px,-2px) skewX(35deg); filter: invert(0.15); } 80% { transform: translate(-10px,2px) skewX(-35deg); filter: invert(0); } 90% { transform: translate(0,0) scale(1.05); filter: invert(0.25); } 100% { transform: translate(0,0) skewX(0) scaleY(1); filter: invert(0); } }
+@keyframes epsilonHGlitch { from { background-position: 0 0; } to { background-position: 100% 0; } }
+@keyframes epsilonVGlitch { from { background-position: 0 0; } to { background-position: 0 100%; } }
 
 .paper-texture {
   background-color: #fdfbf7;

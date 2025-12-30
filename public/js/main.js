@@ -5,6 +5,7 @@ import { initNotepad } from './modules/notepad.js';
 import { initHelp } from './modules/help.js';
 
 const socket = io();
+let currentUser = null;
 
 document.addEventListener("DOMContentLoaded", () => {
     initAudio();
@@ -26,9 +27,12 @@ document.addEventListener("DOMContentLoaded", () => {
         switchScreen('login');
     }, 6000);
 
-    UI.login.btn.onclick = () => handleLogin(socket);
-    UI.login.input.addEventListener("keydown", e => { 
-        if (e.key === "Enter") handleLogin(socket); 
+    UI.login.btn.onclick = async () => {
+        currentUser = await handleLogin(socket);
+    };
+    
+    UI.login.input.addEventListener("keydown", async e => { 
+        if (e.key === "Enter") currentUser = await handleLogin(socket); 
     });
 
     socket.on('status_update', (status) => {
@@ -47,10 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const banner = document.getElementById('alarm-banner');
         const text = document.getElementById('alarm-type-text');
         const powerOff = document.getElementById('power-off-overlay');
+        const btnReboot = document.getElementById('btnSystemReboot');
         
         if (alarmType === 'off') {
             powerOff.classList.remove('hidden');
             banner.classList.add('hidden');
+            
+            if (currentUser && currentUser.isObunto) {
+                btnReboot.classList.remove('hidden');
+            } else {
+                btnReboot.classList.add('hidden');
+            }
+
         } else if (alarmType === 'on') {
             powerOff.classList.add('hidden');
             banner.classList.add('hidden');

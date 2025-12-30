@@ -4,7 +4,7 @@ import { initObunto } from './obunto.js';
 
 export async function handleLogin(socket) {
     const id = UI.login.input.value.trim();
-    if (!id) return;
+    if (!id) return null;
     UI.login.status.textContent = "SYNCING WITH MAINFRAME...";
     try {
         const res = await fetch('/api/login', {
@@ -19,10 +19,13 @@ export async function handleLogin(socket) {
             populateDashboard(user);
             switchScreen('desktop');
             initObunto(socket, user.id);
+            return user; 
         } else {
             UI.login.status.textContent = "ERROR: " + data.message;
+            return null;
         }
     } catch (e) {
         UI.login.status.textContent = "CONNECTION FAILURE";
+        return null;
     }
 }
