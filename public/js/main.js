@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     }, 1000);
 
-    // BOOT LOGIC
     playSound('boot');
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
@@ -40,6 +39,20 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             UI.status.indicator.style.backgroundColor = '#9ca3af';
             UI.status.indicator.style.boxShadow = 'none';
+        }
+    });
+
+    socket.on('alarm_update', (alarmType) => {
+        document.body.className = '';
+        const banner = document.getElementById('alarm-banner');
+        const text = document.getElementById('alarm-type-text');
+        
+        if (alarmType !== 'green' && alarmType !== 'on' && alarmType !== 'off') {
+            document.body.classList.add(`alarm-${alarmType}`);
+            banner.classList.remove('hidden');
+            text.textContent = `${alarmType.toUpperCase()} ALERT`;
+        } else {
+            banner.classList.add('hidden');
         }
     });
 });

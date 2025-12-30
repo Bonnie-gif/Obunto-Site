@@ -20,6 +20,8 @@ const COOLDOWN_TIME = 4 * 60 * 1000;
 
 let dataStore = { notes: {}, helpTickets: [] };
 let systemStatus = 'ONLINE'; 
+let currentAlarm = 'green';
+let activeChats = {}; 
 let userCooldowns = {};
 
 if (fs.existsSync(DATA_FILE)) {
@@ -31,6 +33,8 @@ if (fs.existsSync(DATA_FILE)) {
 function saveData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
 }
+
+let adminSocketId = null;
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
@@ -84,6 +88,7 @@ app.post('/api/login', async (req, res) => {
 
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
+    socket.emit('alarm_update', currentAlarm);
 
     let currentUserId = null;
 
@@ -92,7 +97,7 @@ io.on('connection', (socket) => {
         socket.join(userId); 
         
         if (userId === "8989") {
-            socket.join('admin'); 
+            adminSocketId = socket.id;
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
         }
         
@@ -106,8 +111,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('admin_broadcast_message', (data) => {
-        io.emit('receive_broadcast_message', { 
+    socket.on('mascot_broadcast', (data) => {
+        io.emit('display_mascot_message', { 
             message: data.message, 
             mood: data.mood || 'normal', 
             targetId: data.targetId 
@@ -115,6 +120,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('admin_trigger_alarm', (alarmType) => {
+        currentAlarm = alarmType;
+        io.emit('alarm_update', currentAlarm);
         io.emit('play_alarm_sound', alarmType);
     });
 
@@ -147,7 +154,7 @@ io.on('connection', (socket) => {
         dataStore.helpTickets.push(ticket);
         saveData();
         
-        io.to('admin').emit('new_help_request', ticket);
+        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
         socket.emit('help_request_received');
     });
 
@@ -155,10 +162,11 @@ io.on('connection', (socket) => {
         const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
         if (ticket) {
             ticket.status = 'active';
+            activeChats[ticket.userId] = true;
             saveData();
             
             io.to(ticket.userId).emit('chat_force_open');
-            io.to('admin').emit('admin_chat_opened', ticket);
+            if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
         }
     });
 
@@ -170,6 +178,7 @@ io.on('connection', (socket) => {
         const ticket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
         if (ticket) {
             ticket.status = 'closed';
+            delete activeChats[userId];
             saveData();
             
             userCooldowns[userId] = Date.now() + COOLDOWN_TIME;
@@ -179,14 +188,13 @@ io.on('connection', (socket) => {
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
+        const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
         
-        if (sender === 'ADMIN') {
-            io.to(targetId).emit('chat_receive', { message, sender });
-        } else {
-            io.to('admin').emit('chat_receive', { message, sender });
+        if (recipient) {
+            io.to(recipient).emit('chat_receive', { message, sender });
         }
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => console.log(`SERVER RUNNING ON PORT ${PORT}`));

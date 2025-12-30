@@ -7,10 +7,15 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="/assets/icon-large-dock-35x23.png" type="image/png">
 </head>
-<body>
+<body class="alarm-green">
   <div class="crt-overlay"></div>
   <div class="scanlines"></div>
   <div class="screen-flicker"></div>
+  
+  <div id="alarm-banner" class="alarm-banner hidden">
+    <div class="alarm-text">WARNING: <span id="alarm-type-text">SYSTEM ALERT</span></div>
+    <div class="alarm-sub">PROTOCOL ENGAGED</div>
+  </div>
 
   <div id="boot-sequence" class="active">
     <div class="loading-container">
@@ -219,7 +224,7 @@
           </div>
         </div>
         <div class="admin-section">
-          <label class="admin-label">BROADCAST:</label>
+          <label class="admin-label">GLOBAL BROADCAST:</label>
           <div id="mood-container" class="mood-grid mb-1"></div>
           <div class="target-row">
              <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
