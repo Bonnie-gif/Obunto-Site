@@ -1,117 +1,92 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEWTON OS // TSC GATEWAY</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NEWTON OS • TSC</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="scanlines"></div>
-
-  <div id="boot-3" class="screen full-screen active">
-    <div class="boot-center">
-      <img src="/obunto/normal.png" class="boot-logo" alt="Obunto">
-      <div class="boot-text">OBUNTO SYSTEM LOADING<span id="glitch-dots">...</span></div>
+  <div id="boot" class="screen active">
+    <div class="boot-card">
+      <img src="/obunto/normal.png" class="boot-logo" alt="">
+      <div class="boot-title">NEWTON OS • TSC GATEWAY</div>
+      <div id="boot-progress" class="boot-progress">[□□□□□□□□□□] 0%</div>
+      <div id="boot-status" class="boot-sub">INITIALIZING</div>
     </div>
   </div>
 
-  <div id="boot-2" class="screen full-screen hidden">
-    <div class="boot-center">
-      <div class="boot-title">TSC MAINFRAME</div>
-      <div class="boot-box">
-        <div class="boot-line">Verifying TSC signature........OK</div>
-        <div class="boot-line">Loading Newton emulation.......OK</div>
-        <div class="boot-line">Mounting assets..................<span id="boot-progress">□□□□□□□□□□ 0%</span></div>
-        <div class="boot-line"><span id="boot-status">INITIALIZING...</span></div>
+  <div id="login" class="screen hidden">
+    <div class="panel">
+      <div class="panel-head">
+        <img src="/assets/icon-large-assist-13x20.png" alt="">
+        <div class="panel-title">AUTHENTICATE</div>
       </div>
-    </div>
-  </div>
-
-  <div id="login-screen" class="screen full-screen hidden">
-    <div class="boot-center">
-      <img src="/assets/icon-large-assist-13x20.png" class="boot-logo" alt="Assist">
-      <div class="boot-box">
-        <div class="boot-title">TSC NEWTON GATEWAY</div>
-        <input id="inpId" type="text" placeholder="ENTER USER ID" class="input-newton" />
-        <div id="loginStatus" class="status-text"></div>
-        <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="desktop-screen" class="screen hidden">
-    <aside class="sidebar">
-      <div class="brand">
-        <img src="/assets/icon-large-dock-35x23.png" alt="Dock">
-        <div class="brand-text">NEWTON OS</div>
-      </div>
-
-      <div class="search-block">
-        <input id="search" placeholder="SEARCH ID, @username or NAME" />
-        <div class="search-buttons">
-          <button id="btnSearch">SEARCH</button>
-          <button id="btnRefresh" title="Refresh">↺</button>
+      <div class="panel-body">
+        <input id="inpId" placeholder="ENTER USER ID or @username" />
+        <div id="loginStatus" class="status"></div>
+        <div class="row">
+          <button id="btnLogin" class="primary">SIGN IN</button>
+          <button id="btnGuest" class="secondary">GUEST</button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="operator-login">
-        <input id="operatorInput" placeholder="Operator ID / @name" />
-        <button id="btnAuth">AUTH</button>
-        <div id="sessionInfo" class="session-info"></div>
+  <div id="desktop" class="screen hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="/assets/icon-large-dock-35x23.png" alt="">
+        <div class="brand-name">NEWTON OS</div>
       </div>
-
-      <div class="group-filter">
-        <input id="gfilter" placeholder="Filter groups..." />
-        <div id="glist" class="glist"></div>
+      <div class="search">
+        <input id="search" placeholder="Search ID, @username or name">
+        <div class="search-actions">
+          <button id="btnSearch">SEARCH</button>
+          <button id="btnRefresh">↺</button>
+        </div>
       </div>
-
-      <div class="history">
-        <div class="history-title">RECENT</div>
-        <div id="historyList"></div>
+      <div class="groups" id="glist"></div>
+      <div class="recent">
+        <div class="recent-title">RECENT</div>
+        <div id="historyList" class="recent-list"></div>
       </div>
     </aside>
 
-    <main class="workspace">
+    <main class="main">
       <div class="topbar">
-        <div id="dateDisplay" class="date-display"></div>
-        <div class="controls">
+        <div id="dateDisplay" class="date"></div>
+        <div class="top-actions">
           <button id="btnUnfreeze">RESET</button>
         </div>
       </div>
 
-      <div id="paperContent" class="viewer">WELCOME — USE SEARCH TO RETRIEVE A DOSSIER</div>
+      <div id="viewer" class="viewer empty">WELCOME — USE SEARCH TO RETRIEVE A DOSSIER</div>
     </main>
 
-    <div id="profile-window" class="window-newton hidden" aria-hidden="true">
-      <div class="win-header">
-        <img src="/assets/icon-large-names-32x22.png" class="header-icon" alt="Names">
-        <span>NAMES</span>
-        <button id="closeProfile" class="close-btn"><img src="/assets/button-close-17x17.png" alt="Close"></button>
+    <div id="profile-window" class="window hidden" aria-hidden="true">
+      <div class="window-head">
+        <div class="window-title">PERSONNEL DOSSIER</div>
+        <button id="closeProfile" class="win-close">✕</button>
       </div>
-      <div class="win-body">
-        <img id="userAvatar" src="/assets/icon-large-owner_info-28x14.png" class="avatar" alt="Avatar">
-        <div class="data-row"><b>ID:</b> <span id="userId"></span></div>
-        <div class="data-row"><b>NAME:</b> <span id="userName"></span></div>
-        <div class="data-row"><b>RANK:</b> <span id="userRank"></span></div>
-        <div class="affiliations"><b>AFFILIATIONS:</b><ul id="affList"></ul></div>
-      </div>
+      <div id="profile-body" class="window-body"></div>
     </div>
 
-    <div id="obunto-bubble" class="obunto-overlay hidden" aria-hidden="true">
-      <img id="obunto-img" src="/obunto/normal.png" alt="Obunto">
-      <div id="obunto-text" class="speech-bubble"></div>
+    <div id="obunto-bubble" class="obunto hidden">
+      <img id="obunto-img" src="/obunto/normal.png" alt="">
+      <div id="obunto-text" class="bubble-text"></div>
     </div>
 
-    <div class="dock-newton" role="navigation" aria-label="Dock">
-      <img src="/assets/icon-large-notes-17x22.png" alt="Notes" title="Notes">
-      <img src="/assets/icon-large-dates-25x22.png" alt="Dates" title="Dates">
-      <img src="/assets/icon-large-find-21x21.png" alt="Find" title="Find">
-      <img src="/assets/icon-large-setup-25x22.png" alt="Setup" title="Setup">
-      <span id="clock">--:--</span>
+    <div class="dock">
+      <img src="/assets/icon-large-notes-17x22.png" alt="" title="Notes">
+      <img src="/assets/icon-large-dates-25x22.png" alt="" title="Dates">
+      <img src="/assets/icon-large-find-21x21.png" alt="" title="Find">
+      <img src="/assets/icon-large-setup-25x22.png" alt="" title="Setup">
+      <div id="clock" class="clock">--:--</div>
     </div>
   </div>
 
+  <script src="/socket.io/socket.io.js"></script>
   <script src="renderer.js"></script>
 </body>
 </html>

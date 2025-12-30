@@ -1,54 +1,71 @@
 :root{
-  --bg:#eef2f6;
-  --panel:#ffffffdd;
+  --bg-1:#e9f2fb;
+  --bg-2:#dfeaf8;
+  --panel:#ffffffcc;
   --accent:#0b69ff;
-  --ink:#0b1220;
-  --ink-dim:#596074;
-  --glass:rgba(255,255,255,.6);
-  --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
-  --radius:12px;
-  --shadow:0 10px 30px rgba(0,0,0,.06);
+  --muted:#6b7280;
+  --ink:#081226;
+  --glass:rgba(255,255,255,.5);
+  --radius:14px;
+  --shadow:0 12px 40px rgba(3,10,30,.07);
+  --mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Roboto Mono,monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#dfe7ef);font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg-1),var(--bg-2));font-family:var(--sans);color:var(--ink);-webkit-font-smoothing:antialiased}
 .screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.hidden{display:none !important}
-.active{display:flex}
-.scanlines{pointer-events:none;position:fixed;inset:0;background-image:linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);background-size:100% 3px;mix-blend-mode:soft-light}
-.boot-center{text-align:center}
-.boot-logo{width:84px;height:auto;margin-bottom:12px}
-.boot-text{font-weight:700;letter-spacing:1px}
-.boot-box{background:var(--panel);padding:16px;border-radius:10px;box-shadow:var(--shadow);max-width:520px}
-.boot-title{font-weight:900;letter-spacing:1px;margin-bottom:8px}
-.boot-line{font-family:monospace;font-size:13px;color:var(--ink-dim);margin:6px 0}
-#desktop-screen{display:flex;flex-direction:row;height:100vh;align-items:stretch}
-.sidebar{width:320px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid rgba(0,0,0,.04)}
-.workspace{flex:1;padding:18px;display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
-.brand{display:flex;align-items:center;gap:8px;font-weight:800}
-.brand img{width:36px;height:auto}
-.search-block input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,.06);background:linear-gradient(180deg,#fff,#fbfdff)}
-.search-buttons{display:flex;gap:6px;margin-top:8px}
-.search-buttons button{padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.06);background:transparent;cursor:pointer}
-.operator-login{display:flex;gap:8px;align-items:center}
-.operator-login input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.06)}
-.operator-login button{padding:8px 10px;border-radius:8px;cursor:pointer}
-.glist{margin-top:8px;height:260px;overflow:auto;border-radius:8px;padding:8px;background:linear-gradient(180deg,#fff,#f6f9fc)}
-.glist .group-row{padding:8px;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(0,0,0,.03);cursor:pointer}
-.viewer{background:var(--panel);border-radius:var(--radius);padding:18px;flex:1;margin-top:12px;overflow:auto;box-shadow:var(--shadow)}
-.topbar{display:flex;justify-content:space-between;align-items:center}
-.date-display{font-family:monospace;color:var(--ink-dim)}
-.dock-newton{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:linear-gradient(180deg,#ffffffcc,#f1f5f9cc);padding:8px 12px;border-radius:24px;display:flex;gap:12px;align-items:center;border:1px solid rgba(0,0,0,.04);box-shadow:0 8px 30px rgba(0,0,0,.06)}
-.dock-newton img{height:28px}
-.obunto-overlay{position:fixed;right:22px;bottom:110px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.obunto-overlay img{width:86px;border-radius:12px}
-.speech-bubble{background:var(--glass);padding:10px;border-radius:12px;max-width:260px;border:1px solid rgba(0,0,0,.06);font-size:13px}
-.window-newton{position:fixed;left:50%;top:10%;transform:translateX(-50%);width:720px;background:var(--panel);border-radius:var(--radius);box-shadow:0 20px 50px rgba(0,0,0,.08);z-index:30}
-.win-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid rgba(0,0,0,.04)}
-.win-body{padding:14px}
-.avatar{width:84px;height:84px;border-radius:6px}
-.close-btn{background:transparent;border:0;cursor:pointer;padding:6px}
-.status-text{margin-top:8px;color:var(--ink-dim);font-size:13px}
-.history{margin-top:auto}
-.history-title{font-weight:700}
-.history-item{padding:6px;font-family:monospace;color:var(--ink-dim);cursor:pointer}
-@media(max-width:880px){.sidebar{display:none}.dock-newton{bottom:10px}}
+.hidden{display:none}
+.boot-card{width:420px;padding:28px;border-radius:18px;background:linear-gradient(180deg,#ffffffee,#f3f8ff);box-shadow:var(--shadow);text-align:center}
+.boot-logo{width:88px;height:auto;margin-bottom:14px}
+.boot-title{font-weight:800;font-size:16px;letter-spacing:1px}
+.boot-progress{font-family:var(--mono);margin-top:14px;color:var(--muted)}
+.boot-sub{margin-top:6px;color:var(--muted);font-size:13px}
+.panel{width:420px;padding:18px;border-radius:14px;background:var(--panel);backdrop-filter:blur(6px);box-shadow:var(--shadow)}
+.panel-head{display:flex;align-items:center;gap:12px}
+.panel-head img{width:28px}
+.panel-title{font-weight:800}
+.panel-body{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.panel-body input{padding:12px;border-radius:10px;border:1px solid rgba(8,18,38,.06);background:#fff}
+.row{display:flex;gap:8px}
+.primary{flex:1;padding:10px;border-radius:10px;background:var(--accent);color:#fff;border:0;cursor:pointer}
+.secondary{padding:10px;border-radius:10px;background:transparent;border:1px solid rgba(8,18,38,.06);cursor:pointer}
+.screen#desktop{align-items:stretch}
+.sidebar{width:320px;padding:18px;background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(250,254,255,.6));backdrop-filter:blur(6px);display:flex;flex-direction:column;gap:14px;border-right:1px solid rgba(8,18,38,.04)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{width:40px}
+.brand-name{font-weight:900;letter-spacing:1px}
+.search{display:flex;flex-direction:column;gap:8px}
+.search input{padding:10px;border-radius:10px;border:1px solid rgba(8,18,38,.06);background:#fff}
+.search-actions{display:flex;gap:8px}
+.search-actions button{padding:8px;border-radius:8px;border:0;background:transparent;cursor:pointer}
+.groups{flex:1;overflow:auto;padding:6px;border-radius:8px;background:linear-gradient(180deg,#fff,#f7fbff);border:1px solid rgba(8,18,38,.02)}
+.group-item{padding:8px;border-radius:8px;margin-bottom:8px;background:#ffffff;border:1px solid rgba(8,18,38,.03);display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.recent{margin-top:auto}
+.recent-title{font-weight:700;margin-bottom:6px}
+.recent-list{display:flex;flex-direction:column;gap:6px}
+.recent-item{font-family:var(--mono);font-size:13px;color:var(--muted);cursor:pointer}
+.main{flex:1;padding:22px;display:flex;flex-direction:column}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.viewer{flex:1;border-radius:16px;padding:20px;background:var(--panel);box-shadow:var(--shadow);overflow:auto}
+.empty{display:flex;align-items:center;justify-content:center;color:var(--muted);font-weight:700}
+.window{position:fixed;left:50%;top:8%;transform:translateX(-50%);width:720px;background:var(--panel);border-radius:16px;box-shadow:0 20px 60px rgba(3,10,30,.12);z-index:60}
+.window-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(8,18,38,.04)}
+.window-title{font-weight:900}
+.win-close{background:transparent;border:0;font-size:18px;cursor:pointer}
+.window-body{padding:16px;display:flex;gap:18px}
+.card-avatar{width:200px;border-radius:12px;background:#f4f7fb;padding:12px;border:1px solid rgba(8,18,38,.03);display:flex;flex-direction:column;align-items:center;gap:12px}
+.card-avatar img{width:170px;height:170px;border-radius:8px;object-fit:cover}
+.card-info{flex:1}
+.info-line{font-family:var(--mono);color:var(--muted);margin-bottom:8px}
+.note-area{width:100%;height:90px;padding:10px;border-radius:10px;border:1px solid rgba(8,18,38,.06);resize:vertical}
+.obunto{position:fixed;right:28px;bottom:120px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:90}
+.obunto img{width:92px;border-radius:12px}
+.bubble-text{background:var(--glass);padding:12px;border-radius:12px;border:1px solid rgba(8,18,38,.05);max-width:260px}
+.dock{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;padding:10px 16px;border-radius:24px;background:linear-gradient(180deg,#ffffffdd,#f6f9ffcc);display:flex;gap:14px;align-items:center;box-shadow:0 12px 40px rgba(3,10,30,.08)}
+.dock img{height:28px;cursor:pointer}
+.clock{font-family:var(--mono);color:var(--muted);font-size:14px}
+@media (max-width:900px){
+  .sidebar{display:none}
+  .window{width:92%}
+  .boot-card,.panel{width:92%}
+}

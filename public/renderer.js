@@ -1,180 +1,229 @@
-const ALLOWED_IDS=[11577231,11608337,17211380,16499790,16234200,34002295,33326090,32366471,13732985,12026669,12026513,12045419,12022092,12045972,11649027,11648519,14075418,12330631,33582862,33305632,32791677,15677533,15034756,14118897,35026445,14159717,34645650,14474303,34186581,16047906,15216498]
-const TSC_ID=11577231
-const SCREENS={boot3:document.getElementById("boot-3"),boot2:document.getElementById("boot-2"),login:document.getElementById("login-screen"),desktop:document.getElementById("desktop-screen")}
-const UI={
-search:document.getElementById("search"),
-btnSearch:document.getElementById("btnSearch"),
-btnRefresh:document.getElementById("btnRefresh"),
-historyList:document.getElementById("historyList"),
-dateDisplay:document.getElementById("dateDisplay"),
-paperContent:document.getElementById("paperContent"),
-btnUnfreeze:document.getElementById("btnUnfreeze"),
-btnLogin:document.getElementById("btnLogin"),
-inpId:document.getElementById("inpId"),
-profileClose:document.getElementById("closeProfile")
+const socket = io();
+const screens = {
+  boot: document.getElementById('boot'),
+  login: document.getElementById('login'),
+  desktop: document.getElementById('desktop')
+};
+const UI = {
+  inpId: document.getElementById('inpId'),
+  btnLogin: document.getElementById('btnLogin'),
+  btnGuest: document.getElementById('btnGuest'),
+  loginStatus: document.getElementById('loginStatus'),
+  search: document.getElementById('search'),
+  btnSearch: document.getElementById('btnSearch'),
+  btnRefresh: document.getElementById('btnRefresh'),
+  glist: document.getElementById('glist'),
+  historyList: document.getElementById('historyList'),
+  viewer: document.getElementById('viewer'),
+  dateDisplay: document.getElementById('dateDisplay'),
+  profileWindow: document.getElementById('profile-window'),
+  profileBody: document.getElementById('profile-body'),
+  profileClose: document.getElementById('closeProfile'),
+  obuntoBubble: document.getElementById('obunto-bubble'),
+  obuntoImg: document.getElementById('obunto-img'),
+  obuntoText: document.getElementById('obunto-text'),
+  clock: document.getElementById('clock'),
+  btnUnfreeze: document.getElementById('btnUnfreeze')
+};
+let historyList = JSON.parse(localStorage.getItem('tsc_history') || '[]');
+let currentUser = null;
+
+function show(screen) {
+  Object.values(screens).forEach(s => s && s.classList.add('hidden'));
+  const el = screens[screen];
+  if (el) el.classList.remove('hidden');
 }
-let searchHistory=JSON.parse(localStorage.getItem("tsc_history")||"[]")
-function showScreen(name){
-Object.values(SCREENS).forEach(el=>{if(!el) return; el.classList.add("hidden"); el.classList.remove("active")})
-const el=SCREENS[name]
-if(!el) return
-el.classList.remove("hidden")
-el.classList.add("active")
+
+function bootSequence() {
+  show('boot');
+  const progEl = document.getElementById('boot-progress');
+  const statusEl = document.getElementById('boot-status');
+  let p = 0;
+  const t = setInterval(() => {
+    p += 12;
+    if (p > 100) p = 100;
+    const full = '■'.repeat(Math.floor(p / 10));
+    const empty = '□'.repeat(10 - Math.floor(p / 10));
+    if (progEl) progEl.textContent = `[${full}${empty}] ${p}%`;
+    if (p >= 50) {
+      if (statusEl) statusEl.textContent = 'LOADING SYSTEM';
+    }
+    if (p >= 100) {
+      clearInterval(t);
+      if (statusEl) statusEl.textContent = 'COMPLETE';
+      setTimeout(() => show('login'), 600);
+    }
+  }, 180);
 }
-function updateClock(){
-const c=document.getElementById("clock")
-if(!c) return
-const n=new Date()
-c.textContent=n.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
+
+function showObunto(text, mood) {
+  if (!UI.obuntoBubble) return;
+  UI.obuntoImg.src = `/obunto/${(mood || 'normal')}.png`;
+  UI.obuntoText.textContent = text;
+  UI.obuntoBubble.classList.remove('hidden');
+  setTimeout(() => UI.obuntoBubble.classList.add('hidden'), 5000);
 }
-setInterval(updateClock,1000)
-function speakObunto(text,mood){
-const bubble=document.getElementById("obunto-bubble")
-const img=document.getElementById("obunto-img")
-const txt=document.getElementById("obunto-text")
-if(!bubble||!img||!txt) return
-img.src=`/obunto/${mood||"normal"}.png`
-txt.textContent=text
-bubble.classList.remove("hidden")
-setTimeout(()=>{bubble.classList.add("hidden")},5000)
+
+function updateClock() {
+  if (!UI.clock) return;
+  const now = new Date();
+  UI.clock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
-async function fetchJSON(url,opts){
-try{
-if(window.electronAPI?.fetchData) return await window.electronAPI.fetchData(url,opts)
-const r=await fetch(url,opts)
-if(!r.ok) return null
-return await r.json()
-}catch(e){
-return null
+setInterval(updateClock, 1000);
+
+async function apiLogin(id) {
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: id })
+    });
+    return await res.json();
+  } catch (e) {
+    return { success: false, message: 'NETWORK' };
+  }
 }
+
+function renderHistory() {
+  if (!UI.historyList) return;
+  UI.historyList.innerHTML = '';
+  historyList.forEach(entry => {
+    const d = document.createElement('div');
+    d.className = 'recent-item';
+    d.textContent = `${entry.name} (${entry.id})`;
+    d.onclick = () => { UI.search.value = entry.id; performSearch(); };
+    UI.historyList.appendChild(d);
+  });
 }
-async function resolveUserId(query){
-if(!query) return null
-const clean=String(query).trim()
-if(clean==="") return null
-if(/^\d+$/.test(clean)) return clean
-const payload={usernames:[clean],excludeBannedUsers:true}
-const r=await fetchJSON("https://users.roblox.com/v1/usernames/users",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-if(r && Array.isArray(r.data) && r.data.length) return String(r.data[0].id)
-const r2=await fetchJSON("https://users.roblox.com/v1/users/search?keyword="+encodeURIComponent(clean)+"&limit=1")
-if(r2 && Array.isArray(r2.data) && r2.data.length) return String(r2.data[0].id)
-return null
+
+function renderGroups(groups) {
+  if (!UI.glist) return;
+  UI.glist.innerHTML = '';
+  groups.slice(0, 10).forEach(g => {
+    const el = document.createElement('div');
+    el.className = 'group-item';
+    const left = document.createElement('div');
+    left.textContent = g.dept || g.group || 'UNKNOWN';
+    const right = document.createElement('div');
+    right.style.color = '#0b69ff';
+    right.textContent = g.role || '';
+    el.appendChild(left);
+    el.appendChild(right);
+    UI.glist.appendChild(el);
+  });
 }
-function renderHistory(){
-if(!UI.historyList) return
-UI.historyList.innerHTML=""
-searchHistory.forEach(entry=>{
-const row=document.createElement("div")
-row.className="history-item"
-row.textContent=`> ${entry.name} (${entry.id})`
-row.onclick=()=>{if(UI.search) UI.search.value=entry.id; searchAction()}
-UI.historyList.appendChild(row)
-})
+
+function renderDossier(user) {
+  if (!UI.profileBody) return;
+  const avatar = user.avatar || '/assets/icon-large-owner_info-28x14.png';
+  const affiliations = user.affiliations || [];
+  const html = [];
+  html.push(`<div style="display:flex;gap:18px">`);
+  html.push(`<div class="card-avatar"><img src="${avatar}" alt=""><div style="font-weight:900;margin-top:6px">${escapeHtml(user.username)}</div><div style="font-family:${'ui-monospace,monospace'};color:var(--muted)">${escapeHtml(user.id)}</div></div>`);
+  html.push(`<div class="card-info">`);
+  html.push(`<div class="info-line"><strong>RANK</strong> • <span style="color:var(--accent)">${escapeHtml(user.rank || '')}</span></div>`);
+  html.push(`<div class="info-line"><strong>AFFILIATIONS</strong></div>`);
+  html.push(`<div style="margin-bottom:8px">`);
+  if (affiliations.length) {
+    affiliations.forEach(a => {
+      html.push(`<div style="padding:6px;border-radius:8px;background:linear-gradient(180deg,#fff,#f6f9ff);margin-bottom:6px"><strong>${escapeHtml(a.dept || a)}</strong><div style="font-family:${'ui-monospace,monospace'};color:var(--muted)">${escapeHtml(a.role || '')}</div></div>`);
+    });
+  } else {
+    html.push(`<div style="color:var(--muted)">No affiliations</div>`);
+  }
+  html.push(`</div>`);
+  html.push(`<div><textarea id="noteField" class="note-area" placeholder="Operator notes...">${escapeHtml(localStorage.getItem('note_'+user.id) || '')}</textarea></div>`);
+  html.push(`</div>`);
+  html.push(`</div>`);
+  UI.profileBody.innerHTML = html.join('');
+  UI.profileWindow.classList.remove('hidden');
+  UI.profileWindow.classList.add('window');
+  const noteField = document.getElementById('noteField');
+  if (noteField) noteField.addEventListener('input', () => localStorage.setItem('note_'+user.id, noteField.value));
 }
-function safeSetText(sel,text){
-const el=document.querySelector(sel)
-if(el) el.textContent=text
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-async function getHeadshot(userId){
-try{
-const url=`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`
-const data=await fetchJSON(url)
-if(data && Array.isArray(data.data) && data.data[0] && data.data[0].imageUrl) return data.data[0].imageUrl
-}catch(e){}
-return null
+
+async function performSearch() {
+  const q = (UI.search && UI.search.value || '').trim();
+  if (!q) return;
+  UI.viewer.innerHTML = '<div style="color:var(--muted);font-weight:700">RETRIEVING DOSSIER...</div>';
+  let id = q;
+  if (!/^\d+$/.test(q) && q.startsWith('@')) id = q.slice(1);
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: id })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      UI.viewer.innerHTML = `<div style="color:#ef4444">${escapeHtml(data.message || 'NOT FOUND')}</div>`;
+      showObunto('Data not found','werror');
+      return;
+    }
+    const user = data.userData;
+    historyList = historyList.filter(h => String(h.id) !== String(user.id));
+    historyList.unshift({ id: user.id, name: user.username });
+    if (historyList.length > 8) historyList.length = 8;
+    localStorage.setItem('tsc_history', JSON.stringify(historyList));
+    renderHistory();
+    renderGroups(user.affiliations || []);
+    UI.viewer.innerHTML = `<div style="font-weight:900">${escapeHtml(user.username)}</div><div style="color:var(--muted);font-family:ui-monospace,monospace">ID: ${escapeHtml(user.id)} • ${escapeHtml(user.rank || '')}</div><div style="margin-top:12px"><button id="openProfile" class="primary">OPEN DOSSIER</button></div>`;
+    const openProfile = document.getElementById('openProfile');
+    if (openProfile) openProfile.addEventListener('click', () => renderDossier(user));
+    if (user.isObunto) showObunto('Obunto activated','smug');
+  } catch (e) {
+    UI.viewer.innerHTML = `<div style="color:#ef4444">NETWORK ERROR</div>`;
+    showObunto('Connection error','werror');
+  }
 }
-async function createDossier(profile,groups,avatarUrl){
-const id=profile?.id||"UNKNOWN"
-const name=profile?.name||"UNKNOWN"
-const display=profile?.displayName||""
-const savedNote=localStorage.getItem("note_"+id) || ""
-const affiliations=(Array.isArray(groups)?groups.map(g=>g.group?.name||"").filter(Boolean):[]).slice(0,6)
-const html=[]
-html.push('<div class="form-header" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">')
-html.push('<div>')
-html.push('<div style="font-weight:900;font-size:16px">PERSONNEL DOSSIER</div>')
-html.push('<div style="font-size:12px;color:var(--ink-dim)">THUNDER SCIENTIFIC CORPORATION</div>')
-html.push('</div>')
-html.push('<div style="text-align:right;font-family:monospace;font-size:12px">REF: TSC-'+String(id).slice(-6)+'</div>')
-html.push('</div>')
-html.push('<div style="display:flex;gap:18px">')
-html.push('<div style="width:220px">')
-html.push('<div style="width:200px;height:200px;background:#f4f7fb;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,.04)">')
-html.push('<img src="'+(avatarUrl||'/assets/icon-large-owner_info-28x14.png')+'" style="width:100%;height:100%;object-fit:cover" onerror="this.src=\'/assets/icon-large-owner_info-28x14.png\'">')
-html.push('</div>')
-html.push('<div style="margin-top:12px;font-weight:900;font-size:18px">'+escapeHtml(name)+'</div>')
-html.push('<div style="font-family:monospace;font-size:12px;color:var(--ink-dim)">AKA: '+escapeHtml(display)+'</div>')
-html.push('</div>')
-html.push('<div style="flex:1">')
-html.push('<div style="margin-bottom:12px">REGISTRY ID: <b>'+escapeHtml(id)+'</b> &nbsp;•&nbsp; CLEARANCE: <b>C1</b></div>')
-html.push('<div style="background:rgba(0,0,0,0.03);padding:12px;border-radius:8px;min-height:120px;font-family:monospace;color:var(--ink-dim)"><strong>AUTHORIZED GROUP AFFILIATIONS</strong><br><small>'+(affiliations.length?escapeHtml(affiliations.join(", ")):"No associations")+'</small></div>')
-html.push('<div style="margin-top:12px">OPERATOR NOTES</div>')
-html.push('<textarea class="note-input" placeholder="Add annotations..." style="width:100%;height:80px;margin-top:8px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.06)">'+escapeHtml(savedNote)+'</textarea>')
-html.push('</div>')
-html.push('</div>')
-return html.join("")
-}
-function escapeHtml(s){
-return String(s||"").replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]})
-}
-async function searchAction(){
-try{
-if(!UI.search) return
-const q=UI.search.value.trim()
-if(!q) return
-if(UI.paperContent) UI.paperContent.textContent="RETRIEVING DOSSIER..."
-const uid=await resolveUserId(q)
-if(!uid){
-if(UI.paperContent) UI.paperContent.innerHTML='<div style="color:#ef4444">USER NOT FOUND</div>'
-speakObunto("Data retrieval failed.","bug")
-return
-}
-const profile=await fetchJSON("https://users.roblox.com/v1/users/"+uid)
-const groupsRes=await fetchJSON("https://groups.roblox.com/v2/users/"+uid+"/groups/roles")
-const groups=(groupsRes && Array.isArray(groupsRes.data))?groupsRes.data:[]
-const avatar=await getHeadshot(uid)
-searchHistory=searchHistory.filter(h=>String(h.id)!==String(uid))
-searchHistory.unshift({id:uid,name:profile?.name||uid})
-if(searchHistory.length>8) searchHistory.length=8
-localStorage.setItem("tsc_history",JSON.stringify(searchHistory))
-renderHistory()
-const dossier=await createDossier(profile,groups,avatar)
-if(UI.paperContent) UI.paperContent.innerHTML=dossier
-localStorage.setItem("tsc_paper_archive_v3",dossier)
-localStorage.setItem("tsc_paper_user_v3",uid)
-if(Number(profile?.id)===1947) speakObunto("Obunto: mascot control engaged.","smug")
-}catch(e){
-if(UI.paperContent) UI.paperContent.innerHTML='<div style="color:#ef4444">ERROR RETRIEVING DATA</div>'
-speakObunto("Data retrieval failed.","bug")
-}
-}
-function bootSequence(){
-showScreen("boot3")
-let progress=0
-const step=setInterval(()=>{
-progress+=10
-const prog=document.getElementById("boot-progress")
-if(prog) prog.textContent="["+Array(Math.floor(progress/10)).fill("■").join("")+Array(10-Math.floor(progress/10)).fill("□").join("")+"] "+progress+"%"
-if(progress>=50){
-showScreen("boot2")
-}
-if(progress>=100){
-clearInterval(step)
-setTimeout(()=>{showScreen("login")},200)
-}
-},120)
-}
-function initUI(){
-if(UI.btnSearch) UI.btnSearch.addEventListener("click",searchAction)
-if(UI.btnRefresh) UI.btnRefresh.addEventListener("click",()=>{const u=localStorage.getItem("tsc_paper_user_v3"); if(u && UI.search) { UI.search.value=u; searchAction() }})
-if(UI.search) UI.search.addEventListener("keydown",e=>{if(e.key==="Enter") searchAction()})
-if(UI.btnUnfreeze) UI.btnUnfreeze.addEventListener("click",()=>{speakObunto("System Reset requested.","werror")})
-if(UI.btnLogin && UI.inpId) UI.btnLogin.addEventListener("click",()=>{const v=UI.inpId.value.trim(); if(v){ if(UI.search) UI.search.value=v; showScreen("desktop"); searchAction() }})
-if(UI.profileClose) UI.profileClose.addEventListener("click",()=>{const win=document.getElementById("profile-window"); if(win) win.classList.add("hidden")})
-renderHistory()
-if(UI.dateDisplay) UI.dateDisplay.textContent="DATE: "+(new Date().getFullYear()+16)
-}
-document.addEventListener("DOMContentLoaded",()=>{
-bootSequence()
-initUI()
-})
+
+UI.btnLogin && UI.btnLogin.addEventListener('click', async () => {
+  const id = (UI.inpId && UI.inpId.value || '').trim();
+  if (!id) return;
+  UI.loginStatus.textContent = 'AUTHENTICATING';
+  const r = await apiLogin(id);
+  if (r.success) {
+    currentUser = r.userData;
+    show('desktop');
+    renderGroups(currentUser.affiliations || []);
+    if (currentUser.isObunto) showObunto('Welcome, operator','smug');
+  } else {
+    UI.loginStatus.textContent = r.message || 'DENIED';
+    showObunto('Access denied','werror');
+  }
+});
+
+UI.btnGuest && UI.btnGuest.addEventListener('click', () => {
+  show('desktop');
+  UI.viewer.innerHTML = '<div class="empty">GUEST SESSION</div>';
+});
+
+UI.btnSearch && UI.btnSearch.addEventListener('click', performSearch);
+UI.search && UI.search.addEventListener('keydown', e => { if (e.key === 'Enter') performSearch(); });
+UI.btnRefresh && UI.btnRefresh.addEventListener('click', () => {
+  const last = localStorage.getItem('tsc_paper_user_v3');
+  if (last) { UI.search.value = last; performSearch(); }
+});
+UI.profileClose && UI.profileClose.addEventListener('click', () => {
+  if (UI.profileWindow) UI.profileWindow.classList.add('hidden');
+});
+
+UI.btnUnfreeze && UI.btnUnfreeze.addEventListener('click', () => showObunto('System reset requested','werror'));
+
+socket.on('display_mascot_message', data => {
+  const msg = data && data.message ? data.message : '';
+  const mood = data && data.mood ? data.mood.toLowerCase() : 'normal';
+  showObunto(msg, mood);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  bootSequence();
+  renderHistory();
+  const stored = localStorage.getItem('tsc_history');
+  if (stored) historyList = JSON.parse(stored);
+  updateClock();
+});
