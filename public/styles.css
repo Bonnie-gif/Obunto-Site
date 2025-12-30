@@ -1,241 +1,36 @@
-:root {
-    --bg: #89937a;
-    --ink: #2b3323;
-    --paper: #c8d1c0;
-    --border: #2b3323;
+:root{
+  --bg:#eef2f6;
+  --panel:#ffffffdd;
+  --accent:#0b69ff;
+  --ink:#0b1220;
+  --ink-dim:#596074;
+  --glass:rgba(255,255,255,.6);
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial
 }
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    user-select: none;
-    font-family: 'Courier New', monospace;
-    color: var(--ink);
-}
-
-body {
-    background: var(--bg);
-    height: 100vh;
-    overflow: hidden;
-}
-
-.scanlines {
-    position: fixed;
-    inset: 0;
-    background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.1) 50%);
-    background-size: 100% 4px;
-    pointer-events: none;
-    z-index: 9999;
-}
-
-.full-screen {
-    width: 100%;
-    height: 100%;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    background: var(--bg);
-    position: relative;
-}
-
-.full-screen.active {
-    display: flex;
-}
-
-.boot-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    text-align: center;
-}
-
-.boot-logo {
-    width: 120px;
-    image-rendering: pixelated;
-    filter: drop-shadow(0 0 10px var(--bg));
-}
-
-.boot-text {
-    font-size: 20px;
-    font-weight: bold;
-    letter-spacing: 3px;
-    color: var(--ink);
-}
-
-.boot-title {
-    font-size: 28px;
-    font-weight: bold;
-    letter-spacing: 4px;
-    color: var(--ink);
-    margin-bottom: 10px;
-}
-
-.boot-box {
-    width: 400px;
-    background: var(--paper);
-    border: 2px solid var(--border);
-    padding: 20px;
-    box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
-    text-align: left;
-    font-size: 12px;
-    line-height: 1.8;
-}
-
-.boot-line {
-    white-space: pre;
-    text-align: left;
-    margin-bottom: 5px;
-}
-
-.status-text {
-    text-align: center;
-    margin: 10px 0;
-    height: 20px;
-    color: var(--ink);
-}
-
-.input-newton {
-    width: 100%;
-    padding: 10px;
-    background: var(--paper);
-    border: 1px solid var(--border);
-    font-size: 14px;
-}
-
-.btn-newton {
-    width: 100%;
-    padding: 10px;
-    background: var(--border);
-    color: var(--bg);
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.window-newton {
-    background: var(--paper);
-    border: 2px solid var(--border);
-    box-shadow: 10px 10px 0 rgba(0,0,0,0.3);
-    position: absolute;
-    top: 100px;
-    left: 100px;
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-}
-
-.win-header {
-    background: var(--border);
-    color: var(--bg);
-    padding: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: bold;
-    cursor: move;
-}
-
-.header-icon {
-    width: 20px;
-    image-rendering: pixelated;
-}
-
-.close-btn {
-    width: 15px;
-    margin-left: auto;
-    cursor: pointer;
-}
-
-.win-body {
-    padding: 20px;
-    text-align: center;
-    font-size: 14px;
-}
-
-.avatar {
-    width: 100px;
-    image-rendering: pixelated;
-    margin-bottom: 20px;
-}
-
-.data-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px dashed var(--border);
-    padding-bottom: 5px;
-}
-
-.affiliations {
-    margin-top: 20px;
-    text-align: left;
-}
-
-.affiliations ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.affiliations li {
-    margin-bottom: 5px;
-    font-size: 12px;
-}
-
-.obunto-overlay {
-    position: fixed;
-    bottom: 80px;
-    right: 20px;
-    display: flex;
-    align-items: flex-end;
-    gap: 15px;
-    z-index: 9999;
-}
-
-.obunto-overlay img {
-    width: 80px;
-    height: 80px;
-    background: var(--paper);
-    border: 2px solid var(--border);
-    padding: 5px;
-    image-rendering: pixelated;
-}
-
-.speech-bubble {
-    background: var(--border);
-    color: var(--bg);
-    padding: 15px;
-    border-radius: 10px 10px 10px 0;
-    max-width: 300px;
-    font-size: 14px;
-}
-
-.dock-newton {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: var(--paper);
-    border-top: 2px solid var(--border);
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.dock-newton img {
-    width: 40px;
-    image-rendering: pixelated;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-.hidden {
-    display: none !important;
-}
-
-@keyframes glitch-scan {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(200%); }
-}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:linear-gradient(180deg,var(--bg),#dfe7ef);font-family:var(--font);color:var(--ink)}
+.full-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.scanlines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px);background-size:100% 3px;pointer-events:none}
+.boot-center{text-align:center}
+.boot-logo{width:84px;margin-bottom:12px}
+.boot-box{background:var(--panel);padding:16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.boot-title{font-weight:900;letter-spacing:1px}
+.boot-line{font-family:monospace;font-size:13px;color:var(--ink-dim)}
+#desktop-screen{display:flex;height:100vh}
+.sidebar{width:320px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid rgba(0,0,0,.05)}
+.workspace{flex:1;padding:18px;display:flex;flex-direction:column}
+.brand{display:flex;gap:8px;align-items:center;font-weight:800}
+.search-block input,.operator-login input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}
+.search-buttons{display:flex;gap:6px;margin-top:8px}
+.search-buttons button,.operator-login button,#btnUnfreeze{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff}
+.glist{flex:1;overflow:auto;background:#f6f9fc;border-radius:8px;padding:8px}
+.viewer{background:var(--panel);border-radius:12px;padding:18px;flex:1;box-shadow:0 10px 30px rgba(0,0,0,.05)}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.date-display{font-family:monospace;color:var(--ink-dim)}
+.dock-newton{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#ffffffcc,#f1f5f9cc);padding:8px 14px;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.dock-newton img{height:28px}
+.obunto-overlay{position:fixed;right:24px;bottom:110px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.obunto-overlay img{width:86px}
+.speech-bubble{background:var(--glass);padding:10px;border-radius:10px;font-size:13px}
+.hidden{display:none}
+.history-item{font-family:monospace;font-size:13px;color:var(--ink-dim);cursor:pointer}
