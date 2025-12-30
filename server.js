@@ -14,36 +14,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const MONGO_URI = process.env.MONGO_URI;
-let isDbConnected = false;
-
-// MongoDB Connection (Optional)
-const connectDB = async () => {
-    if (!MONGO_URI) {
-        console.log('⚠️  MongoDB URI not provided - running without database');
-        return;
-    }
-    try { 
-        await mongoose.connect(MONGO_URI); 
-        isDbConnected = true;
-        console.log('✅ MongoDB Connected');
-    } catch (err) { 
-        console.error('❌ DB Error:', err.message);
-        setTimeout(connectDB, 10000); 
-    }
-};
-connectDB();
-
-// Database Schema
-const UserSchema = new mongoose.Schema({
-    userId: { type: String, unique: true },
-    frozen: { type: Boolean, default: false },
-    notes: { type: String, default: "" },
-    lastAccess: { type: Date, default: Date.now }
-});
-const User = mongoose.model('User', UserSchema);
-
-// TSC Groups Configuration
 const TSC_GROUPS = {
     11577231: "THUNDER SCIENTIFIC CORPORATION",
     11608337: "SECURITY DEPARTMENT",
@@ -56,222 +26,108 @@ const TSC_GROUPS = {
     14159717: "INTELLIGENCE"
 };
 
-// Get Roblox User Data
-async function getRobloxData(userId) {
-    try {
-        // Get profile
-        const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
-        const username = profileRes.data.name;
-        const displayName = profileRes.data.displayName;
-        const description = profileRes.data.description || "";
-        const created = profileRes.data.created;
+const connectedUsers = new Map();
 
-        // Get avatar
-        const avatarRes = await axios.get(
-            `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`
-        );
-        const avatar = avatarRes.data.data[0]?.imageUrl || "";
-
-        // Get groups
-        const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
-        const allGroups = groupsRes.data.data || [];
-
-        // Filter TSC groups
-        const tscGroups = allGroups.filter(g => TSC_GROUPS[g.group.id]);
-
-        if (tscGroups.length === 0) {
-            throw new Error("No TSC affiliation detected");
-        }
-
-        // Extract RANK/LEVEL from main group (11577231)
-        const mainGroup = tscGroups.find(g => g.group.id === 11577231);
-        let level = "LEVEL 0";
-        
-        if (mainGroup) {
-            const levelMatch = mainGroup.role.name.match(/\d+/);
-            level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
-        } else {
-            // Fallback to highest rank TSC group
-            tscGroups.sort((a, b) => b.role.rank - a.role.rank);
-            if (tscGroups[0]) {
-                const levelMatch = tscGroups[0].role.name.match(/\d+/);
-                level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
-            }
-        }
-
-        return {
-            id: userId,
-            username,
-            displayName,
-            description,
-            created,
-            avatar,
-            rank: level,
-            affiliations: tscGroups.map(g => ({ 
-                groupId: g.group.id,
-                groupName: TSC_GROUPS[g.group.id] || g.group.name,
-                role: g.role.name,
-                rank: g.role.rank
-            })),
-            allGroups: allGroups.map(g => ({
-                id: g.group.id,
-                name: g.group.name,
-                role: g.role.name,
-                rank: g.role.rank
-            })),
-            isObunto: userId === "1947"
-        };
-    } catch (err) {
-        throw err;
-    }
-}
-
-// API Endpoints
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
 
-    if (!userId) {
-        return res.status(400).json({ 
-            success: false, 
-            message: "USER ID REQUIRED" 
-        });
-    }
+    if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // Admin access
-    if (userId === "000") {
+    if (userId === "8989") {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "000", 
-                username: "OBUNTO_CORE", 
-                displayName: "System Administrator",
-                rank: "OMEGA",
+                id: "8989", 
+                username: "OBUNTO", 
+                displayName: "System Artificial Intelligence",
+                rank: "MAINFRAME",
                 avatar: "/obunto/normal.png", 
                 affiliations: [{
                     groupName: "TSC MAINFRAME",
-                    role: "SYSTEM CORE",
+                    role: "SYSTEM ADMINISTRATOR",
                     rank: 999
                 }],
                 allGroups: [],
-                isAdmin: true,
                 isObunto: true
             } 
         });
     }
 
     try {
-        // Check if user is frozen (if DB available)
-        if (isDbConnected) {
-            let user = await User.findOne({ userId });
-            if (!user) {
-                user = new User({ userId });
-                await user.save();
-            } else if (user.frozen) {
-                return res.status(403).json({ 
-                    success: false, 
-                    message: "ACCESS DENIED - USER ID FROZEN" 
-                });
-            }
-            
-            // Update last access
-            user.lastAccess = new Date();
-            await user.save();
+        const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
+        const userGroupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
+        const avatarRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
+
+        const allGroups = userGroupsRes.data.data || [];
+        const tscGroups = allGroups.filter(g => TSC_GROUPS[g.group.id]);
+
+        if (tscGroups.length === 0) {
+             return res.status(403).json({ success: false, message: "ACCESS DENIED: NON-PERSONNEL" });
         }
 
-        // Get Roblox data
-        const profile = await getRobloxData(userId);
-        
+        const mainGroup = tscGroups.find(g => g.group.id === 11577231);
+        let level = "LEVEL 0";
+        if (mainGroup) {
+            const match = mainGroup.role.name.match(/\d+/);
+            level = match ? `LEVEL ${match[0]}` : "LEVEL 0";
+        }
+
         res.json({ 
             success: true, 
-            userData: profile 
+            userData: {
+                id: userId.toString(),
+                username: profileRes.data.name,
+                displayName: profileRes.data.displayName,
+                created: profileRes.data.created,
+                avatar: avatarRes.data.data[0]?.imageUrl,
+                rank: level,
+                affiliations: tscGroups.map(g => ({
+                    groupName: TSC_GROUPS[g.group.id] || g.group.name,
+                    role: g.role.name
+                })),
+                allGroups: allGroups,
+                isObunto: false
+            } 
         });
 
     } catch (e) {
-        console.error('Login error:', e.message);
-        res.status(500).json({ 
-            success: false, 
-            message: e.message || "SERVER ERROR" 
-        });
+        console.error(e);
+        res.status(500).json({ success: false, message: "CONNECTION ERROR" });
     }
 });
 
-// Save operator notes
-app.post('/api/save-note', async (req, res) => {
-    const { userId, note } = req.body;
-    
-    if (!userId) {
-        return res.status(400).json({ success: false });
-    }
-    
-    try {
-        if (isDbConnected) {
-            await User.updateOne(
-                { userId }, 
-                { notes: note },
-                { upsert: true }
-            );
-        }
-        res.json({ success: true });
-    } catch (e) {
-        console.error('Save note error:', e);
-        res.status(500).json({ success: false });
-    }
-});
-
-// Get operator notes
-app.get('/api/get-note/:userId', async (req, res) => {
-    const { userId } = req.params;
-    
-    try {
-        if (isDbConnected) {
-            const user = await User.findOne({ userId });
-            res.json({ 
-                success: true, 
-                note: user?.notes || "" 
-            });
-        } else {
-            res.json({ 
-                success: true, 
-                note: "" 
-            });
-        }
-    } catch (e) {
-        res.status(500).json({ 
-            success: false, 
-            note: "" 
-        });
-    }
-});
-
-// Socket.io for Obunto broadcasts
 io.on('connection', (socket) => {
-    console.log('👤 User connected:', socket.id);
-    
-    // Mascot broadcast (admin only)
-    socket.on('mascot_broadcast', (data) => {
-        console.log('📢 Obunto broadcast:', data.message);
-        io.emit('display_mascot_message', {
-            message: data.message,
-            mood: data.mood || 'normal'
-        });
+    let currentUserId = null;
+
+    socket.on('register_user', (userId) => {
+        currentUserId = userId;
+        connectedUsers.set(String(userId), socket.id);
+        console.log(`User ${userId} connected via ${socket.id}`);
     });
-    
+
+    socket.on('mascot_broadcast', (data) => {
+        if (data.targetId && data.targetId.trim() !== "") {
+            const targetSocket = connectedUsers.get(String(data.targetId));
+            if (targetSocket) {
+                io.to(targetSocket).emit('display_mascot_message', {
+                    message: `[PRIVATE] ${data.message}`,
+                    mood: data.mood || 'suspicious'
+                });
+            }
+        } else {
+            io.emit('display_mascot_message', {
+                message: data.message,
+                mood: data.mood || 'normal'
+            });
+        }
+    });
+
     socket.on('disconnect', () => {
-        console.log('👋 User disconnected:', socket.id);
+        if (currentUserId) connectedUsers.delete(currentUserId);
     });
 });
 
-// Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log('\n╔════════════════════════════════════════╗');
-    console.log('║   TSC NEWTON OS - PERSONNEL DATABASE  ║');
-    console.log('╚════════════════════════════════════════╝');
-    console.log(`\n🌐 Server running on port ${PORT}`);
-    console.log(`📱 Access: http://localhost:${PORT}`);
-    console.log(`\n💾 Database: ${isDbConnected ? '✅ Connected' : '⚠️  Local storage only'}`);
-    console.log('\n🎮 Test IDs:');
-    console.log('   • 000 - Admin (Obunto Core)');
-    console.log('   • 1947 - Obunto Control');
-    console.log('   • 1 - Roblox User\n');
+    console.log(`TSC NEWTON OS SERVER RUNNING ON PORT ${PORT}`);
 });

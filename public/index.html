@@ -3,245 +3,180 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEWTON OS // TSC PERSONNEL GATEWAY</title>
+  <title>NEWTON OS // TSC PERSONAL TERMINAL</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="/assets/icon-large-dock-35x23.png" type="image/png">
 </head>
 <body>
-  <!-- Scanlines Effect -->
   <div class="scanlines"></div>
 
-  <!-- BOOT SCREEN 1: Obunto Loading -->
   <div id="boot-3" class="screen full-screen active">
     <div class="boot-center">
-      <img src="/obunto/normal.png" class="boot-logo" alt="Obunto System">
-      <div class="boot-text">OBUNTO SYSTEM LOADING<span id="glitch-dots">...</span></div>
-      <div class="boot-subtext">Thunder Scientific Corporation</div>
+      <img src="/obunto/normal.png" class="boot-logo" alt="Obunto">
+      <div class="boot-text">OBUNTO SYSTEM v8.9<span id="glitch-dots">...</span></div>
     </div>
   </div>
 
-  <!-- BOOT SCREEN 2: TSC Mainframe -->
   <div id="boot-2" class="screen full-screen hidden">
     <div class="boot-center">
-      <div class="boot-title">TSC MAINFRAME</div>
+      <div class="boot-title">TSC TERMINAL LINK</div>
       <div class="boot-box">
-        <div class="boot-line">Verifying TSC signature........OK</div>
-        <div class="boot-line">Loading Newton emulation.......OK</div>
-        <div class="boot-line">Mounting assets..................<span id="boot-progress">□□□□□□□□□□ 0%</span></div>
-        <div class="boot-line">Initializing database...........<span id="boot-db">PENDING</span></div>
-        <div class="boot-line"><span id="boot-status">INITIALIZING...</span></div>
+        <div class="boot-line">Establishing secure handshake...OK</div>
+        <div class="boot-line">Verifying personnel credentials...PENDING</div>
+        <div class="boot-line"><span id="boot-status">LOADING GATEWAY...</span></div>
       </div>
     </div>
   </div>
 
-  <!-- LOGIN SCREEN -->
   <div id="login-screen" class="screen full-screen hidden">
     <div class="boot-center">
-      <img src="/assets/icon-large-assist-13x20.png" class="boot-logo-small" alt="Assist">
+      <img src="/assets/icon-large-lock-10x12.png" class="boot-logo-small" alt="Lock">
       <div class="boot-box">
-        <div class="boot-title">TSC NEWTON GATEWAY</div>
-        <div class="boot-subtitle">Personnel Database Access</div>
-        <input id="inpId" type="text" placeholder="ENTER USER ID" class="input-newton" autocomplete="off" />
+        <div class="boot-title">IDENTITY VERIFICATION</div>
+        <div class="boot-subtitle">TSC Personal Terminal Access</div>
+        <input id="inpId" type="text" placeholder="INPUT PERSONNEL ID" class="input-newton" autocomplete="off" />
         <div id="loginStatus" class="status-text"></div>
-        <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
-        <div class="login-help">
-          <small>Test IDs: 000 (Admin) • 1947 (Obunto) • 1 (Roblox)</small>
-        </div>
+        <button id="btnLogin" class="btn-newton">INITIALIZE SESSION</button>
       </div>
     </div>
   </div>
 
-  <!-- DESKTOP SCREEN -->
   <div id="desktop-screen" class="screen hidden">
     
-    <!-- SIDEBAR -->
     <aside class="sidebar">
-      <!-- Brand Header -->
       <div class="brand">
-        <img src="/assets/icon-large-dock-35x23.png" alt="Dock" class="brand-icon">
+        <img src="/assets/icon-large-dock-35x23.png" class="brand-icon">
         <div class="brand-text">
           <div class="brand-title">NEWTON OS</div>
-          <div class="brand-sub">TSC Gateway v2.0</div>
+          <div class="brand-sub">Personal Terminal</div>
         </div>
       </div>
 
-      <!-- Search Section -->
       <div class="section-block">
-        <div class="section-title">
-          <img src="/assets/icon-large-find-21x21.png" alt="Find" class="title-icon">
-          <span>DATABASE SEARCH</span>
-        </div>
-        <input id="search" placeholder="ID, @username, or name" class="input-newton" autocomplete="off" />
-        <div class="search-buttons">
-          <button id="btnSearch" class="btn-action">
-            <img src="/assets/button-text-22x17.png" alt="Search">
-            SEARCH
-          </button>
-          <button id="btnRefresh" class="btn-icon" title="Refresh last search">
-            <img src="/assets/icon-small-rotate_right-13x12.png" alt="Refresh">
-          </button>
-        </div>
+        <button id="navDashboard" class="btn-action active-nav mb-1">
+          <img src="/assets/icon-large-owner_info-28x14.png"> MY TERMINAL
+        </button>
+        <button id="navDatabase" class="btn-action">
+          <img src="/assets/icon-large-find-21x21.png"> DATABASE SEARCH
+        </button>
       </div>
 
-      <!-- Operator Info -->
       <div class="section-block">
-        <div class="section-title">
-          <img src="/assets/icon-large-owner_info-28x14.png" alt="Operator" class="title-icon">
-          <span>OPERATOR SESSION</span>
-        </div>
-        <div id="sessionInfo" class="session-info">
-          <div class="session-line">STATUS: <span class="session-value">GUEST</span></div>
-          <div class="session-line">ID: <span class="session-value">NONE</span></div>
-        </div>
-      </div>
-
-      <!-- TSC Groups -->
-      <div class="section-block groups-section">
-        <div class="section-title">
-          <img src="/assets/icon-large-calls-26x26.png" alt="Groups" class="title-icon">
-          <span>TSC PROTOCOLS</span>
-        </div>
-        <input id="gfilter" placeholder="Filter groups..." class="input-newton filter-input" autocomplete="off" />
-        <div id="glist" class="glist">
-          <div class="empty-groups">Login to view groups</div>
-        </div>
-      </div>
-
-      <!-- Recent Access History -->
-      <div class="section-block history-section">
-        <div class="section-title">
-          <img src="/assets/icon-large-clock-24x22.png" alt="History" class="title-icon">
-          <span>RECENT ACCESS</span>
-        </div>
-        <div id="historyList" class="history-list">
-          <div class="empty-history">No recent searches</div>
+        <div class="section-title">TERMINAL STATUS</div>
+        <div class="session-info">
+          <div class="session-line">NET: <span class="session-value">SECURE (TSC-INTRA)</span></div>
+          <div class="session-line">USER: <span id="sbUser">UNKNOWN</span></div>
+          <div class="session-line">RANK: <span id="sbRank">--</span></div>
         </div>
       </div>
     </aside>
 
-    <!-- MAIN WORKSPACE -->
     <main class="workspace">
-      <!-- Top Bar -->
       <div class="topbar">
         <div class="topbar-left">
-          <img src="/assets/icon-large-dates-25x22.png" alt="Date" class="topbar-icon">
-          <span id="dateDisplay" class="date-display">DATE: 2041-12-30</span>
+           <img src="/assets/icon-large-dates-25x22.png" class="topbar-icon">
+           <span id="dateDisplay" class="date-display">--</span>
         </div>
-        <div class="topbar-center">
-          <img src="/assets/icon-large-assist_highlighted-23x24.png" alt="TSC" class="topbar-logo">
-          <span class="topbar-title">THUNDER SCIENTIFIC CORPORATION</span>
-        </div>
+        <div class="topbar-center">THUNDER SCIENTIFIC CORPORATION</div>
         <div class="topbar-right">
-          <button id="btnUnfreeze" class="btn-control">
-            <img src="/assets/icon-large-undo-19x22.png" alt="Reset">
-            RESET
-          </button>
+           <div class="indicator-light"></div> ONLINE
         </div>
       </div>
 
-      <!-- Paper Viewer -->
-      <div id="paperContent" class="viewer">
-        <div class="welcome-screen">
-          <img src="/assets/icon-large-notes_highlighted-19x25.png" alt="Notes" class="welcome-icon">
-          <div class="welcome-text">WELCOME TO NEWTON OS</div>
-          <div class="welcome-sub">Personnel Database Management System</div>
-          <div class="welcome-instructions">
-            Use the search terminal to retrieve dossiers<br>
-            <small>Supports: Roblox User ID, @username, or display name</small>
-          </div>
+      <div id="view-dashboard" class="viewer active-view">
+        <div class="dashboard-grid">
+           <div class="dash-card profile-card">
+              <img id="dashAvatar" src="" class="dash-avatar">
+              <div class="dash-info">
+                 <div class="dash-name" id="dashName">LOADING...</div>
+                 <div class="dash-rank" id="dashRank">...</div>
+                 <div class="dash-id">ID: <span id="dashId">...</span></div>
+                 <div class="dash-badge">CLEARANCE GRANTED</div>
+              </div>
+           </div>
+
+           <div class="dash-card dept-card">
+              <div class="dash-header">
+                 <img src="/assets/icon-large-calls-26x26.png"> DEPARTMENT ASSIGNMENTS
+              </div>
+              <div id="dashDepts" class="dept-list"></div>
+           </div>
+
+           <div class="dash-card system-card">
+              <div class="dash-header">
+                 <img src="/assets/icon-large-notes-17x22.png"> TERMINAL NOTICES
+              </div>
+              <div class="notice-text">
+                 > Welcome to your personal terminal.<br>
+                 > All actions are logged by the Ethics Committee.<br>
+                 > Obunto System is monitoring network traffic.<br>
+                 > Report any anomalies to Engineering immediately.
+              </div>
+           </div>
         </div>
       </div>
+
+      <div id="view-search" class="viewer hidden">
+        <div class="search-bar-area">
+           <input id="search" placeholder="Search Personnel Database..." class="input-newton big-search" />
+           <button id="btnSearch" class="btn-newton" style="width: auto;">QUERY</button>
+        </div>
+        <div id="paperContent" class="search-results">
+           <div class="welcome-screen">
+              <img src="/assets/icon-large-find-21x21.png" class="welcome-icon">
+              <div class="welcome-text">DATABASE READY</div>
+           </div>
+        </div>
+      </div>
+
     </main>
 
-    <!-- PROFILE WINDOW (hidden by default) -->
-    <div id="profile-window" class="window-newton hidden" aria-hidden="true">
-      <div class="win-header">
-        <img src="/assets/icon-large-names-32x22.png" class="header-icon" alt="Names">
-        <span class="win-title">PERSONNEL CARD</span>
-        <button id="closeProfile" class="close-btn">
-          <img src="/assets/button-close-17x17.png" alt="Close">
-        </button>
-      </div>
-      <div class="win-body">
-        <div class="profile-top">
-          <img id="userAvatar" src="/assets/icon-large-owner_info-28x14.png" class="avatar" alt="Avatar">
-          <div class="profile-info">
-            <div class="profile-name" id="userName">USERNAME</div>
-            <div class="profile-display" id="userDisplay">Display Name</div>
-            <div class="profile-id">ID: <span id="userId">000000</span></div>
-            <div class="profile-rank">RANK: <span id="userRank">LEVEL 0</span></div>
-          </div>
-        </div>
-        <div class="affiliations">
-          <div class="aff-header">
-            <img src="/assets/icon-large-calls-26x26.png" alt="Affiliations" class="aff-icon">
-            <span>TSC AFFILIATIONS</span>
-          </div>
-          <ul id="affList" class="aff-list"></ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- OBUNTO MASCOT -->
-    <div id="obunto-bubble" class="obunto-overlay hidden" aria-hidden="true">
+    <div id="obunto-bubble" class="obunto-overlay hidden">
       <div class="obunto-container">
-        <img id="obunto-img" src="/obunto/normal.png" alt="Obunto" class="obunto-avatar">
+        <img id="obunto-img" src="/obunto/normal.png" class="obunto-avatar">
         <div id="obunto-text" class="speech-bubble"></div>
       </div>
     </div>
 
-    <!-- ADMIN CONTROL PANEL (visible only for ID 000) -->
-    <div id="admin-panel" class="window-newton admin-window hidden" aria-hidden="true">
+    <div id="admin-panel" class="window-newton admin-window hidden">
       <div class="win-header">
-        <img src="/assets/icon-large-preferences-19x19.png" class="header-icon" alt="Admin">
-        <span class="win-title">OBUNTO CONTROL SYSTEM</span>
-        <button id="closeAdmin" class="close-btn">
-          <img src="/assets/button-close-17x17.png" alt="Close">
-        </button>
+        <img src="/assets/icon-large-preferences-19x19.png" class="header-icon">
+        <span class="win-title">OBUNTO CONTROL MATRIX</span>
+        <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
         <div class="admin-section">
-          <label class="admin-label">SELECT MOOD EXPRESSION:</label>
+          <label class="admin-label">EXPRESSION STATE:</label>
           <div id="mood-container" class="mood-grid"></div>
         </div>
         <div class="admin-section">
-          <label class="admin-label">BROADCAST MESSAGE:</label>
-          <textarea id="adminMsg" class="admin-textarea" placeholder="Enter broadcast message..." maxlength="200"></textarea>
-          <div class="admin-footer">
-            <span class="char-count"><span id="charCount">0</span>/200</span>
-            <button id="btnBroadcast" class="btn-newton">BROADCAST TO ALL</button>
+          <label class="admin-label">TARGET RECIPIENT:</label>
+          <div class="target-row">
+            <input id="targetId" class="input-newton" placeholder="User ID (Leave empty for GLOBAL BROADCAST)" />
           </div>
+        </div>
+        <div class="admin-section">
+          <label class="admin-label">TRANSMISSION DATA:</label>
+          <textarea id="adminMsg" class="admin-textarea" placeholder="Enter message protocol..."></textarea>
+          <button id="btnBroadcast" class="btn-newton">EXECUTE TRANSMISSION</button>
         </div>
       </div>
     </div>
 
-    <!-- DOCK -->
-    <div class="dock-newton" role="navigation" aria-label="Dock">
+    <div class="dock-newton">
       <div class="dock-apps">
-        <button class="dock-btn" title="Notes" disabled>
-          <img src="/assets/icon-large-notes-17x22.png" alt="Notes">
-        </button>
-        <button class="dock-btn" title="Dates" disabled>
-          <img src="/assets/icon-large-dates-25x22.png" alt="Dates">
-        </button>
-        <button class="dock-btn" title="Find" disabled>
-          <img src="/assets/icon-large-find-21x21.png" alt="Find">
-        </button>
-        <button id="btnSettings" class="dock-btn" title="Setup">
-          <img src="/assets/icon-large-setup-25x22.png" alt="Setup">
+        <button id="btnObuntoControl" class="dock-btn hidden" title="Obunto Control">
+          <img src="/assets/icon-large-preferences_highlighted-19x19.png">
         </button>
       </div>
-      <div class="dock-divider"></div>
       <div class="dock-clock">
-        <img src="/assets/icon-large-clock-24x22.png" alt="Clock" class="clock-icon">
+        <img src="/assets/icon-large-clock-24x22.png" class="clock-icon">
         <span id="clock">--:--</span>
       </div>
     </div>
   </div>
 
-  <!-- Socket.io -->
   <script src="/socket.io/socket.io.js"></script>
-  <!-- Main Renderer -->
   <script src="renderer.js"></script>
 </body>
 </html>

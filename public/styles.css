@@ -1,10 +1,4 @@
-/* ============================================
-   NEWTON OS - TSC PERSONNEL DATABASE
-   Authentic Newton MessagePad Interface
-   ============================================ */
-
 :root {
-  /* Newton OS Color Palette */
   --bg-main: #89937a;
   --bg-light: #9da896;
   --bg-dark: #6a7462;
@@ -28,17 +22,11 @@
   --button: #a8b2a0;
   --button-hover: #b8c2b0;
   
-  /* Typography */
   --font-main: 'Chicago', 'System', -apple-system, BlinkMacSystemFont, 'Courier New', monospace;
   --font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
   
-  /* Spacing */
   --radius: 8px;
 }
-
-/* ============================================
-   RESET & BASE
-   ============================================ */
 
 * {
   box-sizing: border-box;
@@ -73,10 +61,6 @@ input, textarea {
   font-family: var(--font-mono);
 }
 
-/* ============================================
-   SCANLINES EFFECT
-   ============================================ */
-
 .scanlines {
   pointer-events: none;
   position: fixed;
@@ -94,10 +78,6 @@ input, textarea {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-1px); }
 }
-
-/* ============================================
-   SCREEN MANAGEMENT
-   ============================================ */
 
 .screen {
   position: fixed;
@@ -121,10 +101,6 @@ input, textarea {
   height: 100%;
   background: var(--bg-main);
 }
-
-/* ============================================
-   BOOT SCREENS
-   ============================================ */
 
 .boot-center {
   text-align: center;
@@ -159,13 +135,6 @@ input, textarea {
   font-family: var(--font-mono);
 }
 
-.boot-subtext {
-  font-size: 11px;
-  color: var(--ink-dim);
-  letter-spacing: 1px;
-  margin-top: -10px;
-}
-
 .boot-title {
   font-size: 24px;
   font-weight: bold;
@@ -197,18 +166,6 @@ input, textarea {
   white-space: pre;
   margin-bottom: 4px;
 }
-
-.login-help {
-  text-align: center;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dotted var(--border-light);
-  color: var(--ink-dim);
-}
-
-/* ============================================
-   INPUTS & BUTTONS
-   ============================================ */
 
 .input-newton {
   width: 100%;
@@ -263,17 +220,12 @@ input, textarea {
   font-family: var(--font-mono);
 }
 
-/* ============================================
-   DESKTOP LAYOUT
-   ============================================ */
-
 #desktop-screen {
   display: flex;
   flex-direction: row;
   height: 100vh;
 }
 
-/* Sidebar */
 .sidebar {
   width: 360px;
   background: var(--paper);
@@ -286,21 +238,15 @@ input, textarea {
   box-shadow: inset -2px 0 4px var(--shadow);
 }
 
-/* Workspace */
 .workspace {
   flex: 1;
   padding: 16px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: 80px; /* Space for dock */
+  padding-bottom: 80px; 
 }
 
-/* ============================================
-   SIDEBAR COMPONENTS
-   ============================================ */
-
-/* Brand */
 .brand {
   display: flex;
   align-items: center;
@@ -328,20 +274,11 @@ input, textarea {
   letter-spacing: 0.5px;
 }
 
-/* Section Blocks */
 .section-block {
   background: var(--paper-dark);
   border: 2px solid var(--border-light);
   padding: 12px;
   border-radius: 6px;
-}
-
-.section-block.groups-section,
-.section-block.history-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
 }
 
 .section-title {
@@ -357,21 +294,9 @@ input, textarea {
   border-bottom: 1px solid var(--border-light);
 }
 
-.title-icon {
-  width: 20px;
-  height: auto;
-}
-
-/* Search Buttons */
-.search-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
 .btn-action {
-  flex: 1;
-  padding: 8px 10px;
+  width: 100%;
+  padding: 10px 12px;
   background: var(--button);
   border: 2px solid var(--border);
   border-style: outset;
@@ -380,8 +305,9 @@ input, textarea {
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  text-align: left;
+  margin-bottom: 6px;
 }
 
 .btn-action img {
@@ -398,31 +324,16 @@ input, textarea {
   transform: translateY(1px);
 }
 
-.btn-icon {
-  width: 44px;
-  padding: 8px;
-  background: var(--button);
-  border: 2px solid var(--border);
-  border-style: outset;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.active-nav {
+    background: var(--ink) !important;
+    color: var(--paper) !important;
+    border-style: inset !important;
 }
 
-.btn-icon img {
-  width: 16px;
-  height: auto;
+.active-nav img {
+    filter: brightness(0) invert(1);
 }
 
-.btn-icon:hover {
-  background: var(--button-hover);
-}
-
-.btn-icon:active {
-  border-style: inset;
-}
-
-/* Session Info */
 .session-info {
   background: var(--paper);
   border: 2px solid var(--border);
@@ -448,101 +359,6 @@ input, textarea {
   font-weight: bold;
 }
 
-/* Groups List */
-.filter-input {
-  margin-bottom: 8px;
-}
-
-.glist {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--paper);
-  border: 2px solid var(--border);
-  border-style: inset;
-  padding: 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  min-height: 200px;
-  max-height: 300px;
-}
-
-.empty-groups, .empty-history {
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--ink-dim);
-  font-size: 10px;
-}
-
-.group-section-header {
-  font-weight: bold;
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: var(--ink);
-  padding: 6px 4px;
-  margin: 8px 0 4px 0;
-  background: var(--paper-dark);
-  border-bottom: 1px solid var(--border-light);
-}
-
-.group-row {
-  padding: 6px 8px;
-  margin-bottom: 4px;
-  background: var(--paper-light);
-  border: 1px solid var(--border-light);
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.group-row:hover {
-  background: var(--button);
-}
-
-.group-name {
-  font-weight: bold;
-  font-size: 10px;
-}
-
-.group-role {
-  font-size: 9px;
-  color: var(--ink-dim);
-}
-
-/* History List */
-.history-list {
-  flex: 1;
-  overflow-y: auto;
-  background: var(--paper);
-  border: 2px solid var(--border);
-  border-style: inset;
-  padding: 8px;
-  max-height: 150px;
-}
-
-.history-item {
-  padding: 6px 8px;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-dim);
-  cursor: pointer;
-  border-bottom: 1px dotted var(--border-light);
-  transition: all 0.1s;
-}
-
-.history-item:last-child {
-  border-bottom: none;
-}
-
-.history-item:hover {
-  background: var(--button);
-  color: var(--ink);
-}
-
-/* ============================================
-   TOPBAR
-   ============================================ */
-
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -562,8 +378,7 @@ input, textarea {
   gap: 10px;
 }
 
-.topbar-icon,
-.topbar-logo {
+.topbar-icon {
   width: 26px;
   height: auto;
 }
@@ -576,43 +391,20 @@ input, textarea {
   letter-spacing: 0.5px;
 }
 
-.topbar-title {
+.topbar-center {
   font-size: 12px;
   font-weight: bold;
   letter-spacing: 1px;
   color: var(--ink);
 }
 
-.btn-control {
-  padding: 6px 12px;
-  background: var(--button);
-  border: 2px solid var(--border);
-  border-style: outset;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.indicator-light {
+    width: 8px;
+    height: 8px;
+    background: #15803d;
+    border-radius: 50%;
+    box-shadow: 0 0 4px #15803d;
 }
-
-.btn-control img {
-  width: 16px;
-  height: auto;
-}
-
-.btn-control:hover {
-  background: var(--button-hover);
-}
-
-.btn-control:active {
-  border-style: inset;
-  transform: translateY(1px);
-}
-
-/* ============================================
-   PAPER VIEWER
-   ============================================ */
 
 .viewer {
   flex: 1;
@@ -623,173 +415,133 @@ input, textarea {
   box-shadow: 
     inset 2px 2px 4px var(--shadow),
     4px 4px 0 var(--shadow);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.6;
 }
 
-.welcome-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  text-align: center;
-  gap: 20px;
+.active-view {
+    display: block !important;
 }
 
-.welcome-icon {
-  width: 80px;
-  height: auto;
-  opacity: 0.5;
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr; 
+    grid-template-rows: auto auto;
+    gap: 16px;
+    height: 100%;
 }
 
-.welcome-text {
-  font-size: 20px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  color: var(--ink);
+.dash-card {
+    background: var(--paper-dark);
+    border: 3px solid var(--border);
+    border-style: outset;
+    padding: 12px;
+    box-shadow: 4px 4px 0 var(--shadow);
 }
 
-.welcome-sub {
-  font-size: 12px;
-  color: var(--ink-dim);
-  margin-top: -10px;
+.dash-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 11px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
 }
 
-.welcome-instructions {
-  font-size: 11px;
-  color: var(--ink-dim);
-  line-height: 1.8;
-  margin-top: 10px;
+.dash-header img {
+    width: 20px;
+    height: auto;
 }
 
-/* Dossier Styles */
-.dossier {
-  font-family: var(--font-mono);
+.profile-card {
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--paper);
 }
 
-.dossier-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--border);
+.dash-avatar {
+    width: 150px;
+    height: 150px;
+    border: 4px solid var(--border);
+    margin-bottom: 16px;
+    background: #000;
 }
 
-.dossier-title {
-  font-weight: bold;
-  font-size: 16px;
-  letter-spacing: 1px;
+.dash-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--ink);
+    margin-bottom: 4px;
 }
 
-.dossier-ref {
-  font-size: 10px;
-  color: var(--ink-dim);
+.dash-rank {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--ink-dim);
+    margin-bottom: 12px;
+    background: var(--paper-light);
+    padding: 4px 8px;
+    display: inline-block;
+    border: 1px solid var(--border-light);
 }
 
-.dossier-body {
-  display: flex;
-  gap: 24px;
+.dash-id {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--ink);
 }
 
-.dossier-photo {
-  width: 200px;
-  flex-shrink: 0;
+.dash-badge {
+    margin-top: 20px;
+    background: var(--ink);
+    color: var(--paper-light);
+    padding: 6px 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
-.dossier-photo img {
-  width: 100%;
-  border: 3px solid var(--border);
-  background: var(--paper-dark);
-  box-shadow: 4px 4px 0 var(--shadow);
+.dept-list {
+    max-height: 200px;
+    overflow-y: auto;
 }
 
-.dossier-name {
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 12px;
+.dept-row {
+    background: var(--paper);
+    border: 1px solid var(--border-light);
+    padding: 8px;
+    margin-bottom: 6px;
 }
 
-.dossier-display {
-  font-size: 11px;
-  color: var(--ink-dim);
-  margin-top: 4px;
+.dept-name {
+    font-weight: bold;
+    font-size: 11px;
 }
 
-.dossier-content {
-  flex: 1;
+.dept-role {
+    font-size: 10px;
+    color: var(--ink-dim);
 }
 
-.dossier-field {
-  margin-bottom: 12px;
-  padding: 10px;
-  background: var(--paper-dark);
-  border: 2px solid var(--border-light);
-  border-radius: 4px;
+.notice-text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--ink-dim);
 }
 
-.dossier-label {
-  font-weight: bold;
-  font-size: 9px;
-  letter-spacing: 1px;
-  margin-bottom: 6px;
-  color: var(--ink-dim);
+.search-bar-area {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.dossier-value {
-  font-size: 12px;
-  color: var(--ink);
+.big-search {
+    font-size: 16px;
+    padding: 14px;
 }
-
-.affiliations-box {
-  margin-top: 16px;
-  padding: 12px;
-  background: var(--paper-dark);
-  border: 2px solid var(--border-light);
-  border-radius: 4px;
-}
-
-.aff-item {
-  margin: 8px 0;
-  padding: 8px;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-}
-
-.aff-dept {
-  font-weight: bold;
-  font-size: 11px;
-}
-
-.aff-role {
-  font-size: 10px;
-  color: var(--ink-dim);
-  margin-top: 2px;
-}
-
-.note-input {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
-  background: var(--paper);
-  border: 2px solid var(--border);
-  border-style: inset;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  resize: vertical;
-  margin-top: 8px;
-}
-
-.note-input:focus {
-  outline: 2px solid var(--ink);
-  outline-offset: -4px;
-}
-
-/* ============================================
-   WINDOWS
-   ============================================ */
 
 .window-newton {
   position: fixed;
@@ -838,7 +590,6 @@ input, textarea {
   padding: 4px;
   display: flex;
   align-items: center;
-  transition: background 0.2s;
 }
 
 .close-btn img {
@@ -847,105 +598,12 @@ input, textarea {
   filter: brightness(0) invert(1);
 }
 
-.close-btn:hover {
-  background: rgba(255,255,255,0.15);
-}
-
 .win-body {
   padding: 20px;
 }
 
-/* Profile Window */
-.profile-top {
-  display: flex;
-  gap: 18px;
-  margin-bottom: 18px;
-  padding-bottom: 18px;
-  border-bottom: 2px solid var(--border-light);
-}
-
-.avatar {
-  width: 110px;
-  height: 110px;
-  border: 3px solid var(--border);
-  background: var(--paper-dark);
-  box-shadow: 4px 4px 0 var(--shadow);
-}
-
-.profile-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.profile-name {
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-.profile-display {
-  font-size: 11px;
-  color: var(--ink-dim);
-}
-
-.profile-id,
-.profile-rank {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 6px 10px;
-  background: var(--paper-dark);
-  border: 2px solid var(--border-light);
-  border-style: inset;
-}
-
-.affiliations {
-  background: var(--paper-dark);
-  border: 2px solid var(--border-light);
-  padding: 14px;
-  border-radius: 4px;
-}
-
-.aff-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: bold;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.aff-icon {
-  width: 20px;
-  height: auto;
-}
-
-.aff-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.aff-list li {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 8px;
-  margin-bottom: 6px;
-  background: var(--paper);
-  border: 1px solid var(--border-light);
-}
-
-/* Admin Panel */
 .admin-section {
   margin-bottom: 20px;
-}
-
-.admin-section:last-child {
-  margin-bottom: 0;
 }
 
 .admin-label {
@@ -997,6 +655,10 @@ input, textarea {
   background: var(--button-hover);
 }
 
+.target-row {
+    margin-bottom: 12px;
+}
+
 .admin-textarea {
   width: 100%;
   min-height: 100px;
@@ -1009,27 +671,6 @@ input, textarea {
   resize: vertical;
   margin-bottom: 10px;
 }
-
-.admin-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.char-count {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--ink-dim);
-}
-
-.char-count span {
-  color: var(--ink);
-  font-weight: bold;
-}
-
-/* ============================================
-   OBUNTO MASCOT
-   ============================================ */
 
 .obunto-overlay {
   position: fixed;
@@ -1090,10 +731,6 @@ input, textarea {
   border-top: 14px solid var(--border);
 }
 
-/* ============================================
-   DOCK
-   ============================================ */
-
 .dock-newton {
   position: fixed;
   bottom: 0;
@@ -1142,18 +779,6 @@ input, textarea {
   transform: translateY(0);
 }
 
-.dock-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.dock-divider {
-  width: 3px;
-  height: 44px;
-  background: var(--border-light);
-  margin: 0 10px;
-}
-
 .dock-clock {
   display: flex;
   align-items: center;
@@ -1171,10 +796,6 @@ input, textarea {
   width: 22px;
   height: auto;
 }
-
-/* ============================================
-   SCROLLBARS (Newton OS Style)
-   ============================================ */
 
 ::-webkit-scrollbar {
   width: 18px;
@@ -1203,91 +824,3 @@ input, textarea {
 ::-webkit-scrollbar-corner {
   background: var(--paper-dark);
 }
-
-/* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 1200px) {
-  .sidebar {
-    width: 300px;
-  }
-  
-  .window-newton {
-    width: 90%;
-    max-width: 500px;
-  }
-}
-
-@media (max-width: 900px) {
-  .sidebar {
-    display: none;
-  }
-  
-  .topbar {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .obunto-overlay {
-    bottom: 90px;
-    right: 16px;
-  }
-  
-  .obunto-avatar {
-    width: 70px;
-    height: 70px;
-  }
-  
-  .speech-bubble {
-    max-width: 220px;
-    font-size: 10px;
-  }
-}
-
-@media (max-width: 600px) {
-  .boot-box {
-    width: 90%;
-  }
-  
-  .dock-apps {
-    gap: 6px;
-  }
-  
-  .dock-btn {
-    width: 44px;
-    height: 44px;
-  }
-  
-  .dock-btn img {
-    width: 24px;
-  }
-}
-
-/* ============================================
-   ANIMATIONS
-   ============================================ */
-
-@keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  25% { transform: translate(-2px, 2px); }
-  50% { transform: translate(2px, -2px); }
-  75% { transform: translate(-2px, -2px); }
-}
-
-.glitch {
-  animation: glitch 0.3s infinite;
-}
-
-/* ============================================
-   UTILITIES
-   ============================================ */
-
-.text-center {
-  text-align: center;
-}
-
-.mt-1 { margin-top: 8px; }
-.mt-2 { margin-top: 16px; }
-.mb-1 { margin-bottom: 8px; }
-.mb-2 { margin-bottom: 16px; }
