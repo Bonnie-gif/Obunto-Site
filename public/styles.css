@@ -5,32 +5,50 @@
   --ink:#0b1220;
   --ink-dim:#596074;
   --glass:rgba(255,255,255,.6);
-  --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  --radius:12px;
+  --shadow:0 10px 30px rgba(0,0,0,.06);
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:linear-gradient(180deg,var(--bg),#dfe7ef);font-family:var(--font);color:var(--ink)}
-.full-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-.scanlines{position:fixed;inset:0;background-image:linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px);background-size:100% 3px;pointer-events:none}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#dfe7ef);font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.hidden{display:none !important}
+.active{display:flex}
+.scanlines{pointer-events:none;position:fixed;inset:0;background-image:linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);background-size:100% 3px;mix-blend-mode:soft-light}
 .boot-center{text-align:center}
-.boot-logo{width:84px;margin-bottom:12px}
-.boot-box{background:var(--panel);padding:16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
-.boot-title{font-weight:900;letter-spacing:1px}
-.boot-line{font-family:monospace;font-size:13px;color:var(--ink-dim)}
-#desktop-screen{display:flex;height:100vh}
-.sidebar{width:320px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid rgba(0,0,0,.05)}
-.workspace{flex:1;padding:18px;display:flex;flex-direction:column}
-.brand{display:flex;gap:8px;align-items:center;font-weight:800}
-.search-block input,.operator-login input{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.08)}
+.boot-logo{width:84px;height:auto;margin-bottom:12px}
+.boot-text{font-weight:700;letter-spacing:1px}
+.boot-box{background:var(--panel);padding:16px;border-radius:10px;box-shadow:var(--shadow);max-width:520px}
+.boot-title{font-weight:900;letter-spacing:1px;margin-bottom:8px}
+.boot-line{font-family:monospace;font-size:13px;color:var(--ink-dim);margin:6px 0}
+#desktop-screen{display:flex;flex-direction:row;height:100vh;align-items:stretch}
+.sidebar{width:320px;background:var(--panel);padding:16px;display:flex;flex-direction:column;gap:12px;border-right:1px solid rgba(0,0,0,.04)}
+.workspace{flex:1;padding:18px;display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+.brand{display:flex;align-items:center;gap:8px;font-weight:800}
+.brand img{width:36px;height:auto}
+.search-block input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,.06);background:linear-gradient(180deg,#fff,#fbfdff)}
 .search-buttons{display:flex;gap:6px;margin-top:8px}
-.search-buttons button,.operator-login button,#btnUnfreeze{padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff}
-.glist{flex:1;overflow:auto;background:#f6f9fc;border-radius:8px;padding:8px}
-.viewer{background:var(--panel);border-radius:12px;padding:18px;flex:1;box-shadow:0 10px 30px rgba(0,0,0,.05)}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.search-buttons button{padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,.06);background:transparent;cursor:pointer}
+.operator-login{display:flex;gap:8px;align-items:center}
+.operator-login input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,.06)}
+.operator-login button{padding:8px 10px;border-radius:8px;cursor:pointer}
+.glist{margin-top:8px;height:260px;overflow:auto;border-radius:8px;padding:8px;background:linear-gradient(180deg,#fff,#f6f9fc)}
+.glist .group-row{padding:8px;border-radius:6px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(0,0,0,.03);cursor:pointer}
+.viewer{background:var(--panel);border-radius:var(--radius);padding:18px;flex:1;margin-top:12px;overflow:auto;box-shadow:var(--shadow)}
+.topbar{display:flex;justify-content:space-between;align-items:center}
 .date-display{font-family:monospace;color:var(--ink-dim)}
-.dock-newton{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:linear-gradient(180deg,#ffffffcc,#f1f5f9cc);padding:8px 14px;border-radius:20px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+.dock-newton{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:linear-gradient(180deg,#ffffffcc,#f1f5f9cc);padding:8px 12px;border-radius:24px;display:flex;gap:12px;align-items:center;border:1px solid rgba(0,0,0,.04);box-shadow:0 8px 30px rgba(0,0,0,.06)}
 .dock-newton img{height:28px}
-.obunto-overlay{position:fixed;right:24px;bottom:110px;display:flex;flex-direction:column;align-items:center;gap:8px}
-.obunto-overlay img{width:86px}
-.speech-bubble{background:var(--glass);padding:10px;border-radius:10px;font-size:13px}
-.hidden{display:none}
-.history-item{font-family:monospace;font-size:13px;color:var(--ink-dim);cursor:pointer}
+.obunto-overlay{position:fixed;right:22px;bottom:110px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.obunto-overlay img{width:86px;border-radius:12px}
+.speech-bubble{background:var(--glass);padding:10px;border-radius:12px;max-width:260px;border:1px solid rgba(0,0,0,.06);font-size:13px}
+.window-newton{position:fixed;left:50%;top:10%;transform:translateX(-50%);width:720px;background:var(--panel);border-radius:var(--radius);box-shadow:0 20px 50px rgba(0,0,0,.08);z-index:30}
+.win-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid rgba(0,0,0,.04)}
+.win-body{padding:14px}
+.avatar{width:84px;height:84px;border-radius:6px}
+.close-btn{background:transparent;border:0;cursor:pointer;padding:6px}
+.status-text{margin-top:8px;color:var(--ink-dim);font-size:13px}
+.history{margin-top:auto}
+.history-title{font-weight:700}
+.history-item{padding:6px;font-family:monospace;color:var(--ink-dim);cursor:pointer}
+@media(max-width:880px){.sidebar{display:none}.dock-newton{bottom:10px}}

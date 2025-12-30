@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,14 +9,14 @@
 <body>
   <div class="scanlines"></div>
 
-  <div id="boot-3" class="full-screen active">
+  <div id="boot-3" class="screen full-screen active">
     <div class="boot-center">
-      <img src="/obunto/normal.png" class="boot-logo">
-      <div class="boot-text">OBUNTO SYSTEM LOADING<span id="glitch-dots"></span></div>
+      <img src="/obunto/normal.png" class="boot-logo" alt="Obunto">
+      <div class="boot-text">OBUNTO SYSTEM LOADING<span id="glitch-dots">...</span></div>
     </div>
   </div>
 
-  <div id="boot-2" class="full-screen" style="display:none;">
+  <div id="boot-2" class="screen full-screen hidden">
     <div class="boot-center">
       <div class="boot-title">TSC MAINFRAME</div>
       <div class="boot-box">
@@ -28,41 +28,41 @@
     </div>
   </div>
 
-  <div id="login-screen" class="full-screen" style="display:none;">
+  <div id="login-screen" class="screen full-screen hidden">
     <div class="boot-center">
-      <img src="/assets/icon-large-assist-13x20.png" class="boot-logo">
+      <img src="/assets/icon-large-assist-13x20.png" class="boot-logo" alt="Assist">
       <div class="boot-box">
         <div class="boot-title">TSC NEWTON GATEWAY</div>
-        <input id="inpId" type="text" placeholder="ENTER USER ID" class="input-newton">
+        <input id="inpId" type="text" placeholder="ENTER USER ID" class="input-newton" />
         <div id="loginStatus" class="status-text"></div>
         <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
       </div>
     </div>
   </div>
 
-  <div id="desktop-screen" class="full-screen" style="display:none;">
+  <div id="desktop-screen" class="screen hidden">
     <aside class="sidebar">
       <div class="brand">
-        <img src="/assets/icon-large-dock-35x23.png">
+        <img src="/assets/icon-large-dock-35x23.png" alt="Dock">
         <div class="brand-text">NEWTON OS</div>
       </div>
 
       <div class="search-block">
-        <input id="search" placeholder="SEARCH ID, @username or NAME">
+        <input id="search" placeholder="SEARCH ID, @username or NAME" />
         <div class="search-buttons">
           <button id="btnSearch">SEARCH</button>
-          <button id="btnRefresh">↺</button>
+          <button id="btnRefresh" title="Refresh">↺</button>
         </div>
       </div>
 
       <div class="operator-login">
-        <input id="operatorInput" placeholder="Operator ID / @name">
+        <input id="operatorInput" placeholder="Operator ID / @name" />
         <button id="btnAuth">AUTH</button>
         <div id="sessionInfo" class="session-info"></div>
       </div>
 
       <div class="group-filter">
-        <input id="gfilter" placeholder="Filter groups...">
+        <input id="gfilter" placeholder="Filter groups..." />
         <div id="glist" class="glist"></div>
       </div>
 
@@ -75,21 +75,39 @@
     <main class="workspace">
       <div class="topbar">
         <div id="dateDisplay" class="date-display"></div>
-        <button id="btnUnfreeze">RESET</button>
+        <div class="controls">
+          <button id="btnUnfreeze">RESET</button>
+        </div>
       </div>
+
       <div id="paperContent" class="viewer">WELCOME — USE SEARCH TO RETRIEVE A DOSSIER</div>
     </main>
 
-    <div id="obunto-bubble" class="obunto-overlay hidden">
-      <img id="obunto-img" src="/obunto/normal.png">
+    <div id="profile-window" class="window-newton hidden" aria-hidden="true">
+      <div class="win-header">
+        <img src="/assets/icon-large-names-32x22.png" class="header-icon" alt="Names">
+        <span>NAMES</span>
+        <button id="closeProfile" class="close-btn"><img src="/assets/button-close-17x17.png" alt="Close"></button>
+      </div>
+      <div class="win-body">
+        <img id="userAvatar" src="/assets/icon-large-owner_info-28x14.png" class="avatar" alt="Avatar">
+        <div class="data-row"><b>ID:</b> <span id="userId"></span></div>
+        <div class="data-row"><b>NAME:</b> <span id="userName"></span></div>
+        <div class="data-row"><b>RANK:</b> <span id="userRank"></span></div>
+        <div class="affiliations"><b>AFFILIATIONS:</b><ul id="affList"></ul></div>
+      </div>
+    </div>
+
+    <div id="obunto-bubble" class="obunto-overlay hidden" aria-hidden="true">
+      <img id="obunto-img" src="/obunto/normal.png" alt="Obunto">
       <div id="obunto-text" class="speech-bubble"></div>
     </div>
 
-    <div class="dock-newton">
-      <img src="/assets/icon-large-notes-17x22.png">
-      <img src="/assets/icon-large-dates-25x22.png">
-      <img src="/assets/icon-large-find-21x21.png">
-      <img src="/assets/icon-large-setup-25x22.png">
+    <div class="dock-newton" role="navigation" aria-label="Dock">
+      <img src="/assets/icon-large-notes-17x22.png" alt="Notes" title="Notes">
+      <img src="/assets/icon-large-dates-25x22.png" alt="Dates" title="Dates">
+      <img src="/assets/icon-large-find-21x21.png" alt="Find" title="Find">
+      <img src="/assets/icon-large-setup-25x22.png" alt="Setup" title="Setup">
       <span id="clock">--:--</span>
     </div>
   </div>
