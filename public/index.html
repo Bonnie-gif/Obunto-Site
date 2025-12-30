@@ -12,20 +12,16 @@
   <div class="scanlines"></div>
   <div class="screen-flicker"></div>
 
-  <div id="boot-3" class="screen full-screen active">
-    <div class="boot-center">
-      <img src="/obunto/normal.png" class="boot-logo" alt="Obunto">
-      <div class="boot-text">OBUNTO SYSTEM v8.9<span id="glitch-dots">...</span></div>
-    </div>
-  </div>
-
-  <div id="boot-2" class="screen full-screen hidden">
-    <div class="boot-center">
-      <div class="boot-title">TSC TERMINAL LINK</div>
-      <div class="boot-box">
-        <div class="boot-line">Establishing secure handshake...OK</div>
-        <div class="boot-line">Verifying personnel credentials...PENDING</div>
-        <div class="boot-line"><span id="boot-status">LOADING GATEWAY...</span></div>
+  <div id="boot-sequence" class="screen full-screen active">
+    <div class="power-flash"></div>
+    <div class="loading-content">
+      <div class="logo">N</div>
+      <div class="boot-text">NEWTON OS</div>
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="progress-text">INITIALIZING SYSTEM...</div>
       </div>
     </div>
   </div>
@@ -130,7 +126,6 @@
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body chat-body">
-        
         <div id="help-request-form">
           <div class="admin-section">
             <label class="admin-label">REQUEST ASSISTANCE:</label>
@@ -139,7 +134,6 @@
           </div>
           <div id="help-status" class="status-text hidden">REQUEST SENT. WAITING FOR OPERATOR...</div>
         </div>
-
         <div id="help-chat-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
           <div id="chat-history" class="chat-history"></div>
           <div class="chat-input-area">
@@ -147,7 +141,6 @@
             <button id="btnChatSend" class="btn-newton" style="width: auto;">SEND</button>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -176,7 +169,7 @@
         </div>
         <div class="admin-chat-controls">
           <button id="admin-chat-wait" class="btn-newton btn-warning">WAIT</button>
-          <button id="admin-chat-close" class="btn-newton btn-danger">CLOSE & LOCK</button>
+          <button id="admin-chat-close" class="btn-newton btn-danger">DONE</button>
         </div>
       </div>
     </div>
@@ -184,11 +177,14 @@
     <div id="admin-panel" class="window-newton admin-window hidden" style="top: 80px; left: 50%;">
       <div class="win-header">
         <img src="/assets/icon-large-preferences-19x19.png" class="header-icon">
-        <span class="win-title">OBUNTO CONTROL MATRIX</span>
+        <span class="win-title">AOP // OPERATIONS PROTOCOL</span>
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
-        
+        <div class="admin-section">
+          <label class="admin-label">SYSTEM STATUS:</label>
+          <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
+        </div>
         <div class="admin-section">
           <label class="admin-label">ALARMS & POWER:</label>
           <div class="alarm-grid">
@@ -201,14 +197,12 @@
             <button class="btn-alarm btn-power-off" data-alarm="off">PWR OFF</button>
           </div>
         </div>
-
         <div class="admin-section">
           <label class="admin-label">INCOMING TICKETS:</label>
           <div id="ticket-list" class="ticket-list">
             <div class="no-tickets">NO PENDING REQUESTS</div>
           </div>
         </div>
-
         <div class="admin-section">
           <label class="admin-label">GLOBAL BROADCAST:</label>
           <div id="mood-container" class="mood-grid mb-1"></div>
@@ -238,7 +232,12 @@
   </div>
 
   <audio id="sfx-boot" src="/audio/loading1.wav"></audio>
-  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio> <audio id="sfx-alarm-green" src="/audio/greencode.wav"></audio>
+  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio>
+  <audio id="sfx-notify" src="/assets/sounds/notify.mp3"></audio>
+  <audio id="sfx-speak" src="/assets/sounds/beep.mp3"></audio>
+  <audio id="sfx-error" src="/assets/sounds/error.mp3"></audio>
+  
+  <audio id="sfx-alarm-green" src="/audio/greencode.wav"></audio>
   <audio id="sfx-alarm-blue" src="/audio/bluecode.wav"></audio>
   <audio id="sfx-alarm-red" src="/audio/redcode.wav"></audio>
   <audio id="sfx-alarm-gamma" src="/audio/codegamma4.wav"></audio>

@@ -48,7 +48,7 @@ export function speak(text, mood) {
     
     if (mood === 'sleeping') playSound('sleep');
     else if (mood === 'dizzy') playSound('uhoh');
-    else playSound('msg'); // Generic Obunto speak sound or newmessage
+    else playSound('msg');
 
     if (bubbleTimeout) clearTimeout(bubbleTimeout);
     bubbleTimeout = setTimeout(() => { UI.obunto.bubble.classList.add('hidden'); }, 8000);
@@ -102,7 +102,11 @@ function setupAdminPanel(socket) {
     UI.obunto.btnOpen.onclick = () => UI.obunto.panel.classList.remove('hidden');
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
     
-    // Alarms
+    UI.obunto.btnToggle.onclick = () => {
+        const current = document.getElementById('statusText').textContent;
+        socket.emit('toggle_system_status', current === 'ONLINE' ? 'OFFLINE' : 'ONLINE');
+    };
+
     document.querySelectorAll('.btn-alarm').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-alarm');
@@ -118,7 +122,6 @@ function setupAdminPanel(socket) {
         UI.obunto.msg.value = '';
     };
 
-    // Chat Controls
     const { send, input, wait, close } = UI.obunto.adminChat;
 
     send.onclick = () => {

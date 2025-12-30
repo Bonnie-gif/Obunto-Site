@@ -23,7 +23,7 @@ export function initHelp(socket) {
     reqBtn.onclick = (e) => {
         if (isRequestPending || isChatActive) {
             spawnFlyingIcon(e.clientX, e.clientY);
-            playSound('uhoh'); // Use existing error sound
+            playSound('uhoh');
             return;
         }
         const msg = reqInput.value.trim();
@@ -54,9 +54,7 @@ export function initHelp(socket) {
     socket.on('chat_force_open', () => {
         isChatActive = true;
         isRequestPending = false;
-        // Boot sound usually implies system start, for chat start maybe generic click or notify
-        // But user didn't specify start sound, using click/notify implicitly or logic from previous
-        playSound('msg'); 
+        playSound('msg');
         window.classList.remove('hidden');
         window.classList.add('locked-window');
         reqForm.classList.add('hidden');

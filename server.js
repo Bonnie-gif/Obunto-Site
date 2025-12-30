@@ -19,6 +19,7 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 const COOLDOWN_TIME = 4 * 60 * 1000;
 
 let dataStore = { notes: {}, helpTickets: [] };
+let systemStatus = 'ONLINE'; 
 let activeChats = {}; 
 let userCooldowns = {};
 
@@ -85,16 +86,22 @@ app.post('/api/login', async (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    socket.emit('status_update', systemStatus);
+
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
         currentUserId = userId;
         socket.join(userId); 
+        
         if (userId === "8989") {
             adminSocketId = socket.id;
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
         }
-        if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
+        
+        if (dataStore.notes[userId]) {
+            socket.emit('load_notes', dataStore.notes[userId]);
+        }
         
         const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
         if (activeTicket) {
@@ -102,12 +109,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    // BROADCAST FIX
     socket.on('mascot_broadcast', (data) => {
-        io.emit('display_mascot_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
+        io.emit('display_mascot_message', { 
+            message: data.message, 
+            mood: data.mood || 'normal', 
+            targetId: data.targetId 
+        });
     });
 
     socket.on('admin_trigger_alarm', (alarmType) => {
         io.emit('play_alarm_sound', alarmType);
+    });
+
+    socket.on('toggle_system_status', (status) => {
+        systemStatus = status;
+        io.emit('status_update', systemStatus);
     });
 
     socket.on('save_notes', (text) => {
@@ -169,7 +186,10 @@ io.on('connection', (socket) => {
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
         const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
-        if (recipient) io.to(recipient).emit('chat_receive', { message, sender });
+        
+        if (recipient) {
+            io.to(recipient).emit('chat_receive', { message, sender });
+        }
     });
 });
 

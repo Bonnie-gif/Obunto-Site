@@ -19,16 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     }, 1000);
 
+    // Boot Sequence
+    playSound('boot');
     setTimeout(() => {
-        UI.screens.boot.classList.add('hidden');
-        switchScreen('boot2');
-        
-        setTimeout(() => {
-            switchScreen('login');
-        }, 3000);
-    }, 6000); // 6 seconds for boot screen 1
-
-    playSound('boot'); // Play loading sound on start
+        document.getElementById('boot-sequence').classList.add('hidden');
+        switchScreen('login');
+    }, 6000);
 
     UI.login.btn.onclick = () => handleLogin(socket);
     UI.login.input.addEventListener("keydown", e => { 
