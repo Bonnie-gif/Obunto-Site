@@ -96,6 +96,12 @@ io.on('connection', (socket) => {
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
         }
         if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
+        
+        // Verifica se usuário já tem chat ativo ao reconectar
+        const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
+        if (activeTicket) {
+            socket.emit('chat_force_open');
+        }
     });
 
     socket.on('mascot_broadcast', (data) => {
@@ -116,16 +122,19 @@ io.on('connection', (socket) => {
     socket.on('request_help', (msg) => {
         if (!currentUserId) return;
         
-        const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && t.status === 'open');
+        // Verifica se já existe ticket aberto ou ativo
+        const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && (t.status === 'open' || t.status === 'active'));
+        
         if (existingTicket) {
-            existingTicket.msg = msg; 
-            existingTicket.timestamp = new Date();
-        } else {
-            const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
-            dataStore.helpTickets.push(ticket);
-            if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
+            socket.emit('help_request_denied', { reason: 'ACTIVE_TICKET' });
+            return;
         }
+
+        const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
+        dataStore.helpTickets.push(ticket);
         saveData();
+        
+        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
         socket.emit('help_request_received');
     });
 
@@ -136,7 +145,9 @@ io.on('connection', (socket) => {
             activeChats[ticket.userId] = true;
             saveData();
             
-            io.to(ticket.userId).emit('chat_started');
+            // Força abertura para o usuário
+            io.to(ticket.userId).emit('chat_force_open');
+            // Abre para o admin
             if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
         }
     });
@@ -147,6 +158,7 @@ io.on('connection', (socket) => {
             ticket.status = 'closed';
             delete activeChats[userId];
             saveData();
+            
             io.to(userId).emit('chat_ended');
         }
     });

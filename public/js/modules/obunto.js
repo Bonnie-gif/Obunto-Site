@@ -14,15 +14,19 @@ export function initObunto(socket, userId) {
 
     if (userId === "8989") {
         setupAdminPanel(socket);
+        
         socket.on('new_help_request', (ticket) => {
             playSound('notify');
-            speak(`New Help Request from ID ${ticket.userId}`, "happy");
+            UI.obunto.notifyIcon.classList.remove('hidden');
             addTicketToList(ticket, socket);
         });
+
         socket.on('load_pending_tickets', (tickets) => {
+            if (tickets.length > 0) UI.obunto.notifyIcon.classList.remove('hidden');
             UI.obunto.ticketList.innerHTML = '';
             tickets.forEach(t => addTicketToList(t, socket));
         });
+
         socket.on('chat_receive', (data) => {
             if (currentChatTarget) {
                 const div = document.createElement('div');
@@ -53,6 +57,7 @@ function addTicketToList(ticket, socket) {
     div.onclick = () => {
         openChatSession(ticket.userId);
         div.remove();
+        if (UI.obunto.ticketList.children.length === 0) UI.obunto.notifyIcon.classList.add('hidden');
         socket.emit('admin_accept_ticket', ticket.id);
     };
     if(UI.obunto.ticketList.querySelector('.no-tickets')) UI.obunto.ticketList.innerHTML = '';
@@ -68,6 +73,11 @@ function openChatSession(userId) {
 
 function setupAdminPanel(socket) {
     UI.obunto.btnOpen.classList.remove('hidden');
+    UI.obunto.notifyIcon.onclick = () => {
+        UI.obunto.panel.classList.remove('hidden');
+        UI.obunto.notifyIcon.classList.add('hidden');
+    };
+
     UI.obunto.moods.innerHTML = '';
     MOODS.forEach(mood => {
         const div = document.createElement('div');

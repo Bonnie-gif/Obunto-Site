@@ -33,7 +33,8 @@ export const UI = {
         chatTarget: document.getElementById('admin-chat-target'),
         bubble: document.getElementById('obunto-bubble'),
         img: document.getElementById('obunto-img'),
-        text: document.getElementById('obunto-text')
+        text: document.getElementById('obunto-text'),
+        notifyIcon: document.getElementById('admin-notify-icon')
     },
     help: {
         window: document.getElementById('help-window'),
