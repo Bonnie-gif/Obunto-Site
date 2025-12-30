@@ -19,7 +19,7 @@ export const UI = {
         btnOpen: document.getElementById('btnObuntoControl'),
         btnClose: document.getElementById('closeAdmin'),
         moods: document.getElementById('mood-container'),
-        target: document.getElementById('targetId'),
+        target: document.getElementById('broadcastTarget'),
         msg: document.getElementById('adminMsg'),
         btnSend: document.getElementById('btnBroadcast'),
         btnToggle: document.getElementById('btnToggleStatus'),

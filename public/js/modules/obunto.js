@@ -7,7 +7,7 @@ const MOODS = ['annoyed', 'bug', 'dizzy', 'happy', 'hollow', 'normal', 'panic', 
 let bubbleTimeout;
 
 export function initObunto(socket, userId) {
-    socket.on('display_mascot_message', (data) => {
+    socket.on('receive_broadcast_message', (data) => {
         if (data.targetId && data.targetId !== userId) return;
         speak(data.message, data.mood);
     });
@@ -25,16 +25,19 @@ export function initObunto(socket, userId) {
         UI.obunto.aop.close.onclick = () => UI.obunto.aop.window.classList.add('hidden');
 
         setupAdminPanel(socket);
+        
         socket.on('new_help_request', (ticket) => {
             playSound('msg');
             UI.obunto.notifyIcon.classList.remove('hidden');
             addTicketToList(ticket, socket);
         });
+        
         socket.on('load_pending_tickets', (tickets) => {
             if(tickets.length > 0) UI.obunto.notifyIcon.classList.remove('hidden');
             UI.obunto.ticketList.innerHTML = '';
             tickets.forEach(t => addTicketToList(t, socket));
         });
+        
         socket.on('chat_receive', (data) => {
             if (currentChatTarget) {
                 const div = document.createElement('div');
@@ -123,9 +126,18 @@ function setupAdminPanel(socket) {
 
     UI.obunto.btnSend.onclick = () => {
         const msg = UI.obunto.msg.value.trim();
-        const target = UI.obunto.target.value.trim();
+        let target = null;
+        if(UI.obunto.target && UI.obunto.target.value.trim() !== '') {
+            target = UI.obunto.target.value.trim();
+        }
+
         if (!msg) return;
-        socket.emit('mascot_broadcast', { message: msg, mood: currentMood, targetId: target || null });
+        
+        socket.emit('admin_broadcast_message', { 
+            message: msg, 
+            mood: currentMood, 
+            targetId: target 
+        });
         UI.obunto.msg.value = '';
     };
 

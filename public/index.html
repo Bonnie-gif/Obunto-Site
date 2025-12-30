@@ -131,7 +131,6 @@
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body chat-body">
-        
         <div id="help-request-form" class="help-layout">
           <div class="admin-section" style="flex: 1; display: flex; flex-direction: column;">
             <label class="admin-label">REQUEST ASSISTANCE:</label>
@@ -140,7 +139,6 @@
           </div>
           <div id="help-status" class="status-text hidden">REQUEST SENT. WAITING FOR OPERATOR...</div>
         </div>
-
         <div id="help-chat-interface" class="hidden help-layout">
           <div id="chat-history" class="chat-history"></div>
           <div class="chat-input-area mt-auto">
@@ -148,7 +146,6 @@
             <button id="btnChatSend" class="btn-newton" style="width: auto;">SEND</button>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -222,10 +219,13 @@
           </div>
         </div>
         <div class="admin-section">
-          <label class="admin-label">GLOBAL BROADCAST:</label>
+          <label class="admin-label">BROADCAST:</label>
           <div id="mood-container" class="mood-grid mb-1"></div>
+          <div class="target-row">
+             <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
+          </div>
           <textarea id="adminMsg" class="admin-textarea" placeholder="Broadcast message..."></textarea>
-          <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
+          <button id="btnBroadcast" class="btn-newton">SEND MESSAGE</button>
         </div>
       </div>
     </div>
