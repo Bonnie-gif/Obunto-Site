@@ -78,16 +78,13 @@ async function login() {
             if (currentUser.id === "8989") {
                 // Show the control button in dock
                 UI.obunto.btnOpen.classList.remove('hidden');
-                // Initialize the control panel logic
                 setupObuntoPanel();
-                speakObunto("System Control Online. Awaiting manual input.", "smug");
-            } else {
-                speakObunto(`Welcome back, ${currentUser.username}.`, "happy");
             }
+
+            // Nota: Obunto permanece silencioso ao logar, conforme solicitado.
 
         } else {
             UI.login.status.textContent = "ERROR: " + data.message;
-            speakObunto("Access Denied.", "suspicious");
         }
     } catch (e) {
         console.error(e);
@@ -128,24 +125,21 @@ function setupObuntoPanel() {
     MOODS.forEach(mood => {
         const div = document.createElement('div');
         div.className = 'mood-icon';
-        if (mood === 'normal') div.classList.add('active'); // Default active
+        if (mood === 'normal') div.classList.add('active'); 
         div.innerHTML = `<img src="/obunto/${mood}.png"><br><span>${mood}</span>`;
         
         div.onclick = () => {
-            // Remove active class from all
             document.querySelectorAll('.mood-icon').forEach(m => m.classList.remove('active'));
-            // Add to clicked
             div.classList.add('active');
             currentMood = mood;
         };
         UI.obunto.moods.appendChild(div);
     });
 
-    // Panel Open/Close
     UI.obunto.btnOpen.onclick = () => UI.obunto.panel.classList.remove('hidden');
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
     
-    // Send Logic
+    // Send Logic (Manual)
     UI.obunto.btnSend.onclick = () => {
         const msg = UI.obunto.msg.value.trim();
         const target = UI.obunto.target.value.trim();
@@ -162,12 +156,8 @@ function setupObuntoPanel() {
             targetId: target 
         });
 
-        // Clear message but keep target (useful for chatting)
+        // Limpa a mensagem, mas não fala nada automaticamente
         UI.obunto.msg.value = '';
-        
-        // Show local confirmation
-        const type = target ? `USER ${target}` : "GLOBAL";
-        speakObunto(`Message transmitted to [${type}].`, "smug");
     };
 }
 
@@ -177,14 +167,14 @@ function speakObunto(text, mood) {
     UI.obunto.text.textContent = text;
     UI.obunto.bubble.classList.remove('hidden');
     
-    // Auto hide after 6 seconds
+    // Auto hide after 8 seconds (tempo maior para ler as letras maiores)
     if (window.obuntoTimeout) clearTimeout(window.obuntoTimeout);
     window.obuntoTimeout = setTimeout(() => {
         UI.obunto.bubble.classList.add('hidden');
-    }, 6000);
+    }, 8000);
 }
 
-// Socket Listener
+// Socket Listener (Só fala se vier do servidor/comando manual)
 socket.on('display_mascot_message', (data) => {
     speakObunto(data.message, data.mood);
 });
