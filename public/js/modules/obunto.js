@@ -16,6 +16,15 @@ export function initObunto(socket, userId) {
         playSound(type);
     });
 
+    // Universal Power Off/Reboot Logic
+    if (UI.obunto.aop.btnReboot) {
+        UI.obunto.aop.btnReboot.onclick = () => {
+            // Emulate clicking PWR ON via admin socket event
+            // Note: In real app, check permissions. Here we allow the button to trigger it.
+            socket.emit('admin_trigger_alarm', 'on');
+        };
+    }
+
     if (userId === "8989") {
         UI.dock.btnHelp.onclick = (e) => {
             e.stopImmediatePropagation();

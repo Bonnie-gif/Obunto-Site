@@ -39,7 +39,8 @@ export const UI = {
         },
         aop: {
             window: document.getElementById('aop-window'),
-            close: document.getElementById('closeAop')
+            close: document.getElementById('closeAop'),
+            btnReboot: document.getElementById('btnSystemReboot')
         }
     },
     help: {
