@@ -30,7 +30,7 @@ async function login() {
             setInterval(updateClock, 1000);
 
             if (currentUser.isObunto) {
-                showObunto("Welcome, special user. Systems ready.", "smug");
+                showObunto("Welcome, special user. Systems ready.", "Smug");
             }
         } else {
             document.getElementById('loginStatus').innerText = "DENIED: " + data.message;
@@ -51,7 +51,7 @@ function updateClock() {
     document.getElementById('clock').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Drag para janelas Newton
+// Drag janelas
 let isDragging = false;
 let currentX, currentY, initialX, initialY;
 const windows = document.querySelectorAll('.window-newton');
@@ -83,5 +83,3 @@ function stopDrag() {
 }
 
 document.getElementById('btnLogin').addEventListener('click', login);
-
-// Boot script (inline no HTML, mas aqui para ref)

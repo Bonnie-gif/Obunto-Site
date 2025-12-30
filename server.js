@@ -36,9 +36,9 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// Groups TSC reais (pesquisados: main 11577231, sub-groups comuns)
+// Groups TSC reais
 const TSC_GROUPS = {
-    11577231: "THUNDER SCIENTIFIC CORPORATION", // Main
+    11577231: "THUNDER SCIENTIFIC CORPORATION",
     11608337: "O5 COUNCIL",
     11649027: "ADMINISTRATION",
     12045972: "ETHICS COMMITTEE",
@@ -47,7 +47,6 @@ const TSC_GROUPS = {
     12045419: "ENGINEERING",
     12022092: "LOGISTICS",
     14159717: "INTELLIGENCE"
-    // Adicione mais se necessário
 };
 
 async function getRobloxData(userId) {
@@ -79,7 +78,7 @@ async function getRobloxData(userId) {
             rank: primary.role.name,
             clearance,
             affiliations: tscGroups.map(g => ({ dept: TSC_GROUPS[g.group.id] || g.group.name, role: g.role.name })),
-            isObunto: userId === "1947" // Special flag
+            isObunto: userId === "1947"
         };
     } catch (err) {
         throw err;
@@ -91,7 +90,6 @@ app.post('/api/login', async (req, res) => {
 
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // Admin backdoor
     if (userId === "000") {
         return res.json({ 
             success: true, 

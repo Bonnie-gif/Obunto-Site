@@ -80,5 +80,45 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="renderer.js"></script>
+    <script>
+        window.addEventListener('load', () => {
+            let gdots = 0;
+            const glitchInterval = setInterval(() => {
+                gdots = (gdots + 1) % 4;
+                document.getElementById('glitch-dots').innerText = '.'.repeat(gdots);
+            }, 600);
+
+            setTimeout(() => {
+                document.getElementById('boot-3').style.display = 'none';
+                document.getElementById('boot-2').style.display = 'flex';
+
+                let progress = 0;
+                const progInt = setInterval(() => {
+                    progress += 10;
+                    if (progress > 100) progress = 100;
+                    const bars = '■■■■■■■■■■'.slice(0, Math.floor(progress / 10));
+                    const empty = '□□□□□□□□□□'.slice(0, 10 - Math.floor(progress / 10));
+                    document.getElementById('boot-progress').innerText = `${bars}${empty} ${progress}%`;
+
+                    if (progress >= 100) {
+                        clearInterval(progInt);
+                        document.getElementById('boot-status').innerText = "COMPLETE";
+                        setTimeout(() => {
+                            document.getElementById('boot-2').style.display = 'none';
+                            document.getElementById('login-screen').style.display = 'flex';
+                        }, 1000);
+                    }
+                }, 200); // Mais rápido para evitar travamento percebido
+
+                // Fallback se progresso falhar
+                setTimeout(() => {
+                    if (document.getElementById('boot-2').style.display !== 'none') {
+                        document.getElementById('boot-2').style.display = 'none';
+                        document.getElementById('login-screen').style.display = 'flex';
+                    }
+                }, 7000);
+            }, 3000);
+        });
+    </script>
 </body>
 </html>

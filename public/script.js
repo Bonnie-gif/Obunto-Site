@@ -2,10 +2,11 @@ const socket = io();
 const MOODS = ['annoyed', 'bug', 'dizzy', 'happy', 'hollow', 'normal', 'panic', 'sad', 'sleeping', 'Smug', 'stare', 'suspicious', 'werror'];
 let currentMood = 'normal';
 
-// Se admin panel existir (para ID 000)
+// Admin panel (if ID 000, add to desktop if needed)
 function buildAdminPanel() {
-    if (document.getElementById('admin-screen')) {
-        const container = document.getElementById('mood-container');
+    // Assume admin-screen exists for ID 000 - add logic in renderer.js if needed
+    const container = document.getElementById('mood-container');
+    if (container) {
         MOODS.forEach(mood => {
             const div = document.createElement('div');
             div.className = 'mood-icon';
@@ -20,7 +21,7 @@ function buildAdminPanel() {
     }
 }
 
-// Broadcast function (se button existir)
+// Broadcast
 function sendBroadcast() {
     const msg = document.getElementById('adminMsg').value;
     if (!msg) return;
@@ -31,12 +32,7 @@ function sendBroadcast() {
     });
 }
 
-// Receive
+// Receive broadcast
 socket.on('display_mascot_message', (data) => {
     showObunto(data.message, data.mood);
 });
-
-// Call if needed
-window.onload = () => {
-    buildAdminPanel();
-};
