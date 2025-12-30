@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEWTON OS // TSC GATEWAY</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="scanlines"></div>
 
-    <div id="boot-3" class="full-screen active center-flex" style="background:#1a1a1a;">
+    <div id="boot-3" class="full-screen active center-flex" style="background:#1a1a1a; display:flex;">
         <div style="position:relative;">
             <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
             <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent 48%, rgba(137,147,122,0.3) 50%, transparent 52%); animation:glitch-scan 3s infinite linear;"></div>
@@ -27,99 +28,132 @@
                     Initializing modules...............OK<br>
                     Mounting datastore................<span id="boot-status">IN PROGRESS</span>
                 </div>
-                <div id="boot-progress" style="margin-top:15px;">■□□□□□□□□□ 10%</div>
+                <div id="boot-progress" style="margin-top:15px; font-family:monospace;">■□□□□□□□□□ 10%</div>
             </div>
         </div>
     </div>
 
     <div id="login-screen" class="full-screen center-flex" style="display:none;">
-        <div class="window" style="width:320px;">
-            <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
+        <div class="window opening" style="width:320px;">
+            <div class="win-header">
+                <span>SECURE_GATEWAY</span>
+                <img src="assets/button-close-17x17.png" style="opacity:0.5;">
+            </div>
             <div class="win-body">
-                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x25.png" width="40"></div>
+                <div style="text-align:center; margin-bottom:15px;">
+                    <img src="assets/icon-large-freeze-27x26.png" width="40">
+                </div>
                 <p style="font-size:11px; margin-bottom:5px; font-weight:bold;">PERSONNEL ID:</p>
                 <input type="text" id="inpId" placeholder="ENTER ID...">
-                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">ACCESS SYSTEM</button>
+                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">
+                    <img src="assets/icon-small-arrow_up-18x15.png" width="12"> ACCESS SYSTEM
+                </button>
                 <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000; height:15px;"></div>
             </div>
         </div>
     </div>
 
     <div id="desktop-screen" class="full-screen" style="display:none;">
+        
         <div style="padding:40px;">
             <div class="icon-btn" style="width:70px;" onclick="toggleWin('win-profile')">
                 <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); background:var(--paper); padding:5px; box-shadow:4px 4px 0 rgba(0,0,0,0.1);">
-                <div style="font-size:10px; font-weight:bold; margin-top:5px; background:var(--paper);">DOSSIER</div>
+                <div style="font-size:10px; font-weight:bold; margin-top:5px; background:var(--paper); padding:2px;">DOSSIER</div>
             </div>
         </div>
 
-        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:480px; display:none;">
+        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:460px; display:none;">
             <div class="win-header">
                 <span>PERSONNEL_FILE // <span id="idHeader">---</span></span>
                 <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')">
             </div>
             <div class="win-body">
-                <div class="profile-container">
-                    <div class="profile-left">
-                        <div class="profile-img-frame">
-                            <img id="userAvatar" src="" alt="NO PHOTO">
-                        </div>
-                        <div style="text-align:center; margin-top:5px; font-size:10px; font-weight:bold;">OFFICIAL PHOTO</div>
-                    </div>
+                <div class="profile-container" style="display:flex; gap:15px; border:2px solid var(--border); padding:15px; background:rgba(0,0,0,0.03);">
                     
-                    <div class="profile-right">
-                        <div class="data-row">
-                            <span class="label">IDENTITY:</span>
-                            <span class="value" id="userName">---</span>
+                    <div class="profile-left" style="display:flex; flex-direction:column; align-items:center;">
+                        <div class="profile-img-frame" style="width:90px; height:90px; border:2px solid var(--border); background:#fff; padding:2px; display:flex; justify-content:center; align-items:center;">
+                            <img id="userAvatar" src="" style="width:100%; height:100%; object-fit:cover;">
                         </div>
-                        <div class="data-row">
-                            <span class="label">ID TAG:</span>
-                            <span class="value" id="userId">---</span>
+                        <div style="font-size:9px; margin-top:4px; font-weight:bold;">OFFICIAL PHOTO</div>
+                    </div>
+
+                    <div class="profile-right" style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+                        
+                        <div style="border-bottom:1px dashed rgba(43,51,35,0.4); padding-bottom:2px;">
+                            <span style="font-size:10px; font-weight:bold; width:60px; display:inline-block; opacity:0.7;">IDENTITY:</span>
+                            <b id="userName" style="font-size:14px; text-transform:uppercase;">---</b>
                         </div>
-                        <div class="data-row">
-                            <span class="label">DEPT:</span>
-                            <span class="value" id="userDept">---</span>
+
+                        <div style="border-bottom:1px dashed rgba(43,51,35,0.4); padding-bottom:2px;">
+                            <span style="font-size:10px; font-weight:bold; width:60px; display:inline-block; opacity:0.7;">ID TAG:</span>
+                            <span id="userId" style="font-size:14px; font-weight:bold;">---</span>
                         </div>
-                        <div class="data-row">
-                            <span class="label">RANK:</span>
-                            <span class="value" id="userRank" style="border-bottom:2px solid #2b3323;">---</span>
+
+                        <div style="border-bottom:1px dashed rgba(43,51,35,0.4); padding-bottom:2px;">
+                            <span style="font-size:10px; font-weight:bold; width:60px; display:inline-block; opacity:0.7;">DEPT:</span>
+                            <span id="userDept" style="font-size:13px; font-weight:bold;">---</span>
                         </div>
+
+                        <div style="border-bottom:2px solid var(--border); padding-bottom:2px;">
+                            <span style="font-size:10px; font-weight:bold; width:60px; display:inline-block; opacity:0.7;">RANK:</span>
+                            <span id="userRank" style="font-size:13px; font-weight:bold; color:var(--ink);">---</span>
+                        </div>
+
                     </div>
                 </div>
 
-                <div class="footer-note">
+                <div style="margin-top:10px; font-size:9px; text-align:center; opacity:0.6; padding-top:5px;">
                     AUTHORIZED PERSONNEL ONLY. PROPERTY OF THUNDER SCIENTIFIC CORPORATION.
                 </div>
             </div>
         </div>
 
         <div class="dock">
-            <span><img src="assets/icon-tiny-dock-19x11.png"> TSC_INTRANET</span>
+            <span><img src="assets/icon-tiny-dock-19x11.png" style="vertical-align:middle;"> TSC_INTRANET</span>
             <span id="clock">00:00</span>
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="renderer.js"></script>
+    
     <script>
         window.addEventListener('load', () => {
             const s3 = document.getElementById('boot-3');
             const s2 = document.getElementById('boot-2');
             const login = document.getElementById('login-screen');
+            
+            // Animação dos pontos do glitch
             let gdots = 0;
-            setInterval(() => { gdots = (gdots + 1) % 4; document.getElementById('glitch-dots').innerText = '.'.repeat(gdots); }, 600);
+            const glitchInterval = setInterval(() => { 
+                gdots = (gdots + 1) % 4; 
+                const el = document.getElementById('glitch-dots');
+                if(el) el.innerText = '.'.repeat(gdots); 
+            }, 600);
+
+            // Sequência de Boot
             setTimeout(() => {
-                s3.style.display = 'none'; s2.style.display = 'flex';
+                s3.style.display = 'none'; // Some o Glitch
+                s2.style.display = 'flex'; // Aparece o TSC Mainframe
+                
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 10;
-                    document.getElementById('boot-progress').innerText = '■'.repeat(progress/10) + '□'.repeat(10-progress/10) + ` ${progress}%`;
+                    const elProg = document.getElementById('boot-progress');
+                    if(elProg) elProg.innerText = '■'.repeat(progress/10) + '□'.repeat(10-progress/10) + ` ${progress}%`;
+                    
                     if (progress >= 100) {
                         clearInterval(interval);
+                        clearInterval(glitchInterval);
                         document.getElementById('boot-status').innerText = "COMPLETE";
-                        setTimeout(() => { s2.style.display = 'none'; login.style.display = 'flex'; }, 800);
+                        
+                        setTimeout(() => { 
+                            s2.style.display = 'none'; // Some o Boot
+                            login.style.display = 'flex'; // Aparece o Login
+                        }, 800);
                     }
-                }, 300);
-            }, 3000);
+                }, 400); // Velocidade da barra de progresso
+            }, 3000); // Tempo na tela de Glitch
         });
     </script>
 </body>

@@ -18,11 +18,15 @@ async function login() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('desktop-screen').style.display = 'flex';
             
+            // --- AQUI ESTÁ A ATUALIZAÇÃO DOS DADOS ---
             document.getElementById('userAvatar').src = currentUser.avatar;
             document.getElementById('userName').innerText = currentUser.username.toUpperCase();
             document.getElementById('userId').innerText = currentUser.id;
+            
+            // Atualiza Departamento e Rank com o que veio da API
             document.getElementById('userDept').innerText = currentUser.dept;
             document.getElementById('userRank').innerText = currentUser.rank;
+            
             document.getElementById('idHeader').innerText = currentUser.id;
             
             updateClock();
@@ -30,7 +34,10 @@ async function login() {
         } else {
             document.getElementById('loginStatus').innerText = "DENIED: " + data.message;
         }
-    } catch(e) { document.getElementById('loginStatus').innerText = "SERVER ERROR"; }
+    } catch(e) { 
+        console.error(e);
+        document.getElementById('loginStatus').innerText = "SERVER ERROR"; 
+    }
 }
 
 function updateClock() {
