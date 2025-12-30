@@ -52,18 +52,23 @@ async function getRobloxData(userId) {
             axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
         ]);
 
-        const tscGroupsFound = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-        const primary = tscGroupsFound.length > 0 ? tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
+        const userGroups = groupsRes.data.data;
+        const tscGroupsFound = userGroups.filter(g => TSC_GROUPS[g.group.id]);
+        
+        let primary = null;
+        if (tscGroupsFound.length > 0) {
+            primary = tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0];
+        }
 
         return {
             id: userId,
             username: userRes.data.name,
             dept: primary ? TSC_GROUPS[primary.group.id] : "CIVILIAN",
             rank: primary ? primary.role.name.toUpperCase() : "UNAUTHORIZED",
-            avatar: thumbRes.data.data[0].imageUrl
+            avatar: thumbRes.data.data[0] ? thumbRes.data.data[0].imageUrl : ""
         };
     } catch (e) {
-        return { id: userId, username: "Unknown", dept: "N/A", rank: "OFFLINE", avatar: "" };
+        return { id: userId, username: "Unknown", dept: "N/A", rank: "ERROR", avatar: "" };
     }
 }
 

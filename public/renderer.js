@@ -3,7 +3,7 @@ let currentUser = null;
 async function login() {
     const id = document.getElementById('inpId').value.trim();
     if(!id) return;
-    document.getElementById('loginStatus').innerText = "CONNECTING...";
+    document.getElementById('loginStatus').innerText = "AUTHENTICATING...";
     
     try {
         const res = await fetch('/api/login', { 
@@ -18,7 +18,6 @@ async function login() {
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('desktop-screen').style.display = 'flex';
             
-            // Preenche os dados na janela (mas ela começa fechada)
             document.getElementById('userAvatar').src = currentUser.avatar;
             document.getElementById('userName').innerText = currentUser.username;
             document.getElementById('userId').innerText = currentUser.id;

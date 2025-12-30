@@ -9,8 +9,13 @@
     <div class="scanlines"></div>
 
     <div id="boot-3" class="full-screen active center-flex" style="background:#1a1a1a;">
-        <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
-        <div style="color:#89937a; font-weight:bold; margin-top:40px; font-size:20px;">OBUNTO SYSTEM LOADING<span id="glitch-dots"></span></div>
+        <div style="position:relative;">
+            <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
+            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent 48%, rgba(137,147,122,0.3) 50%, transparent 52%); animation:glitch-scan 3s infinite linear;"></div>
+        </div>
+        <div style="margin-top:40px; font-size:20px; font-weight:bold; color:#89937a; letter-spacing:3px;">
+            OBUNTO SYSTEM LOADING<span id="glitch-dots"></span>
+        </div>
     </div>
 
     <div id="boot-2" class="full-screen center-flex" style="display:none;">
@@ -28,13 +33,14 @@
     </div>
 
     <div id="login-screen" class="full-screen center-flex" style="display:none;">
-        <div class="window" style="width:320px;">
+        <div class="window opening" style="width:320px;">
             <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
             <div class="win-body">
+                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x25.png" width="40"></div>
                 <p style="font-size:11px; margin-bottom:5px; font-weight:bold;">PERSONNEL ID:</p>
                 <input type="text" id="inpId" placeholder="ENTER ID...">
                 <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">ACCESS SYSTEM</button>
-                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000;"></div>
+                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000; height:15px;"></div>
             </div>
         </div>
     </div>
@@ -47,7 +53,7 @@
             </div>
         </div>
 
-        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:400px; display:none;">
+        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:450px; display:none;">
             <div class="win-header">
                 <span>PERSONNEL_FILE // <span id="idHeader">---</span></span>
                 <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')">
@@ -55,17 +61,17 @@
             <div class="win-body">
                 <div class="profile-card">
                     <div class="profile-img-box">
-                        <img id="userAvatar" width="70" src="">
+                        <img id="userAvatar" width="80" src="">
                     </div>
-                    <div class="profile-info">
-                        <div><span class="tag">IDENTITY</span> <b id="userName" style="font-size:14px;">---</b></div>
+                    <div class="profile-info" style="flex:1;">
+                        <div style="margin-bottom:8px;"><span class="tag">IDENTITY</span> <b id="userName" style="font-size:16px;">---</b></div>
                         <div><b>ID:</b> <span id="userId">---</span></div>
                         <div><b>DEPT:</b> <span id="userDept">---</span></div>
-                        <div><b>RANK:</b> <span id="userRank" style="font-weight:bold;">---</span></div>
+                        <div><b>RANK:</b> <span id="userRank" style="font-weight:bold; color:var(--ink);">---</span></div>
                     </div>
                 </div>
-                <div style="margin-top:15px; border-top:1px dashed var(--border); padding-top:10px; font-size:9px; text-align:justify; opacity:0.8;">
-                    NOTE: Authorized access only. This record is property of Thunder Scientific Corporation.
+                <div style="margin-top:15px; border-top:1px dashed var(--border); padding-top:10px; font-size:10px; text-align:justify; opacity:0.8;">
+                    NOTE: Unauthorized access only. Subject to standard TSC monitoring protocols.
                 </div>
             </div>
         </div>
@@ -82,13 +88,10 @@
             const s3 = document.getElementById('boot-3');
             const s2 = document.getElementById('boot-2');
             const login = document.getElementById('login-screen');
-            
             let gdots = 0;
             setInterval(() => { gdots = (gdots + 1) % 4; document.getElementById('glitch-dots').innerText = '.'.repeat(gdots); }, 600);
-
             setTimeout(() => {
-                s3.style.display = 'none';
-                s2.style.display = 'flex';
+                s3.style.display = 'none'; s2.style.display = 'flex';
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 10;
