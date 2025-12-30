@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     userId: { type: String, unique: true },
     frozen: { type: Boolean, default: false }
 });
-const User = mongoose.model('User', UserSchema);
+let User; try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 
@@ -52,8 +52,8 @@ async function getRobloxData(userId) {
             axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
         ]);
 
-        const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-        const primary = tscGroups.length > 0 ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
+        const tscGroupsFound = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
+        const primary = tscGroupsFound.length > 0 ? tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
 
         return {
             id: userId,
@@ -63,7 +63,7 @@ async function getRobloxData(userId) {
             avatar: thumbRes.data.data[0].imageUrl
         };
     } catch (e) {
-        return { id: userId, username: "Unknown", dept: "OFFLINE", rank: "N/A", avatar: "" };
+        return { id: userId, username: "Unknown", dept: "N/A", rank: "OFFLINE", avatar: "" };
     }
 }
 
@@ -81,11 +81,6 @@ app.post('/api/login', async (req, res) => {
         const profile = await getRobloxData(userId);
         res.json({ success: true, userData: profile });
     } catch (e) { res.status(500).json({ success: false }); }
-});
-
-app.get('/api/search/:id', async (req, res) => {
-    const profile = await getRobloxData(req.params.id);
-    res.json(profile);
 });
 
 const PORT = process.env.PORT || 3000;

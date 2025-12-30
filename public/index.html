@@ -8,25 +8,21 @@
 <body>
     <div class="scanlines"></div>
 
-    <div id="boot-screen-3" class="full-screen active" style="background:#1a1a1a; display:flex; justify-content:center; align-items:center; flex-direction:column;">
-        <div style="position:relative;">
-            <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent 48%, rgba(137,147,122,0.3) 50%, transparent 52%); animation:glitch-scan 3s infinite linear;"></div>
-        </div>
-        <div style="margin-top:40px; font-size:20px; font-weight:bold; color:#89937a; letter-spacing:3px;">
-            OBUNTO SYSTEM LOADING<span id="glitch-dots"></span>
-        </div>
+    <div id="boot-3" class="full-screen active center-flex" style="background:#1a1a1a;">
+        <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
+        <div style="color:#89937a; font-weight:bold; margin-top:40px; font-size:20px;">OBUNTO SYSTEM LOADING<span id="glitch-dots"></span></div>
     </div>
 
-    <div id="boot-screen-2" class="full-screen" style="background:var(--bg); color:var(--ink); display:none; justify-content:center; align-items:center; flex-direction:column; gap:40px;">
-        <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">TSC MAINFRAME</div>
-        <div style="width:380px; background:var(--paper); border:2px solid var(--border); box-shadow:8px 8px 0 rgba(0,0,0,0.2); padding:20px;">
-            <div style="font-size:12px; line-height:2;">
-                <div style="text-align:center; margin-bottom:15px; font-weight:bold;">SECURE BOOT SEQUENCE</div>
-                <div>Verifying cryptographic signature........OK</div>
-                <div>Initializing Newton Emulation............OK</div>
-                <div>Mounting secure datastore................<span id="boot-status">IN PROGRESS</span></div>
-                <div style="margin-top:20px; text-align:center;" id="boot-progress">■□□□□□□□□□ 10%</div>
+    <div id="boot-2" class="full-screen center-flex" style="display:none;">
+        <div style="text-align:center;">
+            <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">TSC MAINFRAME</div>
+            <div style="width:380px; background:var(--paper); border:2px solid var(--border); padding:20px; margin-top:20px;">
+                <div style="font-size:11px; line-height:2; text-align:left;">
+                    Verifying signature................OK<br>
+                    Initializing modules...............OK<br>
+                    Mounting datastore................<span id="boot-status">IN PROGRESS</span>
+                </div>
+                <div id="boot-progress" style="margin-top:15px;">■□□□□□□□□□ 10%</div>
             </div>
         </div>
     </div>
@@ -35,45 +31,44 @@
         <div class="window" style="width:320px;">
             <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
             <div class="win-body">
-                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x25.png" width="40"></div>
                 <p style="font-size:11px; margin-bottom:5px; font-weight:bold;">PERSONNEL ID:</p>
                 <input type="text" id="inpId" placeholder="ENTER ID...">
-                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;"><img src="assets/icon-small-arrow_up-18x15.png" width="12"> ACCESS SYSTEM</button>
+                <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;">ACCESS SYSTEM</button>
                 <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000;"></div>
             </div>
         </div>
     </div>
 
     <div id="desktop-screen" class="full-screen" style="display:none;">
-        <aside class="sidebar">
-            <div class="sb-header">
-                <div class="brand-title">TSC_NET // ACCESS</div>
-                <div class="brand-sub">Thunder Scientific Corp.</div>
+        <div style="padding:40px;">
+            <div class="icon-btn" style="width:70px;" onclick="toggleWin('win-profile')">
+                <img src="assets/icon-large-owner_info-28x14.png" width="50" style="border:2px solid var(--border); background:var(--paper); padding:5px; box-shadow:4px 4px 0 rgba(0,0,0,0.1);">
+                <div style="font-size:10px; font-weight:bold; margin-top:5px; background:var(--paper);">DOSSIER</div>
             </div>
-            <div id="sidebar-profile" style="padding:15px; border-bottom:1px solid var(--border); text-align:center;">
-                <img id="profile-avatar" src="" style="width:60px; border:2px solid var(--border); margin-bottom:10px;">
-                <div id="profile-name" style="font-weight:bold; font-size:12px;">---</div>
-                <div id="profile-id" style="font-size:10px; opacity:0.6;">---</div>
-                <span id="profile-rank-tag" class="tag" style="margin-top:5px; display:inline-block;">---</span>
+        </div>
+
+        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:400px; display:none;">
+            <div class="win-header">
+                <span>PERSONNEL_FILE // <span id="idHeader">---</span></span>
+                <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')">
             </div>
-            <div class="sb-controls">
-                <div class="brand-sub">Database Search</div>
-                <div class="search-box">
-                    <input id="search" placeholder="USER ID">
-                    <button onclick="searchUser()" class="os-btn small">REQ</button>
+            <div class="win-body">
+                <div class="profile-card">
+                    <div class="profile-img-box">
+                        <img id="userAvatar" width="70" src="">
+                    </div>
+                    <div class="profile-info">
+                        <div><span class="tag">IDENTITY</span> <b id="userName" style="font-size:14px;">---</b></div>
+                        <div><b>ID:</b> <span id="userId">---</span></div>
+                        <div><b>DEPT:</b> <span id="userDept">---</span></div>
+                        <div><b>RANK:</b> <span id="userRank" style="font-weight:bold;">---</span></div>
+                    </div>
+                </div>
+                <div style="margin-top:15px; border-top:1px dashed var(--border); padding-top:10px; font-size:9px; text-align:justify; opacity:0.8;">
+                    NOTE: Authorized access only. This record is property of Thunder Scientific Corporation.
                 </div>
             </div>
-        </aside>
-        
-        <main class="main-area">
-            <div class="top-bar">
-                <span id="dateDisplay">DATE: 2041-01-01</span>
-                <span>SESSION: <b style="color:#2b3323">SECURE</b></span>
-            </div>
-            <div id="paperContent" class="paper-sheet">
-                <div class="empty-state">SYSTEM READY. WAITING FOR INPUT.</div>
-            </div>
-        </main>
+        </div>
 
         <div class="dock">
             <span><img src="assets/icon-tiny-dock-19x11.png"> TSC_INTRANET</span>
@@ -81,12 +76,11 @@
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script src="renderer.js"></script>
     <script>
         window.addEventListener('load', () => {
-            const s3 = document.getElementById('boot-screen-3');
-            const s2 = document.getElementById('boot-screen-2');
+            const s3 = document.getElementById('boot-3');
+            const s2 = document.getElementById('boot-2');
             const login = document.getElementById('login-screen');
             
             let gdots = 0;
@@ -104,7 +98,7 @@
                         document.getElementById('boot-status').innerText = "COMPLETE";
                         setTimeout(() => { s2.style.display = 'none'; login.style.display = 'flex'; }, 800);
                     }
-                }, 400);
+                }, 300);
             }, 3000);
         });
     </script>
