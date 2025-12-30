@@ -65,9 +65,18 @@ html, body {
 @keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
 
 body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
+body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
+@keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
 body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; background: rgba(255,165,0,0.08); }
+body.alarm-gamma .crt-overlay { animation: gammaDistort 0.5s infinite; }
+body.alarm-gamma .scanlines { animation: gammaGlitch 0.2s infinite; }
+body.alarm-gamma::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9990;
+  background: repeating-linear-gradient(0deg, rgba(255,140,0,0.05) 0px, transparent 2px, transparent 4px);
+  animation: gammaLines 0.1s infinite;
+}
 @keyframes gammaStatic { 
   0% { transform: translate(0,0) skewX(0); opacity: 0.1; } 
   25% { transform: translate(-2px, 2px) skewX(2deg); opacity: 0.2; }
@@ -75,33 +84,58 @@ body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; backgro
   75% { transform: translate(-1px, 1px) skewX(1deg); opacity: 0.2; }
   100% { transform: translate(0,0) skewX(0); opacity: 0.1; } 
 }
+@keyframes gammaDistort {
+  0% { box-shadow: inset 0 0 50px rgba(255,140,0,0.3); filter: hue-rotate(0deg); }
+  50% { box-shadow: inset 0 0 80px rgba(255,140,0,0.5); filter: hue-rotate(10deg); }
+  100% { box-shadow: inset 0 0 50px rgba(255,140,0,0.3); filter: hue-rotate(0deg); }
+}
+@keyframes gammaGlitch {
+  0% { transform: translate(0,0) skewX(0); }
+  20% { transform: translate(-2px, 0) skewX(10deg); }
+  40% { transform: translate(2px, 0) skewX(-10deg); }
+  60% { transform: translate(0, -2px) skewY(5deg); }
+  80% { transform: translate(0, 2px) skewY(-5deg); }
+  100% { transform: translate(0,0) skewX(0); }
+}
+@keyframes gammaLines { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
 
-body.alarm-epsilon .crt-overlay { animation: chaosOverlay 2s infinite; }
-body.alarm-epsilon .scanlines { animation: deltaGlitch 0.2s infinite; }
-body.alarm-epsilon .screen-flicker { animation: epsilonChaos 0.5s infinite; background: rgba(100, 0, 150, 0.1); }
-
+body.alarm-epsilon .crt-overlay { animation: chaosOverlay 0.8s infinite; }
+body.alarm-epsilon .scanlines { animation: epsilonGlitch 0.15s infinite; }
+body.alarm-epsilon .screen-flicker { animation: epsilonChaos 0.3s infinite; background: rgba(177,13,201,0.2); }
+body.alarm-epsilon::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9990;
+  background: repeating-linear-gradient(45deg, rgba(177,13,201,0.1) 0px, transparent 5px, transparent 10px);
+  animation: epsilonPattern 0.2s infinite;
+}
 @keyframes epsilonChaos {
-  0% { transform: translate(0,0) scale(1); filter: hue-rotate(0deg); }
-  20% { transform: translate(5px,-5px) scale(1.02); filter: hue-rotate(90deg) invert(0.1); }
-  40% { transform: translate(-5px,5px) scale(0.98); filter: hue-rotate(180deg); }
-  60% { transform: translate(5px,5px) skewX(20deg); filter: hue-rotate(270deg) invert(0.2); }
-  80% { transform: translate(-5px,-5px) skewX(-20deg); filter: hue-rotate(0deg); }
-  100% { transform: translate(0,0) scale(1); filter: hue-rotate(0deg); }
+  0% { transform: translate(0,0) scale(1) rotate(0deg); filter: hue-rotate(0deg) invert(0); }
+  15% { transform: translate(8px,-8px) scale(1.05) rotate(5deg); filter: hue-rotate(120deg) invert(0.15); }
+  30% { transform: translate(-8px,8px) scale(0.95) rotate(-5deg); filter: hue-rotate(240deg) invert(0.1); }
+  45% { transform: translate(8px,8px) skewX(25deg) rotate(3deg); filter: hue-rotate(360deg) invert(0.2); }
+  60% { transform: translate(-8px,-8px) skewX(-25deg) rotate(-3deg); filter: hue-rotate(180deg) invert(0.15); }
+  75% { transform: translate(5px,-5px) scale(1.08) skewY(15deg); filter: hue-rotate(90deg) invert(0.25); }
+  100% { transform: translate(0,0) scale(1) rotate(0deg); filter: hue-rotate(0deg) invert(0); }
 }
-
 @keyframes chaosOverlay {
-  0% { background: rgba(50,0,50,0.2); }
-  50% { background: rgba(0,50,0,0.2); }
-  100% { background: rgba(50,0,50,0.2); }
+  0% { background: rgba(177,13,201,0.3); box-shadow: inset 0 0 100px rgba(177,13,201,0.5); }
+  33% { background: rgba(13,201,100,0.3); box-shadow: inset 0 0 100px rgba(13,201,100,0.5); }
+  66% { background: rgba(201,13,100,0.3); box-shadow: inset 0 0 100px rgba(201,13,100,0.5); }
+  100% { background: rgba(177,13,201,0.3); box-shadow: inset 0 0 100px rgba(177,13,201,0.5); }
 }
-
-@keyframes deltaGlitch { 
-  0% { transform: skewX(0); } 
-  20% { transform: skewX(50deg); } 
-  40% { transform: skewX(-50deg); } 
-  60% { transform: skewY(10deg); } 
-  100% { transform: skewX(0); } 
+@keyframes epsilonGlitch { 
+  0% { transform: translate(0,0) skewX(0) scaleY(1); filter: invert(0); }
+  10% { transform: translate(-10px,5px) skewX(60deg) scaleY(0.8); filter: invert(0.3); }
+  20% { transform: translate(10px,-5px) skewX(-60deg) scaleY(1.2); filter: invert(0); }
+  30% { transform: translate(0,10px) skewY(30deg) scaleX(0.9); filter: invert(0.2); }
+  40% { transform: translate(0,-10px) skewY(-30deg) scaleX(1.1); filter: invert(0); }
+  50% { transform: translate(8px,8px) rotate(10deg) scale(0.85); filter: invert(0.4); }
+  60% { transform: translate(-8px,-8px) rotate(-10deg) scale(1.15); filter: invert(0); }
+  70% { transform: translate(12px,-3px) skewX(40deg); filter: invert(0.25); }
+  80% { transform: translate(-12px,3px) skewX(-40deg); filter: invert(0); }
+  90% { transform: translate(0,0) scale(1.1); filter: invert(0.35); }
+  100% { transform: translate(0,0) skewX(0) scaleY(1); filter: invert(0); }
 }
+@keyframes epsilonPattern { 0% { transform: translate(0,0) rotate(0deg); opacity: 0.5; } 50% { transform: translate(5px,5px) rotate(180deg); opacity: 0.8; } 100% { transform: translate(0,0) rotate(360deg); opacity: 0.5; } }
 
 .paper-texture {
   background-color: #fdfbf7;
