@@ -4,6 +4,10 @@ export const UI = {
         login: document.getElementById('login-screen'),
         desktop: document.getElementById('desktop-screen')
     },
+    views: {
+        idle: document.getElementById('view-idle'),
+        dashboard: document.getElementById('view-dashboard')
+    },
     dash: {
         name: document.getElementById('dashName'),
         rank: document.getElementById('dashRank'),
@@ -11,7 +15,11 @@ export const UI = {
         avatar: document.getElementById('dashAvatar'),
         depts: document.getElementById('dashDepts')
     },
-    sidebar: { user: document.getElementById('sbUser'), rank: document.getElementById('sbRank') },
+    sidebar: { 
+        user: document.getElementById('sbUser'), 
+        rank: document.getElementById('sbRank'),
+        btnDashboard: document.getElementById('btnMyDashboard')
+    },
     login: { btn: document.getElementById('btnLogin'), input: document.getElementById('inpId'), status: document.getElementById('loginStatus') },
     status: { indicator: document.getElementById('statusIndicator'), text: document.getElementById('statusText') },
     obunto: {
@@ -73,6 +81,21 @@ export function switchScreen(screenName) {
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');
+    }
+}
+
+export function switchView(viewName) {
+    Object.values(UI.views).forEach(el => {
+        if(el) el.classList.add('hidden');
+    });
+    const sidebarBtns = document.querySelectorAll('.btn-action');
+    sidebarBtns.forEach(btn => btn.classList.remove('active-nav'));
+
+    if(UI.views[viewName]) {
+        UI.views[viewName].classList.remove('hidden');
+        if(viewName === 'dashboard') {
+            UI.sidebar.btnDashboard.classList.add('active-nav');
+        }
     }
 }
 

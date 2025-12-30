@@ -1,4 +1,4 @@
-import { UI, switchScreen, initDraggables } from './modules/ui.js';
+import { UI, switchScreen, switchView, initDraggables } from './modules/ui.js';
 import { handleLogin } from './modules/auth.js';
 import { initAudio, playSound } from './modules/audio.js';
 import { initNotepad } from './modules/notepad.js';
@@ -34,6 +34,13 @@ document.addEventListener("DOMContentLoaded", () => {
     UI.login.input.addEventListener("keydown", async e => { 
         if (e.key === "Enter") currentUser = await handleLogin(socket); 
     });
+
+    if (UI.sidebar.btnDashboard) {
+        UI.sidebar.btnDashboard.onclick = () => {
+            switchView('dashboard');
+            playSound('click');
+        };
+    }
 
     socket.on('status_update', (status) => {
         UI.status.text.textContent = status;
