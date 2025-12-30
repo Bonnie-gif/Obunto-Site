@@ -17,6 +17,13 @@ export function initObunto(socket, userId) {
     });
 
     if (userId === "8989") {
+        UI.dock.btnHelp.onclick = (e) => {
+            e.stopImmediatePropagation();
+            UI.obunto.aop.window.classList.remove('hidden');
+            playSound('click');
+        };
+        UI.obunto.aop.close.onclick = () => UI.obunto.aop.window.classList.add('hidden');
+
         setupAdminPanel(socket);
         socket.on('new_help_request', (ticket) => {
             playSound('msg');

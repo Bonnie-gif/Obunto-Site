@@ -109,7 +109,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // BROADCAST FIX
     socket.on('mascot_broadcast', (data) => {
         io.emit('display_mascot_message', { 
             message: data.message, 

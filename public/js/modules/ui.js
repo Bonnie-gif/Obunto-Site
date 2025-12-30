@@ -1,5 +1,6 @@
 export const UI = {
     screens: {
+        boot: document.getElementById('boot-sequence'),
         login: document.getElementById('login-screen'),
         desktop: document.getElementById('desktop-screen')
     },
@@ -35,6 +36,10 @@ export const UI = {
             wait: document.getElementById('admin-chat-wait'),
             close: document.getElementById('admin-chat-close'),
             target: document.getElementById('admin-chat-target')
+        },
+        aop: {
+            window: document.getElementById('aop-window'),
+            close: document.getElementById('closeAop')
         }
     },
     help: {
@@ -51,7 +56,10 @@ export const UI = {
         btnClose: document.getElementById('closeHelp')
     },
     clock: document.getElementById('clock'),
-    date: document.getElementById('dateDisplay')
+    date: document.getElementById('dateDisplay'),
+    dock: {
+        btnHelp: document.getElementById('btnOpenHelp')
+    }
 };
 
 export function switchScreen(screenName) {
