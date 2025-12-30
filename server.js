@@ -4,6 +4,7 @@ const { Server } = require("socket.io");
 const axios = require('axios');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,23 +14,25 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const TSC_GROUP_IDS = [
-    11577231,
-    11608337,
-    11649027,
-    12045972,
-    12026513,
-    12026669,
-    12045419,
-    12022092,
-    14159717
-];
+const DATA_FILE = path.join(__dirname, 'data_store.json');
+const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
-const connectedUsers = new Map();
+let dataStore = { notes: {}, helpTickets: [] };
+
+if (fs.existsSync(DATA_FILE)) {
+    try {
+        dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
+    } catch (e) {}
+}
+
+function saveData() {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
+}
+
+let adminSocketId = null;
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
-
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
     if (userId === "8989") {
@@ -38,15 +41,11 @@ app.post('/api/login', async (req, res) => {
             userData: { 
                 id: "8989", 
                 username: "OBUNTO", 
-                displayName: "System Artificial Intelligence",
-                rank: "MAINFRAME",
+                displayName: "System Artificial Intelligence", 
+                rank: "MAINFRAME", 
                 avatar: "/obunto/normal.png", 
-                affiliations: [{
-                    groupName: "TSC MAINFRAME",
-                    role: "SYSTEM ADMINISTRATOR",
-                    rank: 999
-                }],
-                isObunto: true
+                affiliations: [{ groupName: "TSC MAINFRAME", role: "SYSTEM ADMINISTRATOR", rank: 999 }],
+                isObunto: true 
             } 
         });
     }
@@ -59,16 +58,10 @@ app.post('/api/login', async (req, res) => {
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
-        if (tscGroups.length === 0) {
-             return res.status(403).json({ success: false, message: "ACCESS DENIED: NON-PERSONNEL" });
-        }
+        if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "ACCESS DENIED" });
 
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
-        let level = "LEVEL 0";
-        if (mainGroup) {
-            const match = mainGroup.role.name.match(/\d+/);
-            level = match ? `LEVEL ${match[0]}` : "LEVEL 0";
-        }
+        let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
 
         res.json({ 
             success: true, 
@@ -76,20 +69,14 @@ app.post('/api/login', async (req, res) => {
                 id: userId.toString(),
                 username: profileRes.data.name,
                 displayName: profileRes.data.displayName,
-                created: profileRes.data.created,
                 avatar: avatarRes.data.data[0]?.imageUrl,
                 rank: level,
-                affiliations: tscGroups.map(g => ({
-                    groupName: g.group.name.toUpperCase(),
-                    role: g.role.name.toUpperCase(),
-                    rank: g.role.rank
-                })).sort((a, b) => b.rank - a.rank),
+                affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
                 isObunto: false
             } 
         });
 
     } catch (e) {
-        console.error(e);
         res.status(500).json({ success: false, message: "CONNECTION ERROR" });
     }
 });
@@ -99,33 +86,29 @@ io.on('connection', (socket) => {
 
     socket.on('register_user', (userId) => {
         currentUserId = userId;
-        connectedUsers.set(String(userId), socket.id);
-        console.log(`User ${userId} connected via ${socket.id}`);
+        if (userId === "8989") adminSocketId = socket.id;
+        if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
     });
 
     socket.on('mascot_broadcast', (data) => {
-        if (data.targetId && data.targetId.trim() !== "") {
-            const targetSocket = connectedUsers.get(String(data.targetId));
-            if (targetSocket) {
-                io.to(targetSocket).emit('display_mascot_message', {
-                    message: `[PRIVATE] ${data.message}`,
-                    mood: data.mood || 'normal'
-                });
-            }
-        } else {
-            io.emit('display_mascot_message', {
-                message: data.message,
-                mood: data.mood || 'normal'
-            });
-        }
+        io.emit('display_mascot_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
     });
 
-    socket.on('disconnect', () => {
-        if (currentUserId) connectedUsers.delete(currentUserId);
+    socket.on('save_notes', (text) => {
+        if (!currentUserId) return;
+        dataStore.notes[currentUserId] = text;
+        saveData();
+    });
+
+    socket.on('request_help', (msg) => {
+        if (!currentUserId) return;
+        const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
+        dataStore.helpTickets.push(ticket);
+        saveData();
+        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
+        socket.emit('help_sent', { success: true });
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`TSC NEWTON OS SERVER RUNNING ON PORT ${PORT}`);
-});
+server.listen(PORT, () => console.log(`SERVER RUNNING ON PORT ${PORT}`));

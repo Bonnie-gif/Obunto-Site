@@ -12,15 +12,8 @@ export const UI = {
         avatar: document.getElementById('dashAvatar'),
         depts: document.getElementById('dashDepts')
     },
-    sidebar: {
-        user: document.getElementById('sbUser'),
-        rank: document.getElementById('sbRank')
-    },
-    login: {
-        btn: document.getElementById('btnLogin'),
-        input: document.getElementById('inpId'),
-        status: document.getElementById('loginStatus')
-    },
+    sidebar: { user: document.getElementById('sbUser'), rank: document.getElementById('sbRank') },
+    login: { btn: document.getElementById('btnLogin'), input: document.getElementById('inpId'), status: document.getElementById('loginStatus') },
     obunto: {
         panel: document.getElementById('admin-panel'),
         btnOpen: document.getElementById('btnObuntoControl'),
@@ -40,7 +33,6 @@ export const UI = {
 export function switchScreen(screenName) {
     Object.values(UI.screens).forEach(el => el.classList.add('hidden'));
     Object.values(UI.screens).forEach(el => el.classList.remove('active'));
-    
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');

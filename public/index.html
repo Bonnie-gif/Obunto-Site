@@ -8,7 +8,9 @@
   <link rel="icon" href="/assets/icon-large-dock-35x23.png" type="image/png">
 </head>
 <body>
+  <div class="crt-overlay"></div>
   <div class="scanlines"></div>
+  <div class="screen-flicker"></div>
 
   <div id="boot-3" class="screen full-screen active">
     <div class="boot-center">
@@ -42,7 +44,6 @@
   </div>
 
   <div id="desktop-screen" class="screen hidden">
-    
     <aside class="sidebar">
       <div class="brand">
         <img src="/assets/icon-large-dock-35x23.png" class="brand-icon">
@@ -51,13 +52,11 @@
           <div class="brand-sub">Personal Terminal</div>
         </div>
       </div>
-
       <div class="section-block">
         <button class="btn-action active-nav">
           <img src="/assets/icon-large-owner_info-28x14.png"> MY DASHBOARD
         </button>
       </div>
-
       <div class="section-block">
         <div class="section-title">TERMINAL STATUS</div>
         <div class="session-info">
@@ -91,14 +90,12 @@
                  <div class="dash-badge">AUTHORIZED PERSONNEL</div>
               </div>
            </div>
-
            <div class="dash-card dept-card">
               <div class="dash-header">
                  <img src="/assets/icon-large-calls-26x26.png"> DEPARTMENT ASSIGNMENTS
               </div>
               <div id="dashDepts" class="dept-list"></div>
            </div>
-
            <div class="dash-card system-card">
               <div class="dash-header">
                  <img src="/assets/icon-large-notes-17x22.png"> TERMINAL NOTICES
@@ -114,6 +111,32 @@
       </div>
     </main>
 
+    <div id="notepad-window" class="window-newton hidden" style="width: 400px; height: 500px; top: 10%;">
+      <div class="win-header">
+        <img src="/assets/icon-small-ink_text-12x9.png" class="header-icon">
+        <span class="win-title">PERSONAL NOTES</span>
+        <button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body paper-texture">
+        <textarea id="notepad-area" class="notepad-lines" placeholder="Write your notes here..."></textarea>
+      </div>
+    </div>
+
+    <div id="help-window" class="window-newton hidden" style="width: 350px; top: 20%;">
+      <div class="win-header">
+        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
+        <span class="win-title">CONTACT OBUNTO</span>
+        <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body">
+        <div class="admin-section">
+          <label class="admin-label">DESCRIBE YOUR ISSUE:</label>
+          <textarea id="help-msg" class="admin-textarea" placeholder="Obunto is listening..."></textarea>
+          <button id="btnSendHelp" class="btn-newton">TRANSMIT REQUEST</button>
+        </div>
+      </div>
+    </div>
+
     <div id="obunto-bubble" class="obunto-overlay hidden">
       <div class="obunto-container">
         <img id="obunto-img" src="/obunto/normal.png" class="obunto-avatar">
@@ -128,12 +151,10 @@
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
-        
         <div class="admin-section">
           <label class="admin-label">1. SELECT AVATAR MOOD:</label>
           <div id="mood-container" class="mood-grid"></div>
         </div>
-
         <div class="admin-section">
           <label class="admin-label">2. SELECT TARGET:</label>
           <div class="target-row">
@@ -141,18 +162,22 @@
             <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">* Empty sends to everyone connected.</div>
           </div>
         </div>
-
         <div class="admin-section">
           <label class="admin-label">3. MESSAGE PROTOCOL:</label>
           <textarea id="adminMsg" class="admin-textarea" placeholder="Type message here..."></textarea>
           <button id="btnBroadcast" class="btn-newton">TRANSMIT DATA</button>
         </div>
-
       </div>
     </div>
 
     <div class="dock-newton">
       <div class="dock-apps">
+        <button id="btnOpenNotepad" class="dock-btn" title="Notes">
+          <img src="/assets/icon-large-notes-17x22.png">
+        </button>
+        <button id="btnOpenHelp" class="dock-btn" title="Help">
+          <img src="/assets/icon-large-help-30x23.png">
+        </button>
         <button id="btnObuntoControl" class="dock-btn hidden" title="Access Obunto Control">
           <img src="/assets/icon-large-preferences_highlighted-19x19.png">
         </button>
@@ -163,6 +188,11 @@
       </div>
     </div>
   </div>
+
+  <audio id="sfx-startup" src="/assets/sounds/startup.mp3"></audio>
+  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio>
+  <audio id="sfx-notify" src="/assets/sounds/notify.mp3"></audio>
+  <audio id="sfx-error" src="/assets/sounds/error.mp3"></audio>
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="js/main.js"></script>

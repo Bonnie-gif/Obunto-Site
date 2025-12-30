@@ -2,37 +2,37 @@
   --bg-main: #89937a;
   --bg-light: #9da896;
   --bg-dark: #6a7462;
-  
   --ink: #2b3323;
   --ink-dim: #4a5544;
   --ink-light: #6a7562;
-  
   --paper: #c8d1c0;
   --paper-dark: #b0baa8;
   --paper-light: #d8e1d0;
-  
   --border: #2b3323;
   --border-light: #5a6552;
-  
   --shadow: rgba(43, 51, 35, 0.4);
-  
   --button: #a8b2a0;
   --button-hover: #b8c2b0;
-  
   --font-main: 'Chicago', 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 html, body {
-  height: 100%;
-  margin: 0;
-  background: var(--bg-main);
-  font-family: var(--font-main);
-  font-size: 13px;
-  color: var(--ink);
-  overflow: hidden;
-  image-rendering: pixelated;
-  -ms-interpolation-mode: nearest-neighbor;
+  height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
+  font-size: 13px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
+}
+.crt-overlay {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.4) 100%);
+  box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+}
+.screen-flicker {
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background: rgba(255,255,255,0.02); opacity: 0; animation: flicker 0.15s infinite;
+}
+@keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
+.paper-texture {
+  background-color: #fdfbf7;
+  background-image: linear-gradient(#e1e1e1 1px, transparent 1px), radial-gradient(#c7c7c7 1px, transparent 1px);
+  background-size: 100% 24px, 20px 20px;
 }
