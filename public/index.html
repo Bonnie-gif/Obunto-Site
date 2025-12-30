@@ -124,50 +124,31 @@
       </div>
     </div>
 
-    <div id="help-window" class="window-newton hidden" style="width: 380px; top: 120px; left: 200px;">
+    <div id="help-window" class="window-newton hidden" style="width: 380px; height: 450px; top: 120px; left: 200px;">
       <div class="win-header">
         <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
         <span class="win-title">REQUEST ASSISTANCE</span>
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body chat-body">
-        <div id="help-request-form">
-          <div class="admin-section">
+        
+        <div id="help-request-form" class="help-layout">
+          <div class="admin-section" style="flex: 1; display: flex; flex-direction: column;">
             <label class="admin-label">REQUEST ASSISTANCE:</label>
-            <textarea id="help-req-msg" class="admin-textarea" placeholder="Describe your issue..."></textarea>
-            <button id="btnSendHelp" class="btn-newton">TRANSMIT REQUEST</button>
+            <textarea id="help-req-msg" class="help-textarea" placeholder="Describe your issue..."></textarea>
+            <button id="btnSendHelp" class="btn-newton mt-auto">TRANSMIT REQUEST</button>
           </div>
           <div id="help-status" class="status-text hidden">REQUEST SENT. WAITING FOR OPERATOR...</div>
         </div>
-        <div id="help-chat-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+
+        <div id="help-chat-interface" class="hidden help-layout">
           <div id="chat-history" class="chat-history"></div>
-          <div class="chat-input-area">
+          <div class="chat-input-area mt-auto">
             <input id="chat-input" class="input-newton" placeholder="Type message..." />
             <button id="btnChatSend" class="btn-newton" style="width: auto;">SEND</button>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div id="aop-window" class="window-newton hidden" style="width: 380px; top: 100px; left: 300px;">
-      <div class="win-header">
-        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
-        <span class="win-title">AOP // OPERATIONS PROTOCOL</span>
-        <button id="closeAop" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body">
-        <div class="admin-section">
-          <label class="admin-label">ALARMS & POWER:</label>
-          <div class="alarm-grid">
-            <button class="btn-alarm btn-green" data-alarm="green">GREEN</button>
-            <button class="btn-alarm btn-blue" data-alarm="blue">BLUE</button>
-            <button class="btn-alarm btn-red" data-alarm="red">RED</button>
-            <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
-            <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
-            <button class="btn-alarm btn-power-on" data-alarm="on">PWR ON</button>
-            <button class="btn-alarm btn-power-off" data-alarm="off">PWR OFF</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -197,6 +178,28 @@
         <div class="admin-chat-controls">
           <button id="admin-chat-wait" class="btn-newton btn-warning">WAIT</button>
           <button id="admin-chat-close" class="btn-newton btn-danger">DONE</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="aop-window" class="window-newton hidden" style="width: 380px; top: 100px; left: 300px;">
+      <div class="win-header">
+        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
+        <span class="win-title">AOP // OPERATIONS PROTOCOL</span>
+        <button id="closeAop" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body">
+        <div class="admin-section">
+          <label class="admin-label">ALARMS & POWER:</label>
+          <div class="alarm-grid">
+            <button class="btn-alarm btn-green" data-alarm="green">GREEN</button>
+            <button class="btn-alarm btn-blue" data-alarm="blue">BLUE</button>
+            <button class="btn-alarm btn-red" data-alarm="red">RED</button>
+            <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
+            <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
+            <button class="btn-alarm btn-power-on" data-alarm="on">PWR ON</button>
+            <button class="btn-alarm btn-power-off" data-alarm="off">PWR OFF</button>
+          </div>
         </div>
       </div>
     </div>

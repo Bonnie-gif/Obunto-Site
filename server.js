@@ -2,9 +2,9 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const axios = require('axios');
+const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
-const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,30 +14,111 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const DATA_FILE = path.join(__dirname, 'data_store.json');
-const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
-const COOLDOWN_TIME = 4 * 60 * 1000;
+const MONGO_URI = process.env.MONGO_URI;
+let isDbConnected = false;
 
-let dataStore = { notes: {}, helpTickets: [] };
-let systemStatus = 'ONLINE'; 
-let activeChats = {}; 
-let userCooldowns = {};
+const connectDB = async () => {
+    if (!MONGO_URI) return;
+    try { 
+        await mongoose.connect(MONGO_URI); 
+        isDbConnected = true;
+    } catch (err) { 
+        setTimeout(connectDB, 10000); 
+    }
+};
+connectDB();
 
-if (fs.existsSync(DATA_FILE)) {
+const UserSchema = new mongoose.Schema({
+    userId: { type: String, unique: true },
+    frozen: { type: Boolean, default: false },
+    notes: { type: String, default: "" },
+    lastAccess: { type: Date, default: Date.now }
+});
+const User = mongoose.model('User', UserSchema);
+
+const TSC_GROUPS = {
+    11577231: "THUNDER SCIENTIFIC CORPORATION",
+    11608337: "SECURITY DEPARTMENT",
+    11649027: "ADMINISTRATION",
+    12045972: "ETHICS COMMITTEE",
+    12026513: "MEDICAL DEPARTMENT",
+    12026669: "SCIENTIFIC DEPARTMENT",
+    12045419: "ENGINEERING",
+    12022092: "LOGISTICS",
+    14159717: "INTELLIGENCE"
+};
+
+const connectedUsers = new Map();
+
+async function getRobloxData(userId) {
     try {
-        dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
-    } catch (e) {}
-}
+        const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
+        const username = profileRes.data.name;
+        const displayName = profileRes.data.displayName;
+        const description = profileRes.data.description || "";
+        const created = profileRes.data.created;
 
-function saveData() {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
-}
+        const avatarRes = await axios.get(
+            `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`
+        );
+        const avatar = avatarRes.data.data[0]?.imageUrl || "";
 
-let adminSocketId = null;
+        const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
+        const allGroups = groupsRes.data.data || [];
+
+        const tscGroups = allGroups.filter(g => TSC_GROUPS[g.group.id]);
+
+        if (tscGroups.length === 0) {
+            throw new Error("No TSC affiliation detected");
+        }
+
+        const mainGroup = tscGroups.find(g => g.group.id === 11577231);
+        let level = "LEVEL 0";
+        
+        if (mainGroup) {
+            const levelMatch = mainGroup.role.name.match(/\d+/);
+            level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+        } else {
+            tscGroups.sort((a, b) => b.role.rank - a.role.rank);
+            if (tscGroups[0]) {
+                const levelMatch = tscGroups[0].role.name.match(/\d+/);
+                level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+            }
+        }
+
+        return {
+            id: userId,
+            username,
+            displayName,
+            description,
+            created,
+            avatar,
+            rank: level,
+            affiliations: tscGroups.map(g => ({ 
+                groupId: g.group.id,
+                groupName: TSC_GROUPS[g.group.id] || g.group.name,
+                role: g.role.name,
+                rank: g.role.rank
+            })),
+            allGroups: allGroups.map(g => ({
+                id: g.group.id,
+                name: g.group.name,
+                role: g.role.name,
+                rank: g.role.rank
+            })),
+            isObunto: userId === "8989"
+        };
+    } catch (err) {
+        throw err;
+    }
+}
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
-    if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
+
+    if (!userId) {
+        return res.status(400).json({ success: false, message: "USER ID REQUIRED" });
+    }
 
     if (userId === "8989") {
         return res.json({ 
@@ -45,152 +126,93 @@ app.post('/api/login', async (req, res) => {
             userData: { 
                 id: "8989", 
                 username: "OBUNTO", 
-                displayName: "System Artificial Intelligence", 
-                rank: "MAINFRAME", 
+                displayName: "Obunto System Core",
+                rank: "OMEGA",
                 avatar: "/obunto/normal.png", 
-                affiliations: [{ groupName: "TSC MAINFRAME", role: "SYSTEM ADMINISTRATOR", rank: 999 }],
-                isObunto: true 
+                affiliations: [{
+                    groupName: "TSC MAINFRAME",
+                    role: "SYSTEM ADMINISTRATOR",
+                    rank: 999
+                }],
+                allGroups: [],
+                isObunto: true
             } 
         });
     }
 
     try {
-        const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
-        const userGroupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
-        const avatarRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
+        if (isDbConnected) {
+            let user = await User.findOne({ userId });
+            if (!user) {
+                user = new User({ userId });
+                await user.save();
+            } else if (user.frozen) {
+                return res.status(403).json({ success: false, message: "ACCESS DENIED - USER ID FROZEN" });
+            }
+            user.lastAccess = new Date();
+            await user.save();
+        }
 
-        const allGroups = userGroupsRes.data.data || [];
-        const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
-
-        if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "ACCESS DENIED" });
-
-        const mainGroup = tscGroups.find(g => g.group.id === 11577231);
-        let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
-
-        res.json({ 
-            success: true, 
-            userData: {
-                id: userId.toString(),
-                username: profileRes.data.name,
-                displayName: profileRes.data.displayName,
-                avatar: avatarRes.data.data[0]?.imageUrl,
-                rank: level,
-                affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-                isObunto: false
-            } 
-        });
+        const profile = await getRobloxData(userId);
+        res.json({ success: true, userData: profile });
 
     } catch (e) {
-        res.status(500).json({ success: false, message: "CONNECTION ERROR" });
+        res.status(500).json({ success: false, message: e.message || "SERVER ERROR" });
+    }
+});
+
+app.post('/api/save-note', async (req, res) => {
+    const { userId, note } = req.body;
+    
+    if (!userId) return res.status(400).json({ success: false });
+    
+    try {
+        if (isDbConnected) {
+            await User.updateOne({ userId }, { notes: note }, { upsert: true });
+        }
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ success: false });
+    }
+});
+
+app.get('/api/get-note/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        if (isDbConnected) {
+            const user = await User.findOne({ userId });
+            res.json({ success: true, note: user?.notes || "" });
+        } else {
+            res.json({ success: true, note: "" });
+        }
+    } catch (e) {
+        res.status(500).json({ success: false, note: "" });
     }
 });
 
 io.on('connection', (socket) => {
-    socket.emit('status_update', systemStatus);
-
-    let currentUserId = null;
-
     socket.on('register_user', (userId) => {
-        currentUserId = userId;
-        socket.join(userId); 
-        
-        if (userId === "8989") {
-            adminSocketId = socket.id;
-            socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
-        }
-        
-        if (dataStore.notes[userId]) {
-            socket.emit('load_notes', dataStore.notes[userId]);
-        }
-        
-        const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
-        if (activeTicket) {
-            socket.emit('chat_force_open');
-        }
+        connectedUsers.set(userId, socket.id);
     });
-
+    
     socket.on('mascot_broadcast', (data) => {
-        io.emit('display_mascot_message', { 
-            message: data.message, 
-            mood: data.mood || 'normal', 
-            targetId: data.targetId 
+        io.emit('display_mascot_message', {
+            message: data.message,
+            mood: data.mood || 'normal'
         });
     });
-
-    socket.on('admin_trigger_alarm', (alarmType) => {
-        io.emit('play_alarm_sound', alarmType);
-    });
-
-    socket.on('toggle_system_status', (status) => {
-        systemStatus = status;
-        io.emit('status_update', systemStatus);
-    });
-
-    socket.on('save_notes', (text) => {
-        if (!currentUserId) return;
-        dataStore.notes[currentUserId] = text;
-        saveData();
-    });
-
-    socket.on('request_help', (msg) => {
-        if (!currentUserId) return;
-        
-        if (userCooldowns[currentUserId] && Date.now() < userCooldowns[currentUserId]) {
-            socket.emit('help_request_denied', { reason: 'COOLDOWN' });
-            return;
-        }
-
-        const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && (t.status === 'open' || t.status === 'active'));
-        if (existingTicket) {
-            socket.emit('help_request_denied', { reason: 'ACTIVE_TICKET' });
-            return;
-        }
-
-        const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
-        dataStore.helpTickets.push(ticket);
-        saveData();
-        
-        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
-        socket.emit('help_request_received');
-    });
-
-    socket.on('admin_accept_ticket', (ticketId) => {
-        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
-        if (ticket) {
-            ticket.status = 'active';
-            activeChats[ticket.userId] = true;
-            saveData();
-            
-            io.to(ticket.userId).emit('chat_force_open');
-            if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
-        }
-    });
-
-    socket.on('admin_wait_signal', (targetId) => {
-        io.to(targetId).emit('chat_wait_mode');
-    });
-
-    socket.on('admin_close_ticket', (userId) => {
-        const ticket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
-        if (ticket) {
-            ticket.status = 'closed';
-            delete activeChats[userId];
-            saveData();
-            
-            userCooldowns[userId] = Date.now() + COOLDOWN_TIME;
-            io.to(userId).emit('chat_ended_cooldown');
-        }
-    });
-
-    socket.on('chat_message', (data) => {
-        const { targetId, message, sender } = data;
-        const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
-        
-        if (recipient) {
-            io.to(recipient).emit('chat_receive', { message, sender });
+    
+    socket.on('disconnect', () => {
+        for (const [userId, socketId] of connectedUsers.entries()) {
+            if (socketId === socket.id) {
+                connectedUsers.delete(userId);
+                break;
+            }
         }
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SERVER RUNNING ON PORT ${PORT}`));
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
