@@ -14,18 +14,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- CONEXÃO BANCO ---
 const MONGO_URI = process.env.MONGO_URI;
 let isDbConnected = false;
 
 const connectDB = async () => {
-    if (!MONGO_URI) return console.log("⚠️ MODO MEMÓRIA (SEM BANCO)");
+    if (!MONGO_URI) return;
     try { 
         await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 }); 
         isDbConnected = true;
-        console.log("✅ BANCO CONECTADO"); 
     } catch (err) { 
-        console.log("⚠️ ERRO BANCO - MODO OFFLINE");
         setTimeout(connectDB, 10000); 
     }
 };
@@ -33,103 +30,71 @@ connectDB();
 
 const UserSchema = new mongoose.Schema({
     userId: { type: String, unique: true },
-    createdAt: { type: Date, default: Date.now },
     frozen: { type: Boolean, default: false }
 });
 let User; try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
 const TSC_GROUPS = {
-    11649027: "ADMINISTRATION", 12026513: "MEDICAL_DEPT", 11577231: "INTERNAL_SECURITY",
-    14159717: "INTELLIGENCE", 12026669: "SCIENCE_DIV", 12045419: "ENGINEERING", 12022092: "LOGISTICS"
+    11649027: "ADMINISTRATION", 
+    12026513: "MEDICAL_DEPT", 
+    11577231: "INTERNAL_SECURITY",
+    14159717: "INTELLIGENCE", 
+    12026669: "SCIENCE_DIV", 
+    12045419: "ENGINEERING", 
+    12022092: "LOGISTICS"
 };
 
-const activeSessions = new Map();
 const USER_CACHE = {}; 
+
+async function getRobloxData(userId) {
+    try {
+        const [userRes, groupsRes, thumbRes] = await Promise.all([
+            axios.get(`https://users.roblox.com/v1/users/${userId}`),
+            axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`),
+            axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
+        ]);
+
+        const tscGroupsFound = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
+        const primary = tscGroupsFound.length > 0 ? tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
+
+        return {
+            id: userId,
+            username: userRes.data.name,
+            dept: primary ? TSC_GROUPS[primary.group.id] : "CIVILIAN",
+            rank: primary ? primary.role.name.toUpperCase() : "UNAUTHORIZED",
+            avatar: thumbRes.data.data[0].imageUrl
+        };
+    } catch (e) {
+        return { id: userId, username: "Unknown", dept: "N/A", rank: "ERROR", avatar: "" };
+    }
+}
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
-
     if (userId === "000") {
         return res.json({ success: true, userData: { id: "000", username: "OBUNTO_CORE", dept: "MAINFRAME", rank: "MASTER_ADMIN", avatar: "obunto/normal.png", isAdmin: true } });
     }
-
     try {
         if (isDbConnected) {
             let user = await User.findOne({ userId });
-            if (!user) {
-                user = new User({ userId });
-                await user.save();
-                io.to('admins').emit('new_registration', { userId });
-            } else if (user.frozen) {
-                return res.status(403).json({ success: false, message: "ACCOUNT FROZEN" });
-            }
+            if (!user) { user = new User({ userId }); await user.save(); }
+            else if (user.frozen) return res.status(403).json({ success: false, message: "ID FROZEN" });
         }
-
-        let profile = USER_CACHE[userId]?.data;
-        if (!profile || (Date.now() - USER_CACHE[userId].timestamp > 300000)) {
-            try {
-                const [userRes, groupsRes, thumbRes] = await Promise.all([
-                    axios.get(`https://users.roblox.com/v1/users/${userId}`),
-                    axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`),
-                    axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
-                ]);
-
-                const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-                const primary = tscGroups.length > 0 ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
-
-                profile = {
-                    id: userId,
-                    username: userRes.data.name,
-                    dept: primary ? TSC_GROUPS[primary.group.id] : "CIVILIAN",
-                    rank: primary ? primary.role.name.toUpperCase() : "N/A",
-                    avatar: thumbRes.data.data[0].imageUrl,
-                    isAdmin: false
-                };
-            } catch (apiErr) {
-                profile = { id: userId, username: `ID_${userId}`, dept: "UNKNOWN", rank: "ERROR", avatar: "assets/icon-large-owner_info-28x14.png", isAdmin: false };
-            }
-            USER_CACHE[userId] = { timestamp: Date.now(), data: profile };
-        }
+        const profile = await getRobloxData(userId);
+        USER_CACHE[userId] = { data: profile, timestamp: Date.now() };
         res.json({ success: true, userData: profile });
-    } catch (e) {
-        res.status(500).json({ success: false, message: "SYSTEM ERROR" });
-    }
+    } catch (e) { res.status(500).json({ success: false }); }
+});
+
+app.get('/api/search/:id', async (req, res) => {
+    const profile = await getRobloxData(req.params.id);
+    res.json(profile);
 });
 
 io.on('connection', (socket) => {
-    let session = null;
-    socket.on('admin_login', () => { socket.join('admins'); sendList(); });
-    socket.on('user_login', (data) => {
-        session = { ...data, socketId: socket.id };
-        activeSessions.set(socket.id, session);
-        sendList();
-    });
-    socket.on('admin_refresh', sendList);
-
-    async function sendList() {
-        let allUsers = [];
-        if(isDbConnected) try { allUsers = await User.find({}); } catch(e){}
-        const list = allUsers.map(u => {
-            const online = Array.from(activeSessions.values()).find(s => s.id === u.userId);
-            const cached = USER_CACHE[u.userId]?.data;
-            return {
-                id: u.userId,
-                username: online?.username || cached?.username || "Offline",
-                dept: online?.dept || cached?.dept || "---",
-                frozen: u.frozen,
-                online: !!online,
-                socketId: online?.socketId
-            };
-        });
-        io.to('admins').emit('users_list', list);
-    }
-
-    socket.on('admin_kick', (id) => { const t = Array.from(activeSessions.values()).find(s => s.id === id); if(t) io.to(t.socketId).emit('force_disconnect'); });
-    socket.on('admin_freeze', async (id) => { if(isDbConnected) await User.findOneAndUpdate({ userId: id }, { frozen: true }); const t = Array.from(activeSessions.values()).find(s => s.id === id); if(t) io.to(t.socketId).emit('account_frozen'); sendList(); });
-    socket.on('admin_delete', async (id) => { if(isDbConnected) await User.findOneAndDelete({ userId: id }); delete USER_CACHE[id]; const t = Array.from(activeSessions.values()).find(s => s.id === id); if(t) io.to(t.socketId).emit('account_deleted'); sendList(); });
-    socket.on('admin_broadcast', (data) => { if(data.target === 'all') io.emit('receive_mascot', data); else { const t = Array.from(activeSessions.values()).find(s => s.id === data.target); if(t) io.to(t.socketId).emit('receive_mascot', data); } });
-    socket.on('disconnect', () => { if(session) { activeSessions.delete(socket.id); sendList(); } });
+    socket.on('admin_login', () => socket.join('admins'));
+    socket.on('user_login', (data) => socket.broadcast.to('admins').emit('user_online', data));
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`NEWTON OS ONLINE :${PORT}`));
+server.listen(PORT, () => console.log(`PORT ${PORT}`));
