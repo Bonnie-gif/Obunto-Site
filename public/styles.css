@@ -168,6 +168,21 @@ body {
     padding-bottom: 5px;
 }
 
+.affiliations {
+    margin-top: 20px;
+    text-align: left;
+}
+
+.affiliations ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.affiliations li {
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
 .obunto-overlay {
     position: fixed;
     bottom: 80px;

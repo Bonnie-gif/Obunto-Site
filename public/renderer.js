@@ -22,9 +22,16 @@ async function login() {
             document.getElementById('userAvatar').src = currentUser.avatar;
             document.getElementById('userName').innerText = currentUser.username.toUpperCase();
             document.getElementById('userId').innerText = currentUser.id;
-            document.getElementById('userDept').innerText = currentUser.dept;
-            document.getElementById('userRank').innerText = currentUser.rank;
-            document.getElementById('userClearance').innerText = currentUser.clearance || "LEVEL 0";
+            document.getElementById('userRank').innerText = currentUser.rank;  // RANK agora é LEVEL
+
+            // Lista de afiliações
+            const affList = document.getElementById('affList');
+            affList.innerHTML = '';
+            currentUser.affiliations.forEach(aff => {
+                const li = document.createElement('li');
+                li.innerText = `${aff.dept}: ${aff.role}`;
+                affList.appendChild(li);
+            });
 
             updateClock();
             setInterval(updateClock, 1000);

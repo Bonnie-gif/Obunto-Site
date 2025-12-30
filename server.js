@@ -36,10 +36,10 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// Groups TSC reais
+// Groups TSC reais (confirmados via search + histórico)
 const TSC_GROUPS = {
     11577231: "THUNDER SCIENTIFIC CORPORATION",
-    11608337: "O5 COUNCIL",
+    11608337: "SECURITY DEPARTMENT",
     11649027: "ADMINISTRATION",
     12045972: "ETHICS COMMITTEE",
     12026513: "MEDICAL DEPARTMENT",
@@ -68,15 +68,13 @@ async function getRobloxData(userId) {
         const primary = tscGroups[0];
 
         const levelMatch = primary.role.name.match(/\d+/);
-        const clearance = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+        const level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
 
         return {
             id: userId,
             username,
             avatar,
-            dept: TSC_GROUPS[primary.group.id] || primary.group.name,
-            rank: primary.role.name,
-            clearance,
+            rank: level,  // Agora RANK é o LEVEL do principal
             affiliations: tscGroups.map(g => ({ dept: TSC_GROUPS[g.group.id] || g.group.name, role: g.role.name })),
             isObunto: userId === "1947"
         };
@@ -99,7 +97,7 @@ app.post('/api/login', async (req, res) => {
                 dept: "MAINFRAME", 
                 rank: "MASTER_ADMIN", 
                 avatar: "/obunto/normal.png", 
-                clearance: "OMEGA",
+                rank: "OMEGA",  // RANK como level
                 isAdmin: true 
             } 
         });
