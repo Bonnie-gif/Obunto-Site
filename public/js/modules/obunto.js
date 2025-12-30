@@ -14,26 +14,23 @@ export function initObunto(socket, userId) {
 
     if (userId === "8989") {
         setupAdminPanel(socket);
-        
         socket.on('new_help_request', (ticket) => {
             playSound('notify');
             UI.obunto.notifyIcon.classList.remove('hidden');
             addTicketToList(ticket, socket);
         });
-
         socket.on('load_pending_tickets', (tickets) => {
-            if (tickets.length > 0) UI.obunto.notifyIcon.classList.remove('hidden');
+            if(tickets.length > 0) UI.obunto.notifyIcon.classList.remove('hidden');
             UI.obunto.ticketList.innerHTML = '';
             tickets.forEach(t => addTicketToList(t, socket));
         });
-
         socket.on('chat_receive', (data) => {
             if (currentChatTarget) {
                 const div = document.createElement('div');
                 div.className = 'chat-msg user';
                 div.textContent = data.message;
-                UI.obunto.chatHistory.appendChild(div);
-                UI.obunto.chatHistory.scrollTop = UI.obunto.chatHistory.scrollHeight;
+                UI.obunto.adminChat.history.appendChild(div);
+                UI.obunto.adminChat.history.scrollTop = UI.obunto.adminChat.history.scrollHeight;
                 playSound('notify');
             }
         });
@@ -57,7 +54,7 @@ function addTicketToList(ticket, socket) {
     div.onclick = () => {
         openChatSession(ticket.userId);
         div.remove();
-        if (UI.obunto.ticketList.children.length === 0) UI.obunto.notifyIcon.classList.add('hidden');
+        if(UI.obunto.ticketList.children.length === 0) UI.obunto.notifyIcon.classList.add('hidden');
         socket.emit('admin_accept_ticket', ticket.id);
     };
     if(UI.obunto.ticketList.querySelector('.no-tickets')) UI.obunto.ticketList.innerHTML = '';
@@ -66,13 +63,15 @@ function addTicketToList(ticket, socket) {
 
 function openChatSession(userId) {
     currentChatTarget = userId;
-    UI.obunto.chatTarget.textContent = userId;
-    UI.obunto.chatArea.classList.remove('hidden');
-    UI.obunto.chatHistory.innerHTML = '<div class="chat-msg system">SESSION STARTED</div>';
+    const { window, target, history } = UI.obunto.adminChat;
+    target.textContent = userId;
+    window.classList.remove('hidden');
+    history.innerHTML = '<div class="chat-msg system">SESSION STARTED</div>';
 }
 
 function setupAdminPanel(socket) {
     UI.obunto.btnOpen.classList.remove('hidden');
+    
     UI.obunto.notifyIcon.onclick = () => {
         UI.obunto.panel.classList.remove('hidden');
         UI.obunto.notifyIcon.classList.add('hidden');
@@ -94,37 +93,42 @@ function setupAdminPanel(socket) {
 
     UI.obunto.btnOpen.onclick = () => UI.obunto.panel.classList.remove('hidden');
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
-    
     UI.obunto.btnToggle.onclick = () => {
         const current = document.getElementById('statusText').textContent;
         socket.emit('toggle_system_status', current === 'ONLINE' ? 'OFFLINE' : 'ONLINE');
     };
-
-    UI.obunto.chatSend.onclick = () => {
-        const msg = UI.obunto.chatInput.value.trim();
-        if (!msg || !currentChatTarget) return;
-        socket.emit('chat_message', { targetId: currentChatTarget, message: msg, sender: 'ADMIN' });
-        const div = document.createElement('div');
-        div.className = 'chat-msg admin';
-        div.textContent = msg;
-        UI.obunto.chatHistory.appendChild(div);
-        UI.obunto.chatHistory.scrollTop = UI.obunto.chatHistory.scrollHeight;
-        UI.obunto.chatInput.value = '';
-    };
-
-    UI.obunto.chatClose.onclick = () => {
-        if(currentChatTarget) {
-            socket.emit('admin_close_ticket', currentChatTarget);
-            currentChatTarget = null;
-            UI.obunto.chatArea.classList.add('hidden');
-        }
-    };
-
     UI.obunto.btnSend.onclick = () => {
         const msg = UI.obunto.msg.value.trim();
         const target = UI.obunto.target.value.trim();
         if (!msg) return;
         socket.emit('mascot_broadcast', { message: msg, mood: currentMood, targetId: target || null });
         UI.obunto.msg.value = '';
+    };
+
+    // Chat Window Controls
+    const { send, input, wait, close } = UI.obunto.adminChat;
+
+    send.onclick = () => {
+        const msg = input.value.trim();
+        if (!msg || !currentChatTarget) return;
+        socket.emit('chat_message', { targetId: currentChatTarget, message: msg, sender: 'ADMIN' });
+        const div = document.createElement('div');
+        div.className = 'chat-msg admin';
+        div.textContent = msg;
+        UI.obunto.adminChat.history.appendChild(div);
+        UI.obunto.adminChat.history.scrollTop = UI.obunto.adminChat.history.scrollHeight;
+        input.value = '';
+    };
+
+    wait.onclick = () => {
+        if(currentChatTarget) socket.emit('admin_wait_signal', currentChatTarget);
+    };
+
+    close.onclick = () => {
+        if(currentChatTarget) {
+            socket.emit('admin_close_ticket', currentChatTarget);
+            currentChatTarget = null;
+            UI.obunto.adminChat.window.classList.add('hidden');
+        }
     };
 }

@@ -25,16 +25,19 @@ export const UI = {
         btnSend: document.getElementById('btnBroadcast'),
         btnToggle: document.getElementById('btnToggleStatus'),
         ticketList: document.getElementById('ticket-list'),
-        chatArea: document.getElementById('admin-chat-area'),
-        chatHistory: document.getElementById('admin-chat-history'),
-        chatInput: document.getElementById('admin-chat-input'),
-        chatSend: document.getElementById('admin-chat-send'),
-        chatClose: document.getElementById('admin-chat-close'),
-        chatTarget: document.getElementById('admin-chat-target'),
+        notifyIcon: document.getElementById('admin-notify-icon'),
         bubble: document.getElementById('obunto-bubble'),
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text'),
-        notifyIcon: document.getElementById('admin-notify-icon')
+        adminChat: {
+            window: document.getElementById('admin-chat-window'),
+            history: document.getElementById('admin-chat-history'),
+            input: document.getElementById('admin-chat-input'),
+            send: document.getElementById('admin-chat-send'),
+            wait: document.getElementById('admin-chat-wait'),
+            close: document.getElementById('admin-chat-close'),
+            target: document.getElementById('admin-chat-target')
+        }
     },
     help: {
         window: document.getElementById('help-window'),

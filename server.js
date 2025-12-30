@@ -16,10 +16,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
+const COOLDOWN_TIME = 4 * 60 * 1000;
 
 let dataStore = { notes: {}, helpTickets: [] };
 let systemStatus = 'ONLINE'; 
 let activeChats = {}; 
+let userCooldowns = {};
 
 if (fs.existsSync(DATA_FILE)) {
     try {
@@ -97,7 +99,6 @@ io.on('connection', (socket) => {
         }
         if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
         
-        // Verifica se usuário já tem chat ativo ao reconectar
         const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
         if (activeTicket) {
             socket.emit('chat_force_open');
@@ -122,9 +123,12 @@ io.on('connection', (socket) => {
     socket.on('request_help', (msg) => {
         if (!currentUserId) return;
         
-        // Verifica se já existe ticket aberto ou ativo
+        if (userCooldowns[currentUserId] && Date.now() < userCooldowns[currentUserId]) {
+            socket.emit('help_request_denied', { reason: 'COOLDOWN' });
+            return;
+        }
+
         const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && (t.status === 'open' || t.status === 'active'));
-        
         if (existingTicket) {
             socket.emit('help_request_denied', { reason: 'ACTIVE_TICKET' });
             return;
@@ -145,11 +149,13 @@ io.on('connection', (socket) => {
             activeChats[ticket.userId] = true;
             saveData();
             
-            // Força abertura para o usuário
             io.to(ticket.userId).emit('chat_force_open');
-            // Abre para o admin
             if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
         }
+    });
+
+    socket.on('admin_wait_signal', (targetId) => {
+        io.to(targetId).emit('chat_wait_mode');
     });
 
     socket.on('admin_close_ticket', (userId) => {
@@ -159,17 +165,15 @@ io.on('connection', (socket) => {
             delete activeChats[userId];
             saveData();
             
-            io.to(userId).emit('chat_ended');
+            userCooldowns[userId] = Date.now() + COOLDOWN_TIME;
+            io.to(userId).emit('chat_ended_cooldown');
         }
     });
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
         const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
-        
-        if (recipient) {
-            io.to(recipient).emit('chat_receive', { message, sender });
-        }
+        if (recipient) io.to(recipient).emit('chat_receive', { message, sender });
     });
 });
 

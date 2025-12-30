@@ -26,10 +26,8 @@ export function initHelp(socket) {
             playSound('error');
             return;
         }
-
         const msg = reqInput.value.trim();
         if(!msg) return;
-        
         socket.emit('request_help', msg);
         playSound('notify');
         isRequestPending = true;
@@ -42,23 +40,25 @@ export function initHelp(socket) {
         reqBtn.disabled = true;
     });
 
-    socket.on('help_request_denied', () => {
-        reqStatus.textContent = "BUSY: REQUEST ALREADY PENDING.";
+    socket.on('help_request_denied', (data) => {
+        if (data.reason === 'COOLDOWN') {
+            reqStatus.textContent = "SYSTEM COOLING DOWN. TRY LATER.";
+        } else {
+            reqStatus.textContent = "BUSY: REQUEST ALREADY PENDING.";
+        }
         reqStatus.classList.remove('hidden');
         isRequestPending = true; 
+        playSound('error');
     });
 
     socket.on('chat_force_open', () => {
         isChatActive = true;
         isRequestPending = false;
-        
         playSound('startup');
         window.classList.remove('hidden');
-        window.classList.add('locked-window'); // Esconde botão fechar
-        
+        window.classList.add('locked-window');
         reqForm.classList.add('hidden');
         chatInterface.classList.remove('hidden');
-        
         history.innerHTML = '';
         const sysMsg = document.createElement('div');
         sysMsg.className = 'chat-msg admin';
@@ -73,6 +73,15 @@ export function initHelp(socket) {
         msgDiv.textContent = data.message;
         history.appendChild(msgDiv);
         history.scrollTop = history.scrollHeight;
+    });
+
+    socket.on('chat_wait_mode', () => {
+        const div = document.createElement('div');
+        div.className = 'chat-msg system';
+        div.textContent = "OBUNTO IS PROCESSING...";
+        history.appendChild(div);
+        history.scrollTop = history.scrollHeight;
+        playSound('notify');
     });
 
     function sendMessage() {
@@ -90,14 +99,13 @@ export function initHelp(socket) {
     send.onclick = sendMessage;
     input.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
 
-    socket.on('chat_ended', () => {
+    socket.on('chat_ended_cooldown', () => {
         isChatActive = false;
         window.classList.remove('locked-window');
-        
+        window.classList.add('hidden');
         reqForm.classList.remove('hidden');
         chatInterface.classList.add('hidden');
-        
-        reqStatus.textContent = "SESSION CLOSED BY OPERATOR.";
+        reqStatus.textContent = "SESSION CLOSED. LINK INACTIVE.";
         reqBtn.disabled = false;
         history.innerHTML = '';
         playSound('error');

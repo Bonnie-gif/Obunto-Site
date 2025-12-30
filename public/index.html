@@ -163,6 +163,26 @@
       <span class="notify-badge">!</span>
     </div>
 
+    <div id="admin-chat-window" class="window-newton hidden" style="width: 400px; height: 500px; top: 150px; left: 300px; z-index: 3500;">
+      <div class="win-header">
+        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
+        <span class="win-title">OBUNTO DIRECT LINK (<span id="admin-chat-target"></span>)</span>
+      </div>
+      <div class="win-body chat-body">
+        <div id="admin-chat-history" class="chat-history"></div>
+        
+        <div class="chat-input-area mb-1">
+          <input id="admin-chat-input" class="input-newton" placeholder="Reply..." />
+          <button id="admin-chat-send" class="btn-newton" style="width: auto;">SEND</button>
+        </div>
+
+        <div class="admin-chat-controls">
+          <button id="admin-chat-wait" class="btn-newton btn-warning">WAIT</button>
+          <button id="admin-chat-close" class="btn-newton btn-danger">CLOSE & LOCK</button>
+        </div>
+      </div>
+    </div>
+
     <div id="admin-panel" class="window-newton admin-window hidden" style="top: 80px; left: 50%;">
       <div class="win-header">
         <img src="/assets/icon-large-preferences-19x19.png" class="header-icon">
@@ -170,36 +190,22 @@
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
-        
         <div class="admin-section">
           <label class="admin-label">SYSTEM STATUS:</label>
           <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
         </div>
-
         <div class="admin-section">
           <label class="admin-label">INCOMING TICKETS:</label>
           <div id="ticket-list" class="ticket-list">
             <div class="no-tickets">NO PENDING REQUESTS</div>
           </div>
         </div>
-
-        <div id="admin-chat-area" class="admin-section hidden">
-          <label class="admin-label">ACTIVE CHAT (<span id="admin-chat-target"></span>):</label>
-          <div id="admin-chat-history" class="chat-history" style="height: 150px;"></div>
-          <div class="chat-input-area mt-1">
-            <input id="admin-chat-input" class="input-newton" placeholder="Reply..." />
-            <button id="admin-chat-send" class="btn-newton" style="width: auto;">SEND</button>
-            <button id="admin-chat-close" class="btn-newton" style="width: auto; background: #ef4444;">DONE</button>
-          </div>
-        </div>
-
         <div class="admin-section">
           <label class="admin-label">GLOBAL BROADCAST:</label>
           <div id="mood-container" class="mood-grid mb-1"></div>
           <textarea id="adminMsg" class="admin-textarea" placeholder="Broadcast message..."></textarea>
           <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
         </div>
-
       </div>
     </div>
 
