@@ -31,8 +31,3 @@ html, body {
   background: rgba(255,255,255,0.02); opacity: 0; animation: flicker 0.15s infinite;
 }
 @keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
-.paper-texture {
-  background-color: #fdfbf7;
-  background-image: linear-gradient(#e1e1e1 1px, transparent 1px), radial-gradient(#c7c7c7 1px, transparent 1px);
-  background-size: 100% 24px, 20px 20px;
-}

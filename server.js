@@ -126,6 +126,7 @@ io.on('connection', (socket) => {
             if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
         }
         saveData();
+        socket.emit('help_request_received');
     });
 
     socket.on('admin_accept_ticket', (ticketId) => {
@@ -146,15 +147,16 @@ io.on('connection', (socket) => {
             ticket.status = 'closed';
             delete activeChats[userId];
             saveData();
-            
             io.to(userId).emit('chat_ended');
         }
     });
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
-        if (activeChats[targetId] || activeChats[currentUserId]) {
-            io.to(targetId).emit('chat_receive', { message, sender });
+        const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
+        
+        if (recipient) {
+            io.to(recipient).emit('chat_receive', { message, sender });
         }
     });
 });

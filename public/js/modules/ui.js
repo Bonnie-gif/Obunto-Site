@@ -39,7 +39,7 @@ export const UI = {
         window: document.getElementById('help-window'),
         reqForm: document.getElementById('help-request-form'),
         chatInterface: document.getElementById('help-chat-interface'),
-        reqInput: document.getElementById('help-msg'),
+        reqInput: document.getElementById('help-req-msg'),
         reqBtn: document.getElementById('btnSendHelp'),
         reqStatus: document.getElementById('help-status'),
         history: document.getElementById('chat-history'),
@@ -64,44 +64,25 @@ export function switchScreen(screenName) {
 export function makeDraggable(win) {
     const header = win.querySelector('.win-header');
     if (!header) return;
-    
-    let isDragging = false;
-    let startX, startY, initialLeft, initialTop;
-
+    let isDragging = false, startX, startY, initialLeft, initialTop;
     header.addEventListener('mousedown', (e) => {
         if(e.target.closest('.close-btn')) return;
         isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialLeft = win.offsetLeft;
-        initialTop = win.offsetTop;
+        startX = e.clientX; startY = e.clientY;
+        initialLeft = win.offsetLeft; initialTop = win.offsetTop;
         win.style.cursor = 'grabbing';
     });
-
     window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
-        
-        let newLeft = initialLeft + dx;
-        let newTop = initialTop + dy;
-
-        const maxLeft = window.innerWidth - win.offsetWidth;
-        const maxTop = window.innerHeight - win.offsetHeight;
-
-        win.style.left = `${Math.min(Math.max(0, newLeft), maxLeft)}px`;
-        win.style.top = `${Math.min(Math.max(0, newTop), maxTop)}px`;
+        win.style.left = `${initialLeft + dx}px`;
+        win.style.top = `${initialTop + dy}px`;
     });
-
-    window.addEventListener('mouseup', () => {
-        isDragging = false;
-        win.style.cursor = 'default';
-    });
+    window.addEventListener('mouseup', () => { isDragging = false; win.style.cursor = 'default'; });
 }
 
 export function initDraggables() {
-    document.querySelectorAll('.window-newton').forEach(win => {
-        makeDraggable(win);
-    });
+    document.querySelectorAll('.window-newton').forEach(win => makeDraggable(win));
 }

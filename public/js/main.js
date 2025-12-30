@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initAudio();
     initNotepad(socket);
     initHelp(socket);
-    initDraggables(); // Enable dragging for windows
+    initDraggables();
 
     setInterval(() => {
         const now = new Date();
