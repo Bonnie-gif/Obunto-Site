@@ -1,0 +1,34 @@
+.boot-center { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.boot-logo { width: 120px; filter: drop-shadow(4px 4px 0 var(--shadow)); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+.boot-logo-small { width: 60px; height: auto; }
+.boot-text { font-size: 18px; font-weight: bold; letter-spacing: 2px; color: var(--ink); font-family: var(--font-mono); }
+
+.boot-box { width: 450px; background: var(--paper); border: 3px solid var(--border); padding: 24px; box-shadow: 8px 8px 0 var(--shadow); text-align: left; }
+.boot-title { font-size: 20px; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px; text-align: center; }
+.boot-subtitle { font-size: 11px; color: var(--ink-dim); margin-bottom: 16px; text-align: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+.boot-line { font-family: var(--font-mono); font-size: 12px; line-height: 1.6; color: var(--ink); }
+
+.viewer { flex: 1; background: var(--paper); border: 3px solid var(--border); padding: 20px; overflow-y: auto; box-shadow: inset 2px 2px 5px var(--shadow), 4px 4px 0 var(--shadow); }
+.active-view { display: block; }
+
+.dashboard-grid { display: grid; grid-template-columns: 2fr 1.5fr; grid-template-rows: auto auto; gap: 16px; height: 100%; }
+
+.dash-card { background: var(--paper-dark); border: 3px solid var(--border); border-style: outset; padding: 12px; display: flex; flex-direction: column; }
+.dash-header { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+.dash-header img { width: 20px; }
+
+.profile-card { grid-row: span 2; align-items: center; background: var(--paper); text-align: center; }
+.dash-avatar { width: 160px; height: 160px; border: 4px solid var(--border); background: #000; margin-bottom: 16px; }
+.dash-info { width: 100%; }
+.dash-name { font-size: 22px; font-weight: bold; margin-bottom: 6px; }
+.dash-rank { display: inline-block; font-family: var(--font-mono); font-size: 12px; background: var(--paper-light); border: 1px solid var(--border-light); padding: 4px 8px; margin-bottom: 12px; }
+.dash-id { font-family: var(--font-mono); font-size: 12px; color: var(--ink-dim); }
+.dash-badge { margin-top: 24px; background: var(--ink); color: var(--paper); padding: 8px; font-weight: bold; letter-spacing: 2px; }
+
+.dept-list { flex: 1; overflow-y: auto; padding-right: 4px; }
+.dept-row { background: var(--paper); border: 1px solid var(--border-light); padding: 8px; margin-bottom: 6px; }
+.dept-name { font-weight: bold; font-size: 10px; }
+.dept-role { font-size: 9px; color: var(--ink-dim); margin-top: 2px; }
+
+.notice-text { font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--ink-dim); }

@@ -13,17 +13,16 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// IDs dos grupos TSC para filtragem
 const TSC_GROUP_IDS = [
-    11577231, // MAIN
-    11608337, // SECURITY
-    11649027, // ADMIN
-    12045972, // ETHICS
-    12026513, // MEDICAL
-    12026669, // SCIENTIFIC
-    12045419, // ENGINEERING
-    12022092, // LOGISTICS
-    14159717  // INTELLIGENCE
+    11577231,
+    11608337,
+    11649027,
+    12045972,
+    12026513,
+    12026669,
+    12045419,
+    12022092,
+    14159717
 ];
 
 const connectedUsers = new Map();
@@ -33,7 +32,6 @@ app.post('/api/login', async (req, res) => {
 
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // LOGIN DO OBUNTO (MASTER CONTROL)
     if (userId === "8989") {
         return res.json({ 
             success: true, 
@@ -53,7 +51,6 @@ app.post('/api/login', async (req, res) => {
         });
     }
 
-    // LOGIN DE FUNCIONÁRIO (ROBLOX API)
     try {
         const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         const userGroupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
@@ -107,10 +104,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('mascot_broadcast', (data) => {
-        // data = { message, mood, targetId }
-        
         if (data.targetId && data.targetId.trim() !== "") {
-            // MENSAGEM PRIVADA
             const targetSocket = connectedUsers.get(String(data.targetId));
             if (targetSocket) {
                 io.to(targetSocket).emit('display_mascot_message', {
@@ -119,7 +113,6 @@ io.on('connection', (socket) => {
                 });
             }
         } else {
-            // BROADCAST GLOBAL (PARA TODOS)
             io.emit('display_mascot_message', {
                 message: data.message,
                 mood: data.mood || 'normal'

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NEWTON OS // PERSONAL TERMINAL</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="/assets/icon-large-dock-35x23.png" type="image/png">
 </head>
 <body>
@@ -131,8 +131,7 @@
         
         <div class="admin-section">
           <label class="admin-label">1. SELECT AVATAR MOOD:</label>
-          <div id="mood-container" class="mood-grid">
-             </div>
+          <div id="mood-container" class="mood-grid"></div>
         </div>
 
         <div class="admin-section">
@@ -166,6 +165,6 @@
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
-  <script src="renderer.js"></script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>

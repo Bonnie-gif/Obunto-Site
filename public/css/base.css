@@ -1,0 +1,38 @@
+:root {
+  --bg-main: #89937a;
+  --bg-light: #9da896;
+  --bg-dark: #6a7462;
+  
+  --ink: #2b3323;
+  --ink-dim: #4a5544;
+  --ink-light: #6a7562;
+  
+  --paper: #c8d1c0;
+  --paper-dark: #b0baa8;
+  --paper-light: #d8e1d0;
+  
+  --border: #2b3323;
+  --border-light: #5a6552;
+  
+  --shadow: rgba(43, 51, 35, 0.4);
+  
+  --button: #a8b2a0;
+  --button-hover: #b8c2b0;
+  
+  --font-main: 'Chicago', 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background: var(--bg-main);
+  font-family: var(--font-main);
+  font-size: 13px;
+  color: var(--ink);
+  overflow: hidden;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+}
