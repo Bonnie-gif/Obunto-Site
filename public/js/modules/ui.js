@@ -1,7 +1,5 @@
 export const UI = {
     screens: {
-        boot: document.getElementById('boot-3'),
-        boot2: document.getElementById('boot-2'),
         login: document.getElementById('login-screen'),
         desktop: document.getElementById('desktop-screen')
     },
@@ -57,8 +55,12 @@ export const UI = {
 };
 
 export function switchScreen(screenName) {
-    Object.values(UI.screens).forEach(el => el.classList.add('hidden'));
-    Object.values(UI.screens).forEach(el => el.classList.remove('active'));
+    Object.values(UI.screens).forEach(el => {
+        if(el) {
+            el.classList.add('hidden');
+            el.classList.remove('active');
+        }
+    });
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');

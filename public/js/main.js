@@ -19,10 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     }, 1000);
 
-    // Boot Sequence
+    // BOOT LOGIC
     playSound('boot');
     setTimeout(() => {
-        document.getElementById('boot-sequence').classList.add('hidden');
+        const bootScreen = document.getElementById('boot-sequence');
+        if(bootScreen) bootScreen.classList.add('hidden');
         switchScreen('login');
     }, 6000);
 
