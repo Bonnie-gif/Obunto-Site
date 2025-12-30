@@ -3,7 +3,7 @@ let currentUser = null;
 async function login() {
     const id = document.getElementById('inpId').value.trim();
     if(!id) return;
-    document.getElementById('loginStatus').innerText = "AUTHENTICATING...";
+    document.getElementById('loginStatus').innerText = "CONNECTING...";
     
     try {
         const res = await fetch('/api/login', { 
@@ -19,7 +19,7 @@ async function login() {
             document.getElementById('desktop-screen').style.display = 'flex';
             
             document.getElementById('userAvatar').src = currentUser.avatar;
-            document.getElementById('userName').innerText = currentUser.username;
+            document.getElementById('userName').innerText = currentUser.username.toUpperCase();
             document.getElementById('userId').innerText = currentUser.id;
             document.getElementById('userDept').innerText = currentUser.dept;
             document.getElementById('userRank').innerText = currentUser.rank;

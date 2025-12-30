@@ -21,7 +21,7 @@
     <div id="boot-2" class="full-screen center-flex" style="display:none;">
         <div style="text-align:center;">
             <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">TSC MAINFRAME</div>
-            <div style="width:380px; background:var(--paper); border:2px solid var(--border); padding:20px; margin-top:20px;">
+            <div style="width:380px; background:var(--paper); border:2px solid var(--border); padding:20px; margin-top:20px; box-shadow:8px 8px 0 rgba(0,0,0,0.2);">
                 <div style="font-size:11px; line-height:2; text-align:left;">
                     Verifying signature................OK<br>
                     Initializing modules...............OK<br>
@@ -33,7 +33,7 @@
     </div>
 
     <div id="login-screen" class="full-screen center-flex" style="display:none;">
-        <div class="window opening" style="width:320px;">
+        <div class="window" style="width:320px;">
             <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
             <div class="win-body">
                 <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x25.png" width="40"></div>
@@ -53,25 +53,42 @@
             </div>
         </div>
 
-        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:450px; display:none;">
+        <div id="win-profile" class="window animate-up" style="position:absolute; top:80px; left:150px; width:480px; display:none;">
             <div class="win-header">
                 <span>PERSONNEL_FILE // <span id="idHeader">---</span></span>
                 <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="toggleWin('win-profile')">
             </div>
             <div class="win-body">
-                <div class="profile-card">
-                    <div class="profile-img-box">
-                        <img id="userAvatar" width="80" src="">
+                <div class="profile-container">
+                    <div class="profile-left">
+                        <div class="profile-img-frame">
+                            <img id="userAvatar" src="" alt="NO PHOTO">
+                        </div>
+                        <div style="text-align:center; margin-top:5px; font-size:10px; font-weight:bold;">OFFICIAL PHOTO</div>
                     </div>
-                    <div class="profile-info" style="flex:1;">
-                        <div style="margin-bottom:8px;"><span class="tag">IDENTITY</span> <b id="userName" style="font-size:16px;">---</b></div>
-                        <div><b>ID:</b> <span id="userId">---</span></div>
-                        <div><b>DEPT:</b> <span id="userDept">---</span></div>
-                        <div><b>RANK:</b> <span id="userRank" style="font-weight:bold; color:var(--ink);">---</span></div>
+                    
+                    <div class="profile-right">
+                        <div class="data-row">
+                            <span class="label">IDENTITY:</span>
+                            <span class="value" id="userName">---</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">ID TAG:</span>
+                            <span class="value" id="userId">---</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">DEPT:</span>
+                            <span class="value" id="userDept">---</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">RANK:</span>
+                            <span class="value" id="userRank" style="border-bottom:2px solid #2b3323;">---</span>
+                        </div>
                     </div>
                 </div>
-                <div style="margin-top:15px; border-top:1px dashed var(--border); padding-top:10px; font-size:10px; text-align:justify; opacity:0.8;">
-                    NOTE: Unauthorized access only. Subject to standard TSC monitoring protocols.
+
+                <div class="footer-note">
+                    AUTHORIZED PERSONNEL ONLY. PROPERTY OF THUNDER SCIENTIFIC CORPORATION.
                 </div>
             </div>
         </div>
