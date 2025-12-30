@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,105 +9,76 @@
 <body>
     <div class="scanlines"></div>
 
-    <!-- Boot Screens (mantidas e melhoradas) -->
-    <div id="boot-3" class="full-screen active center-flex" style="background:#1a1a1a;">
-        <div style="position:relative;">
-            <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
-            <div class="glitch-line"></div>
-        </div>
-        <div style="margin-top:40px; font-size:20px; font-weight:bold; color:#89937a; letter-spacing:3px;">
-            OBUNTO SYSTEM LOADING<span id="glitch-dots"></span>
+    <!-- Boot Glitch -->
+    <div id="boot-3" class="full-screen active">
+        <div class="boot-center">
+            <img src="/obunto/normal.png" class="boot-logo" alt="Obunto Logo">
+            <div class="boot-text">OBUNTO SYSTEM LOADING<span id="glitch-dots"></span></div>
         </div>
     </div>
 
-    <div id="boot-2" class="full-screen center-flex" style="display:none;">
-        <div style="text-align:center;">
-            <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">TSC MAINFRAME</div>
-            <div style="width:380px; background:var(--paper); border:2px solid var(--border); padding:20px; margin-top:20px; box-shadow:8px 8px 0 rgba(0,0,0,0.3);">
-                <div style="font-size:12px; line-height:2;">
-                    Verifying TSC signature........OK<br>
-                    Loading Newton emulation.......OK<br>
-                    Mounting assets..................<span id="boot-progress">□□□□□□□□□□ 0%</span><br>
-                    <span id="boot-status">INITIALIZING...</span>
-                </div>
+    <!-- Boot Mainframe -->
+    <div id="boot-2" class="full-screen" style="display:none;">
+        <div class="boot-center">
+            <div class="boot-title">TSC MAINFRAME</div>
+            <div class="boot-box">
+                <div class="boot-line">Verifying TSC signature........OK</div>
+                <div class="boot-line">Loading Newton emulation.......OK</div>
+                <div class="boot-line">Mounting assets..................<span id="boot-progress">□□□□□□□□□□ 0%</span></div>
+                <div class="boot-line"><span id="boot-status">INITIALIZING...</span></div>
             </div>
         </div>
     </div>
 
     <!-- Login Screen -->
     <div id="login-screen" class="full-screen" style="display:none;">
-        <div class="center-flex" style="flex-direction:column; gap:30px;">
-            <img src="assets/icon-large-book-29x23.png" width="80">
-            <div style="background:var(--paper); border:2px solid var(--border); padding:30px; width:400px; box-shadow:10px 10px 0 rgba(0,0,0,0.3);">
-                <div style="font-size:18px; text-align:center; margin-bottom:20px;">TSC NEWTON GATEWAY</div>
-                <input id="inpId" type="text" placeholder="USER ID" style="width:100%; padding:10px; margin-bottom:10px; background:var(--paper); border:1px solid var(--border);">
-                <div id="loginStatus" style="text-align:center; margin:10px 0; height:20px;"></div>
-                <button id="btnLogin" style="width:100%; padding:10px; background:var(--border); color:var(--bg);">AUTHENTICATE</button>
+        <div class="boot-center">
+            <img src="/assets/icon-large-assist-13x20.png" class="boot-logo" alt="Assist Icon">
+            <div class="boot-box">
+                <div class="boot-title">TSC NEWTON GATEWAY</div>
+                <input id="inpId" type="text" placeholder="ENTER USER ID" class="input-newton">
+                <div id="loginStatus" class="status-text"></div>
+                <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
             </div>
         </div>
     </div>
 
-    <!-- Desktop Screen -->
+    <!-- Desktop -->
     <div id="desktop-screen" class="full-screen" style="display:none;">
-        <!-- Janela de Perfil -->
-        <div id="profile-window" class="window" style="position:absolute; top:50px; left:50px; width:400px;">
-            <div class="win-header">NAMES</div>
-            <div class="win-body" style="text-align:center;">
-                <img id="userAvatar" src="" width="100" style="margin:20px 0; image-rendering:pixelated;">
-                <div><b>ID:</b> <span id="userId"></span></div>
-                <div><b>NAME:</b> <span id="userName"></span></div>
-                <div><b>DEPT:</b> <span id="userDept"></span></div>
-                <div><b>RANK:</b> <span id="userRank"></span></div>
-                <div><b>CLEARANCE:</b> <span id="userClearance"></span></div>
+        <!-- Perfil Window -->
+        <div id="profile-window" class="window-newton">
+            <div class="win-header">
+                <img src="/assets/icon-large-names-32x22.png" alt="Names Icon" class="header-icon">
+                <span>NAMES</span>
+                <img src="/assets/button-close-17x17.png" alt="Close" class="close-btn">
+            </div>
+            <div class="win-body">
+                <img id="userAvatar" src="" class="avatar">
+                <div class="data-row"><b>ID:</b> <span id="userId"></span></div>
+                <div class="data-row"><b>NAME:</b> <span id="userName"></span></div>
+                <div class="data-row"><b>DEPT:</b> <span id="userDept"></span></div>
+                <div class="data-row"><b>RANK:</b> <span id="userRank"></span></div>
+                <div class="data-row"><b>CLEARANCE:</b> <span id="userClearance"></span></div>
             </div>
         </div>
 
-        <!-- Obunto Bubble (ativado para ID 1947) -->
+        <!-- Obunto Bubble -->
         <div id="obunto-bubble" class="obunto-overlay hidden">
-            <img id="obunto-img" src="obunto/normal.png">
-            <div id="obunto-text"></div>
+            <img id="obunto-img" src="/obunto/normal.png" alt="Obunto">
+            <div id="obunto-text" class="speech-bubble"></div>
         </div>
 
-        <!-- Dock Newton -->
-        <div class="dock">
-            <div style="display:flex; gap:10px;">
-                <img src="assets/icon-large-notes-17x22.png" width="40">
-                <img src="assets/icon-large-dates-25x22.png" width="40">
-                <img src="assets/icon-large-find-21x21.png" width="40">
-                <img src="assets/icon-large-setup-25x22.png" width="40">
-            </div>
-            <div id="clock" style="font-size:14px;">--:--</div>
+        <!-- Dock -->
+        <div class="dock-newton">
+            <img src="/assets/icon-large-notes-17x22.png" alt="Notes">
+            <img src="/assets/icon-large-dates-25x22.png" alt="Dates">
+            <img src="/assets/icon-large-find-21x21.png" alt="Find">
+            <img src="/assets/icon-large-setup-25x22.png" alt="Setup">
+            <span id="clock">--:--</span>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="renderer.js"></script>
-    <script>
-        // Boot sequence
-        let gdots = 0;
-        const glitchInterval = setInterval(() => {
-            gdots = (gdots + 1) % 4;
-            document.getElementById('glitch-dots').innerText = '.'.repeat(gdots);
-        }, 600);
-
-        setTimeout(() => {
-            document.getElementById('boot-3').style.display = 'none';
-            document.getElementById('boot-2').style.display = 'flex';
-
-            let progress = 0;
-            const progInt = setInterval(() => {
-                progress += 10;
-                document.getElementById('boot-progress').innerText = '■■■■■■■■■■'.slice(0, progress/10) + '□□□□□□□□□□'.slice(0, 10-progress/10) + ` ${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(progInt);
-                    document.getElementById('boot-status').innerText = "COMPLETE";
-                    setTimeout(() => {
-                        document.getElementById('boot-2').style.display = 'none';
-                        document.getElementById('login-screen').style.display = 'flex';
-                    }, 1000);
-                }
-            }, 300);
-        }, 3000);
-    </script>
 </body>
 </html>
