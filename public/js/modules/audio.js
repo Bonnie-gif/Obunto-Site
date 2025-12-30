@@ -2,7 +2,8 @@ const SOUNDS = {
     startup: document.getElementById('sfx-startup'),
     click: document.getElementById('sfx-click'),
     notify: document.getElementById('sfx-notify'),
-    error: document.getElementById('sfx-error')
+    error: document.getElementById('sfx-error'),
+    speak: document.getElementById('sfx-speak')
 };
 
 export function playSound(name) {

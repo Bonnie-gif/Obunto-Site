@@ -18,6 +18,7 @@ const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
 let dataStore = { notes: {}, helpTickets: [] };
+let systemStatus = 'ONLINE'; 
 
 if (fs.existsSync(DATA_FILE)) {
     try {
@@ -82,16 +83,28 @@ app.post('/api/login', async (req, res) => {
 });
 
 io.on('connection', (socket) => {
+    socket.emit('status_update', systemStatus);
+
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
         currentUserId = userId;
+        socket.join(userId); 
         if (userId === "8989") adminSocketId = socket.id;
         if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
     });
 
     socket.on('mascot_broadcast', (data) => {
         io.emit('display_mascot_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
+    });
+
+    socket.on('admin_chat_reply', (data) => {
+        io.to(data.targetId).emit('chat_reply', { message: data.message, sender: 'OBUNTO' });
+    });
+
+    socket.on('toggle_system_status', (status) => {
+        systemStatus = status;
+        io.emit('status_update', systemStatus);
     });
 
     socket.on('save_notes', (text) => {
@@ -106,7 +119,6 @@ io.on('connection', (socket) => {
         dataStore.helpTickets.push(ticket);
         saveData();
         if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
-        socket.emit('help_sent', { success: true });
     });
 });
 

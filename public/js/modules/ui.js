@@ -14,6 +14,7 @@ export const UI = {
     },
     sidebar: { user: document.getElementById('sbUser'), rank: document.getElementById('sbRank') },
     login: { btn: document.getElementById('btnLogin'), input: document.getElementById('inpId'), status: document.getElementById('loginStatus') },
+    status: { indicator: document.getElementById('statusIndicator'), text: document.getElementById('statusText') },
     obunto: {
         panel: document.getElementById('admin-panel'),
         btnOpen: document.getElementById('btnObuntoControl'),
@@ -22,6 +23,7 @@ export const UI = {
         target: document.getElementById('targetId'),
         msg: document.getElementById('adminMsg'),
         btnSend: document.getElementById('btnBroadcast'),
+        btnToggle: document.getElementById('btnToggleStatus'),
         bubble: document.getElementById('obunto-bubble'),
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text')

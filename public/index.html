@@ -75,7 +75,8 @@
         </div>
         <div class="topbar-center">THUNDER SCIENTIFIC CORPORATION</div>
         <div class="topbar-right">
-           <div class="indicator-light"></div> ONLINE
+           <div id="statusIndicator" class="indicator-light"></div> 
+           <span id="statusText">ONLINE</span>
         </div>
       </div>
 
@@ -117,22 +118,24 @@
         <span class="win-title">PERSONAL NOTES</span>
         <button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body paper-texture">
+      <div class="win-body no-padding">
         <textarea id="notepad-area" class="notepad-lines" placeholder="Write your notes here..."></textarea>
       </div>
     </div>
 
-    <div id="help-window" class="window-newton hidden" style="width: 350px; top: 20%;">
+    <div id="help-window" class="window-newton hidden" style="width: 380px; top: 15%;">
       <div class="win-header">
         <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
-        <span class="win-title">CONTACT OBUNTO</span>
+        <span class="win-title">OBUNTO LIVE LINK</span>
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body">
-        <div class="admin-section">
-          <label class="admin-label">DESCRIBE YOUR ISSUE:</label>
-          <textarea id="help-msg" class="admin-textarea" placeholder="Obunto is listening..."></textarea>
-          <button id="btnSendHelp" class="btn-newton">TRANSMIT REQUEST</button>
+      <div class="win-body chat-body">
+        <div id="chat-history" class="chat-history">
+          <div class="chat-msg system">Connection established with TSC Mainframe...</div>
+        </div>
+        <div class="chat-input-area">
+          <input id="help-msg" class="input-newton" placeholder="Type message..." />
+          <button id="btnSendHelp" class="btn-newton" style="width: auto;">SEND</button>
         </div>
       </div>
     </div>
@@ -152,6 +155,10 @@
       </div>
       <div class="win-body">
         <div class="admin-section">
+          <label class="admin-label">SYSTEM STATUS CONTROL:</label>
+          <button id="btnToggleStatus" class="btn-newton">TOGGLE SYSTEM STATUS</button>
+        </div>
+        <div class="admin-section">
           <label class="admin-label">1. SELECT AVATAR MOOD:</label>
           <div id="mood-container" class="mood-grid"></div>
         </div>
@@ -159,7 +166,7 @@
           <label class="admin-label">2. SELECT TARGET:</label>
           <div class="target-row">
             <input id="targetId" class="input-newton" placeholder="User ID (Leave empty for GLOBAL BROADCAST)" />
-            <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">* Empty sends to everyone connected.</div>
+            <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">* Empty sends to everyone.</div>
           </div>
         </div>
         <div class="admin-section">
@@ -192,6 +199,7 @@
   <audio id="sfx-startup" src="/assets/sounds/startup.mp3"></audio>
   <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio>
   <audio id="sfx-notify" src="/assets/sounds/notify.mp3"></audio>
+  <audio id="sfx-speak" src="/assets/sounds/beep.mp3"></audio>
   <audio id="sfx-error" src="/assets/sounds/error.mp3"></audio>
 
   <script src="/socket.io/socket.io.js"></script>

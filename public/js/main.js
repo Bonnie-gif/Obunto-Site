@@ -31,4 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
     UI.login.input.addEventListener("keydown", e => { 
         if (e.key === "Enter") handleLogin(socket); 
     });
+
+    socket.on('status_update', (status) => {
+        UI.status.text.textContent = status;
+        if (status === 'ONLINE') {
+            UI.status.indicator.style.backgroundColor = '#4ade80';
+            UI.status.indicator.style.boxShadow = '0 0 5px #4ade80';
+        } else {
+            UI.status.indicator.style.backgroundColor = '#9ca3af';
+            UI.status.indicator.style.boxShadow = 'none';
+        }
+    });
 });
