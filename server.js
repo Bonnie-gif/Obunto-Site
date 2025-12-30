@@ -19,7 +19,6 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 const COOLDOWN_TIME = 4 * 60 * 1000;
 
 let dataStore = { notes: {}, helpTickets: [] };
-let systemStatus = 'ONLINE'; 
 let activeChats = {}; 
 let userCooldowns = {};
 
@@ -86,8 +85,6 @@ app.post('/api/login', async (req, res) => {
 });
 
 io.on('connection', (socket) => {
-    socket.emit('status_update', systemStatus);
-
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
@@ -109,9 +106,8 @@ io.on('connection', (socket) => {
         io.emit('display_mascot_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
     });
 
-    socket.on('toggle_system_status', (status) => {
-        systemStatus = status;
-        io.emit('status_update', systemStatus);
+    socket.on('admin_trigger_alarm', (alarmType) => {
+        io.emit('play_alarm_sound', alarmType);
     });
 
     socket.on('save_notes', (text) => {

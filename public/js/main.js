@@ -22,11 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         UI.screens.boot.classList.add('hidden');
         switchScreen('boot2');
-        playSound('click');
+        
         setTimeout(() => {
             switchScreen('login');
         }, 3000);
-    }, 3000);
+    }, 6000); // 6 seconds for boot screen 1
+
+    playSound('boot'); // Play loading sound on start
 
     UI.login.btn.onclick = () => handleLogin(socket);
     UI.login.input.addEventListener("keydown", e => { 

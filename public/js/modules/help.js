@@ -23,13 +23,13 @@ export function initHelp(socket) {
     reqBtn.onclick = (e) => {
         if (isRequestPending || isChatActive) {
             spawnFlyingIcon(e.clientX, e.clientY);
-            playSound('error');
+            playSound('uhoh'); // Use existing error sound
             return;
         }
         const msg = reqInput.value.trim();
         if(!msg) return;
         socket.emit('request_help', msg);
-        playSound('notify');
+        playSound('sent');
         isRequestPending = true;
     };
 
@@ -48,13 +48,15 @@ export function initHelp(socket) {
         }
         reqStatus.classList.remove('hidden');
         isRequestPending = true; 
-        playSound('error');
+        playSound('denied');
     });
 
     socket.on('chat_force_open', () => {
         isChatActive = true;
         isRequestPending = false;
-        playSound('startup');
+        // Boot sound usually implies system start, for chat start maybe generic click or notify
+        // But user didn't specify start sound, using click/notify implicitly or logic from previous
+        playSound('msg'); 
         window.classList.remove('hidden');
         window.classList.add('locked-window');
         reqForm.classList.add('hidden');
@@ -67,7 +69,7 @@ export function initHelp(socket) {
     });
 
     socket.on('chat_receive', (data) => {
-        if (data.sender !== 'USER') playSound('notify');
+        playSound('msg');
         const msgDiv = document.createElement('div');
         msgDiv.className = data.sender === 'USER' ? 'chat-msg user' : 'chat-msg admin';
         msgDiv.textContent = data.message;
@@ -81,7 +83,7 @@ export function initHelp(socket) {
         div.textContent = "OBUNTO IS PROCESSING...";
         history.appendChild(div);
         history.scrollTop = history.scrollHeight;
-        playSound('notify');
+        playSound('msg');
     });
 
     function sendMessage() {
@@ -108,6 +110,6 @@ export function initHelp(socket) {
         reqStatus.textContent = "SESSION CLOSED. LINK INACTIVE.";
         reqBtn.disabled = false;
         history.innerHTML = '';
-        playSound('error');
+        playSound('denied');
     });
 }

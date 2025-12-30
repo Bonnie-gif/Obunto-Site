@@ -170,12 +170,10 @@
       </div>
       <div class="win-body chat-body">
         <div id="admin-chat-history" class="chat-history"></div>
-        
         <div class="chat-input-area mb-1">
           <input id="admin-chat-input" class="input-newton" placeholder="Reply..." />
           <button id="admin-chat-send" class="btn-newton" style="width: auto;">SEND</button>
         </div>
-
         <div class="admin-chat-controls">
           <button id="admin-chat-wait" class="btn-newton btn-warning">WAIT</button>
           <button id="admin-chat-close" class="btn-newton btn-danger">CLOSE & LOCK</button>
@@ -190,16 +188,27 @@
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
+        
         <div class="admin-section">
-          <label class="admin-label">SYSTEM STATUS:</label>
-          <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
+          <label class="admin-label">ALARMS & POWER:</label>
+          <div class="alarm-grid">
+            <button class="btn-alarm btn-green" data-alarm="green">GREEN</button>
+            <button class="btn-alarm btn-blue" data-alarm="blue">BLUE</button>
+            <button class="btn-alarm btn-red" data-alarm="red">RED</button>
+            <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
+            <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
+            <button class="btn-alarm btn-power-on" data-alarm="on">PWR ON</button>
+            <button class="btn-alarm btn-power-off" data-alarm="off">PWR OFF</button>
+          </div>
         </div>
+
         <div class="admin-section">
           <label class="admin-label">INCOMING TICKETS:</label>
           <div id="ticket-list" class="ticket-list">
             <div class="no-tickets">NO PENDING REQUESTS</div>
           </div>
         </div>
+
         <div class="admin-section">
           <label class="admin-label">GLOBAL BROADCAST:</label>
           <div id="mood-container" class="mood-grid mb-1"></div>
@@ -228,11 +237,20 @@
     </div>
   </div>
 
-  <audio id="sfx-startup" src="/assets/sounds/startup.mp3"></audio>
-  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio>
-  <audio id="sfx-notify" src="/assets/sounds/notify.mp3"></audio>
-  <audio id="sfx-speak" src="/assets/sounds/beep.mp3"></audio>
-  <audio id="sfx-error" src="/assets/sounds/error.mp3"></audio>
+  <audio id="sfx-boot" src="/audio/loading1.wav"></audio>
+  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio> <audio id="sfx-alarm-green" src="/audio/greencode.wav"></audio>
+  <audio id="sfx-alarm-blue" src="/audio/bluecode.wav"></audio>
+  <audio id="sfx-alarm-red" src="/audio/redcode.wav"></audio>
+  <audio id="sfx-alarm-gamma" src="/audio/codegamma4.wav"></audio>
+  <audio id="sfx-alarm-epsilon" src="/audio/codeepslon.wav"></audio>
+  <audio id="sfx-power-on" src="/audio/poweron.wav"></audio>
+  <audio id="sfx-power-off" src="/audio/poweroff.wav"></audio>
+  
+  <audio id="sfx-msg" src="/audio/newmessage.wav"></audio>
+  <audio id="sfx-denied" src="/audio/requestdenied.wav"></audio>
+  <audio id="sfx-sent" src="/audio/requestsent.wav"></audio>
+  <audio id="sfx-sleep" src="/audio/sleep.wav"></audio>
+  <audio id="sfx-uhoh" src="/audio/uh_oh.wav"></audio>
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="js/main.js"></script>

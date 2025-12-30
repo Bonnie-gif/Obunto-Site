@@ -12,10 +12,14 @@ export function initObunto(socket, userId) {
         speak(data.message, data.mood);
     });
 
+    socket.on('play_alarm_sound', (type) => {
+        playSound(type);
+    });
+
     if (userId === "8989") {
         setupAdminPanel(socket);
         socket.on('new_help_request', (ticket) => {
-            playSound('notify');
+            playSound('msg');
             UI.obunto.notifyIcon.classList.remove('hidden');
             addTicketToList(ticket, socket);
         });
@@ -31,7 +35,7 @@ export function initObunto(socket, userId) {
                 div.textContent = data.message;
                 UI.obunto.adminChat.history.appendChild(div);
                 UI.obunto.adminChat.history.scrollTop = UI.obunto.adminChat.history.scrollHeight;
-                playSound('notify');
+                playSound('msg');
             }
         });
     }
@@ -41,7 +45,11 @@ export function speak(text, mood) {
     UI.obunto.img.src = `/obunto/${mood}.png`;
     UI.obunto.text.textContent = text;
     UI.obunto.bubble.classList.remove('hidden');
-    playSound('speak');
+    
+    if (mood === 'sleeping') playSound('sleep');
+    else if (mood === 'dizzy') playSound('uhoh');
+    else playSound('msg'); // Generic Obunto speak sound or newmessage
+
     if (bubbleTimeout) clearTimeout(bubbleTimeout);
     bubbleTimeout = setTimeout(() => { UI.obunto.bubble.classList.add('hidden'); }, 8000);
 }
@@ -93,10 +101,15 @@ function setupAdminPanel(socket) {
 
     UI.obunto.btnOpen.onclick = () => UI.obunto.panel.classList.remove('hidden');
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
-    UI.obunto.btnToggle.onclick = () => {
-        const current = document.getElementById('statusText').textContent;
-        socket.emit('toggle_system_status', current === 'ONLINE' ? 'OFFLINE' : 'ONLINE');
-    };
+    
+    // Alarms
+    document.querySelectorAll('.btn-alarm').forEach(btn => {
+        btn.onclick = () => {
+            const type = btn.getAttribute('data-alarm');
+            socket.emit('admin_trigger_alarm', type);
+        };
+    });
+
     UI.obunto.btnSend.onclick = () => {
         const msg = UI.obunto.msg.value.trim();
         const target = UI.obunto.target.value.trim();
@@ -105,7 +118,7 @@ function setupAdminPanel(socket) {
         UI.obunto.msg.value = '';
     };
 
-    // Chat Window Controls
+    // Chat Controls
     const { send, input, wait, close } = UI.obunto.adminChat;
 
     send.onclick = () => {
