@@ -96,8 +96,7 @@
               <div class="dash-header">
                  <img src="/assets/icon-large-calls-26x26.png"> DEPARTMENT ASSIGNMENTS
               </div>
-              <div id="dashDepts" class="dept-list">
-                 </div>
+              <div id="dashDepts" class="dept-list"></div>
            </div>
 
            <div class="dash-card system-card">
@@ -107,7 +106,7 @@
               <div class="notice-text">
                  > Welcome to your assigned workstation.<br>
                  > Department data is synchronized with Mainframe.<br>
-                 > Unassigned TSC groups will not appear here.<br>
+                 > All actions are monitored.<br>
                  > Report discrepancies to Administration.
               </div>
            </div>
@@ -129,27 +128,33 @@
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body">
+        
         <div class="admin-section">
-          <label class="admin-label">EXPRESSION STATE:</label>
-          <div id="mood-container" class="mood-grid"></div>
+          <label class="admin-label">1. SELECT AVATAR MOOD:</label>
+          <div id="mood-container" class="mood-grid">
+             </div>
         </div>
+
         <div class="admin-section">
-          <label class="admin-label">TARGET RECIPIENT:</label>
+          <label class="admin-label">2. SELECT TARGET:</label>
           <div class="target-row">
             <input id="targetId" class="input-newton" placeholder="User ID (Leave empty for GLOBAL BROADCAST)" />
+            <div style="font-size:10px; color:var(--ink-dim); margin-top:4px;">* Empty sends to everyone connected.</div>
           </div>
         </div>
+
         <div class="admin-section">
-          <label class="admin-label">TRANSMISSION DATA:</label>
-          <textarea id="adminMsg" class="admin-textarea" placeholder="Enter message protocol..."></textarea>
-          <button id="btnBroadcast" class="btn-newton">EXECUTE TRANSMISSION</button>
+          <label class="admin-label">3. MESSAGE PROTOCOL:</label>
+          <textarea id="adminMsg" class="admin-textarea" placeholder="Type message here..."></textarea>
+          <button id="btnBroadcast" class="btn-newton">TRANSMIT DATA</button>
         </div>
+
       </div>
     </div>
 
     <div class="dock-newton">
       <div class="dock-apps">
-        <button id="btnObuntoControl" class="dock-btn hidden" title="Obunto Control">
+        <button id="btnObuntoControl" class="dock-btn hidden" title="Access Obunto Control">
           <img src="/assets/icon-large-preferences_highlighted-19x19.png">
         </button>
       </div>

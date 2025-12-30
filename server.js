@@ -33,7 +33,7 @@ app.post('/api/login', async (req, res) => {
 
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // LOGIN DO OBUNTO (SISTEMA)
+    // LOGIN DO OBUNTO (MASTER CONTROL)
     if (userId === "8989") {
         return res.json({ 
             success: true, 
@@ -60,15 +60,12 @@ app.post('/api/login', async (req, res) => {
         const avatarRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
 
         const allGroups = userGroupsRes.data.data || [];
-        
-        // Filtra apenas grupos que estão na lista permitida da TSC
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
         if (tscGroups.length === 0) {
              return res.status(403).json({ success: false, message: "ACCESS DENIED: NON-PERSONNEL" });
         }
 
-        // Define o Rank Baseado no grupo principal ou o mais alto
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = "LEVEL 0";
         if (mainGroup) {
@@ -85,12 +82,11 @@ app.post('/api/login', async (req, res) => {
                 created: profileRes.data.created,
                 avatar: avatarRes.data.data[0]?.imageUrl,
                 rank: level,
-                // Mapeia usando os dados REAIS da API
                 affiliations: tscGroups.map(g => ({
-                    groupName: g.group.name.toUpperCase(), // Nome direto da API
-                    role: g.role.name.toUpperCase(),       // Cargo direto da API
+                    groupName: g.group.name.toUpperCase(),
+                    role: g.role.name.toUpperCase(),
                     rank: g.role.rank
-                })).sort((a, b) => b.rank - a.rank), // Ordena por rank hierárquico
+                })).sort((a, b) => b.rank - a.rank),
                 isObunto: false
             } 
         });
@@ -111,15 +107,19 @@ io.on('connection', (socket) => {
     });
 
     socket.on('mascot_broadcast', (data) => {
+        // data = { message, mood, targetId }
+        
         if (data.targetId && data.targetId.trim() !== "") {
+            // MENSAGEM PRIVADA
             const targetSocket = connectedUsers.get(String(data.targetId));
             if (targetSocket) {
                 io.to(targetSocket).emit('display_mascot_message', {
                     message: `[PRIVATE] ${data.message}`,
-                    mood: data.mood || 'suspicious'
+                    mood: data.mood || 'normal'
                 });
             }
         } else {
+            // BROADCAST GLOBAL (PARA TODOS)
             io.emit('display_mascot_message', {
                 message: data.message,
                 mood: data.mood || 'normal'
