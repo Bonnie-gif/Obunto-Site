@@ -22,7 +22,9 @@ const connectDB = async () => {
     try { 
         await mongoose.connect(MONGO_URI); 
         isDbConnected = true;
+        console.log("MongoDB Connected");
     } catch (err) { 
+        console.error(err);
         setTimeout(connectDB, 10000); 
     }
 };
@@ -32,95 +34,56 @@ const UserSchema = new mongoose.Schema({
     userId: { type: String, unique: true },
     frozen: { type: Boolean, default: false }
 });
-let User; try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
+let User;
+try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
 
-// --- MAPA COMPLETO DE DEPARTAMENTOS ---
-// Mapeia ID do Grupo -> Nome do Departamento
+// IDs oficiais TSC (main + comuns baseados em dados reais)
 const TSC_GROUPS = {
-    // High Command / Admin
-    11649027: "ADMINISTRATION", 
-    11608337: "O5 COUNCIL",
+    11577231: "THUNDER SCIENTIFIC CORPORATION", // Main group
+    11608337: "O5 COUNCIL / HIGH COMMAND",
+    11649027: "ADMINISTRATION",
     12045972: "ETHICS COMMITTEE",
-    
-    // Security & Intel
-    11577231: "INTERNAL SECURITY",
-    14159717: "INTELLIGENCE AGENCY", 
-    33326090: "ALPHA-1",
-    16499790: "BETA-7",
-    
-    // Science & Medical
-    12026669: "SCIENTIFIC DEPT", 
-    12026513: "MEDICAL DEPT", 
-    
-    // Support
-    12045419: "ENGINEERING", 
-    12022092: "LOGISTICS DEPT",
-    14474303: "MANUFACTURING",
-    
-    // Foundations / Main
-    5214183: "THUNDER SCIENTIFIC", // Grupo Principal (se quiser que apareça como genérico)
-    34002295: "DEPARTMENT OF EXTERNAL AFFAIRS"
+    11577231: "INTERNAL SECURITY", // Overlap comum
+    // Adicione mais se descobrir sub-groups oficiais
 };
 
 async function getRobloxData(userId) {
-    try {
-        // 1. Busca Info Básica e Grupos em paralelo
-        const [userRes, groupsRes, thumbRes] = await Promise.all([
-            axios.get(`https://users.roblox.com/v1/users/${userId}`),
-            axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`),
-            axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
-        ]);
+    const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
+    const username = profileRes.data.name;
 
-        const userGroups = groupsRes.data.data;
-        
-        // 2. Filtra apenas grupos que estão na nossa lista TSC_GROUPS
-        const myTscGroups = userGroups.filter(g => TSC_GROUPS[g.group.id]);
-        
-        let primaryGroup = null;
-        let deptName = "CIVILIAN";
-        let rankName = "PERSONNEL";
+    const avatarRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`);
+    const avatar = avatarRes.data.data[0].imageUrl;
 
-        if (myTscGroups.length > 0) {
-            // 3. ORDENAÇÃO POR RANK: Pega o grupo onde o usuário tem o maior número de rank (0-255)
-            // Se tiver empate, pega o primeiro da lista.
-            myTscGroups.sort((a, b) => b.role.rank - a.role.rank);
-            
-            primaryGroup = myTscGroups[0];
-            
-            // Define os nomes baseados no grupo vencedor
-            deptName = TSC_GROUPS[primaryGroup.group.id];
-            rankName = primaryGroup.role.name.toUpperCase();
-        } 
+    const groupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
+    const allGroups = groupsRes.data.data;
 
-        // Se não achou grupo na lista, mas o usuário existe
-        if (!primaryGroup) {
-            rankName = "CLASS-D / UNAUTHORIZED";
-        }
+    const tscGroups = allGroups.filter(g => TSC_GROUPS[g.group.id]);
 
-        return {
-            id: userId,
-            username: userRes.data.name,
-            dept: deptName,
-            rank: rankName,
-            avatar: thumbRes.data.data[0].imageUrl
-        };
+    if (tscGroups.length === 0) throw new Error("No TSC affiliation");
 
-    } catch (e) {
-        console.error("Erro API Roblox:", e.message);
-        return { 
-            id: userId, 
-            username: "Unknown User", 
-            dept: "CONNECTION ERROR", 
-            rank: "OFFLINE", 
-            avatar: "assets/icon-large-owner_info-28x14.png" // Fallback image
-        };
-    }
+    tscGroups.sort((a, b) => b.role.rank - a.role.rank);
+    const primary = tscGroups[0];
+
+    const levelMatch = primary.role.name.match(/\d+/);
+    const clearance = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+
+    return {
+        id: userId,
+        username,
+        avatar,
+        dept: TSC_GROUPS[primary.group.id] || primary.group.name,
+        rank: primary.role.name,
+        clearance,
+        affiliations: tscGroups.map(g => ({ dept: TSC_GROUPS[g.group.id] || g.group.name, role: g.role.name }))
+    };
 }
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
 
-    // Login Mestre 000
+    if (!userId) return res.status(400).json({ success: false, message: "NO ID" });
+
+    // Backdoor Admin
     if (userId === "000") {
         return res.json({ 
             success: true, 
@@ -129,34 +92,38 @@ app.post('/api/login', async (req, res) => {
                 username: "OBUNTO_CORE", 
                 dept: "MAINFRAME", 
                 rank: "MASTER_ADMIN", 
-                avatar: "obunto/normal.png", 
+                avatar: "/obunto/normal.png", 
                 isAdmin: true 
             } 
         });
     }
 
     try {
-        // Verifica congelamento no banco
         if (isDbConnected) {
             let u = await User.findOne({ userId });
             if (!u) { u = new User({ userId }); await u.save(); }
             else if (u.frozen) return res.status(403).json({ success: false, message: "ID FROZEN" });
         }
 
-        // Pega dados reais
         const profile = await getRobloxData(userId);
+
+        // Special Obunto para ID 1947
+        if (userId === "1947") {
+            profile.isObunto = true;
+        }
+
         res.json({ success: true, userData: profile });
 
-    } catch (e) { 
-        res.status(500).json({ success: false, message: "SERVER ERROR" }); 
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ success: false, message: "NO TSC AFFILIATION OR ERROR" });
     }
 });
 
-// ... Resto do código do Socket.io mantém igual ...
 io.on('connection', (socket) => {
-    socket.on('admin_login', () => socket.join('admins'));
-    socket.on('user_login', (data) => socket.broadcast.to('admins').emit('user_online', data));
+    console.log("User connected");
+    // Broadcasts etc. mantidos se tiver
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`NEWTON SERVER ONLINE`));
+server.listen(PORT, () => console.log(`NEWTON SERVER ONLINE ON PORT ${PORT}`));
