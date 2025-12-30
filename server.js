@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const axios = require('axios');
-const mongoose = require('mongoose');
 const path = require('path');
 const cors = require('cors');
 
@@ -14,17 +13,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const TSC_GROUPS = {
-    11577231: "THUNDER SCIENTIFIC CORPORATION",
-    11608337: "SECURITY DEPARTMENT",
-    11649027: "ADMINISTRATION",
-    12045972: "ETHICS COMMITTEE",
-    12026513: "MEDICAL DEPARTMENT",
-    12026669: "SCIENTIFIC DEPARTMENT",
-    12045419: "ENGINEERING",
-    12022092: "LOGISTICS",
-    14159717: "INTELLIGENCE"
-};
+// IDs dos grupos TSC para filtragem
+const TSC_GROUP_IDS = [
+    11577231, // MAIN
+    11608337, // SECURITY
+    11649027, // ADMIN
+    12045972, // ETHICS
+    12026513, // MEDICAL
+    12026669, // SCIENTIFIC
+    12045419, // ENGINEERING
+    12022092, // LOGISTICS
+    14159717  // INTELLIGENCE
+];
 
 const connectedUsers = new Map();
 
@@ -33,6 +33,7 @@ app.post('/api/login', async (req, res) => {
 
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
+    // LOGIN DO OBUNTO (SISTEMA)
     if (userId === "8989") {
         return res.json({ 
             success: true, 
@@ -47,24 +48,27 @@ app.post('/api/login', async (req, res) => {
                     role: "SYSTEM ADMINISTRATOR",
                     rank: 999
                 }],
-                allGroups: [],
                 isObunto: true
             } 
         });
     }
 
+    // LOGIN DE FUNCIONÁRIO (ROBLOX API)
     try {
         const profileRes = await axios.get(`https://users.roblox.com/v1/users/${userId}`);
         const userGroupsRes = await axios.get(`https://groups.roblox.com/v2/users/${userId}/groups/roles`);
         const avatarRes = await axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=420x420&format=Png&isCircular=false`);
 
         const allGroups = userGroupsRes.data.data || [];
-        const tscGroups = allGroups.filter(g => TSC_GROUPS[g.group.id]);
+        
+        // Filtra apenas grupos que estão na lista permitida da TSC
+        const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
         if (tscGroups.length === 0) {
              return res.status(403).json({ success: false, message: "ACCESS DENIED: NON-PERSONNEL" });
         }
 
+        // Define o Rank Baseado no grupo principal ou o mais alto
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = "LEVEL 0";
         if (mainGroup) {
@@ -81,11 +85,12 @@ app.post('/api/login', async (req, res) => {
                 created: profileRes.data.created,
                 avatar: avatarRes.data.data[0]?.imageUrl,
                 rank: level,
+                // Mapeia usando os dados REAIS da API
                 affiliations: tscGroups.map(g => ({
-                    groupName: TSC_GROUPS[g.group.id] || g.group.name,
-                    role: g.role.name
-                })),
-                allGroups: allGroups,
+                    groupName: g.group.name.toUpperCase(), // Nome direto da API
+                    role: g.role.name.toUpperCase(),       // Cargo direto da API
+                    rank: g.role.rank
+                })).sort((a, b) => b.rank - a.rank), // Ordena por rank hierárquico
                 isObunto: false
             } 
         });

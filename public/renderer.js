@@ -7,14 +7,6 @@ const UI = {
         login: document.getElementById('login-screen'),
         desktop: document.getElementById('desktop-screen')
     },
-    views: {
-        dashboard: document.getElementById('view-dashboard'),
-        search: document.getElementById('view-search')
-    },
-    nav: {
-        dash: document.getElementById('navDashboard'),
-        db: document.getElementById('navDatabase')
-    },
     dash: {
         name: document.getElementById('dashName'),
         rank: document.getElementById('dashRank'),
@@ -43,11 +35,6 @@ const UI = {
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text')
     },
-    search: {
-        input: document.getElementById('search'),
-        btn: document.getElementById('btnSearch'),
-        content: document.getElementById('paperContent')
-    },
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay')
 };
@@ -56,24 +43,11 @@ let currentUser = null;
 let currentMood = 'normal';
 const MOODS = ['annoyed', 'bug', 'dizzy', 'happy', 'hollow', 'normal', 'panic', 'sad', 'sleeping', 'Smug', 'stare', 'suspicious', 'werror'];
 
-function switchView(viewName) {
-    UI.nav.dash.classList.toggle('active-nav', viewName === 'dashboard');
-    UI.nav.db.classList.toggle('active-nav', viewName === 'search');
-    
-    UI.views.dashboard.classList.toggle('hidden', viewName !== 'dashboard');
-    UI.views.dashboard.classList.toggle('active-view', viewName === 'dashboard');
-    
-    UI.views.search.classList.toggle('hidden', viewName !== 'search');
-}
-
-UI.nav.dash.onclick = () => switchView('dashboard');
-UI.nav.db.onclick = () => switchView('search');
-
 async function login() {
     const id = UI.login.input.value.trim();
     if (!id) return;
 
-    UI.login.status.textContent = "CONNECTING TO MAINFRAME...";
+    UI.login.status.textContent = "SYNCING WITH MAINFRAME...";
     
     try {
         const res = await fetch('/api/login', {
@@ -90,36 +64,41 @@ async function login() {
 
             populateDashboard(currentUser);
 
+            // Troca de tela
             UI.screens.login.classList.add('hidden');
             UI.screens.desktop.classList.remove('hidden');
             UI.screens.desktop.classList.add('active');
 
+            // Habilita controle para ID 8989
             if (currentUser.id === "8989") {
                 UI.obunto.btnOpen.classList.remove('hidden');
                 setupObuntoPanel();
             }
 
-            speakObunto(`Terminal initialized. Welcome, ${currentUser.username}.`, "happy");
+            speakObunto(`Identity verified. Workstation ready, ${currentUser.username}.`, "happy");
 
         } else {
-            UI.login.status.textContent = "ACCESS DENIED: " + data.message;
-            speakObunto("Access denied. Invalid credentials.", "suspicious");
+            UI.login.status.textContent = "ERRO: " + data.message;
+            speakObunto("Authentication failed.", "suspicious");
         }
     } catch (e) {
         console.error(e);
-        UI.login.status.textContent = "NETWORK ERROR";
+        UI.login.status.textContent = "CONNECTION FAILURE";
     }
 }
 
 function populateDashboard(user) {
+    // Sidebar
     UI.sidebar.user.textContent = user.username.toUpperCase();
     UI.sidebar.rank.textContent = user.rank;
 
+    // Cartão Principal
     UI.dash.name.textContent = user.displayName;
     UI.dash.rank.textContent = user.rank;
     UI.dash.id.textContent = user.id;
     UI.dash.avatar.src = user.avatar || '/assets/icon-large-owner_info-28x14.png';
 
+    // Lista de Departamentos (Dados REAIS da API)
     UI.dash.depts.innerHTML = '';
     if (user.affiliations && user.affiliations.length > 0) {
         user.affiliations.forEach(aff => {
@@ -132,7 +111,7 @@ function populateDashboard(user) {
             UI.dash.depts.appendChild(div);
         });
     } else {
-        UI.dash.depts.innerHTML = '<div class="dept-row">NO TSC AFFILIATIONS</div>';
+        UI.dash.depts.innerHTML = '<div class="dept-row">NO TSC AFFILIATIONS DETECTED</div>';
     }
 }
 
@@ -167,7 +146,7 @@ function setupObuntoPanel() {
         });
 
         UI.obunto.msg.value = '';
-        speakObunto("Command executed.", "smug");
+        speakObunto("Message transmitted.", "smug");
     };
 }
 

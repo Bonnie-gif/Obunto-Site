@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEWTON OS // TSC PERSONAL TERMINAL</title>
+  <title>NEWTON OS // PERSONAL TERMINAL</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="/assets/icon-large-dock-35x23.png" type="image/png">
 </head>
@@ -53,11 +53,8 @@
       </div>
 
       <div class="section-block">
-        <button id="navDashboard" class="btn-action active-nav mb-1">
-          <img src="/assets/icon-large-owner_info-28x14.png"> MY TERMINAL
-        </button>
-        <button id="navDatabase" class="btn-action">
-          <img src="/assets/icon-large-find-21x21.png"> DATABASE SEARCH
+        <button class="btn-action active-nav">
+          <img src="/assets/icon-large-owner_info-28x14.png"> MY DASHBOARD
         </button>
       </div>
 
@@ -91,7 +88,7 @@
                  <div class="dash-name" id="dashName">LOADING...</div>
                  <div class="dash-rank" id="dashRank">...</div>
                  <div class="dash-id">ID: <span id="dashId">...</span></div>
-                 <div class="dash-badge">CLEARANCE GRANTED</div>
+                 <div class="dash-badge">AUTHORIZED PERSONNEL</div>
               </div>
            </div>
 
@@ -99,7 +96,8 @@
               <div class="dash-header">
                  <img src="/assets/icon-large-calls-26x26.png"> DEPARTMENT ASSIGNMENTS
               </div>
-              <div id="dashDepts" class="dept-list"></div>
+              <div id="dashDepts" class="dept-list">
+                 </div>
            </div>
 
            <div class="dash-card system-card">
@@ -107,28 +105,14 @@
                  <img src="/assets/icon-large-notes-17x22.png"> TERMINAL NOTICES
               </div>
               <div class="notice-text">
-                 > Welcome to your personal terminal.<br>
-                 > All actions are logged by the Ethics Committee.<br>
-                 > Obunto System is monitoring network traffic.<br>
-                 > Report any anomalies to Engineering immediately.
+                 > Welcome to your assigned workstation.<br>
+                 > Department data is synchronized with Mainframe.<br>
+                 > Unassigned TSC groups will not appear here.<br>
+                 > Report discrepancies to Administration.
               </div>
            </div>
         </div>
       </div>
-
-      <div id="view-search" class="viewer hidden">
-        <div class="search-bar-area">
-           <input id="search" placeholder="Search Personnel Database..." class="input-newton big-search" />
-           <button id="btnSearch" class="btn-newton" style="width: auto;">QUERY</button>
-        </div>
-        <div id="paperContent" class="search-results">
-           <div class="welcome-screen">
-              <img src="/assets/icon-large-find-21x21.png" class="welcome-icon">
-              <div class="welcome-text">DATABASE READY</div>
-           </div>
-        </div>
-      </div>
-
     </main>
 
     <div id="obunto-bubble" class="obunto-overlay hidden">
