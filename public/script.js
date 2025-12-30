@@ -4,7 +4,6 @@ let currentMood = 'normal';
 
 // Admin panel (if ID 000, add to desktop if needed)
 function buildAdminPanel() {
-    // Assume admin-screen exists for ID 000 - add logic in renderer.js if needed
     const container = document.getElementById('mood-container');
     if (container) {
         MOODS.forEach(mood => {

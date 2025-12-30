@@ -36,7 +36,7 @@ const UserSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', UserSchema);
 
-// Groups TSC reais (confirmados via search + histórico)
+// Groups TSC reais (expandido com todos do histórico + search)
 const TSC_GROUPS = {
     11577231: "THUNDER SCIENTIFIC CORPORATION",
     11608337: "SECURITY DEPARTMENT",
@@ -46,7 +46,9 @@ const TSC_GROUPS = {
     12026669: "SCIENTIFIC DEPARTMENT",
     12045419: "ENGINEERING",
     12022092: "LOGISTICS",
-    14159717: "INTELLIGENCE"
+    14159717: "INTELLIGENCE",
+    12045972: "ADMINISTRATIVE DEPARTMENT", // Alias if needed
+    // Firearms: Assumindo parte de Security, no separate ID found; add if known, e.g., 12345678: "FIREARMS DIVISION"
 };
 
 async function getRobloxData(userId) {
@@ -64,17 +66,25 @@ async function getRobloxData(userId) {
 
         if (tscGroups.length === 0) throw new Error("No TSC affiliation");
 
-        tscGroups.sort((a, b) => b.role.rank - a.role.rank);
-        const primary = tscGroups[0];
-
-        const levelMatch = primary.role.name.match(/\d+/);
-        const level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+        // Find main group for level (11577231)
+        const mainGroup = tscGroups.find(g => g.group.id === 11577231);
+        let level = "LEVEL 0";
+        if (mainGroup) {
+            const levelMatch = mainGroup.role.name.match(/\d+/);
+            level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+        } else {
+            // Fallback to primary
+            tscGroups.sort((a, b) => b.role.rank - a.role.rank);
+            const primary = tscGroups[0];
+            const levelMatch = primary.role.name.match(/\d+/);
+            level = levelMatch ? `LEVEL ${levelMatch[0]}` : "LEVEL 0";
+        }
 
         return {
             id: userId,
             username,
             avatar,
-            rank: level,  // Agora RANK é o LEVEL do principal
+            rank: level,  // RANK = level from main or primary
             affiliations: tscGroups.map(g => ({ dept: TSC_GROUPS[g.group.id] || g.group.name, role: g.role.name })),
             isObunto: userId === "1947"
         };
@@ -95,9 +105,9 @@ app.post('/api/login', async (req, res) => {
                 id: "000", 
                 username: "OBUNTO_CORE", 
                 dept: "MAINFRAME", 
-                rank: "MASTER_ADMIN", 
+                rank: "OMEGA",  // RANK as level
                 avatar: "/obunto/normal.png", 
-                rank: "OMEGA",  // RANK como level
+                affiliations: [],  // No affiliations for admin
                 isAdmin: true 
             } 
         });

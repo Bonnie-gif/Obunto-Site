@@ -20,11 +20,11 @@ async function login() {
             document.getElementById('desktop-screen').style.display = 'flex';
 
             document.getElementById('userAvatar').src = currentUser.avatar;
-            document.getElementById('userName').innerText = currentUser.username.toUpperCase();
             document.getElementById('userId').innerText = currentUser.id;
-            document.getElementById('userRank').innerText = currentUser.rank;  // RANK agora é LEVEL
+            document.getElementById('userName').innerText = currentUser.username.toUpperCase();
+            document.getElementById('userRank').innerText = currentUser.rank;
 
-            // Lista de afiliações
+            // Affiliations list (dept: role)
             const affList = document.getElementById('affList');
             affList.innerHTML = '';
             currentUser.affiliations.forEach(aff => {
