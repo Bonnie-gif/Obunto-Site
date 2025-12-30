@@ -20,7 +20,7 @@ let isDbConnected = false;
 const connectDB = async () => {
     if (!MONGO_URI) return;
     try { 
-        await mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 5000 }); 
+        await mongoose.connect(MONGO_URI); 
         isDbConnected = true;
     } catch (err) { 
         setTimeout(connectDB, 10000); 
@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     userId: { type: String, unique: true },
     frozen: { type: Boolean, default: false }
 });
-let User; try { User = mongoose.model('User', UserSchema); } catch(e) { User = mongoose.model('User'); }
+const User = mongoose.model('User', UserSchema);
 
 const TSC_GROUPS = {
     11649027: "ADMINISTRATION", 
@@ -44,8 +44,6 @@ const TSC_GROUPS = {
     12022092: "LOGISTICS"
 };
 
-const USER_CACHE = {}; 
-
 async function getRobloxData(userId) {
     try {
         const [userRes, groupsRes, thumbRes] = await Promise.all([
@@ -54,8 +52,8 @@ async function getRobloxData(userId) {
             axios.get(`https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${userId}&size=150x150&format=Png&isCircular=false`)
         ]);
 
-        const tscGroupsFound = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
-        const primary = tscGroupsFound.length > 0 ? tscGroupsFound.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
+        const tscGroups = groupsRes.data.data.filter(g => TSC_GROUPS[g.group.id]);
+        const primary = tscGroups.length > 0 ? tscGroups.sort((a, b) => b.role.rank - a.role.rank)[0] : null;
 
         return {
             id: userId,
@@ -65,7 +63,7 @@ async function getRobloxData(userId) {
             avatar: thumbRes.data.data[0].imageUrl
         };
     } catch (e) {
-        return { id: userId, username: "Unknown", dept: "N/A", rank: "ERROR", avatar: "" };
+        return { id: userId, username: "Unknown", dept: "OFFLINE", rank: "N/A", avatar: "" };
     }
 }
 
@@ -76,12 +74,11 @@ app.post('/api/login', async (req, res) => {
     }
     try {
         if (isDbConnected) {
-            let user = await User.findOne({ userId });
-            if (!user) { user = new User({ userId }); await user.save(); }
-            else if (user.frozen) return res.status(403).json({ success: false, message: "ID FROZEN" });
+            let u = await User.findOne({ userId });
+            if (!u) { u = new User({ userId }); await u.save(); }
+            else if (u.frozen) return res.status(403).json({ success: false, message: "ID FROZEN" });
         }
         const profile = await getRobloxData(userId);
-        USER_CACHE[userId] = { data: profile, timestamp: Date.now() };
         res.json({ success: true, userData: profile });
     } catch (e) { res.status(500).json({ success: false }); }
 });
@@ -91,10 +88,5 @@ app.get('/api/search/:id', async (req, res) => {
     res.json(profile);
 });
 
-io.on('connection', (socket) => {
-    socket.on('admin_login', () => socket.join('admins'));
-    socket.on('user_login', (data) => socket.broadcast.to('admins').emit('user_online', data));
-});
-
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`PORT ${PORT}`));
+server.listen(PORT, () => console.log(`NEWTON SERVER ONLINE`));

@@ -1,5 +1,4 @@
 const socket = io();
-let currentUser = null;
 
 async function login() {
     const id = document.getElementById('inpId').value.trim();
@@ -15,23 +14,25 @@ async function login() {
         const data = await res.json();
 
         if(data.success) {
-            currentUser = data.userData;
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('desktop-screen').classList.add('active');
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('desktop-screen').style.display = 'flex';
             
-            document.getElementById('profile-avatar').src = currentUser.avatar;
-            document.getElementById('profile-name').innerText = currentUser.username;
-            document.getElementById('profile-id').innerText = currentUser.id;
-            document.getElementById('profile-rank-tag').innerText = currentUser.rank;
+            document.getElementById('profile-avatar').src = data.userData.avatar;
+            document.getElementById('profile-name').innerText = data.userData.username;
+            document.getElementById('profile-id').innerText = data.userData.id;
+            document.getElementById('profile-rank-tag').innerText = data.userData.rank;
             
-            socket.emit('user_login', currentUser);
-            setInterval(() => {
-                document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            }, 1000);
+            socket.emit('user_login', data.userData);
+            updateClock();
+            setInterval(updateClock, 1000);
         } else {
             document.getElementById('loginStatus').innerText = "DENIED: " + data.message;
         }
     } catch(e) { document.getElementById('loginStatus').innerText = "SERVER ERROR"; }
+}
+
+function updateClock() {
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
 async function searchUser() {
@@ -45,7 +46,7 @@ async function searchUser() {
         const user = await res.json();
 
         viewer.innerHTML = `
-            <div class="window animate-up" style="width:400px; margin: 20px auto;">
+            <div class="window animate-up" style="width:420px; margin: 20px auto;">
                 <div class="win-header">
                     <span>PERSONNEL FILE // ${user.id}</span>
                     <img src="assets/button-close-17x17.png" style="cursor:pointer;" onclick="this.closest('.window').remove()">
@@ -55,14 +56,14 @@ async function searchUser() {
                         <div class="profile-img-box">
                             <img src="${user.avatar}" width="70">
                         </div>
-                        <div class="profile-info">
-                            <div><span class="tag">IDENTITY</span> <b>${user.username}</b></div>
-                            <div>ID: ${user.id}</div>
-                            <div>DEPT: ${user.dept}</div>
-                            <div>RANK: <span style="font-weight:bold;">${user.rank}</span></div>
+                        <div class="profile-info" style="flex:1;">
+                            <div style="margin-bottom:8px;"><span class="tag">IDENTITY</span> <b style="font-size:14px;">${user.username}</b></div>
+                            <div><b>ID:</b> ${user.id}</div>
+                            <div><b>DEPT:</b> ${user.dept}</div>
+                            <div><b>RANK:</b> <span style="font-weight:bold; color:#2b3323;">${user.rank}</span></div>
                         </div>
                     </div>
-                    <div style="margin-top:15px; border-top:1px dashed #2b3323; padding-top:10px; font-size:10px; text-align:justify;">
+                    <div style="margin-top:15px; border-top:1px dashed #2b3323; padding-top:10px; font-size:9px; text-align:justify; opacity:0.8;">
                         NOTE: Employee is subject to standard surveillance protocols under TSC Regulation 14-B. Reporting mandatory for anomalies.
                     </div>
                 </div>

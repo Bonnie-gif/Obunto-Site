@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <title>TSC // ARCHIVE TERMINAL</title>
+    <title>NEWTON OS // TSC GATEWAY</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="scanlines"></div>
 
-    <div id="boot-screen-3" class="full-screen active" style="background:#1a1a1a; justify-content:center; align-items:center; flex-direction:column;">
+    <div id="boot-screen-3" class="full-screen active" style="background:#1a1a1a; display:flex; justify-content:center; align-items:center; flex-direction:column;">
         <div style="position:relative;">
             <img src="obunto/normal.png" width="120" style="image-rendering:pixelated; filter:drop-shadow(0 0 10px #89937a);">
             <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(90deg, transparent 48%, rgba(137,147,122,0.3) 50%, transparent 52%); animation:glitch-scan 3s infinite linear;"></div>
@@ -19,40 +18,40 @@
         </div>
     </div>
 
-    <div id="boot-screen-2" class="full-screen" style="background:var(--bg); color:var(--ink); justify-content:center; align-items:center; flex-direction:column; gap:40px;">
+    <div id="boot-screen-2" class="full-screen" style="background:var(--bg); color:var(--ink); display:none; justify-content:center; align-items:center; flex-direction:column; gap:40px;">
         <div style="font-size:28px; font-weight:bold; letter-spacing:4px;">TSC MAINFRAME</div>
         <div style="width:380px; background:var(--paper); border:2px solid var(--border); box-shadow:8px 8px 0 rgba(0,0,0,0.2); padding:20px;">
             <div style="font-size:12px; line-height:2;">
                 <div style="text-align:center; margin-bottom:15px; font-weight:bold;">SECURE BOOT SEQUENCE</div>
-                <div>Verifying signature................OK</div>
-                <div>Initializing modules...............OK</div>
-                <div>Mounting datastore................<span id="boot-status">IN PROGRESS</span></div>
+                <div>Verifying cryptographic signature........OK</div>
+                <div>Initializing Newton Emulation............OK</div>
+                <div>Mounting secure datastore................<span id="boot-status">IN PROGRESS</span></div>
                 <div style="margin-top:20px; text-align:center;" id="boot-progress">■□□□□□□□□□ 10%</div>
             </div>
         </div>
     </div>
 
-    <div id="login-screen" class="full-screen center-flex">
-        <div class="window opening" style="width:320px;">
+    <div id="login-screen" class="full-screen center-flex" style="display:none;">
+        <div class="window" style="width:320px;">
             <div class="win-header"><span>SECURE_GATEWAY</span><img src="assets/button-close-17x17.png" style="opacity:0.5;"></div>
             <div class="win-body">
-                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x26.png" width="40"></div>
+                <div style="text-align:center; margin-bottom:15px;"><img src="assets/icon-large-freeze-27x25.png" width="40"></div>
                 <p style="font-size:11px; margin-bottom:5px; font-weight:bold;">PERSONNEL ID:</p>
                 <input type="text" id="inpId" placeholder="ENTER ID...">
                 <button class="os-btn" onclick="login()" style="width:100%; margin-top:15px;"><img src="assets/icon-small-arrow_up-18x15.png" width="12"> ACCESS SYSTEM</button>
-                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000; height:15px;"></div>
+                <div id="loginStatus" style="text-align:center; margin-top:10px; font-size:10px; color:#550000;"></div>
             </div>
         </div>
     </div>
 
-    <div id="desktop-screen" class="full-screen">
+    <div id="desktop-screen" class="full-screen" style="display:none;">
         <aside class="sidebar">
             <div class="sb-header">
                 <div class="brand-title">TSC_NET // ACCESS</div>
                 <div class="brand-sub">Thunder Scientific Corp.</div>
             </div>
-            <div id="sidebar-profile" style="padding:15px; border-bottom:1px solid #333; text-align:center;">
-                <img id="profile-avatar" src="" style="width:60px; border:2px solid #333; margin-bottom:10px;">
+            <div id="sidebar-profile" style="padding:15px; border-bottom:1px solid var(--border); text-align:center;">
+                <img id="profile-avatar" src="" style="width:60px; border:2px solid var(--border); margin-bottom:10px;">
                 <div id="profile-name" style="font-weight:bold; font-size:12px;">---</div>
                 <div id="profile-id" style="font-size:10px; opacity:0.6;">---</div>
                 <span id="profile-rank-tag" class="tag" style="margin-top:5px; display:inline-block;">---</span>
@@ -60,8 +59,8 @@
             <div class="sb-controls">
                 <div class="brand-sub">Database Search</div>
                 <div class="search-box">
-                    <input id="search" class="input-dark" placeholder="USER ID">
-                    <button onclick="searchUser()" class="btn btn-primary">REQ</button>
+                    <input id="search" placeholder="USER ID">
+                    <button onclick="searchUser()" class="os-btn small">REQ</button>
                 </div>
             </div>
         </aside>
@@ -86,12 +85,16 @@
     <script src="renderer.js"></script>
     <script>
         window.addEventListener('load', () => {
-            const s1 = document.getElementById('boot-screen-3');
+            const s3 = document.getElementById('boot-screen-3');
             const s2 = document.getElementById('boot-screen-2');
             const login = document.getElementById('login-screen');
+            
+            let gdots = 0;
+            setInterval(() => { gdots = (gdots + 1) % 4; document.getElementById('glitch-dots').innerText = '.'.repeat(gdots); }, 600);
+
             setTimeout(() => {
-                s1.classList.remove('active');
-                s2.classList.add('active');
+                s3.style.display = 'none';
+                s2.style.display = 'flex';
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 10;
@@ -99,7 +102,7 @@
                     if (progress >= 100) {
                         clearInterval(interval);
                         document.getElementById('boot-status').innerText = "COMPLETE";
-                        setTimeout(() => { s2.classList.remove('active'); login.classList.add('active'); }, 800);
+                        setTimeout(() => { s2.style.display = 'none'; login.style.display = 'flex'; }, 800);
                     }
                 }, 400);
             }, 3000);
