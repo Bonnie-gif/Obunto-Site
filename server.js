@@ -111,8 +111,8 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('mascot_broadcast', (data) => {
-        io.emit('display_mascot_message', { 
+    socket.on('admin_broadcast_message', (data) => {
+        io.emit('receive_broadcast_message', { 
             message: data.message, 
             mood: data.mood || 'normal', 
             targetId: data.targetId 
@@ -197,4 +197,4 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`SERVER RUNNING ON PORT ${PORT}`));
+server.listen(PORT, () => {});

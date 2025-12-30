@@ -46,12 +46,23 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.className = '';
         const banner = document.getElementById('alarm-banner');
         const text = document.getElementById('alarm-type-text');
+        const powerOff = document.getElementById('power-off-overlay');
         
-        if (alarmType !== 'green' && alarmType !== 'on' && alarmType !== 'off') {
+        if (alarmType === 'off') {
+            powerOff.classList.remove('hidden');
+            banner.classList.add('hidden');
+        } else if (alarmType === 'on') {
+            powerOff.classList.add('hidden');
+            banner.classList.add('hidden');
+            document.body.style.opacity = '0';
+            setTimeout(() => { document.body.style.opacity = '1'; playSound('boot'); }, 1000);
+        } else if (alarmType !== 'green') {
+            powerOff.classList.add('hidden');
             document.body.classList.add(`alarm-${alarmType}`);
             banner.classList.remove('hidden');
             text.textContent = `${alarmType.toUpperCase()} ALERT`;
         } else {
+            powerOff.classList.add('hidden');
             banner.classList.add('hidden');
         }
     });
