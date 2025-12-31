@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
-let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: [], messages: [] };
+let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
 let connectedSockets = {}; 
@@ -235,13 +235,11 @@ io.on('connection', (socket) => {
             timestamp: new Date()
         };
         
-        // Always send back to sender for display
         socket.emit('comm_receive', msg);
 
         if(data.target === 'GLOBAL') {
             socket.broadcast.emit('comm_receive', msg);
         } else {
-            // Private
             io.to(data.target).emit('comm_receive', msg);
             if(adminSocketId) io.to(adminSocketId).emit('comm_receive', msg); 
         }

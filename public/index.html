@@ -344,24 +344,25 @@
       </div>
     </div>
 
-    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: #000; border: 2px solid #0f0;">
-      <div class="win-header" style="background: #003300; border-bottom: 2px solid #0f0; color: #0f0;">
+    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: var(--paper-dark);">
+      <div class="win-header">
+        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
         <span class="win-title">SURVEILLANCE FEED: <span id="spy-target-name">UNKNOWN</span></span>
         <button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body" style="padding: 0; display: flex; flex-direction: column; background: #000;">
-        <div style="padding: 10px; border-bottom: 1px solid #004400; display: flex; justify-content: space-between; align-items: center; color: #00ff00; font-family: 'Courier New', monospace; font-size: 10px;">
+      <div class="win-body" style="padding: 0; display: flex; flex-direction: column;">
+        <div style="padding: 10px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; color: var(--ink); font-family: var(--font-mono); font-size: 10px; background: var(--paper);">
            <span style="letter-spacing: 1px;">// SECURE LINK [AES-256]</span>
-           <span style="animation: blink 1s infinite; color: #ff0000; font-weight: bold; text-shadow: 0 0 5px red;">● LIVE REC</span>
+           <span style="animation: blink 1s infinite; color: #ff0000; font-weight: bold;">● REC</span>
         </div>
-        <div id="spy-content" class="spy-terminal">
+        <div id="spy-content" class="spy-terminal" style="background: var(--paper-light); color: var(--ink);">
            <div class="spy-section">
-              <div class="spy-header">SYSTEM STATE</div>
+              <div class="spy-header" style="color: var(--ink-dim); border-color: var(--border-light);">SYSTEM STATE</div>
               <div id="spy-state-data">WAITING FOR UPLINK...</div>
            </div>
-           <div class="spy-section" style="flex: 1; border-top: 1px dashed #004400;">
-              <div class="spy-header">KEYSTROKE FEED</div>
-              <div id="spy-input-data" class="spy-log"></div>
+           <div class="spy-section" style="flex: 1; border-top: 1px dashed var(--border-light);">
+              <div class="spy-header" style="color: var(--ink-dim); border-color: var(--border-light);">KEYSTROKE FEED</div>
+              <div id="spy-input-data" class="spy-log" style="color: var(--ink);"></div>
            </div>
         </div>
       </div>

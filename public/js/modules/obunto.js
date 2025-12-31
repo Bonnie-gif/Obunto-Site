@@ -106,7 +106,6 @@ function renderPersonnelList(list, socket) {
         btnTask.onclick = (e) => {
             e.stopPropagation();
             socket.emit('admin_assign_task', { targetId: p.id, taskType: 'HEX' });
-            alert("TASK ASSIGNED");
         };
 
         div.onclick = () => {
@@ -121,7 +120,7 @@ function startSpy(id, name, socket) {
     UI.obunto.spy.title.textContent = name.toUpperCase();
     UI.obunto.spy.window.classList.remove('hidden');
     bringToFront(UI.obunto.spy.window);
-    UI.obunto.spy.content.innerHTML = `<div class="spy-section"><div class="spy-header">SYSTEM STATE</div><div id="spy-state-data">WAITING FOR UPLINK...</div></div><div class="spy-section" style="flex: 1; border-top: 1px dashed #004400;"><div class="spy-header">KEYSTROKE FEED</div><div id="spy-input-data" class="spy-log"></div></div>`;
+    UI.obunto.spy.content.innerHTML = `<div class="spy-section"><div class="spy-header">SYSTEM STATE</div><div id="spy-state-data">WAITING FOR UPLINK...</div></div><div class="spy-section" style="flex: 1; border-top: 1px dashed var(--border-light);"><div class="spy-header">KEYSTROKE FEED</div><div id="spy-input-data" class="spy-log"></div></div>`;
     socket.emit('admin_spy_start', id);
 }
 
@@ -135,7 +134,7 @@ function renderSpyData(state) {
     state.windows.forEach(w => {
         if(!w.hidden) html += `<div>- ${w.id}</div>`;
     });
-    if(state.afk) html += `<div style="color:yellow; margin-top:10px;">[USER IS AFK]</div>`;
+    if(state.afk) html += `<div style="color:var(--alert-color); margin-top:10px;">[USER IS AFK]</div>`;
     el.innerHTML = html;
 }
 

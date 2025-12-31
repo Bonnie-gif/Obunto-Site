@@ -32,6 +32,7 @@ body.alarm-red {
   --alert-color: #ff4136;
 }
 
+/* GAMMA - REVERTED TO ORANGE/BUGGY */
 body.alarm-gamma {
   --bg-main: #5a4a1a; --bg-light: #7d6d33; --bg-dark: #3b2e0e;
   --paper: #e8e0c0; --paper-dark: #d0c8a8; --paper-light: #f8f0d0;
@@ -167,18 +168,43 @@ body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
 @keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-body.alarm-gamma .screen-flicker { animation: gammaFlicker 0.2s infinite; background: rgba(255,165,0,0.1); }
-body.alarm-gamma .crt-overlay { animation: gammaOverlay 1s infinite; }
-body.alarm-gamma .workspace { animation: gammaShake 0.5s infinite; }
+/* GAMMA STYLE REVERTED TO BUGGY ORANGE */
+body.alarm-gamma .screen-flicker { animation: gammaStatic 0.08s infinite; background: rgba(255,140,0,0.15); }
+body.alarm-gamma .crt-overlay { animation: gammaDistort 0.5s infinite; }
+body.alarm-gamma .scanlines { animation: gammaGlitch 0.2s infinite; }
+body.alarm-gamma .workspace { animation: gammaWarp 0.4s infinite; }
 body.alarm-gamma::before {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9990;
   background: repeating-linear-gradient(0deg, rgba(255,140,0,0.05) 0px, transparent 2px, transparent 4px);
-  animation: gammaScan 0.3s infinite linear; opacity: 0.3;
+  animation: gammaLines 0.1s infinite;
 }
-@keyframes gammaFlicker { 0% { opacity: 0.1; } 50% { opacity: 0.2; } 100% { opacity: 0.1; } }
-@keyframes gammaOverlay { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,140,0,0.2); filter: sepia(0.2); } 50% { box-shadow: inset 0 0 70px rgba(255,140,0,0.3); filter: sepia(0.4) hue-rotate(-10deg); } }
-@keyframes gammaShake { 0% { transform: translate(0,0); } 25% { transform: translate(-2px, 1px); } 50% { transform: translate(1px, -2px); } 75% { transform: translate(-1px, 2px); } 100% { transform: translate(0,0); } }
-@keyframes gammaScan { from { background-position: 0 0; } to { background-position: 0 100%; } }
+@keyframes gammaStatic { 
+  0% { transform: translate(0,0) skewX(0); opacity: 0.15; } 
+  25% { transform: translate(-3px, 2px) skewX(3deg); opacity: 0.25; } 
+  50% { transform: translate(3px, -2px) skewX(-2deg); opacity: 0.15; } 
+  75% { transform: translate(-2px, 3px) skewX(2deg); opacity: 0.25; } 
+  100% { transform: translate(0,0) skewX(0); opacity: 0.15; } 
+}
+@keyframes gammaDistort { 
+  0% { box-shadow: inset 0 0 50px rgba(255,140,0,0.3); filter: hue-rotate(0deg); } 
+  50% { box-shadow: inset 0 0 80px rgba(255,140,0,0.5); filter: hue-rotate(10deg); } 
+  100% { box-shadow: inset 0 0 50px rgba(255,140,0,0.3); filter: hue-rotate(0deg); } 
+}
+@keyframes gammaGlitch { 
+  0% { transform: translate(0,0) skewX(0); } 
+  20% { transform: translate(-2px, 0) skewX(10deg); } 
+  40% { transform: translate(2px, 0) skewX(-10deg); } 
+  60% { transform: translate(0, -2px) skewY(5deg); } 
+  80% { transform: translate(0, 2px) skewY(-5deg); } 
+  100% { transform: translate(0,0) skewX(0); } 
+}
+@keyframes gammaWarp { 
+  0% { transform: perspective(500px) rotateY(0deg); } 
+  25% { transform: perspective(500px) rotateY(-2deg); } 
+  75% { transform: perspective(500px) rotateY(2deg); } 
+  100% { transform: perspective(500px) rotateY(0deg); } 
+}
+@keyframes gammaLines { 0% { transform: translateY(0); } 100% { transform: translateY(4px); } }
 
 .paper-texture {
   background-color: #fdfbf7;

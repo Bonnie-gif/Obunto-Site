@@ -1,4 +1,4 @@
-import { UI, bringToFront } from './ui.js';
+import { UI, bringToFront, showCustomPrompt } from './ui.js';
 import { playSound } from './audio.js';
 
 export function initComms(socket) {
