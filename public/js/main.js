@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     initNotepad(socket);
     initHelp(socket);
     initFiles(socket);
-    initComms(socket);
     initProtocols(socket);
     initDraggables();
 
@@ -32,16 +31,27 @@ document.addEventListener("DOMContentLoaded", () => {
     playSound('boot');
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
-        if(bootScreen) bootScreen.classList.add('hidden');
+        if(bootScreen) {
+            bootScreen.classList.add('hidden');
+            bootScreen.style.display = 'none'; 
+        }
         switchScreen('login');
     }, 6000);
 
     UI.login.btn.onclick = async () => {
         currentUser = await handleLogin(socket);
+        if(currentUser) {
+            initComms(socket, currentUser); 
+        }
     };
     
     UI.login.input.addEventListener("keydown", async e => { 
-        if (e.key === "Enter") currentUser = await handleLogin(socket); 
+        if (e.key === "Enter") {
+            currentUser = await handleLogin(socket);
+            if(currentUser) {
+                initComms(socket, currentUser); 
+            }
+        }
     });
 
     if (UI.sidebar.btnDashboard) {

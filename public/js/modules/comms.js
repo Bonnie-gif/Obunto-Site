@@ -1,7 +1,10 @@
 import { UI, bringToFront, showCustomPrompt } from './ui.js';
 import { playSound } from './audio.js';
 
-export function initComms(socket) {
+let currentUser = null;
+
+export function initComms(socket, user) {
+    currentUser = user;
     const { window, close, btnOpen, list, targetInput, msgInput, btnSend } = UI.comms;
 
     if(btnOpen) {
@@ -35,7 +38,8 @@ export function initComms(socket) {
 
     function addMessage(msg) {
         const div = document.createElement('div');
-        div.className = 'comm-msg';
+        const isSelf = msg.fromName === currentUser.username;
+        div.className = `comm-msg ${isSelf ? 'self' : 'other'}`;
         const time = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         div.innerHTML = `
             <div class="comm-meta">[${time}] ${msg.fromName} >> ${msg.to}</div>
