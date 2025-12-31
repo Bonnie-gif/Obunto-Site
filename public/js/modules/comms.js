@@ -38,6 +38,7 @@ export function initComms(socket, user) {
 
     function addMessage(msg) {
         const div = document.createElement('div');
+        // Identifica se a mensagem é do próprio usuário (Obunto, Holtz ou Personnel)
         const isSelf = msg.fromName === currentUser.username;
         div.className = `comm-msg ${isSelf ? 'self' : 'other'}`;
         const time = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
