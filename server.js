@@ -84,7 +84,9 @@ app.post('/api/login', async (req, res) => {
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
-        if (tscGroups.length === 0) return res.status(403).json({ success: false, message: "ACCESS DENIED" });
+        if (tscGroups.length === 0) {
+             return res.status(403).json({ success: false, message: "ACCESS DENIED: NOT IN GROUP" });
+        }
 
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
@@ -110,7 +112,28 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        res.status(500).json({ success: false, message: "CONNECTION ERROR" });
+        console.log("API Error or Blocked:", e.message);
+        
+        // FALLBACK MODE: Allows login even if Roblox API blocks the server
+        const fallbackData = {
+            id: userId.toString(),
+            username: `OPERATOR-${userId.substring(0,4)}`,
+            displayName: "AUTHORIZED PERSONNEL",
+            avatar: "/assets/icon-large-owner_info-28x14.png", 
+            rank: "LEVEL ?",
+            affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
+            isObunto: false
+        };
+
+        dataStore.knownUsers[userId] = {
+            id: userId,
+            name: fallbackData.username,
+            rank: fallbackData.rank,
+            lastSeen: Date.now()
+        };
+        saveData();
+
+        res.json({ success: true, userData: fallbackData });
     }
 });
 
@@ -177,7 +200,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- FILE SYSTEM ---
     socket.on('fs_get_files', () => {
         if(!currentUserId) return;
         if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
@@ -208,7 +230,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- COMM-LINK ---
     socket.on('comm_get_messages', () => {
         if(!currentUserId) return;
         const myMessages = dataStore.messages.filter(m => m.to === currentUserId || m.to === 'ALL');
@@ -236,7 +257,6 @@ io.on('connection', (socket) => {
         socket.emit('comm_sent_success');
     });
 
-    // --- PROTOCOLS (TASKS) ---
     socket.on('admin_assign_task', (data) => {
         const { targetId, taskType } = data;
         io.to(targetId).emit('protocol_task_assigned', { type: taskType, id: Date.now() });
@@ -252,7 +272,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- ADMIN / OBUNTO ---
     socket.on('admin_broadcast_message', (data) => {
         io.emit('receive_broadcast_message', { 
             message: data.message, 

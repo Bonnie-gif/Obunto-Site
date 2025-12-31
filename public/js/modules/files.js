@@ -51,7 +51,9 @@ export function initFiles(socket) {
     if(btnDelete) {
         btnDelete.onclick = () => {
             if(selectedItem) {
-                socket.emit('fs_delete_item', selectedItem.id);
+                if(confirm(`DELETE ${selectedItem.name}?`)) {
+                    socket.emit('fs_delete_item', selectedItem.id);
+                }
             }
         };
     }
