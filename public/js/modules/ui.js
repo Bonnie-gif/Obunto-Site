@@ -105,10 +105,21 @@ export function switchView(viewName) {
     }
 }
 
+let topZIndex = 3000;
+
+export function bringToFront(win) {
+    topZIndex++;
+    win.style.zIndex = topZIndex;
+}
+
 export function makeDraggable(win) {
+    win.addEventListener('mousedown', () => bringToFront(win));
+    
     const header = win.querySelector('.win-header');
     if (!header) return;
+    
     let isDragging = false, startX, startY, initialLeft, initialTop;
+    
     header.addEventListener('mousedown', (e) => {
         if(e.target.closest('.close-btn')) return;
         isDragging = true;
@@ -116,6 +127,7 @@ export function makeDraggable(win) {
         initialLeft = win.offsetLeft; initialTop = win.offsetTop;
         win.style.cursor = 'grabbing';
     });
+    
     window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
@@ -124,9 +136,45 @@ export function makeDraggable(win) {
         win.style.left = `${initialLeft + dx}px`;
         win.style.top = `${initialTop + dy}px`;
     });
+    
     window.addEventListener('mouseup', () => { isDragging = false; win.style.cursor = 'default'; });
 }
 
+export function makeResizable(win) {
+    if(win.querySelector('.resize-handle')) return;
+    
+    const handle = document.createElement('div');
+    handle.className = 'resize-handle';
+    win.appendChild(handle);
+    
+    handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        bringToFront(win);
+        
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const startWidth = parseInt(document.defaultView.getComputedStyle(win).width, 10);
+        const startHeight = parseInt(document.defaultView.getComputedStyle(win).height, 10);
+        
+        function doDrag(e) {
+            win.style.width = (startWidth + e.clientX - startX) + 'px';
+            win.style.height = (startHeight + e.clientY - startY) + 'px';
+        }
+        
+        function stopDrag() {
+            document.documentElement.removeEventListener('mousemove', doDrag);
+            document.documentElement.removeEventListener('mouseup', stopDrag);
+        }
+        
+        document.documentElement.addEventListener('mousemove', doDrag);
+        document.documentElement.addEventListener('mouseup', stopDrag);
+    });
+}
+
 export function initDraggables() {
-    document.querySelectorAll('.window-newton').forEach(win => makeDraggable(win));
+    document.querySelectorAll('.window-newton').forEach(win => {
+        makeDraggable(win);
+        makeResizable(win);
+    });
 }
