@@ -1,6 +1,7 @@
 import { UI, switchScreen } from './ui.js';
 import { populateDashboard } from './dashboard.js';
-import { initObunto } from './obunto.js';
+import { initObunto } from './admin/obunto.js';
+import { initHoltz } from './admin/holtz.js';
 
 export async function handleLogin(socket) {
     const id = UI.login.input.value.trim();
@@ -18,7 +19,13 @@ export async function handleLogin(socket) {
             socket.emit('register_user', user.id);
             populateDashboard(user);
             switchScreen('desktop');
-            initObunto(socket, user.id);
+            
+            if (user.isObunto) {
+                initObunto(socket, user.id);
+            } else if (user.isHoltz) {
+                initHoltz(socket, user.id);
+            }
+            
             return user; 
         } else {
             UI.login.status.textContent = "ERROR: " + data.message;

@@ -21,14 +21,13 @@ let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, mes
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
 let connectedSockets = {}; 
-let adminSocketId = null;
 
 if (fs.existsSync(DATA_FILE)) {
     try {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
         if(!dataStore.knownUsers) dataStore.knownUsers = {};
-        if(!dataStore.userFiles) dataStore.userFiles = {}; 
-        if(Array.isArray(dataStore.userFiles)) dataStore.userFiles = {};
+        if(!dataStore.userFiles) dataStore.userFiles = {};
+        if(!dataStore.messages) dataStore.messages = [];
     } catch (e) {}
 }
 
@@ -37,17 +36,15 @@ function saveData() {
 }
 
 function broadcastPersonnelUpdate() {
-    if (adminSocketId) {
-        const personnelList = Object.values(dataStore.knownUsers).map(u => ({
-            id: u.id,
-            name: u.name,
-            rank: u.rank,
-            status: connectedSockets[u.id] ? (connectedSockets[u.id].afk ? 'AFK' : 'ONLINE') : 'OFFLINE',
-            activity: connectedSockets[u.id] ? connectedSockets[u.id].activity : 'DISCONNECTED',
-            socketId: connectedSockets[u.id] ? connectedSockets[u.id].socketId : null
-        }));
-        io.to(adminSocketId).emit('personnel_list_update', personnelList);
-    }
+    const personnelList = Object.values(dataStore.knownUsers).map(u => ({
+        id: u.id,
+        name: u.name,
+        rank: u.rank,
+        status: connectedSockets[u.id] ? (connectedSockets[u.id].afk ? 'AFK' : 'ONLINE') : 'OFFLINE',
+        activity: connectedSockets[u.id] ? connectedSockets[u.id].activity : 'DISCONNECTED',
+        socketId: connectedSockets[u.id] ? connectedSockets[u.id].socketId : null
+    }));
+    io.to('admins').emit('personnel_list_update', personnelList);
 }
 
 function deleteRecursive(userId, itemId) {
@@ -71,7 +68,24 @@ app.post('/api/login', async (req, res) => {
                 rank: "MAINFRAME", 
                 avatar: "/obunto/normal.png", 
                 affiliations: [{ groupName: "TSC MAINFRAME", role: "SYSTEM ADMINISTRATOR", rank: 999 }],
-                isObunto: true 
+                isObunto: true,
+                isHoltz: false
+            } 
+        });
+    }
+
+    if (userId === "36679824") {
+        return res.json({ 
+            success: true, 
+            userData: { 
+                id: "36679824", 
+                username: "DR. HOLTZ", 
+                displayName: "Head of Research", 
+                rank: "LEVEL 5", 
+                avatar: "/obunto/normal.png", 
+                affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
+                isObunto: false,
+                isHoltz: true
             } 
         });
     }
@@ -98,7 +112,8 @@ app.post('/api/login', async (req, res) => {
             avatar: avatarRes.data.data[0]?.imageUrl,
             rank: level,
             affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-            isObunto: false
+            isObunto: false,
+            isHoltz: false
         };
 
         dataStore.knownUsers[userId] = {
@@ -119,7 +134,8 @@ app.post('/api/login', async (req, res) => {
             avatar: "/assets/icon-large-owner_info-28x14.png", 
             rank: "LEVEL ?",
             affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
-            isObunto: false
+            isObunto: false,
+            isHoltz: false
         };
         dataStore.knownUsers[userId] = {
             id: userId,
@@ -142,8 +158,8 @@ io.on('connection', (socket) => {
         currentUserId = userId;
         socket.join(userId); 
         
-        if (userId === "8989") {
-            adminSocketId = socket.id;
+        if (userId === "8989" || userId === "36679824") {
+            socket.join('admins');
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
             broadcastPersonnelUpdate();
         } else {
@@ -158,40 +174,32 @@ io.on('connection', (socket) => {
     });
 
     socket.on('update_activity', (data) => {
-        if (!currentUserId || currentUserId === "8989") return;
+        if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
         if (connectedSockets[currentUserId]) {
             connectedSockets[currentUserId].activity = data.view;
             connectedSockets[currentUserId].afk = data.afk;
             broadcastPersonnelUpdate();
             
-            if (adminSocketId) {
-                io.to(adminSocketId).emit('spy_data_update', {
-                    targetId: currentUserId,
-                    state: data.fullState
-                });
-            }
-        }
-    });
-
-    socket.on('live_input', (data) => {
-        if (!currentUserId || currentUserId === "8989") return;
-        if (adminSocketId) {
-            io.to(adminSocketId).emit('spy_input_update', {
+            io.to('admins').emit('spy_data_update', {
                 targetId: currentUserId,
-                field: data.fieldId,
-                value: data.value
+                state: data.fullState
             });
         }
     });
 
+    socket.on('live_input', (data) => {
+        if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
+        io.to('admins').emit('spy_input_update', {
+            targetId: currentUserId,
+            field: data.fieldId,
+            value: data.value
+        });
+    });
+
     socket.on('disconnect', () => {
         if (currentUserId) {
-            if (currentUserId === "8989") {
-                adminSocketId = null;
-            } else {
-                delete connectedSockets[currentUserId];
-                broadcastPersonnelUpdate();
-            }
+            delete connectedSockets[currentUserId];
+            broadcastPersonnelUpdate();
         }
     });
 
@@ -241,7 +249,7 @@ io.on('connection', (socket) => {
             socket.broadcast.emit('comm_receive', msg);
         } else {
             io.to(data.target).emit('comm_receive', msg);
-            if(adminSocketId) io.to(adminSocketId).emit('comm_receive', msg); 
+            io.to('admins').emit('comm_receive', msg); 
         }
     });
 
@@ -251,13 +259,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('task_complete', (data) => {
-        if(adminSocketId) {
-            io.to(adminSocketId).emit('protocol_task_result', {
-                userId: currentUserId,
-                success: data.success,
-                type: data.type
-            });
-        }
+        io.to('admins').emit('protocol_task_result', {
+            userId: currentUserId,
+            success: data.success,
+            type: data.type
+        });
     });
 
     socket.on('admin_broadcast_message', (data) => {
@@ -284,7 +290,7 @@ io.on('connection', (socket) => {
         const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
         dataStore.helpTickets.push(ticket);
         saveData();
-        if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
+        io.to('admins').emit('new_help_request', ticket);
         socket.emit('help_request_received');
     });
 
@@ -294,18 +300,21 @@ io.on('connection', (socket) => {
             ticket.status = 'active';
             saveData();
             io.to(ticket.userId).emit('chat_force_open');
-            if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
+            io.to('admins').emit('admin_chat_opened', ticket);
         }
     });
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
-        const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
-        if (recipient) io.to(recipient).emit('chat_receive', { message, sender });
+        if (sender === 'ADMIN') {
+            io.to(targetId).emit('chat_receive', { message, sender });
+        } else {
+            io.to('admins').emit('chat_receive', { message, sender });
+        }
     });
     
     socket.on('admin_spy_start', (targetId) => {
-        if(adminSocketId && connectedSockets[targetId]) {
+        if(connectedSockets[targetId]) {
             io.to(connectedSockets[targetId].socketId).emit('force_state_report');
         }
     });
