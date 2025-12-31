@@ -173,3 +173,21 @@ body.powering-on .screen-flicker { animation: powerOnFlicker 4s ease-out forward
 .spy-log { height: 200px; overflow-y: auto; color: #00cc00; white-space: pre-wrap; word-break: break-all; }
 .spy-log::-webkit-scrollbar { width: 5px; }
 .spy-log::-webkit-scrollbar-thumb { background: #004400; }
+
+#boot-sequence {
+  position: fixed; inset: 0; background: #000;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 5000;
+  animation: powerOn 6s ease-out forwards;
+}
+@keyframes powerOn {
+  0% { background: #000; filter: brightness(0); }
+  15% { background: #000; filter: brightness(0.1); }
+  30% { background: #0a0f08; filter: brightness(0.3); }
+  50% { background: #1a241a; filter: brightness(0.6); }
+  70% { background: #3a4a32; filter: brightness(0.85); }
+  100% { background: var(--bg-main); filter: brightness(1); }
+}
+.loading-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+.loading-content { text-align: center; opacity: 0; animation: fadeIn 6s ease-out forwards; z-index: 10; animation-delay: 0.5s; animation-fill-mode: forwards; }
+@keyframes fadeIn { 0% { opacity: 0; transform: scale(0.95); } 40% { opacity: 0; } 100% { opacity: 1; transform: scale(1); } }

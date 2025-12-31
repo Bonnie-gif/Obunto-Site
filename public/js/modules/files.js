@@ -91,7 +91,6 @@ export function initFiles(socket) {
             div.onclick = (e) => {
                 e.stopPropagation();
                 if(selectedItem && selectedItem.id === item.id) {
-                    // Double click logic
                     if(item.type === 'folder') {
                         currentPath.push(item.id);
                         updatePath();
