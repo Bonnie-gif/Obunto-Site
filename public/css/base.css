@@ -18,19 +18,18 @@
   --alert-color: #2b3323;
 }
 
-.hidden {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: -9999 !important;
-}
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 html, body {
   height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
   font-size: 13px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
   transition: background 0.5s ease;
+}
+
+.paper-texture {
+  background-color: #fdfbf7;
+  background-image: linear-gradient(#e1e1e1 1px, transparent 1px), radial-gradient(#c7c7c7 1px, transparent 1px);
+  background-size: 100% 24px, 20px 20px;
 }
 
 .crt-overlay {
@@ -42,12 +41,6 @@ html, body {
 .screen-flicker {
   position: fixed; inset: 0; pointer-events: none; z-index: 9999;
   background: rgba(255,255,255,0.02); opacity: 0; animation: flicker 0.15s infinite;
-}
-
-.scanlines {
-  position: fixed; inset: 0; pointer-events: none; z-index: 9997;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-  background-size: 100% 4px;
 }
 
 @keyframes flicker { 0% { opacity: 0.01; } 50% { opacity: 0.03; } 100% { opacity: 0.01; } }
@@ -70,7 +63,6 @@ body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
 @keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-/* GAMMA - VIBRAÇÃO CURTA E TENSA */
 body.alarm-gamma {
   --bg-main: #5a4a1a; --bg-light: #7d6d33; --bg-dark: #3b2e0e;
   --paper: #e8e0c0; --paper-dark: #d0c8a8; --paper-light: #f8f0d0;
@@ -88,26 +80,25 @@ body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; backgro
 }
 @keyframes gammaStatic { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.15; } }
 
-/* EPSILON - CORRUPÇÃO GLITCH (Preto e Branco, Sem Cores) */
 body.alarm-epsilon {
   --bg-main: #000000;
   --bg-light: #111111;
   --bg-dark: #000000;
-  --paper: #808080;
-  --paper-dark: #222222;
-  --paper-light: #404040;
+  --paper: #a0a0a0;
+  --paper-dark: #505050;
+  --paper-light: #808080;
   --ink: #ffffff;
   --border: #ffffff;
-  --button: #333333;
-  --button-hover: #444444;
+  --button: #303030;
+  --button-hover: #505050;
   --alert-color: #ffffff;
-  filter: grayscale(100%) contrast(150%) brightness(0.9);
+  filter: contrast(200%) grayscale(100%);
   overflow: hidden;
 }
 body.alarm-epsilon .workspace,
 body.alarm-epsilon .sidebar,
 body.alarm-epsilon .window-newton {
-  animation: epsilonGlitch 0.2s infinite steps(2);
+  animation: epsilonGlitch 0.2s infinite steps(1);
 }
 body.alarm-epsilon::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9995;
@@ -115,12 +106,12 @@ body.alarm-epsilon::before {
   animation: epsilonScroll 8s infinite linear;
 }
 body.alarm-epsilon .screen-flicker {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.15);
   animation: epsilonStatic 0.05s infinite;
   mix-blend-mode: exclusion;
 }
 @keyframes epsilonGlitch {
-  0% { transform: translate(0,0) skewX(0); clip-path: inset(0 0 0 0); }
+  0% { transform: translate(0,0); clip-path: inset(0 0 0 0); }
   5% { transform: translate(-2px, 1px); clip-path: inset(10% 0 80% 0); }
   10% { transform: translate(2px, -1px); clip-path: inset(0 0 0 0); }
   50% { filter: invert(0); }
@@ -130,10 +121,4 @@ body.alarm-epsilon .screen-flicker {
   100% { transform: translate(0,0); clip-path: inset(0 0 0 0); }
 }
 @keyframes epsilonScroll { from { background-position: 0 0; } to { background-position: 0 100%; } }
-@keyframes epsilonStatic { 0% { opacity: 0.1; } 50% { opacity: 0.2; } 100% { opacity: 0.1; } }
-
-.paper-texture {
-  background-color: #fdfbf7;
-  background-image: linear-gradient(#e1e1e1 1px, transparent 1px), radial-gradient(#c7c7c7 1px, transparent 1px);
-  background-size: 100% 24px, 20px 20px;
-}
+@keyframes epsilonStatic { 0% { opacity: 0.1; } 50% { opacity: 0.3; } 100% { opacity: 0.1; } }
