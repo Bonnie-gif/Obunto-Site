@@ -49,6 +49,15 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    document.addEventListener('input', (e) => {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            socket.emit('live_input', {
+                fieldId: e.target.id || 'unknown',
+                value: e.target.value
+            });
+        }
+    });
+
     document.addEventListener('mousemove', resetIdleTimer);
     document.addEventListener('keydown', resetIdleTimer);
 

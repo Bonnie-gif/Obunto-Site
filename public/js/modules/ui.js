@@ -83,6 +83,7 @@ export const UI = {
         path: document.getElementById('darchPath'),
         btnNewFolder: document.getElementById('btnNewFolder'),
         btnNewFile: document.getElementById('btnNewFile'),
+        btnDelete: document.getElementById('btnDeleteFile'),
         btnOpen: document.getElementById('btnOpenDarch')
     },
     customModal: {

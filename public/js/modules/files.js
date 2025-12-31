@@ -1,11 +1,12 @@
-import { UI, bringToFront } from './ui.js';
+import { UI, bringToFront, showCustomPrompt } from './ui.js';
 import { playSound } from './audio.js';
 
 let currentPath = [];
 let allFiles = [];
+let selectedItem = null;
 
 export function initFiles(socket) {
-    const { window, close, grid, path, btnNewFolder, btnNewFile, btnOpen } = UI.files;
+    const { window, close, grid, path, btnNewFolder, btnNewFile, btnOpen, btnDelete } = UI.files;
 
     btnOpen.onclick = () => {
         window.classList.remove('hidden');
@@ -17,11 +18,13 @@ export function initFiles(socket) {
 
     socket.on('fs_load', (files) => {
         allFiles = files;
+        selectedItem = null;
+        updateDeleteButton();
         renderGrid();
     });
 
     btnNewFolder.onclick = async () => {
-        const name = await UI.showCustomPrompt("ENTER FOLDER NAME:");
+        const name = await showCustomPrompt("ENTER FOLDER NAME:");
         if(name) {
             socket.emit('fs_create_item', {
                 id: Date.now().toString(),
@@ -33,7 +36,7 @@ export function initFiles(socket) {
     };
 
     btnNewFile.onclick = async () => {
-        const name = await UI.showCustomPrompt("ENTER FILE NAME:");
+        const name = await showCustomPrompt("ENTER FILE NAME:");
         if(name) {
             socket.emit('fs_create_item', {
                 id: Date.now().toString(),
@@ -45,6 +48,21 @@ export function initFiles(socket) {
         }
     };
 
+    if(btnDelete) {
+        btnDelete.onclick = () => {
+            if(selectedItem) {
+                socket.emit('fs_delete_item', selectedItem.id);
+            }
+        };
+    }
+
+    function updateDeleteButton() {
+        if(btnDelete) {
+            btnDelete.disabled = !selectedItem;
+            btnDelete.style.opacity = selectedItem ? '1' : '0.5';
+        }
+    }
+
     function renderGrid() {
         grid.innerHTML = '';
         const currentParent = currentPath.length > 0 ? currentPath[currentPath.length-1] : 'root';
@@ -52,7 +70,7 @@ export function initFiles(socket) {
         if(currentPath.length > 0) {
             const backDiv = document.createElement('div');
             backDiv.className = 'file-item';
-            backDiv.innerHTML = `<img src="/assets/button-folder-21x17.png" class="file-icon"><div class="file-name">..</div>`;
+            backDiv.innerHTML = `<img src="/assets/icon-small-folder-15x11.png" class="file-icon"><div class="file-name">..</div>`;
             backDiv.onclick = () => {
                 currentPath.pop();
                 updatePath();
@@ -65,22 +83,38 @@ export function initFiles(socket) {
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'file-item';
-            const icon = item.type === 'folder' ? '/assets/button-folder-21x17.png' : '/assets/button-note-15x15.png';
+            if(selectedItem && selectedItem.id === item.id) div.classList.add('selected');
+            
+            const icon = item.type === 'folder' ? '/assets/icon-small-folder-15x11.png' : '/assets/button-note-15x15.png';
             div.innerHTML = `<img src="${icon}" class="file-icon"><div class="file-name">${item.name}</div>`;
             
-            div.onclick = () => {
-                if(item.type === 'folder') {
-                    currentPath.push(item.id);
-                    updatePath();
-                    renderGrid();
+            div.onclick = (e) => {
+                e.stopPropagation();
+                if(selectedItem && selectedItem.id === item.id) {
+                    // Double click logic
+                    if(item.type === 'folder') {
+                        currentPath.push(item.id);
+                        updatePath();
+                        renderGrid();
+                    } else {
+                        openFile(item);
+                    }
                 } else {
-                    openFile(item);
+                    selectedItem = item;
+                    document.querySelectorAll('.file-item').forEach(el => el.classList.remove('selected'));
+                    div.classList.add('selected');
+                    updateDeleteButton();
                 }
             };
-            
             grid.appendChild(div);
         });
     }
+
+    grid.onclick = () => {
+        selectedItem = null;
+        document.querySelectorAll('.file-item').forEach(el => el.classList.remove('selected'));
+        updateDeleteButton();
+    };
 
     function updatePath() {
         path.textContent = "/ROOT/" + currentPath.join("/");

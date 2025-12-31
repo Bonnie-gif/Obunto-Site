@@ -51,6 +51,12 @@ export function initObunto(socket, userId) {
             }
         });
 
+        socket.on('spy_input_update', (data) => {
+            if(currentSpyTarget === data.targetId) {
+                renderSpyInput(data);
+            }
+        });
+
         UI.obunto.spy.close.onclick = () => {
             UI.obunto.spy.window.classList.add('hidden');
             currentSpyTarget = null;
@@ -106,19 +112,31 @@ function startSpy(id, name, socket) {
     UI.obunto.spy.title.textContent = name.toUpperCase();
     UI.obunto.spy.window.classList.remove('hidden');
     bringToFront(UI.obunto.spy.window);
-    UI.obunto.spy.content.innerHTML = "ESTABLISHING SECURE LINK...";
+    UI.obunto.spy.content.innerHTML = `<div class="spy-section"><div class="spy-header">SYSTEM STATE</div><div id="spy-state-data">WAITING FOR UPLINK...</div></div><div class="spy-section" style="flex: 1; border-top: 1px dashed #004400;"><div class="spy-header">KEYSTROKE FEED</div><div id="spy-input-data" class="spy-log"></div></div>`;
     socket.emit('admin_spy_start', id);
 }
 
 function renderSpyData(state) {
     if(!state) return;
+    const el = document.getElementById('spy-state-data');
+    if(!el) return;
+    
     let html = `<div style="margin-bottom:10px;">CURRENT VIEW: <strong>${state.view}</strong></div>`;
     html += `<div>OPEN WINDOWS:</div>`;
     state.windows.forEach(w => {
         if(!w.hidden) html += `<div>- ${w.id}</div>`;
     });
     if(state.afk) html += `<div style="color:yellow; margin-top:10px;">[USER IS AFK]</div>`;
-    UI.obunto.spy.content.innerHTML = html;
+    el.innerHTML = html;
+}
+
+function renderSpyInput(data) {
+    const el = document.getElementById('spy-input-data');
+    if(!el) return;
+    const line = document.createElement('div');
+    line.textContent = `> [${data.field}]: ${data.value}`;
+    el.appendChild(line);
+    el.scrollTop = el.scrollHeight;
 }
 
 export function speak(text, mood) {

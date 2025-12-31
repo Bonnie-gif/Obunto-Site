@@ -157,7 +157,7 @@
 
     <div id="darch-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
       <div class="win-header">
-        <img src="/assets/icon-small-folder-16x13.png" class="header-icon">
+        <img src="/assets/icon-small-folder-15x11.png" class="header-icon">
         <span class="win-title">D-ARCH // DATA ARCHIVE</span>
         <button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
@@ -167,6 +167,7 @@
            <div class="darch-actions">
               <button id="btnNewFolder" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FOLDER</button>
               <button id="btnNewFile" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FILE</button>
+              <button id="btnDeleteFile" class="btn-newton" style="font-size: 10px; padding: 6px; border-color: #ef4444; color: #ef4444;" disabled>DELETE</button>
            </div>
         </div>
         <div class="darch-content">
@@ -295,23 +296,25 @@
       </div>
     </div>
 
-    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: #050505; border-color: #00ff00;">
-      <div class="win-header" style="background: #003300; color: #00ff00; border-bottom: 2px solid #00ff00;">
+    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: #000; border: 2px solid #0f0;">
+      <div class="win-header" style="background: #003300; border-bottom: 2px solid #0f0; color: #0f0;">
         <span class="win-title">SURVEILLANCE FEED: <span id="spy-target-name">UNKNOWN</span></span>
         <button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body" style="padding: 0; background: #000;">
-        <div style="background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,50,0,0.5) 4px); height: 100%; padding: 15px; color: #00ff00; font-family: 'Courier New', monospace; position: relative;">
-            <div style="border-bottom: 1px solid #00ff00; padding-bottom: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 10px;">
-               <span>// SECURE CONNECTION ESTABLISHED</span>
-               <span style="animation: blink 1s infinite; color: #ff0000; text-shadow: 0 0 5px red;">● LIVE REC</span>
-            </div>
-            <div id="spy-content" class="spy-grid">
-               WAITING FOR SIGNAL UPLINK...
-            </div>
-            <div style="position: absolute; bottom: 10px; right: 10px; font-size: 9px; opacity: 0.7;">
-                ENCRYPTION: AES-256 // LATENCY: 12ms
-            </div>
+      <div class="win-body" style="padding: 0; display: flex; flex-direction: column; background: #000;">
+        <div style="padding: 10px; border-bottom: 1px solid #004400; display: flex; justify-content: space-between; align-items: center; color: #00ff00; font-family: 'Courier New', monospace; font-size: 10px;">
+           <span style="letter-spacing: 1px;">// SECURE LINK [AES-256]</span>
+           <span style="animation: blink 1s infinite; color: #ff0000; font-weight: bold; text-shadow: 0 0 5px red;">● REC</span>
+        </div>
+        <div id="spy-content" class="spy-terminal">
+           <div class="spy-section">
+              <div class="spy-header">SYSTEM STATE</div>
+              <div id="spy-state-data">WAITING FOR UPLINK...</div>
+           </div>
+           <div class="spy-section" style="flex: 1; border-top: 1px dashed #004400;">
+              <div class="spy-header">KEYSTROKE FEED</div>
+              <div id="spy-input-data" class="spy-log"></div>
+           </div>
         </div>
       </div>
     </div>
@@ -325,7 +328,7 @@
           <img src="/assets/button-folder-21x17.png" style="width: 24px;">
         </button>
         <button id="btnOpenHelp" class="dock-btn" title="Help">
-          <img src="/assets/icon-large-help-30x23.png">
+          <img src="/assets/icon-large-in_out_highlighted-28x27.png" style="width: 28px;">
         </button>
         <button id="btnObuntoControl" class="dock-btn hidden" title="Access Obunto Control">
           <img src="/assets/icon-large-preferences_highlighted-19x19.png">
