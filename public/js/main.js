@@ -33,24 +33,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
             bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none'; 
+            bootScreen.style.display = 'none'; // Force hide
         }
         switchScreen('login');
     }, 6000);
 
     UI.login.btn.onclick = async () => {
         currentUser = await handleLogin(socket);
-        if(currentUser) {
-            initComms(socket, currentUser); 
-        }
+        if(currentUser) initComms(socket, currentUser);
     };
     
     UI.login.input.addEventListener("keydown", async e => { 
         if (e.key === "Enter") {
             currentUser = await handleLogin(socket);
-            if(currentUser) {
-                initComms(socket, currentUser); 
-            }
+            if(currentUser) initComms(socket, currentUser);
         }
     });
 
@@ -86,22 +82,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function reportActivity(isAfk = false) {
         if (!currentUser) return;
-        
         const openWindows = [];
         document.querySelectorAll('.window-newton').forEach(win => {
             if (!win.classList.contains('hidden')) {
                 openWindows.push({ id: win.id, hidden: false });
             }
         });
-
         socket.emit('update_activity', { 
             view: isAfk ? 'AFK' : currentView, 
             afk: isAfk,
-            fullState: {
-                view: currentView,
-                afk: isAfk,
-                windows: openWindows
-            }
+            fullState: { view: currentView, afk: isAfk, windows: openWindows }
         });
     }
 
@@ -130,13 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alarmType === 'off') {
             powerOff.classList.remove('hidden');
             banner.classList.add('hidden');
-            
-            if (currentUser && currentUser.isObunto) {
-                btnReboot.classList.remove('hidden');
-            } else {
-                btnReboot.classList.add('hidden');
-            }
-
+            if (currentUser && currentUser.isObunto) btnReboot.classList.remove('hidden');
+            else btnReboot.classList.add('hidden');
         } else if (alarmType === 'on') {
             powerOff.classList.add('hidden');
             banner.classList.add('hidden');
