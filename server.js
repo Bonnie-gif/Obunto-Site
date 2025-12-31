@@ -18,15 +18,17 @@ const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 const COOLDOWN_TIME = 4 * 60 * 1000;
 
-let dataStore = { notes: {}, helpTickets: [] };
+let dataStore = { notes: {}, helpTickets: [], knownUsers: {} };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
 let activeChats = {}; 
 let userCooldowns = {};
+let connectedSockets = {};
 
 if (fs.existsSync(DATA_FILE)) {
     try {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
+        if(!dataStore.knownUsers) dataStore.knownUsers = {};
     } catch (e) {}
 }
 
@@ -35,6 +37,20 @@ function saveData() {
 }
 
 let adminSocketId = null;
+
+function broadcastPersonnelUpdate() {
+    if (adminSocketId) {
+        const personnelList = Object.values(dataStore.knownUsers).map(u => ({
+            id: u.id,
+            name: u.name,
+            rank: u.rank,
+            status: connectedSockets[u.id] ? (connectedSockets[u.id].afk ? 'AFK' : 'ONLINE') : 'OFFLINE',
+            activity: connectedSockets[u.id] ? connectedSockets[u.id].activity : 'DISCONNECTED',
+            lastSeen: u.lastSeen
+        }));
+        io.to(adminSocketId).emit('personnel_list_update', personnelList);
+    }
+}
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
@@ -68,18 +84,25 @@ app.post('/api/login', async (req, res) => {
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
 
-        res.json({ 
-            success: true, 
-            userData: {
-                id: userId.toString(),
-                username: profileRes.data.name,
-                displayName: profileRes.data.displayName,
-                avatar: avatarRes.data.data[0]?.imageUrl,
-                rank: level,
-                affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-                isObunto: false
-            } 
-        });
+        const userData = {
+            id: userId.toString(),
+            username: profileRes.data.name,
+            displayName: profileRes.data.displayName,
+            avatar: avatarRes.data.data[0]?.imageUrl,
+            rank: level,
+            affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
+            isObunto: false
+        };
+
+        dataStore.knownUsers[userId] = {
+            id: userId,
+            name: userData.username,
+            rank: level,
+            lastSeen: Date.now()
+        };
+        saveData();
+
+        res.json({ success: true, userData });
 
     } catch (e) {
         res.status(500).json({ success: false, message: "CONNECTION ERROR" });
@@ -99,6 +122,14 @@ io.on('connection', (socket) => {
         if (userId === "8989") {
             adminSocketId = socket.id;
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
+            broadcastPersonnelUpdate();
+        } else {
+            connectedSockets[userId] = { socketId: socket.id, activity: 'IDLE', afk: false };
+            if(dataStore.knownUsers[userId]) {
+                dataStore.knownUsers[userId].lastSeen = Date.now();
+                saveData();
+            }
+            broadcastPersonnelUpdate();
         }
         
         if (dataStore.notes[userId]) {
@@ -108,6 +139,30 @@ io.on('connection', (socket) => {
         const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
         if (activeTicket) {
             socket.emit('chat_force_open');
+        }
+    });
+
+    socket.on('update_activity', (data) => {
+        if (!currentUserId || currentUserId === "8989") return;
+        if (connectedSockets[currentUserId]) {
+            connectedSockets[currentUserId].activity = data.view;
+            connectedSockets[currentUserId].afk = data.afk;
+            broadcastPersonnelUpdate();
+        }
+    });
+
+    socket.on('disconnect', () => {
+        if (currentUserId) {
+            if (currentUserId === "8989") {
+                adminSocketId = null;
+            } else {
+                delete connectedSockets[currentUserId];
+                if(dataStore.knownUsers[currentUserId]) {
+                    dataStore.knownUsers[currentUserId].lastSeen = Date.now();
+                    saveData();
+                }
+                broadcastPersonnelUpdate();
+            }
         }
     });
 

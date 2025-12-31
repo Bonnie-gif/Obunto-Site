@@ -197,3 +197,35 @@ body.powering-on .screen-flicker { animation: powerOnFlicker 4s ease-out forward
   pointer-events: none; z-index: 98; opacity: 0; animation: vignetteAppear 6s ease-out forwards;
 }
 @keyframes vignetteAppear { 0%, 50% { opacity: 0; } 100% { opacity: 1; } }
+
+/* Adicione isso ao final do arquivo views.css existente */
+
+.personnel-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  background: var(--paper-dark);
+  padding: 4px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.personnel-row {
+  display: grid;
+  grid-template-columns: 0.5fr 1fr 0.5fr 1fr;
+  gap: 8px;
+  background: var(--paper);
+  padding: 8px;
+  align-items: center;
+  border: 1px solid var(--border-light);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.p-id { color: var(--ink-dim); }
+.p-name { font-weight: bold; }
+.p-status { font-weight: bold; text-align: center; }
+.p-status.online { color: #16a34a; }
+.p-status.afk { color: #ca8a04; }
+.p-status.offline { color: #dc2626; }
+.p-act { font-style: italic; color: var(--ink-dim); text-align: right; }

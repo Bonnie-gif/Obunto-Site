@@ -6,6 +6,8 @@ import { initHelp } from './modules/help.js';
 
 const socket = io();
 let currentUser = null;
+let idleTimer;
+const IDLE_LIMIT = 60000;
 
 document.addEventListener("DOMContentLoaded", () => {
     initAudio();
@@ -39,7 +41,25 @@ document.addEventListener("DOMContentLoaded", () => {
         UI.sidebar.btnDashboard.onclick = () => {
             switchView('dashboard');
             playSound('click');
+            reportActivity('DASHBOARD');
         };
+    }
+
+    document.addEventListener('mousemove', resetIdleTimer);
+    document.addEventListener('keydown', resetIdleTimer);
+
+    function resetIdleTimer() {
+        if (!currentUser) return;
+        clearTimeout(idleTimer);
+        socket.emit('update_activity', { view: 'ACTIVE', afk: false });
+        idleTimer = setTimeout(() => {
+            socket.emit('update_activity', { view: 'IDLE', afk: true });
+        }, IDLE_LIMIT);
+    }
+
+    function reportActivity(view) {
+        if (!currentUser) return;
+        socket.emit('update_activity', { view: view, afk: false });
     }
 
     socket.on('status_update', (status) => {

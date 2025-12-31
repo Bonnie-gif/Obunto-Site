@@ -16,11 +16,8 @@ export function initObunto(socket, userId) {
         playSound(type);
     });
 
-    // Universal Power Off/Reboot Logic
     if (UI.obunto.aop.btnReboot) {
         UI.obunto.aop.btnReboot.onclick = () => {
-            // Emulate clicking PWR ON via admin socket event
-            // Note: In real app, check permissions. Here we allow the button to trigger it.
             socket.emit('admin_trigger_alarm', 'on');
         };
     }
@@ -35,6 +32,17 @@ export function initObunto(socket, userId) {
 
         setupAdminPanel(socket);
         
+        // Monitor Setup
+        UI.obunto.btnMonitor.onclick = () => {
+            UI.obunto.monitor.window.classList.remove('hidden');
+            playSound('click');
+        };
+        UI.obunto.monitor.close.onclick = () => UI.obunto.monitor.window.classList.add('hidden');
+
+        socket.on('personnel_list_update', (list) => {
+            renderPersonnelList(list);
+        });
+
         socket.on('new_help_request', (ticket) => {
             playSound('msg');
             UI.obunto.notifyIcon.classList.remove('hidden');
@@ -58,6 +66,22 @@ export function initObunto(socket, userId) {
             }
         });
     }
+}
+
+function renderPersonnelList(list) {
+    const container = UI.obunto.monitor.list;
+    container.innerHTML = '';
+    list.forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'personnel-row';
+        div.innerHTML = `
+            <div class="p-id">${p.id}</div>
+            <div class="p-name">${p.name}</div>
+            <div class="p-status ${p.status.toLowerCase()}">${p.status}</div>
+            <div class="p-act">${p.activity}</div>
+        `;
+        container.appendChild(div);
+    });
 }
 
 export function speak(text, mood) {

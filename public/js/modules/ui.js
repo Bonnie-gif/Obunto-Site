@@ -36,6 +36,7 @@ export const UI = {
         bubble: document.getElementById('obunto-bubble'),
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text'),
+        btnMonitor: document.getElementById('btnMonitor'),
         adminChat: {
             window: document.getElementById('admin-chat-window'),
             history: document.getElementById('admin-chat-history'),
@@ -49,6 +50,11 @@ export const UI = {
             window: document.getElementById('aop-window'),
             close: document.getElementById('closeAop'),
             btnReboot: document.getElementById('btnSystemReboot')
+        },
+        monitor: {
+            window: document.getElementById('personnel-window'),
+            list: document.getElementById('personnel-list'),
+            close: document.getElementById('closePersonnel')
         }
     },
     help: {
