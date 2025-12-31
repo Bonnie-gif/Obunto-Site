@@ -20,8 +20,10 @@
 
 .hidden {
   display: none !important;
+  visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
+  z-index: -9999 !important;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,14 +70,14 @@ body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
 @keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-/* GAMMA - VIBRAÇÃO TENSIONADA */
+/* GAMMA - VIBRAÇÃO CURTA E TENSA */
 body.alarm-gamma {
   --bg-main: #5a4a1a; --bg-light: #7d6d33; --bg-dark: #3b2e0e;
   --paper: #e8e0c0; --paper-dark: #d0c8a8; --paper-light: #f8f0d0;
   --ink: #3f3000; --border: #3f3000; --button: #c3b77f; --button-hover: #d8cc9b;
   --alert-color: #ffdc00;
 }
-body.alarm-gamma .workspace { animation: gammaVibrate 0.05s infinite; }
+body.alarm-gamma .workspace { animation: gammaVibrate 0.08s infinite; }
 body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; background: rgba(255,140,0,0.05); }
 @keyframes gammaVibrate { 
   0% { transform: translate(0, 0); } 
@@ -86,26 +88,26 @@ body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; backgro
 }
 @keyframes gammaStatic { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.15; } }
 
-/* EPSILON - CORRUPÇÃO DE HARDWARE (Sem Cores) */
+/* EPSILON - CORRUPÇÃO GLITCH (Preto e Branco, Sem Cores) */
 body.alarm-epsilon {
-  --bg-main: #080808;
-  --bg-light: #111;
-  --bg-dark: #000;
-  --paper: #555;
-  --paper-dark: #222;
-  --paper-light: #333;
-  --ink: #eee;
-  --border: #fff;
-  --button: #333;
-  --button-hover: #444;
-  --alert-color: #fff;
+  --bg-main: #000000;
+  --bg-light: #111111;
+  --bg-dark: #000000;
+  --paper: #808080;
+  --paper-dark: #222222;
+  --paper-light: #404040;
+  --ink: #ffffff;
+  --border: #ffffff;
+  --button: #333333;
+  --button-hover: #444444;
+  --alert-color: #ffffff;
   filter: grayscale(100%) contrast(150%) brightness(0.9);
   overflow: hidden;
 }
 body.alarm-epsilon .workspace,
 body.alarm-epsilon .sidebar,
 body.alarm-epsilon .window-newton {
-  animation: epsilonGlitch 0.2s infinite steps(1);
+  animation: epsilonGlitch 0.2s infinite steps(2);
 }
 body.alarm-epsilon::before {
   content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 9995;
@@ -118,7 +120,7 @@ body.alarm-epsilon .screen-flicker {
   mix-blend-mode: exclusion;
 }
 @keyframes epsilonGlitch {
-  0% { transform: translate(0,0); clip-path: inset(0 0 0 0); }
+  0% { transform: translate(0,0) skewX(0); clip-path: inset(0 0 0 0); }
   5% { transform: translate(-2px, 1px); clip-path: inset(10% 0 80% 0); }
   10% { transform: translate(2px, -1px); clip-path: inset(0 0 0 0); }
   50% { filter: invert(0); }

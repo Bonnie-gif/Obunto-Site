@@ -1,6 +1,6 @@
 import { UI, switchScreen } from './ui.js';
 import { populateDashboard } from './dashboard.js';
-import { initObunto } from './admin/obunto.js';
+import { initObunto } from './obunto.js';
 import { initHoltz } from './admin/holtz.js';
 
 export async function handleLogin(socket) {

@@ -29,11 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     playSound('boot');
+    
+    // Força a remoção da tela de boot após 6 segundos
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
             bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none'; // Force hide
+            bootScreen.style.display = 'none'; // Redundância para garantir
+            bootScreen.style.zIndex = -100;
         }
         switchScreen('login');
     }, 6000);

@@ -44,7 +44,6 @@ function broadcastPersonnelUpdate() {
         activity: connectedSockets[u.id] ? connectedSockets[u.id].activity : 'DISCONNECTED',
         socketId: connectedSockets[u.id] ? connectedSockets[u.id].socketId : null
     }));
-    // Envia para a sala 'admins' (Obunto e Holtz)
     io.to('admins').emit('personnel_list_update', personnelList);
 }
 
@@ -59,24 +58,24 @@ app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // OBUNTO LOGIN
+    // OBUNTO
     if (userId === "8989") {
         return res.json({ 
             success: true, 
             userData: { 
                 id: "8989", 
                 username: "OBUNTO", 
-                displayName: "System Artificial Intelligence", 
+                displayName: "System AI", 
                 rank: "MAINFRAME", 
                 avatar: "/obunto/normal.png", 
-                affiliations: [{ groupName: "TSC MAINFRAME", role: "SYSTEM ADMINISTRATOR", rank: 999 }],
+                affiliations: [{ groupName: "TSC CORE", role: "ADMIN", rank: 999 }],
                 isObunto: true,
                 isHoltz: false
             } 
         });
     }
 
-    // DR. HOLTZ LOGIN
+    // DR. HOLTZ
     if (userId === "36679824") {
         return res.json({ 
             success: true, 
@@ -85,7 +84,7 @@ app.post('/api/login', async (req, res) => {
                 username: "DR. HOLTZ", 
                 displayName: "Head of Research", 
                 rank: "LEVEL 5", 
-                avatar: "/obunto/normal.png", // Use um avatar específico se tiver
+                avatar: "/assets/icon-large-owner_info-28x14.png", 
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
                 isObunto: false,
                 isHoltz: true
@@ -130,7 +129,7 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        // Fallback for testing/offline
+        // Fallback para testes
         const fallbackData = {
             id: userId.toString(),
             username: `OPERATOR-${userId.substring(0,4)}`,
@@ -155,14 +154,12 @@ app.post('/api/login', async (req, res) => {
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
-
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
         currentUserId = userId;
         socket.join(userId); 
         
-        // Se for Admin (Obunto ou Holtz), entra na sala 'admins'
         if (userId === "8989" || userId === "36679824") {
             socket.join('admins');
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'open'));
@@ -184,21 +181,13 @@ io.on('connection', (socket) => {
             connectedSockets[currentUserId].activity = data.view;
             connectedSockets[currentUserId].afk = data.afk;
             broadcastPersonnelUpdate();
-            
-            io.to('admins').emit('spy_data_update', {
-                targetId: currentUserId,
-                state: data.fullState
-            });
+            io.to('admins').emit('spy_data_update', { targetId: currentUserId, state: data.fullState });
         }
     });
 
     socket.on('live_input', (data) => {
         if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
-        io.to('admins').emit('spy_input_update', {
-            targetId: currentUserId,
-            field: data.fieldId,
-            value: data.value
-        });
+        io.to('admins').emit('spy_input_update', { targetId: currentUserId, field: data.fieldId, value: data.value });
     });
 
     socket.on('disconnect', () => {
@@ -232,10 +221,14 @@ io.on('connection', (socket) => {
     socket.on('fs_update_content', (data) => {
         if(!currentUserId) return;
         const file = dataStore.userFiles[currentUserId].find(f => f.id === data.id);
-        if(file) {
-            file.content = data.content;
-            saveData();
-        }
+        if(file) { file.content = data.content; saveData(); }
+    });
+
+    socket.on('comm_get_messages', () => {
+        if(!currentUserId) return;
+        // Simple chat history - returns global or DM
+        // For a full chat, we might want to filter only relevant ones. 
+        // For now, comm_receive handles real-time.
     });
 
     socket.on('comm_send_msg', (data) => {
@@ -247,14 +240,15 @@ io.on('connection', (socket) => {
             body: data.message,
             timestamp: new Date()
         };
+        dataStore.messages.push(msg);
         
-        socket.emit('comm_receive', msg); // Devolve para quem enviou ver na tela
+        socket.emit('comm_receive', msg); // Devolve para quem enviou
 
         if(data.target === 'GLOBAL') {
             socket.broadcast.emit('comm_receive', msg);
         } else {
             io.to(data.target).emit('comm_receive', msg);
-            io.to('admins').emit('comm_receive', msg); // Admins veem tudo
+            io.to('admins').emit('comm_receive', msg); 
         }
     });
 
@@ -264,19 +258,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('task_complete', (data) => {
-        io.to('admins').emit('protocol_task_result', {
-            userId: currentUserId,
-            success: data.success,
-            type: data.type
-        });
+        io.to('admins').emit('protocol_task_result', { userId: currentUserId, success: data.success, type: data.type });
     });
 
     socket.on('admin_broadcast_message', (data) => {
-        io.emit('receive_broadcast_message', { 
-            message: data.message, 
-            mood: data.mood || 'normal', 
-            targetId: data.targetId 
-        });
+        io.emit('receive_broadcast_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
     });
 
     socket.on('admin_trigger_alarm', (alarmType) => {

@@ -1,4 +1,4 @@
-import { UI, bringToFront, showCustomPrompt } from './ui.js';
+import { UI, bringToFront } from './ui.js';
 import { playSound } from './audio.js';
 
 let currentUser = null;
@@ -38,7 +38,7 @@ export function initComms(socket, user) {
 
     function addMessage(msg) {
         const div = document.createElement('div');
-        // Identifica se a mensagem é do próprio usuário (Obunto, Holtz ou Personnel)
+        // Verifica se a mensagem veio do usuário atual
         const isSelf = msg.fromName === currentUser.username;
         div.className = `comm-msg ${isSelf ? 'self' : 'other'}`;
         const time = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
