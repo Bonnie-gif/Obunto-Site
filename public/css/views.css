@@ -2,16 +2,22 @@
   position: fixed; inset: 0; background: #000;
   display: flex; align-items: center; justify-content: center;
   z-index: 10000;
-  animation: powerOn 6s ease-out forwards;
+  /* FORÇA O DESAPARECIMENTO APÓS A ANIMAÇÃO */
+  animation: powerOn 6s ease-out forwards, forceHide 0.1s linear 6.5s forwards;
+}
+
+@keyframes forceHide {
+  to { opacity: 0; visibility: hidden; z-index: -1; pointer-events: none; }
 }
 
 @keyframes powerOn {
   0% { background: #000; filter: brightness(0); }
-  20% { background: #0a0f08; filter: brightness(0.2); }
-  60% { background: #1a241a; filter: brightness(0.6); }
-  80% { background: var(--bg-main); filter: brightness(0.8); opacity: 1; }
-  99% { background: var(--bg-main); filter: brightness(1); opacity: 1; z-index: 10000; }
-  100% { background: var(--bg-main); filter: brightness(1); opacity: 0; z-index: -1; visibility: hidden; }
+  15% { background: #000; filter: brightness(0.1); }
+  30% { background: #0a0f08; filter: brightness(0.3); }
+  50% { background: #1a241a; filter: brightness(0.6); }
+  70% { background: #3a4a32; filter: brightness(0.85); }
+  90% { background: var(--bg-main); filter: brightness(1); opacity: 1; }
+  100% { background: var(--bg-main); filter: brightness(1); opacity: 0; visibility: hidden; }
 }
 
 .loading-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10001; }
@@ -149,10 +155,13 @@
 .proto-desc { font-family: var(--font-mono); font-size: 14px; color: var(--ink-dim); margin-bottom: 30px; text-align: center; max-width: 400px; }
 .proto-game { display: flex; flex-direction: column; align-items: center; }
 
+/* COMM-LINK CHAT */
 .comm-toolbar { padding: 8px; border-bottom: 2px solid var(--border-light); background: var(--paper-dark); display: flex; gap: 8px; align-items: center; }
 .comm-list { flex: 1; overflow-y: auto; background: var(--paper-light); display: flex; flex-direction: column; padding: 10px; gap: 8px; }
 .comm-msg { max-width: 80%; padding: 8px; border: 1px solid var(--border); font-size: 11px; display: flex; flex-direction: column; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); }
+/* EU ENVIO (DIREITA) */
 .comm-msg.self { align-self: flex-end; background: var(--paper); border-color: var(--ink); text-align: right; }
+/* OUTRO ENVIA (ESQUERDA) */
 .comm-msg.other { align-self: flex-start; background: var(--bg-light); color: var(--paper); border-color: var(--border-light); }
 .comm-meta { font-size: 9px; opacity: 0.7; margin-bottom: 4px; padding-bottom: 2px; border-bottom: 1px dashed rgba(0,0,0,0.1); }
 .comm-body { font-family: var(--font-mono); font-size: 12px; }
