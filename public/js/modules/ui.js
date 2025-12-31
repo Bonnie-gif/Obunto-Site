@@ -85,12 +85,41 @@ export const UI = {
         btnNewFile: document.getElementById('btnNewFile'),
         btnOpen: document.getElementById('btnOpenDarch')
     },
+    customModal: {
+        overlay: document.getElementById('input-modal'),
+        title: document.getElementById('input-modal-title'),
+        input: document.getElementById('input-modal-value'),
+        ok: document.getElementById('btn-modal-ok'),
+        cancel: document.getElementById('btn-modal-cancel')
+    },
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay'),
     dock: {
         btnHelp: document.getElementById('btnOpenHelp')
     }
 };
+
+export function showCustomPrompt(title) {
+    return new Promise((resolve) => {
+        const { overlay, title: titleEl, input, ok, cancel } = UI.customModal;
+        titleEl.textContent = title;
+        input.value = '';
+        overlay.classList.remove('hidden');
+        input.focus();
+
+        const close = (val) => {
+            overlay.classList.add('hidden');
+            resolve(val);
+        };
+
+        ok.onclick = () => close(input.value.trim());
+        cancel.onclick = () => close(null);
+        input.onkeydown = (e) => {
+            if(e.key === 'Enter') close(input.value.trim());
+            if(e.key === 'Escape') close(null);
+        };
+    });
+}
 
 export function switchScreen(screenName) {
     Object.values(UI.screens).forEach(el => {

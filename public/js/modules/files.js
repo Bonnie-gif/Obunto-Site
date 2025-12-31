@@ -20,8 +20,8 @@ export function initFiles(socket) {
         renderGrid();
     });
 
-    btnNewFolder.onclick = () => {
-        const name = prompt("FOLDER NAME:");
+    btnNewFolder.onclick = async () => {
+        const name = await UI.showCustomPrompt("ENTER FOLDER NAME:");
         if(name) {
             socket.emit('fs_create_item', {
                 id: Date.now().toString(),
@@ -32,8 +32,8 @@ export function initFiles(socket) {
         }
     };
 
-    btnNewFile.onclick = () => {
-        const name = prompt("FILE NAME:");
+    btnNewFile.onclick = async () => {
+        const name = await UI.showCustomPrompt("ENTER FILE NAME:");
         if(name) {
             socket.emit('fs_create_item', {
                 id: Date.now().toString(),
@@ -52,7 +52,7 @@ export function initFiles(socket) {
         if(currentPath.length > 0) {
             const backDiv = document.createElement('div');
             backDiv.className = 'file-item';
-            backDiv.innerHTML = `<img src="/assets/icon-small-folder-16x13.png" class="file-icon"><div class="file-name">..</div>`;
+            backDiv.innerHTML = `<img src="/assets/button-folder-21x17.png" class="file-icon"><div class="file-name">..</div>`;
             backDiv.onclick = () => {
                 currentPath.pop();
                 updatePath();
@@ -65,7 +65,7 @@ export function initFiles(socket) {
         items.forEach(item => {
             const div = document.createElement('div');
             div.className = 'file-item';
-            const icon = item.type === 'folder' ? '/assets/icon-small-folder-16x13.png' : '/assets/icon-small-ink_text-12x9.png';
+            const icon = item.type === 'folder' ? '/assets/button-folder-21x17.png' : '/assets/button-note-15x15.png';
             div.innerHTML = `<img src="${icon}" class="file-icon"><div class="file-name">${item.name}</div>`;
             
             div.onclick = () => {
@@ -78,7 +78,6 @@ export function initFiles(socket) {
                 }
             };
             
-            // Right click delete? maybe later
             grid.appendChild(div);
         });
     }
@@ -94,7 +93,6 @@ export function initFiles(socket) {
         bringToFront(notepad);
         area.value = file.content || "";
         
-        // Simple auto-save for files
         area.oninput = () => {
             socket.emit('fs_update_content', { id: file.id, content: area.value });
         };

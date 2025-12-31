@@ -26,6 +26,17 @@
     </div>
   </div>
 
+  <div id="input-modal" class="modal-overlay hidden">
+    <div class="modal-window">
+      <div class="modal-title" id="input-modal-title">INPUT REQUIRED</div>
+      <input type="text" id="input-modal-value" class="input-newton" autocomplete="off">
+      <div class="modal-actions">
+        <button id="btn-modal-cancel" class="btn-newton modal-btn">CANCEL</button>
+        <button id="btn-modal-ok" class="btn-newton modal-btn">CONFIRM</button>
+      </div>
+    </div>
+  </div>
+
   <div id="boot-sequence" class="active">
     <div class="loading-container">
       <div class="loading-content">
@@ -284,18 +295,23 @@
       </div>
     </div>
 
-    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000;">
-      <div class="win-header" style="background: #330000; color: #ff0000;">
+    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: #050505; border-color: #00ff00;">
+      <div class="win-header" style="background: #003300; color: #00ff00; border-bottom: 2px solid #00ff00;">
         <span class="win-title">SURVEILLANCE FEED: <span id="spy-target-name">UNKNOWN</span></span>
         <button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body" style="background: #000; color: #00ff00; font-family: 'Courier New', monospace; padding: 10px;">
-        <div style="border-bottom: 1px solid #004400; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-           <span>LIVE FEED</span>
-           <span style="animation: blink 1s infinite; color: red;">● REC</span>
-        </div>
-        <div id="spy-content" style="font-size: 12px; line-height: 1.5;">
-           WAITING FOR SIGNAL...
+      <div class="win-body" style="padding: 0; background: #000;">
+        <div style="background: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,50,0,0.5) 4px); height: 100%; padding: 15px; color: #00ff00; font-family: 'Courier New', monospace; position: relative;">
+            <div style="border-bottom: 1px solid #00ff00; padding-bottom: 5px; margin-bottom: 15px; display: flex; justify-content: space-between; font-size: 10px;">
+               <span>// SECURE CONNECTION ESTABLISHED</span>
+               <span style="animation: blink 1s infinite; color: #ff0000; text-shadow: 0 0 5px red;">● LIVE REC</span>
+            </div>
+            <div id="spy-content" class="spy-grid">
+               WAITING FOR SIGNAL UPLINK...
+            </div>
+            <div style="position: absolute; bottom: 10px; right: 10px; font-size: 9px; opacity: 0.7;">
+                ENCRYPTION: AES-256 // LATENCY: 12ms
+            </div>
         </div>
       </div>
     </div>
@@ -303,10 +319,10 @@
     <div class="dock-newton">
       <div class="dock-apps">
         <button id="btnOpenNotepad" class="dock-btn" title="Notes">
-          <img src="/assets/icon-large-notes-17x22.png">
+          <img src="/assets/button-note-15x15.png" style="width: 20px;">
         </button>
         <button id="btnOpenDarch" class="dock-btn" title="D-ARCH Files">
-          <img src="/assets/icon-small-folder-16x13.png" style="width: 24px;">
+          <img src="/assets/button-folder-21x17.png" style="width: 24px;">
         </button>
         <button id="btnOpenHelp" class="dock-btn" title="Help">
           <img src="/assets/icon-large-help-30x23.png">
