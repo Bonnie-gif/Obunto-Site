@@ -55,6 +55,12 @@ export const UI = {
             window: document.getElementById('personnel-window'),
             list: document.getElementById('personnel-list'),
             close: document.getElementById('closePersonnel')
+        },
+        spy: {
+            window: document.getElementById('spy-window'),
+            close: document.getElementById('closeSpy'),
+            content: document.getElementById('spy-content'),
+            title: document.getElementById('spy-target-name')
         }
     },
     help: {
@@ -69,6 +75,15 @@ export const UI = {
         send: document.getElementById('btnChatSend'),
         btnOpen: document.getElementById('btnOpenHelp'),
         btnClose: document.getElementById('closeHelp')
+    },
+    files: {
+        window: document.getElementById('darch-window'),
+        close: document.getElementById('closeDarch'),
+        grid: document.getElementById('darchGrid'),
+        path: document.getElementById('darchPath'),
+        btnNewFolder: document.getElementById('btnNewFolder'),
+        btnNewFile: document.getElementById('btnNewFile'),
+        btnOpen: document.getElementById('btnOpenDarch')
     },
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay'),
@@ -142,31 +157,25 @@ export function makeDraggable(win) {
 
 export function makeResizable(win) {
     if(win.querySelector('.resize-handle')) return;
-    
     const handle = document.createElement('div');
     handle.className = 'resize-handle';
     win.appendChild(handle);
-    
     handle.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
         bringToFront(win);
-        
         const startX = e.clientX;
         const startY = e.clientY;
         const startWidth = parseInt(document.defaultView.getComputedStyle(win).width, 10);
         const startHeight = parseInt(document.defaultView.getComputedStyle(win).height, 10);
-        
         function doDrag(e) {
             win.style.width = (startWidth + e.clientX - startX) + 'px';
             win.style.height = (startHeight + e.clientY - startY) + 'px';
         }
-        
         function stopDrag() {
             document.documentElement.removeEventListener('mousemove', doDrag);
             document.documentElement.removeEventListener('mouseup', stopDrag);
         }
-        
         document.documentElement.addEventListener('mousemove', doDrag);
         document.documentElement.addEventListener('mouseup', stopDrag);
     });

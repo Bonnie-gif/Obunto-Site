@@ -3,16 +3,19 @@ import { handleLogin } from './modules/auth.js';
 import { initAudio, playSound } from './modules/audio.js';
 import { initNotepad } from './modules/notepad.js';
 import { initHelp } from './modules/help.js';
+import { initFiles } from './modules/files.js';
 
 const socket = io();
 let currentUser = null;
 let idleTimer;
+let currentView = 'IDLE';
 const IDLE_LIMIT = 60000;
 
 document.addEventListener("DOMContentLoaded", () => {
     initAudio();
     initNotepad(socket);
     initHelp(socket);
+    initFiles(socket);
     initDraggables();
 
     setInterval(() => {
@@ -40,8 +43,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (UI.sidebar.btnDashboard) {
         UI.sidebar.btnDashboard.onclick = () => {
             switchView('dashboard');
+            currentView = 'DASHBOARD';
             playSound('click');
-            reportActivity('DASHBOARD');
+            reportActivity();
         };
     }
 
@@ -51,16 +55,36 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetIdleTimer() {
         if (!currentUser) return;
         clearTimeout(idleTimer);
-        socket.emit('update_activity', { view: 'ACTIVE', afk: false });
+        reportActivity(false);
         idleTimer = setTimeout(() => {
-            socket.emit('update_activity', { view: 'IDLE', afk: true });
+            reportActivity(true);
         }, IDLE_LIMIT);
     }
 
-    function reportActivity(view) {
+    function reportActivity(isAfk = false) {
         if (!currentUser) return;
-        socket.emit('update_activity', { view: view, afk: false });
+        
+        const openWindows = [];
+        document.querySelectorAll('.window-newton').forEach(win => {
+            if (!win.classList.contains('hidden')) {
+                openWindows.push({ id: win.id, hidden: false });
+            }
+        });
+
+        socket.emit('update_activity', { 
+            view: isAfk ? 'AFK' : currentView, 
+            afk: isAfk,
+            fullState: {
+                view: currentView,
+                afk: isAfk,
+                windows: openWindows
+            }
+        });
     }
+
+    socket.on('force_state_report', () => {
+        reportActivity();
+    });
 
     socket.on('status_update', (status) => {
         UI.status.text.textContent = status;

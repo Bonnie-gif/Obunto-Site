@@ -144,6 +144,27 @@
       </div>
     </div>
 
+    <div id="darch-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
+      <div class="win-header">
+        <img src="/assets/icon-small-folder-16x13.png" class="header-icon">
+        <span class="win-title">D-ARCH // DATA ARCHIVE</span>
+        <button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body no-padding" style="flex-direction: row;">
+        <div class="darch-sidebar">
+           <div class="darch-nav-item active" id="btnDarchHome">ROOT DIRECTORY</div>
+           <div class="darch-actions">
+              <button id="btnNewFolder" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FOLDER</button>
+              <button id="btnNewFile" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FILE</button>
+           </div>
+        </div>
+        <div class="darch-content">
+           <div class="darch-path" id="darchPath">/</div>
+           <div class="darch-grid" id="darchGrid"></div>
+        </div>
+      </div>
+    </div>
+
     <div id="help-window" class="window-newton hidden" style="width: 380px; height: 450px; top: 120px; left: 200px;">
       <div class="win-header">
         <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
@@ -259,8 +280,23 @@
         <button id="closePersonnel" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
       <div class="win-body no-padding">
-        <div id="personnel-list" class="personnel-grid">
-          </div>
+        <div id="personnel-list" class="personnel-grid"></div>
+      </div>
+    </div>
+
+    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000;">
+      <div class="win-header" style="background: #330000; color: #ff0000;">
+        <span class="win-title">SURVEILLANCE FEED: <span id="spy-target-name">UNKNOWN</span></span>
+        <button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body" style="background: #000; color: #00ff00; font-family: 'Courier New', monospace; padding: 10px;">
+        <div style="border-bottom: 1px solid #004400; padding-bottom: 5px; margin-bottom: 10px; display: flex; justify-content: space-between;">
+           <span>LIVE FEED</span>
+           <span style="animation: blink 1s infinite; color: red;">● REC</span>
+        </div>
+        <div id="spy-content" style="font-size: 12px; line-height: 1.5;">
+           WAITING FOR SIGNAL...
+        </div>
       </div>
     </div>
 
@@ -268,6 +304,9 @@
       <div class="dock-apps">
         <button id="btnOpenNotepad" class="dock-btn" title="Notes">
           <img src="/assets/icon-large-notes-17x22.png">
+        </button>
+        <button id="btnOpenDarch" class="dock-btn" title="D-ARCH Files">
+          <img src="/assets/icon-small-folder-16x13.png" style="width: 24px;">
         </button>
         <button id="btnOpenHelp" class="dock-btn" title="Help">
           <img src="/assets/icon-large-help-30x23.png">

@@ -16,27 +16,24 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
-const COOLDOWN_TIME = 4 * 60 * 1000;
 
-let dataStore = { notes: {}, helpTickets: [], knownUsers: {} };
+let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {} };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
-let activeChats = {}; 
-let userCooldowns = {};
-let connectedSockets = {};
+let connectedSockets = {}; 
+let adminSocketId = null;
 
 if (fs.existsSync(DATA_FILE)) {
     try {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
         if(!dataStore.knownUsers) dataStore.knownUsers = {};
+        if(!dataStore.userFiles) dataStore.userFiles = {};
     } catch (e) {}
 }
 
 function saveData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
 }
-
-let adminSocketId = null;
 
 function broadcastPersonnelUpdate() {
     if (adminSocketId) {
@@ -46,7 +43,7 @@ function broadcastPersonnelUpdate() {
             rank: u.rank,
             status: connectedSockets[u.id] ? (connectedSockets[u.id].afk ? 'AFK' : 'ONLINE') : 'OFFLINE',
             activity: connectedSockets[u.id] ? connectedSockets[u.id].activity : 'DISCONNECTED',
-            lastSeen: u.lastSeen
+            socketId: connectedSockets[u.id] ? connectedSockets[u.id].socketId : null
         }));
         io.to(adminSocketId).emit('personnel_list_update', personnelList);
     }
@@ -125,21 +122,13 @@ io.on('connection', (socket) => {
             broadcastPersonnelUpdate();
         } else {
             connectedSockets[userId] = { socketId: socket.id, activity: 'IDLE', afk: false };
-            if(dataStore.knownUsers[userId]) {
-                dataStore.knownUsers[userId].lastSeen = Date.now();
-                saveData();
-            }
             broadcastPersonnelUpdate();
         }
         
-        if (dataStore.notes[userId]) {
-            socket.emit('load_notes', dataStore.notes[userId]);
-        }
+        if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
         
         const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
-        if (activeTicket) {
-            socket.emit('chat_force_open');
-        }
+        if (activeTicket) socket.emit('chat_force_open');
     });
 
     socket.on('update_activity', (data) => {
@@ -148,6 +137,13 @@ io.on('connection', (socket) => {
             connectedSockets[currentUserId].activity = data.view;
             connectedSockets[currentUserId].afk = data.afk;
             broadcastPersonnelUpdate();
+            
+            if (adminSocketId) {
+                io.to(adminSocketId).emit('spy_data_update', {
+                    targetId: currentUserId,
+                    state: data.fullState
+                });
+            }
         }
     });
 
@@ -157,15 +153,44 @@ io.on('connection', (socket) => {
                 adminSocketId = null;
             } else {
                 delete connectedSockets[currentUserId];
-                if(dataStore.knownUsers[currentUserId]) {
-                    dataStore.knownUsers[currentUserId].lastSeen = Date.now();
-                    saveData();
-                }
                 broadcastPersonnelUpdate();
             }
         }
     });
 
+    // --- FILE SYSTEM ---
+    socket.on('fs_get_files', () => {
+        if(!currentUserId) return;
+        if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
+        socket.emit('fs_load', dataStore.userFiles[currentUserId]);
+    });
+
+    socket.on('fs_create_item', (item) => {
+        if(!currentUserId) return;
+        if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
+        dataStore.userFiles[currentUserId].push(item);
+        saveData();
+        socket.emit('fs_load', dataStore.userFiles[currentUserId]);
+    });
+
+    socket.on('fs_delete_item', (itemId) => {
+        if(!currentUserId) return;
+        if(!dataStore.userFiles[currentUserId]) return;
+        dataStore.userFiles[currentUserId] = dataStore.userFiles[currentUserId].filter(i => i.id !== itemId && i.parentId !== itemId);
+        saveData();
+        socket.emit('fs_load', dataStore.userFiles[currentUserId]);
+    });
+
+    socket.on('fs_update_content', (data) => {
+        if(!currentUserId) return;
+        const file = dataStore.userFiles[currentUserId].find(f => f.id === data.id);
+        if(file) {
+            file.content = data.content;
+            saveData();
+        }
+    });
+
+    // --- ADMIN / OBUNTO ---
     socket.on('admin_broadcast_message', (data) => {
         io.emit('receive_broadcast_message', { 
             message: data.message, 
@@ -185,30 +210,11 @@ io.on('connection', (socket) => {
         io.emit('status_update', systemStatus);
     });
 
-    socket.on('save_notes', (text) => {
-        if (!currentUserId) return;
-        dataStore.notes[currentUserId] = text;
-        saveData();
-    });
-
     socket.on('request_help', (msg) => {
         if (!currentUserId) return;
-        
-        if (userCooldowns[currentUserId] && Date.now() < userCooldowns[currentUserId]) {
-            socket.emit('help_request_denied', { reason: 'COOLDOWN' });
-            return;
-        }
-
-        const existingTicket = dataStore.helpTickets.find(t => t.userId === currentUserId && (t.status === 'open' || t.status === 'active'));
-        if (existingTicket) {
-            socket.emit('help_request_denied', { reason: 'ACTIVE_TICKET' });
-            return;
-        }
-
         const ticket = { id: Date.now(), userId: currentUserId, msg: msg, status: 'open', timestamp: new Date() };
         dataStore.helpTickets.push(ticket);
         saveData();
-        
         if (adminSocketId) io.to(adminSocketId).emit('new_help_request', ticket);
         socket.emit('help_request_received');
     });
@@ -217,36 +223,21 @@ io.on('connection', (socket) => {
         const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
         if (ticket) {
             ticket.status = 'active';
-            activeChats[ticket.userId] = true;
             saveData();
-            
             io.to(ticket.userId).emit('chat_force_open');
             if (adminSocketId) io.to(adminSocketId).emit('admin_chat_opened', ticket);
-        }
-    });
-
-    socket.on('admin_wait_signal', (targetId) => {
-        io.to(targetId).emit('chat_wait_mode');
-    });
-
-    socket.on('admin_close_ticket', (userId) => {
-        const ticket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
-        if (ticket) {
-            ticket.status = 'closed';
-            delete activeChats[userId];
-            saveData();
-            
-            userCooldowns[userId] = Date.now() + COOLDOWN_TIME;
-            io.to(userId).emit('chat_ended_cooldown');
         }
     });
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
         const recipient = sender === 'ADMIN' ? targetId : adminSocketId;
-        
-        if (recipient) {
-            io.to(recipient).emit('chat_receive', { message, sender });
+        if (recipient) io.to(recipient).emit('chat_receive', { message, sender });
+    });
+    
+    socket.on('admin_spy_start', (targetId) => {
+        if(adminSocketId && connectedSockets[targetId]) {
+            io.to(connectedSockets[targetId].socketId).emit('force_state_report');
         }
     });
 });

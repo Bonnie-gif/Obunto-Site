@@ -1,8 +1,9 @@
-import { UI } from './ui.js';
+import { UI, bringToFront } from './ui.js';
 import { playSound } from './audio.js';
 
 let currentMood = 'normal';
 let currentChatTarget = null;
+let currentSpyTarget = null;
 const MOODS = ['annoyed', 'bug', 'dizzy', 'happy', 'hollow', 'normal', 'panic', 'sad', 'sleeping', 'Smug', 'stare', 'suspicious', 'werror'];
 let bubbleTimeout;
 
@@ -26,22 +27,34 @@ export function initObunto(socket, userId) {
         UI.dock.btnHelp.onclick = (e) => {
             e.stopImmediatePropagation();
             UI.obunto.aop.window.classList.remove('hidden');
+            bringToFront(UI.obunto.aop.window);
             playSound('click');
         };
         UI.obunto.aop.close.onclick = () => UI.obunto.aop.window.classList.add('hidden');
 
         setupAdminPanel(socket);
         
-        // Monitor Setup
         UI.obunto.btnMonitor.onclick = () => {
             UI.obunto.monitor.window.classList.remove('hidden');
+            bringToFront(UI.obunto.monitor.window);
             playSound('click');
         };
         UI.obunto.monitor.close.onclick = () => UI.obunto.monitor.window.classList.add('hidden');
 
         socket.on('personnel_list_update', (list) => {
-            renderPersonnelList(list);
+            renderPersonnelList(list, socket);
         });
+
+        socket.on('spy_data_update', (data) => {
+            if(currentSpyTarget === data.targetId) {
+                renderSpyData(data.state);
+            }
+        });
+
+        UI.obunto.spy.close.onclick = () => {
+            UI.obunto.spy.window.classList.add('hidden');
+            currentSpyTarget = null;
+        };
 
         socket.on('new_help_request', (ticket) => {
             playSound('msg');
@@ -68,20 +81,44 @@ export function initObunto(socket, userId) {
     }
 }
 
-function renderPersonnelList(list) {
+function renderPersonnelList(list, socket) {
     const container = UI.obunto.monitor.list;
     container.innerHTML = '';
     list.forEach(p => {
         const div = document.createElement('div');
         div.className = 'personnel-row';
+        div.style.cursor = 'pointer';
         div.innerHTML = `
             <div class="p-id">${p.id}</div>
             <div class="p-name">${p.name}</div>
             <div class="p-status ${p.status.toLowerCase()}">${p.status}</div>
             <div class="p-act">${p.activity}</div>
         `;
+        div.onclick = () => {
+            startSpy(p.id, p.name, socket);
+        };
         container.appendChild(div);
     });
+}
+
+function startSpy(id, name, socket) {
+    currentSpyTarget = id;
+    UI.obunto.spy.title.textContent = name.toUpperCase();
+    UI.obunto.spy.window.classList.remove('hidden');
+    bringToFront(UI.obunto.spy.window);
+    UI.obunto.spy.content.innerHTML = "ESTABLISHING SECURE LINK...";
+    socket.emit('admin_spy_start', id);
+}
+
+function renderSpyData(state) {
+    if(!state) return;
+    let html = `<div style="margin-bottom:10px;">CURRENT VIEW: <strong>${state.view}</strong></div>`;
+    html += `<div>OPEN WINDOWS:</div>`;
+    state.windows.forEach(w => {
+        if(!w.hidden) html += `<div>- ${w.id}</div>`;
+    });
+    if(state.afk) html += `<div style="color:yellow; margin-top:10px;">[USER IS AFK]</div>`;
+    UI.obunto.spy.content.innerHTML = html;
 }
 
 export function speak(text, mood) {

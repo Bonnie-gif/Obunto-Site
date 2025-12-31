@@ -218,3 +218,34 @@ body.powering-on .screen-flicker { animation: powerOnFlicker 4s ease-out forward
   pointer-events: none; z-index: 98; opacity: 0; animation: vignetteAppear 6s ease-out forwards;
 }
 @keyframes vignetteAppear { 0%, 50% { opacity: 0; } 100% { opacity: 1; } }
+
+/* ... (Todo o CSS anterior do views.css) ... */
+
+/* D-ARCH STYLES */
+.darch-sidebar {
+  width: 120px; background: var(--paper-dark); border-right: 2px solid var(--border);
+  display: flex; flex-direction: column; padding: 8px;
+}
+.darch-nav-item {
+  padding: 6px; font-size: 10px; font-weight: bold; cursor: pointer; color: var(--ink-dim);
+  border: 1px solid transparent; margin-bottom: 4px;
+}
+.darch-nav-item:hover { background: var(--paper); border-color: var(--border-light); }
+.darch-nav-item.active { background: var(--paper); border-color: var(--border); color: var(--ink); }
+.darch-actions { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+.darch-content { flex: 1; display: flex; flex-direction: column; padding: 8px; background: var(--paper-light); }
+.darch-path { font-family: var(--font-mono); font-size: 10px; border-bottom: 2px solid var(--border); padding-bottom: 4px; margin-bottom: 8px; }
+.darch-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr)); gap: 12px;
+  overflow-y: auto; align-content: start; height: 100%;
+}
+.file-item {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  cursor: pointer; padding: 4px; border: 1px solid transparent;
+}
+.file-item:hover { background: rgba(0,0,0,0.05); border-color: var(--border-light); }
+.file-icon { width: 32px; height: 32px; margin-bottom: 4px; image-rendering: pixelated; }
+.file-name { font-size: 10px; word-break: break-all; line-height: 1.2; }
+
+/* SPY MONITOR */
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
