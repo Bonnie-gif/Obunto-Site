@@ -4,6 +4,8 @@ import { initAudio, playSound } from './modules/audio.js';
 import { initNotepad } from './modules/notepad.js';
 import { initHelp } from './modules/help.js';
 import { initFiles } from './modules/files.js';
+import { initComms } from './modules/comms.js';
+import { initProtocols } from './modules/protocols.js';
 
 const socket = io();
 let currentUser = null;
@@ -16,6 +18,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initNotepad(socket);
     initHelp(socket);
     initFiles(socket);
+    initComms(socket);
+    initProtocols(socket);
     initDraggables();
 
     setInterval(() => {

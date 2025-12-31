@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
-let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {} };
+let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
 let connectedSockets = {}; 
@@ -28,6 +28,7 @@ if (fs.existsSync(DATA_FILE)) {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
         if(!dataStore.knownUsers) dataStore.knownUsers = {};
         if(!dataStore.userFiles) dataStore.userFiles = {};
+        if(!dataStore.messages) dataStore.messages = [];
     } catch (e) {}
 }
 
@@ -176,6 +177,7 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- FILE SYSTEM ---
     socket.on('fs_get_files', () => {
         if(!currentUserId) return;
         if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
@@ -206,6 +208,51 @@ io.on('connection', (socket) => {
         }
     });
 
+    // --- COMM-LINK ---
+    socket.on('comm_get_messages', () => {
+        if(!currentUserId) return;
+        const myMessages = dataStore.messages.filter(m => m.to === currentUserId || m.to === 'ALL');
+        socket.emit('comm_load', myMessages);
+    });
+
+    socket.on('comm_send', (data) => {
+        if(!currentUserId) return;
+        const msg = {
+            id: Date.now(),
+            from: currentUserId,
+            fromName: dataStore.knownUsers[currentUserId]?.name || 'UNKNOWN',
+            to: data.to,
+            subject: data.subject,
+            body: data.body,
+            timestamp: new Date()
+        };
+        dataStore.messages.push(msg);
+        saveData();
+        if(data.to === 'ALL') {
+            io.emit('comm_new', msg);
+        } else {
+            io.to(data.to).emit('comm_new', msg);
+        }
+        socket.emit('comm_sent_success');
+    });
+
+    // --- PROTOCOLS (TASKS) ---
+    socket.on('admin_assign_task', (data) => {
+        const { targetId, taskType } = data;
+        io.to(targetId).emit('protocol_task_assigned', { type: taskType, id: Date.now() });
+    });
+
+    socket.on('task_complete', (data) => {
+        if(adminSocketId) {
+            io.to(adminSocketId).emit('protocol_task_result', {
+                userId: currentUserId,
+                success: data.success,
+                type: data.type
+            });
+        }
+    });
+
+    // --- ADMIN / OBUNTO ---
     socket.on('admin_broadcast_message', (data) => {
         io.emit('receive_broadcast_message', { 
             message: data.message, 

@@ -1,4 +1,4 @@
-import { UI, bringToFront } from './ui.js';
+import { UI, bringToFront, showCustomPrompt } from './ui.js';
 import { playSound } from './audio.js';
 
 let currentMood = 'normal';
@@ -99,7 +99,16 @@ function renderPersonnelList(list, socket) {
             <div class="p-name">${p.name}</div>
             <div class="p-status ${p.status.toLowerCase()}">${p.status}</div>
             <div class="p-act">${p.activity}</div>
+            <button class="btn-newton" style="font-size:9px; padding:2px 4px; margin-left:5px;">TASK</button>
         `;
+        
+        const btnTask = div.querySelector('button');
+        btnTask.onclick = (e) => {
+            e.stopPropagation();
+            socket.emit('admin_assign_task', { targetId: p.id, taskType: 'HEX' });
+            alert("TASK ASSIGNED");
+        };
+
         div.onclick = () => {
             startSpy(p.id, p.name, socket);
         };
@@ -134,7 +143,8 @@ function renderSpyInput(data) {
     const el = document.getElementById('spy-input-data');
     if(!el) return;
     const line = document.createElement('div');
-    line.textContent = `> [${data.field}]: ${data.value}`;
+    const time = new Date().toLocaleTimeString().split(' ')[0];
+    line.textContent = `[${time}] > ${data.value}`; 
     el.appendChild(line);
     el.scrollTop = el.scrollHeight;
 }

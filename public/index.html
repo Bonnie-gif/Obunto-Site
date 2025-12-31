@@ -26,6 +26,22 @@
     </div>
   </div>
 
+  <div id="protocol-overlay" class="power-off-screen hidden" style="z-index: 7000; background: rgba(0,0,0,0.9);">
+    <div class="protocol-container">
+       <div id="protocol-countdown" class="hidden">
+          <img id="proto-cnt-img" src="" style="width: 64px; height: auto;">
+       </div>
+       <div id="protocol-task" class="hidden">
+          <div class="proto-title">MAINTENANCE PROTOCOL</div>
+          <div class="proto-desc" id="proto-desc">...</div>
+          <div class="proto-game">
+             <div id="proto-code-display" style="font-size: 24px; letter-spacing: 5px; margin-bottom: 10px; color: #0f0;"></div>
+             <input type="text" id="proto-input" class="input-newton" style="text-align: center; width: 200px; font-size: 18px;" placeholder="ENTER SEQUENCE" autocomplete="off">
+          </div>
+       </div>
+    </div>
+  </div>
+
   <div id="input-modal" class="modal-overlay hidden">
     <div class="modal-window">
       <div class="modal-title" id="input-modal-title">INPUT REQUIRED</div>
@@ -155,6 +171,29 @@
       </div>
     </div>
 
+    <div id="comms-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 110px; left: 110px;">
+      <div class="win-header">
+        <img src="/assets/icon-large-dock-35x23.png" class="header-icon" style="width: 18px; height: auto;">
+        <span class="win-title">COMM-LINK // INBOX</span>
+        <button id="closeComms" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
+      </div>
+      <div class="win-body no-padding" style="flex-direction: column;">
+        <div class="comm-toolbar">
+           <button id="btnCommRefresh" class="btn-newton" style="width: auto; font-size: 10px;">REFRESH</button>
+           <button id="btnCommNew" class="btn-newton" style="width: auto; font-size: 10px;">COMPOSE</button>
+        </div>
+        <div class="comm-list-header">
+           <span style="width: 100px;">FROM</span>
+           <span style="flex: 1;">SUBJECT</span>
+           <span style="width: 80px;">DATE</span>
+        </div>
+        <div id="comm-list" class="comm-list"></div>
+        <div id="comm-preview" class="comm-preview">
+           <div style="text-align: center; color: var(--ink-dim); padding-top: 20px;">SELECT A MESSAGE</div>
+        </div>
+      </div>
+    </div>
+
     <div id="darch-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
       <div class="win-header">
         <img src="/assets/button-folder-21x17.png" class="header-icon">
@@ -179,7 +218,7 @@
 
     <div id="help-window" class="window-newton hidden" style="width: 380px; height: 450px; top: 120px; left: 200px;">
       <div class="win-header">
-        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
+        <img src="/assets/icon-large-in_out_highlighted-28x27.png" class="header-icon" style="width: 16px; height: auto;">
         <span class="win-title">REQUEST ASSISTANCE</span>
         <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
@@ -323,6 +362,9 @@
       <div class="dock-apps">
         <button id="btnOpenNotepad" class="dock-btn" title="Notes">
           <img src="/assets/button-note-15x15.png" style="width: 20px;">
+        </button>
+        <button id="btnOpenComms" class="dock-btn" title="Comm-Link">
+          <img src="/assets/icon-large-dock-35x23.png" style="width: 24px;">
         </button>
         <button id="btnOpenDarch" class="dock-btn" title="D-ARCH Files">
           <img src="/assets/button-folder-21x17.png" style="width: 24px;">
