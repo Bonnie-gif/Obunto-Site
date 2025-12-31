@@ -17,7 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
-let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
+let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: [], messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
 let connectedSockets = {}; 
@@ -27,8 +27,8 @@ if (fs.existsSync(DATA_FILE)) {
     try {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
         if(!dataStore.knownUsers) dataStore.knownUsers = {};
-        if(!dataStore.userFiles) dataStore.userFiles = {};
-        if(!dataStore.messages) dataStore.messages = [];
+        if(!dataStore.userFiles) dataStore.userFiles = {}; 
+        if(Array.isArray(dataStore.userFiles)) dataStore.userFiles = {};
     } catch (e) {}
 }
 
@@ -85,7 +85,7 @@ app.post('/api/login', async (req, res) => {
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
         if (tscGroups.length === 0) {
-             return res.status(403).json({ success: false, message: "ACCESS DENIED: NOT IN GROUP" });
+             return res.status(403).json({ success: false, message: "ACCESS DENIED" });
         }
 
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
@@ -112,9 +112,6 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        console.log("API Error or Blocked:", e.message);
-        
-        // FALLBACK MODE: Allows login even if Roblox API blocks the server
         const fallbackData = {
             id: userId.toString(),
             username: `OPERATOR-${userId.substring(0,4)}`,
@@ -124,7 +121,6 @@ app.post('/api/login', async (req, res) => {
             affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
             isObunto: false
         };
-
         dataStore.knownUsers[userId] = {
             id: userId,
             name: fallbackData.username,
@@ -132,7 +128,6 @@ app.post('/api/login', async (req, res) => {
             lastSeen: Date.now()
         };
         saveData();
-
         res.json({ success: true, userData: fallbackData });
     }
 });
@@ -230,31 +225,26 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('comm_get_messages', () => {
-        if(!currentUserId) return;
-        const myMessages = dataStore.messages.filter(m => m.to === currentUserId || m.to === 'ALL');
-        socket.emit('comm_load', myMessages);
-    });
-
-    socket.on('comm_send', (data) => {
+    socket.on('comm_send_msg', (data) => {
         if(!currentUserId) return;
         const msg = {
             id: Date.now(),
-            from: currentUserId,
             fromName: dataStore.knownUsers[currentUserId]?.name || 'UNKNOWN',
-            to: data.to,
-            subject: data.subject,
-            body: data.body,
+            to: data.target, 
+            body: data.message,
             timestamp: new Date()
         };
-        dataStore.messages.push(msg);
-        saveData();
-        if(data.to === 'ALL') {
-            io.emit('comm_new', msg);
+        
+        // Always send back to sender for display
+        socket.emit('comm_receive', msg);
+
+        if(data.target === 'GLOBAL') {
+            socket.broadcast.emit('comm_receive', msg);
         } else {
-            io.to(data.to).emit('comm_new', msg);
+            // Private
+            io.to(data.target).emit('comm_receive', msg);
+            if(adminSocketId) io.to(adminSocketId).emit('comm_receive', msg); 
         }
-        socket.emit('comm_sent_success');
     });
 
     socket.on('admin_assign_task', (data) => {

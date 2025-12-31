@@ -86,6 +86,15 @@ export const UI = {
         btnDelete: document.getElementById('btnDeleteFile'),
         btnOpen: document.getElementById('btnOpenDarch')
     },
+    comms: {
+        window: document.getElementById('comms-window'),
+        close: document.getElementById('closeComms'),
+        btnOpen: document.getElementById('btnOpenComms'),
+        list: document.getElementById('comm-list'),
+        targetInput: document.getElementById('commTargetInput'),
+        msgInput: document.getElementById('commMsgInput'),
+        btnSend: document.getElementById('btnCommSend')
+    },
     customModal: {
         overlay: document.getElementById('input-modal'),
         title: document.getElementById('input-modal-title'),

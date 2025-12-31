@@ -60,14 +60,12 @@ export function initProtocols(socket) {
     input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (input.value.toUpperCase() === currentTask.code) {
-                playSound('success'); // Need a success sound, reusing click for now if missing
+                playSound('click');
                 socket.emit('task_complete', { success: true, type: currentTask.type });
                 overlay.classList.add('hidden');
             } else {
                 playSound('error');
                 input.value = '';
-                input.classList.add('error-shake');
-                setTimeout(() => input.classList.remove('error-shake'), 500);
             }
         }
     });

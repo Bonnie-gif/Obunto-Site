@@ -72,7 +72,7 @@ export function initFiles(socket) {
         if(currentPath.length > 0) {
             const backDiv = document.createElement('div');
             backDiv.className = 'file-item';
-            backDiv.innerHTML = `<img src="/assets/icon-small-folder-15x11.png" class="file-icon"><div class="file-name">..</div>`;
+            backDiv.innerHTML = `<img src="/assets/button-folder-21x17.png" class="file-icon"><div class="file-name">..</div>`;
             backDiv.onclick = () => {
                 currentPath.pop();
                 updatePath();
@@ -87,7 +87,7 @@ export function initFiles(socket) {
             div.className = 'file-item';
             if(selectedItem && selectedItem.id === item.id) div.classList.add('selected');
             
-            const icon = item.type === 'folder' ? '/assets/icon-small-folder-15x11.png' : '/assets/button-note-15x15.png';
+            const icon = item.type === 'folder' ? '/assets/button-folder-21x17.png' : '/assets/button-note-15x15.png';
             div.innerHTML = `<img src="${icon}" class="file-icon"><div class="file-name">${item.name}</div>`;
             
             div.onclick = (e) => {
