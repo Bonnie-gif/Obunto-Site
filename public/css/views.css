@@ -2,21 +2,16 @@
   position: fixed; inset: 0; background: #000;
   display: flex; align-items: center; justify-content: center;
   z-index: 10000;
-  animation: powerOn 6s ease-out forwards, forceHide 0.1s linear 6.5s forwards;
-}
-
-@keyframes forceHide {
-  to { opacity: 0; visibility: hidden; z-index: -1; pointer-events: none; }
+  animation: powerOn 6s ease-out forwards;
 }
 
 @keyframes powerOn {
   0% { background: #000; filter: brightness(0); }
-  15% { background: #000; filter: brightness(0.1); }
-  30% { background: #0a0f08; filter: brightness(0.3); }
-  50% { background: #1a241a; filter: brightness(0.6); }
-  70% { background: #3a4a32; filter: brightness(0.85); }
-  90% { background: var(--bg-main); filter: brightness(1); opacity: 1; }
-  100% { background: var(--bg-main); filter: brightness(1); opacity: 0; visibility: hidden; }
+  20% { background: #0a0f08; filter: brightness(0.2); }
+  60% { background: #1a241a; filter: brightness(0.6); }
+  80% { background: var(--bg-main); filter: brightness(0.8); opacity: 1; }
+  99% { background: var(--bg-main); filter: brightness(1); opacity: 1; z-index: 10000; }
+  100% { background: var(--bg-main); filter: brightness(1); opacity: 0; z-index: -1; visibility: hidden; }
 }
 
 .loading-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; z-index: 10001; }
