@@ -136,15 +136,12 @@ export function switchScreen(screenName) {
     Object.values(UI.screens).forEach(el => {
         if(el) {
             el.classList.add('hidden');
-            el.classList.remove('active');
-            el.style.display = 'none';
+            el.style.display = 'none'; // Force hide
         }
     });
-    
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
-        UI.screens[screenName].classList.add('active');
-        UI.screens[screenName].style.display = 'flex';
+        UI.screens[screenName].style.display = 'flex'; // Force show
     }
 }
 

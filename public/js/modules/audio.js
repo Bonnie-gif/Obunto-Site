@@ -17,8 +17,18 @@ const SOUNDS = {
 
 export function playSound(name) {
     if (SOUNDS[name]) {
-        SOUNDS[name].currentTime = 0;
-        SOUNDS[name].play().catch(() => {});
+        try {
+            SOUNDS[name].currentTime = 0;
+            const playPromise = SOUNDS[name].play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Silently ignore auto-play restrictions or missing files
+                    // console.warn('Audio play failed:', error); 
+                });
+            }
+        } catch (e) {
+            // Ignore missing elements
+        }
     }
 }
 

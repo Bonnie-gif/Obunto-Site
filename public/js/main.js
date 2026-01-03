@@ -10,7 +10,6 @@ import { initProtocols } from './modules/protocols.js';
 const socket = io();
 let currentUser = null;
 let idleTimer;
-let currentView = 'IDLE';
 const IDLE_LIMIT = 60000;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -24,39 +23,47 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setInterval(() => {
         const now = new Date();
-        UI.clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        const year = now.getFullYear() + 16;
-        UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        if(UI.clock) UI.clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        if(UI.date) {
+            const year = now.getFullYear() + 16;
+            UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
     }, 1000);
 
     playSound('boot');
     
-    // Força a transição para Login
+    // JS Logic to switch screen
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
-            bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none'; 
+            bootScreen.style.opacity = '0';
+            setTimeout(() => { 
+                bootScreen.style.display = 'none'; 
+                bootScreen.classList.add('hidden');
+            }, 500);
         }
         switchScreen('login');
-    }, 6500);
+    }, 6000);
 
-    UI.login.btn.onclick = async () => {
-        currentUser = await handleLogin(socket);
-        if(currentUser) initComms(socket, currentUser);
-    };
-    
-    UI.login.input.addEventListener("keydown", async e => { 
-        if (e.key === "Enter") {
+    if(UI.login.btn) {
+        UI.login.btn.onclick = async () => {
             currentUser = await handleLogin(socket);
             if(currentUser) initComms(socket, currentUser);
-        }
-    });
+        };
+    }
+    
+    if(UI.login.input) {
+        UI.login.input.addEventListener("keydown", async e => { 
+            if (e.key === "Enter") {
+                currentUser = await handleLogin(socket);
+                if(currentUser) initComms(socket, currentUser);
+            }
+        });
+    }
 
     if (UI.sidebar.btnDashboard) {
         UI.sidebar.btnDashboard.onclick = () => {
             switchView('dashboard');
-            currentView = 'DASHBOARD';
             playSound('click');
             reportActivity();
         };
@@ -99,9 +106,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
         socket.emit('update_activity', { 
-            view: isAfk ? 'AFK' : currentView, 
+            view: isAfk ? 'AFK' : 'ACTIVE', 
             afk: isAfk,
-            fullState: { view: currentView, afk: isAfk, windows: openWindows }
+            fullState: {
+                view: 'ACTIVE',
+                afk: isAfk,
+                windows: openWindows
+            }
         });
     }
 
@@ -110,13 +121,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     socket.on('status_update', (status) => {
-        UI.status.text.textContent = status;
-        if (status === 'ONLINE') {
-            UI.status.indicator.style.backgroundColor = '#4ade80';
-            UI.status.indicator.style.boxShadow = '0 0 5px #4ade80';
-        } else {
-            UI.status.indicator.style.backgroundColor = '#9ca3af';
-            UI.status.indicator.style.boxShadow = 'none';
+        if(UI.status.text) UI.status.text.textContent = status;
+        if(UI.status.indicator) {
+            if (status === 'ONLINE') {
+                UI.status.indicator.style.backgroundColor = '#4ade80';
+                UI.status.indicator.style.boxShadow = '0 0 5px #4ade80';
+            } else {
+                UI.status.indicator.style.backgroundColor = '#9ca3af';
+                UI.status.indicator.style.boxShadow = 'none';
+            }
         }
     });
 
@@ -128,31 +141,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const btnReboot = document.getElementById('btnSystemReboot');
         
         if (alarmType === 'off') {
-            powerOff.classList.remove('hidden');
-            banner.classList.add('hidden');
+            if(powerOff) powerOff.classList.remove('hidden');
+            if(banner) banner.classList.add('hidden');
             
-            if (currentUser && currentUser.isObunto) {
+            if (currentUser && currentUser.isObunto && btnReboot) {
                 btnReboot.classList.remove('hidden');
-            } else {
+            } else if (btnReboot) {
                 btnReboot.classList.add('hidden');
             }
 
         } else if (alarmType === 'on') {
-            powerOff.classList.add('hidden');
-            banner.classList.add('hidden');
+            if(powerOff) powerOff.classList.add('hidden');
+            if(banner) banner.classList.add('hidden');
             document.body.classList.add('powering-on');
             setTimeout(() => { 
                 document.body.classList.remove('powering-on');
                 playSound('boot'); 
             }, 4000);
         } else if (alarmType !== 'green') {
-            powerOff.classList.add('hidden');
+            if(powerOff) powerOff.classList.add('hidden');
             document.body.classList.add(`alarm-${alarmType}`);
-            banner.classList.remove('hidden');
-            text.textContent = `${alarmType.toUpperCase()} ALERT`;
+            if(banner) banner.classList.remove('hidden');
+            if(text) text.textContent = `${alarmType.toUpperCase()} ALERT`;
         } else {
-            powerOff.classList.add('hidden');
-            banner.classList.add('hidden');
+            if(powerOff) powerOff.classList.add('hidden');
+            if(banner) banner.classList.add('hidden');
         }
     });
 });

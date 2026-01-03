@@ -21,7 +21,7 @@
     <div class="power-off-content">
       <div class="power-off-icon">⚠</div>
       <div class="power-off-title">SYSTEM POWER OFF</div>
-      <div class="power-off-msg">Site power off, send some Utility & Maintenance to fix this problem</div>
+      <div class="power-off-msg">Site power off. Maintenance required.</div>
       <button id="btnSystemReboot" class="btn-reboot hidden">⚠ INITIATE SYSTEM REBOOT ⚠</button>
     </div>
   </div>
@@ -94,7 +94,7 @@
            <span id="statusText">ONLINE</span>
         </div>
       </div>
-      
+
       <div id="view-idle" class="viewer active-view" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
          <img src="/assets/icon-tiny-company-16x11.png" style="width: 40px; opacity: 0.5; margin-bottom: 10px;">
          <div style="font-family: var(--font-mono); color: var(--ink-dim); font-size: 11px;">AWAITING USER INPUT...</div>
@@ -119,19 +119,12 @@
       </div>
     </main>
 
-    <div id="obunto-bubble" class="obunto-overlay hidden">
-      <div class="obunto-container">
-        <img id="obunto-img" src="/obunto/normal.png" class="obunto-avatar">
-        <div id="obunto-text" class="speech-bubble"></div>
-      </div>
-    </div>
-    
     <div id="admin-panel" class="window-newton hidden" style="top: 80px; left: 50%;">
       <div class="win-header">
         <span class="win-title">OBUNTO CONTROL</span>
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body">
+      <div class="win-body" style="gap: 10px;">
          <div class="admin-grid-layout">
             <div class="admin-group">
                 <div class="group-label">SYSTEM</div>
@@ -141,45 +134,148 @@
                    <button class="btn-newton" id="btnEnergyDec">-</button>
                    <button class="btn-newton" id="btnEnergyInc">+</button>
                 </div>
+                <button id="btnMonitor" class="btn-newton" style="margin-top:5px;">MONITOR</button>
             </div>
+            <div class="admin-group">
+               <div class="group-label">INCOMING</div>
+               <div id="ticket-list" class="ticket-list"><div class="no-tickets">EMPTY</div></div>
             </div>
+         </div>
+         <div class="admin-group">
+             <div class="group-label">BROADCAST</div>
+             <div id="mood-container" class="mood-grid"></div>
+             <textarea id="adminMsg" class="admin-textarea" placeholder="Message..."></textarea>
+             <button id="btnBroadcast" class="btn-newton">SEND</button>
+         </div>
       </div>
+    </div>
+
+    <div id="personnel-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 100px; left: 100px;">
+      <div class="win-header"><span class="win-title">PERSONNEL MONITOR</span><button id="closePersonnel" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+      <div class="win-body no-padding"><div id="personnel-list" class="personnel-grid"></div></div>
+    </div>
+
+    <div id="spy-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
+      <div class="win-header"><span class="win-title">SURVEILLANCE: <span id="spy-target-name"></span></span><button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+      <div class="win-body" style="padding:0; display:flex; flex-direction:column;">
+         <div id="spy-content" class="spy-terminal" style="flex:1;">
+            <div class="spy-section"><div class="spy-header">STATE</div><div id="spy-state-data"></div></div>
+            <div class="spy-section"><div class="spy-header">KEYLOG</div><div id="spy-input-data" class="spy-log"></div></div>
+         </div>
+      </div>
+    </div>
+
+    <div id="aop-window" class="window-newton hidden" style="width: 300px; top: 100px; left: 300px;">
+      <div class="win-header"><span class="win-title">AOP</span><button id="closeAop" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+      <div class="win-body">
+        <div class="alarm-grid">
+           <button class="btn-alarm btn-green" data-alarm="green">GREEN</button>
+           <button class="btn-alarm btn-blue" data-alarm="blue">BLUE</button>
+           <button class="btn-alarm btn-red" data-alarm="red">RED</button>
+           <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
+           <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
+           <button class="btn-alarm btn-power-off" data-alarm="off">OFF</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="help-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">HELP</span><button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body">
+          <div id="help-request-form"><textarea id="help-req-msg" class="help-textarea"></textarea><button id="btnSendHelp" class="btn-newton">SEND</button><div id="help-status" class="status-text"></div></div>
+          <div id="help-chat-interface" class="hidden"><div id="chat-history" class="chat-history"></div><div class="chat-input-area"><input id="chat-input" class="input-newton"><button id="btnChatSend" class="btn-newton">SEND</button></div></div>
+       </div>
     </div>
     
-    <div class="dock-newton">
-      <div class="dock-apps">
-        <button id="btnObuntoControl" class="dock-btn hidden">
-          <img src="/assets/icon-large-preferences_highlighted-19x19.png">
-        </button>
-      </div>
-      <div class="dock-clock">
-        <span id="clock">--:--</span>
+    <div id="admin-chat-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">LINK (<span id="admin-chat-target"></span>)</span><button id="admin-chat-close" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body"><div id="admin-chat-history" class="chat-history"></div><div class="chat-input-area"><input id="admin-chat-input" class="input-newton"><button id="admin-chat-send" class="btn-newton">SEND</button></div><button id="admin-chat-wait" class="btn-newton" style="margin-top:5px;">WAIT</button></div>
+    </div>
+
+    <div id="notepad-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">NOTES</span><button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body no-padding"><textarea id="notepad-area" class="notepad-lines"></textarea></div>
+    </div>
+
+    <div id="darch-window" class="window-newton hidden">
+        <div class="win-header"><span class="win-title">D-ARCH</span><button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+        <div class="win-body no-padding" style="flex-direction:row;">
+           <div class="darch-sidebar"><div id="btnDarchHome" class="darch-nav-item">ROOT</div><div class="darch-actions"><button id="btnNewFolder" class="btn-newton">FOLDER</button><button id="btnNewFile" class="btn-newton">FILE</button><button id="btnDeleteFile" class="btn-newton">DEL</button></div></div>
+           <div class="darch-content"><div id="darchPath" class="darch-path">/</div><div id="darchGrid" class="darch-grid"></div></div>
+        </div>
+    </div>
+
+    <div id="comms-window" class="window-newton hidden">
+        <div class="win-header"><span class="win-title">COMM-LINK</span><button id="closeComms" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+        <div class="win-body no-padding" style="flex-direction:column;">
+            <div class="comm-toolbar"><input id="commTargetInput" class="input-newton" value="GLOBAL"></div>
+            <div id="comm-list" class="comm-list"></div>
+            <div class="comm-input-area"><input id="commMsgInput" class="input-newton"><button id="btnCommSend" class="btn-newton">SEND</button></div>
+        </div>
+    </div>
+
+    <div id="input-modal" class="modal-overlay hidden">
+        <div class="modal-window">
+            <div class="modal-title" id="input-modal-title">INPUT</div>
+            <input id="input-modal-value" class="input-newton">
+            <div class="modal-actions"><button id="btn-modal-cancel" class="btn-newton">CANCEL</button><button id="btn-modal-ok" class="btn-newton">OK</button></div>
+        </div>
+    </div>
+
+    <div id="obunto-bubble" class="obunto-overlay hidden">
+      <div class="obunto-container">
+        <img id="obunto-img" src="/obunto/normal.png" class="obunto-avatar">
+        <div id="obunto-text" class="speech-bubble"></div>
       </div>
     </div>
-  </div>
 
-  <div id="admin-notify-icon" class="notify-icon hidden">
+    <div id="admin-notify-icon" class="notify-icon hidden">
       <img src="/assets/icon-tiny-company-16x11.png">
       <span class="notify-badge">!</span>
+    </div>
+
+    <div class="dock-newton">
+      <div class="dock-apps">
+        <button id="btnOpenNotepad" class="dock-btn"><img src="/assets/button-note-15x15.png"></button>
+        <button id="btnOpenDarch" class="dock-btn"><img src="/assets/button-folder-21x17.png"></button>
+        <button id="btnOpenComms" class="dock-btn"><img src="/assets/icon-large-dock-35x23.png"></button>
+        <button id="btnOpenHelp" class="dock-btn"><img src="/assets/icon-large-in_out_highlighted-28x27.png"></button>
+        <button id="btnObuntoControl" class="dock-btn hidden"><img src="/assets/icon-large-preferences_highlighted-19x19.png"></button>
+      </div>
+      <div class="dock-clock"><span id="clock">--:--</span></div>
+    </div>
   </div>
 
   <audio id="sfx-boot" src="/audio/loading1.wav"></audio>
-  <audio id="sfx-click" src=""></audio>
-  <audio id="sfx-notify" src=""></audio>
-  <audio id="sfx-alarm-green" src=""></audio>
-  <audio id="sfx-alarm-blue" src=""></audio>
-  <audio id="sfx-alarm-red" src=""></audio>
-  <audio id="sfx-alarm-gamma" src=""></audio>
-  <audio id="sfx-alarm-epsilon" src=""></audio>
-  <audio id="sfx-power-on" src=""></audio>
-  <audio id="sfx-power-off" src=""></audio>
-  <audio id="sfx-msg" src=""></audio>
-  <audio id="sfx-denied" src=""></audio>
-  <audio id="sfx-sent" src=""></audio>
-  <audio id="sfx-sleep" src=""></audio>
-  <audio id="sfx-uhoh" src=""></audio>
+  <audio id="sfx-click" src="/audio/click.mp3"></audio>
+  <audio id="sfx-notify" src="/audio/notify.mp3"></audio>
+  <audio id="sfx-alarm-green" src="/audio/greencode.wav"></audio>
+  <audio id="sfx-alarm-blue" src="/audio/bluecode.wav"></audio>
+  <audio id="sfx-alarm-red" src="/audio/redcode.wav"></audio>
+  <audio id="sfx-alarm-gamma" src="/audio/codegamma4.wav"></audio>
+  <audio id="sfx-alarm-epsilon" src="/audio/codeepslon.wav"></audio>
+  <audio id="sfx-power-on" src="/audio/poweron.wav"></audio>
+  <audio id="sfx-power-off" src="/audio/poweroff.wav"></audio>
+  <audio id="sfx-msg" src="/audio/newmessage.wav"></audio>
+  <audio id="sfx-denied" src="/audio/requestdenied.wav"></audio>
+  <audio id="sfx-sent" src="/audio/requestsent.wav"></audio>
+  <audio id="sfx-sleep" src="/audio/sleep.wav"></audio>
+  <audio id="sfx-uhoh" src="/audio/uh_oh.wav"></audio>
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="js/main.js"></script>
+  
+  <script>
+    setTimeout(() => {
+        const boot = document.getElementById('boot-sequence');
+        const login = document.getElementById('login-screen');
+        if(boot && getComputedStyle(boot).opacity !== '0') {
+            console.warn('Boot sequence fallback triggered');
+            boot.style.display = 'none';
+            login.classList.remove('hidden');
+            login.style.display = 'flex';
+        }
+    }, 5000);
+  </script>
 </body>
 </html>
