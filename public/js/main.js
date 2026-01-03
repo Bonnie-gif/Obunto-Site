@@ -30,11 +30,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     playSound('boot');
+    
+    // Força a troca de tela após o boot
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
             bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none';
+            bootScreen.style.display = 'none'; // Segurança extra
         }
         switchScreen('login');
     }, 6000);
@@ -133,8 +135,11 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (alarmType === 'on') {
             powerOff.classList.add('hidden');
             banner.classList.add('hidden');
-            document.body.style.opacity = '0';
-            setTimeout(() => { document.body.style.opacity = '1'; playSound('boot'); }, 1000);
+            document.body.classList.add('powering-on');
+            setTimeout(() => { 
+                document.body.classList.remove('powering-on');
+                playSound('boot'); 
+            }, 4000);
         } else if (alarmType !== 'green') {
             powerOff.classList.add('hidden');
             document.body.classList.add(`alarm-${alarmType}`);
