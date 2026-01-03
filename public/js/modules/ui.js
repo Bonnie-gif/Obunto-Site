@@ -133,28 +133,18 @@ export function showCustomPrompt(title) {
 }
 
 export function switchScreen(screenName) {
-    console.log('switchScreen called with:', screenName);
-    console.log('Available screens:', Object.keys(UI.screens));
-    
     Object.values(UI.screens).forEach(el => {
         if(el) {
             el.classList.add('hidden');
             el.classList.remove('active');
             el.style.display = 'none';
-            el.style.opacity = '0';
         }
     });
     
     if(UI.screens[screenName]) {
-        console.log('Showing screen:', screenName);
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');
         UI.screens[screenName].style.display = 'flex';
-        UI.screens[screenName].style.opacity = '1';
-        UI.screens[screenName].style.visibility = 'visible';
-        UI.screens[screenName].style.zIndex = '100';
-    } else {
-        console.error('Screen not found:', screenName);
     }
 }
 
@@ -180,63 +170,33 @@ export function bringToFront(win) {
     win.style.zIndex = topZIndex;
 }
 
-export function makeDraggable(win) {
-    win.addEventListener('mousedown', () => bringToFront(win));
-    
-    const header = win.querySelector('.win-header');
-    if (!header) return;
-    
-    let isDragging = false, startX, startY, initialLeft, initialTop;
-    
-    header.addEventListener('mousedown', (e) => {
-        if(e.target.closest('.close-btn')) return;
-        isDragging = true;
-        startX = e.clientX; startY = e.clientY;
-        initialLeft = win.offsetLeft; initialTop = win.offsetTop;
-        win.style.cursor = 'grabbing';
-    });
-    
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        win.style.left = `${initialLeft + dx}px`;
-        win.style.top = `${initialTop + dy}px`;
-    });
-    
-    window.addEventListener('mouseup', () => { isDragging = false; win.style.cursor = 'default'; });
-}
-
-export function makeResizable(win) {
-    if(win.querySelector('.resize-handle')) return;
-    const handle = document.createElement('div');
-    handle.className = 'resize-handle';
-    win.appendChild(handle);
-    handle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        bringToFront(win);
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startWidth = parseInt(document.defaultView.getComputedStyle(win).width, 10);
-        const startHeight = parseInt(document.defaultView.getComputedStyle(win).height, 10);
-        function doDrag(e) {
-            win.style.width = (startWidth + e.clientX - startX) + 'px';
-            win.style.height = (startHeight + e.clientY - startY) + 'px';
-        }
-        function stopDrag() {
-            document.documentElement.removeEventListener('mousemove', doDrag);
-            document.documentElement.removeEventListener('mouseup', stopDrag);
-        }
-        document.documentElement.addEventListener('mousemove', doDrag);
-        document.documentElement.addEventListener('mouseup', stopDrag);
-    });
-}
-
 export function initDraggables() {
     document.querySelectorAll('.window-newton').forEach(win => {
-        makeDraggable(win);
-        makeResizable(win);
+        const header = win.querySelector('.win-header');
+        if(!header) return;
+        
+        header.onmousedown = (e) => {
+            if(e.target.closest('.close-btn')) return;
+            bringToFront(win);
+            
+            let shiftX = e.clientX - win.getBoundingClientRect().left;
+            let shiftY = e.clientY - win.getBoundingClientRect().top;
+            
+            function moveAt(pageX, pageY) {
+                win.style.left = pageX - shiftX + 'px';
+                win.style.top = pageY - shiftY + 'px';
+            }
+            
+            function onMouseMove(event) {
+                moveAt(event.pageX, event.pageY);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            
+            win.onmouseup = function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                win.onmouseup = null;
+            };
+        };
     });
 }

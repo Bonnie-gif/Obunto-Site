@@ -1,7 +1,6 @@
 const SOUNDS = {
     boot: document.getElementById('sfx-boot'),
     click: document.getElementById('sfx-click'),
-    
     green: document.getElementById('sfx-alarm-green'),
     blue: document.getElementById('sfx-alarm-blue'),
     red: document.getElementById('sfx-alarm-red'),
@@ -9,7 +8,6 @@ const SOUNDS = {
     epsilon: document.getElementById('sfx-alarm-epsilon'),
     on: document.getElementById('sfx-power-on'),
     off: document.getElementById('sfx-power-off'),
-    
     msg: document.getElementById('sfx-msg'),
     denied: document.getElementById('sfx-denied'),
     sent: document.getElementById('sfx-sent'),
@@ -20,7 +18,7 @@ const SOUNDS = {
 export function playSound(name) {
     if (SOUNDS[name]) {
         SOUNDS[name].currentTime = 0;
-        SOUNDS[name].play().catch(e => {});
+        SOUNDS[name].play().catch(() => {});
     }
 }
 

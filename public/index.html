@@ -26,38 +26,6 @@
     </div>
   </div>
 
-  <div id="protocol-overlay" class="modal-overlay hidden" style="z-index: 7000;">
-    <div class="window-newton" style="width: 400px; box-shadow: 20px 20px 0 rgba(0,0,0,0.5);">
-       <div class="win-header">
-          <img src="/assets/icon-large-owner_info_highlighted-28x14.png" class="header-icon">
-          <span class="win-title">MAINTENANCE PROTOCOL</span>
-       </div>
-       <div class="win-body" style="align-items: center; justify-content: center; text-align: center;">
-           <div id="protocol-countdown" class="hidden">
-              <img id="proto-cnt-img" src="" style="width: 64px; height: auto;">
-           </div>
-           <div id="protocol-task" class="hidden" style="width: 100%;">
-              <div class="proto-desc" id="proto-desc" style="color: var(--ink); font-family: var(--font-mono); margin-bottom: 20px;">...</div>
-              <div class="proto-game">
-                 <div id="proto-code-display" style="font-size: 24px; letter-spacing: 5px; margin-bottom: 15px; color: var(--ink); font-weight: bold; background: var(--paper-dark); padding: 5px; border: 1px solid var(--border); border-radius: 4px;"></div>
-                 <input type="text" id="proto-input" class="input-newton" style="text-align: center; font-size: 16px;" placeholder="ENTER SEQUENCE" autocomplete="off">
-              </div>
-           </div>
-       </div>
-    </div>
-  </div>
-
-  <div id="input-modal" class="modal-overlay hidden">
-    <div class="modal-window">
-      <div class="modal-title" id="input-modal-title">INPUT REQUIRED</div>
-      <input type="text" id="input-modal-value" class="input-newton" autocomplete="off">
-      <div class="modal-actions">
-        <button id="btn-modal-cancel" class="btn-newton modal-btn">CANCEL</button>
-        <button id="btn-modal-ok" class="btn-newton modal-btn">CONFIRM</button>
-      </div>
-    </div>
-  </div>
-
   <div id="boot-sequence" class="active">
     <div class="loading-container">
       <div class="loading-content">
@@ -71,10 +39,6 @@
         </div>
       </div>
     </div>
-    <div class="power-flash"></div>
-    <div class="boot-flicker"></div>
-    <div class="boot-scanlines"></div>
-    <div class="vignette"></div>
   </div>
 
   <div id="login-screen" class="screen full-screen hidden">
@@ -111,8 +75,8 @@
           <div class="session-line">USER: <span id="sbUser">UNKNOWN</span></div>
           <div class="session-line">RANK: <span id="sbRank">--</span></div>
           <div class="session-line" style="margin-top: 5px;">ENERGY: <span id="energyVal">100</span>%</div>
-          <div class="energy-bar-container">
-             <div id="energyBar" class="energy-fill" style="width: 100%;"></div>
+          <div style="width: 100%; height: 8px; background: var(--paper-dark); border: 1px solid var(--border);">
+             <div id="energyBar" style="width: 100%; height: 100%; background: var(--ink);"></div>
           </div>
         </div>
       </div>
@@ -130,11 +94,10 @@
            <span id="statusText">ONLINE</span>
         </div>
       </div>
-
+      
       <div id="view-idle" class="viewer active-view" style="display: flex; align-items: center; justify-content: center; flex-direction: column;">
          <img src="/assets/icon-tiny-company-16x11.png" style="width: 40px; opacity: 0.5; margin-bottom: 10px;">
          <div style="font-family: var(--font-mono); color: var(--ink-dim); font-size: 11px;">AWAITING USER INPUT...</div>
-         <div style="font-family: var(--font-mono); color: var(--ink-dim); font-size: 9px; margin-top: 5px;">SELECT 'MY DASHBOARD' TO VIEW PROFILE</div>
       </div>
 
       <div id="view-dashboard" class="viewer hidden">
@@ -149,102 +112,12 @@
               </div>
            </div>
            <div class="dash-card dept-card">
-              <div class="dash-header">
-                 <img src="/assets/icon-large-calls-26x26.png"> DEPARTMENT ASSIGNMENTS
-              </div>
+              <div class="dash-header">DEPARTMENT ASSIGNMENTS</div>
               <div id="dashDepts" class="dept-list"></div>
-           </div>
-           <div class="dash-card system-card">
-              <div class="dash-header">
-                 <img src="/assets/icon-large-notes-17x22.png"> TERMINAL NOTICES
-              </div>
-              <div class="notice-text">
-                 > Welcome to your assigned workstation.<br>
-                 > Department data is synchronized with Mainframe.<br>
-                 > All actions are monitored.<br>
-                 > Report discrepancies to Administration.
-              </div>
            </div>
         </div>
       </div>
     </main>
-
-    <div id="notepad-window" class="window-newton hidden" style="width: 400px; height: 500px; top: 100px; left: 100px;">
-      <div class="win-header">
-        <img src="/assets/button-note-15x15.png" class="header-icon">
-        <span class="win-title">PERSONAL NOTES</span>
-        <button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body no-padding">
-        <textarea id="notepad-area" class="notepad-lines" placeholder="Write your notes here..."></textarea>
-      </div>
-    </div>
-
-    <div id="comms-window" class="window-newton hidden" style="width: 450px; height: 500px; top: 110px; left: 110px;">
-      <div class="win-header">
-        <img src="/assets/icon-large-dock-35x23.png" class="header-icon" style="width: 18px; height: auto;">
-        <span class="win-title">COMM-LINK // CHAT RELAY</span>
-        <button id="closeComms" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body no-padding" style="flex-direction: column;">
-        <div class="comm-toolbar">
-           <label style="font-size: 10px; font-weight: bold; margin-right: 5px;">TARGET:</label>
-           <input id="commTargetInput" class="input-newton" style="flex:1; padding: 4px;" value="GLOBAL" placeholder="ID or GLOBAL">
-        </div>
-        <div id="comm-list" class="comm-list" style="flex:1; background: var(--paper-light);"></div>
-        <div class="comm-input-area" style="padding: 8px; border-top: 2px solid var(--border); display: flex; gap: 5px;">
-           <input id="commMsgInput" class="input-newton" placeholder="Transmit message...">
-           <button id="btnCommSend" class="btn-newton" style="width: auto;">SEND</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="darch-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
-      <div class="win-header">
-        <img src="/assets/button-folder-21x17.png" class="header-icon">
-        <span class="win-title">D-ARCH // DATA ARCHIVE</span>
-        <button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body no-padding" style="flex-direction: row;">
-        <div class="darch-sidebar">
-           <div class="darch-nav-item active" id="btnDarchHome">ROOT DIRECTORY</div>
-           <div class="darch-actions">
-              <button id="btnNewFolder" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FOLDER</button>
-              <button id="btnNewFile" class="btn-newton" style="font-size: 10px; padding: 6px;">+ FILE</button>
-              <button id="btnDeleteFile" class="btn-newton" style="font-size: 10px; padding: 6px; border-color: #ef4444; color: #ef4444;" disabled>DELETE</button>
-           </div>
-        </div>
-        <div class="darch-content">
-           <div class="darch-path" id="darchPath">/</div>
-           <div class="darch-grid" id="darchGrid"></div>
-        </div>
-      </div>
-    </div>
-
-    <div id="help-window" class="window-newton hidden" style="width: 380px; height: 450px; top: 120px; left: 200px;">
-      <div class="win-header">
-        <img src="/assets/icon-large-in_out_highlighted-28x27.png" class="header-icon" style="width: 16px; height: auto;">
-        <span class="win-title">REQUEST ASSISTANCE</span>
-        <button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body chat-body">
-        <div id="help-request-form" class="help-layout">
-          <div class="admin-section" style="flex: 1; display: flex; flex-direction: column;">
-            <label class="admin-label">REQUEST ASSISTANCE:</label>
-            <textarea id="help-req-msg" class="help-textarea" placeholder="Describe your issue..."></textarea>
-            <button id="btnSendHelp" class="btn-newton mt-auto">TRANSMIT REQUEST</button>
-          </div>
-          <div id="help-status" class="status-text hidden">REQUEST SENT. WAITING FOR OPERATOR...</div>
-        </div>
-        <div id="help-chat-interface" class="hidden help-layout">
-          <div id="chat-history" class="chat-history"></div>
-          <div class="chat-input-area mt-auto">
-            <input id="chat-input" class="input-newton" placeholder="Type message..." />
-            <button id="btnChatSend" class="btn-newton" style="width: auto;">SEND</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div id="obunto-bubble" class="obunto-overlay hidden">
       <div class="obunto-container">
@@ -252,175 +125,59 @@
         <div id="obunto-text" class="speech-bubble"></div>
       </div>
     </div>
-
-    <div id="admin-notify-icon" class="notify-icon hidden">
-      <img src="/assets/icon-tiny-company-16x11.png">
-      <span class="notify-badge">!</span>
-    </div>
-
-    <div id="admin-chat-window" class="window-newton hidden" style="width: 400px; height: 500px; top: 150px; left: 300px; z-index: 3500;">
+    
+    <div id="admin-panel" class="window-newton hidden" style="top: 80px; left: 50%;">
       <div class="win-header">
-        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
-        <span class="win-title">OBUNTO DIRECT LINK (<span id="admin-chat-target"></span>)</span>
-      </div>
-      <div class="win-body chat-body">
-        <div id="admin-chat-history" class="chat-history"></div>
-        <div class="chat-input-area mb-1">
-          <input id="admin-chat-input" class="input-newton" placeholder="Reply..." />
-          <button id="admin-chat-send" class="btn-newton" style="width: auto;">SEND</button>
-        </div>
-        <div class="admin-chat-controls">
-          <button id="admin-chat-wait" class="btn-newton btn-warning">WAIT</button>
-          <button id="admin-chat-close" class="btn-newton btn-danger">DONE</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="aop-window" class="window-newton hidden" style="width: 380px; top: 100px; left: 300px;">
-      <div class="win-header">
-        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
-        <span class="win-title">AOP // OPERATIONS PROTOCOL</span>
-        <button id="closeAop" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body">
-        <div class="admin-section">
-          <label class="admin-label">ALARMS & POWER:</label>
-          <div class="alarm-grid">
-            <button class="btn-alarm btn-green" data-alarm="green">GREEN</button>
-            <button class="btn-alarm btn-blue" data-alarm="blue">BLUE</button>
-            <button class="btn-alarm btn-red" data-alarm="red">RED</button>
-            <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
-            <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
-            <button class="btn-alarm btn-power-off" data-alarm="off">PWR OFF</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="admin-panel" class="window-newton admin-window hidden" style="top: 80px; left: 50%;">
-      <div class="win-header">
-        <img src="/assets/icon-large-preferences-19x19.png" class="header-icon">
         <span class="win-title">OBUNTO CONTROL</span>
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body" style="gap: 15px;">
-        <div class="admin-grid-layout">
+      <div class="win-body">
+         <div class="admin-grid-layout">
             <div class="admin-group">
-                <div class="group-label">SYSTEM STATE</div>
-                <button id="btnToggleStatus" class="btn-newton" style="width:100%">TOGGLE ONLINE/OFFLINE</button>
-                <div style="margin-top: 8px; font-weight: bold; font-size: 10px;">ENERGY LEVEL:</div>
-                <div style="display: flex; gap: 5px;">
-                   <button class="btn-newton" id="btnEnergyDec">-10</button>
-                   <button class="btn-newton" id="btnEnergyInc">+10</button>
-                </div>
-                <button id="btnMonitor" class="btn-newton" style="width:100%; margin-top:5px;">OPEN PERSONNEL MONITOR</button>
-            </div>
-            
-            <div class="admin-group">
-                <div class="group-label">INCOMING</div>
-                <div id="ticket-list" class="ticket-list">
-                    <div class="no-tickets">NO PENDING REQUESTS</div>
+                <div class="group-label">SYSTEM</div>
+                <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE</button>
+                <div style="margin-top:5px; font-weight:bold; font-size:10px;">ENERGY:</div>
+                <div style="display:flex; gap:5px;">
+                   <button class="btn-newton" id="btnEnergyDec">-</button>
+                   <button class="btn-newton" id="btnEnergyInc">+</button>
                 </div>
             </div>
-
-            <div class="admin-group" style="grid-column: span 2;">
-                <div class="group-label">MOOD MATRIX</div>
-                <div id="mood-container" class="mood-grid"></div>
             </div>
-
-            <div class="admin-group" style="grid-column: span 2;">
-                <div class="group-label">BROADCAST</div>
-                <div class="target-row">
-                    <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
-                </div>
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <textarea id="adminMsg" class="admin-textarea" placeholder="Message..." style="height:40px; flex:1;"></textarea>
-                    <button id="btnBroadcast" class="btn-newton" style="width:auto;">SEND</button>
-                </div>
-            </div>
-        </div>
       </div>
     </div>
-
-    <div id="personnel-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 100px; left: 100px;">
-      <div class="win-header">
-        <img src="/assets/icon-large-owner_info-28x14.png" class="header-icon">
-        <span class="win-title">PERSONNEL MONITOR</span>
-        <button id="closePersonnel" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body no-padding">
-        <div id="personnel-list" class="personnel-grid"></div>
-      </div>
-    </div>
-
-    <div id="spy-window" class="window-newton hidden" style="width: 600px; height: 450px; top: 150px; left: 350px; z-index: 4000; background: var(--paper-dark);">
-      <div class="win-header">
-        <img src="/assets/icon-tiny-company-16x11.png" class="header-icon">
-        <span class="win-title">SURVEILLANCE FEED: <span id="spy-target-name">UNKNOWN</span></span>
-        <button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body" style="padding: 0; display: flex; flex-direction: column;">
-        <div style="padding: 10px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; color: var(--ink); font-family: var(--font-mono); font-size: 10px; background: var(--paper);">
-           <span style="letter-spacing: 1px;">// SECURE LINK [AES-256]</span>
-           <span style="animation: blink 1s infinite; color: #ff0000; font-weight: bold;">● REC</span>
-        </div>
-        <div id="spy-content" class="spy-terminal" style="background: var(--paper-light); color: var(--ink);">
-           <div class="spy-section">
-              <div class="spy-header" style="color: var(--ink-dim); border-color: var(--border-light);">SYSTEM STATE</div>
-              <div id="spy-state-data">WAITING FOR UPLINK...</div>
-           </div>
-           <div class="spy-section" style="flex: 1; border-top: 1px dashed var(--border-light);">
-              <div class="spy-header" style="color: var(--ink-dim); border-color: var(--border-light);">KEYSTROKE FEED</div>
-              <div id="spy-input-data" class="spy-log" style="color: var(--ink);"></div>
-           </div>
-        </div>
-      </div>
-    </div>
-
+    
     <div class="dock-newton">
       <div class="dock-apps">
-        <button id="btnOpenNotepad" class="dock-btn" title="Notes">
-          <img src="/assets/button-note-15x15.png" style="width: 20px;">
-        </button>
-        <button id="btnOpenDarch" class="dock-btn" title="D-ARCH Files">
-          <img src="/assets/button-folder-21x17.png" style="width: 24px;">
-        </button>
-        <button id="btnOpenComms" class="dock-btn" title="Comm-Link">
-          <img src="/assets/icon-large-dock-35x23.png" style="width: 24px;">
-        </button>
-        <button id="btnOpenHelp" class="dock-btn" title="Help">
-          <img src="/assets/icon-large-in_out_highlighted-28x27.png" style="width: 28px;">
-        </button>
-        <button id="btnObuntoControl" class="dock-btn hidden" title="Access Obunto Control">
+        <button id="btnObuntoControl" class="dock-btn hidden">
           <img src="/assets/icon-large-preferences_highlighted-19x19.png">
         </button>
       </div>
       <div class="dock-clock">
-        <img src="/assets/icon-large-clock-24x22.png" class="clock-icon">
         <span id="clock">--:--</span>
       </div>
     </div>
   </div>
 
+  <div id="admin-notify-icon" class="notify-icon hidden">
+      <img src="/assets/icon-tiny-company-16x11.png">
+      <span class="notify-badge">!</span>
+  </div>
+
   <audio id="sfx-boot" src="/audio/loading1.wav"></audio>
-  <audio id="sfx-click" src="/assets/sounds/click.mp3"></audio>
-  <audio id="sfx-notify" src="/assets/sounds/notify.mp3"></audio>
-  <audio id="sfx-speak" src="/assets/sounds/beep.mp3"></audio>
-  <audio id="sfx-error" src="/assets/sounds/error.mp3"></audio>
-  
-  <audio id="sfx-alarm-green" src="/audio/greencode.wav"></audio>
-  <audio id="sfx-alarm-blue" src="/audio/bluecode.wav"></audio>
-  <audio id="sfx-alarm-red" src="/audio/redcode.wav"></audio>
-  <audio id="sfx-alarm-gamma" src="/audio/codegamma4.wav"></audio>
-  <audio id="sfx-alarm-epsilon" src="/audio/codeepslon.wav"></audio>
-  <audio id="sfx-power-on" src="/audio/poweron.wav"></audio>
-  <audio id="sfx-power-off" src="/audio/poweroff.wav"></audio>
-  
-  <audio id="sfx-msg" src="/audio/newmessage.wav"></audio>
-  <audio id="sfx-denied" src="/audio/requestdenied.wav"></audio>
-  <audio id="sfx-sent" src="/audio/requestsent.wav"></audio>
-  <audio id="sfx-sleep" src="/audio/sleep.wav"></audio>
-  <audio id="sfx-uhoh" src="/audio/uh_oh.wav"></audio>
+  <audio id="sfx-click" src=""></audio>
+  <audio id="sfx-notify" src=""></audio>
+  <audio id="sfx-alarm-green" src=""></audio>
+  <audio id="sfx-alarm-blue" src=""></audio>
+  <audio id="sfx-alarm-red" src=""></audio>
+  <audio id="sfx-alarm-gamma" src=""></audio>
+  <audio id="sfx-alarm-epsilon" src=""></audio>
+  <audio id="sfx-power-on" src=""></audio>
+  <audio id="sfx-power-off" src=""></audio>
+  <audio id="sfx-msg" src=""></audio>
+  <audio id="sfx-denied" src=""></audio>
+  <audio id="sfx-sent" src=""></audio>
+  <audio id="sfx-sleep" src=""></audio>
+  <audio id="sfx-uhoh" src=""></audio>
 
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="js/main.js"></script>

@@ -31,14 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     playSound('boot');
     
-    console.log('TSC Newton OS - Initializing...');
-
+    // Força a transição para Login
     setTimeout(() => {
-        console.log('Boot sequence complete. Switching to login.');
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
-            bootScreen.style.display = 'none';
             bootScreen.classList.add('hidden');
+            bootScreen.style.display = 'none'; 
         }
         switchScreen('login');
     }, 6500);
@@ -132,8 +130,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alarmType === 'off') {
             powerOff.classList.remove('hidden');
             banner.classList.add('hidden');
-            if (currentUser && currentUser.isObunto) btnReboot.classList.remove('hidden');
-            else btnReboot.classList.add('hidden');
+            
+            if (currentUser && currentUser.isObunto) {
+                btnReboot.classList.remove('hidden');
+            } else {
+                btnReboot.classList.add('hidden');
+            }
+
         } else if (alarmType === 'on') {
             powerOff.classList.add('hidden');
             banner.classList.add('hidden');
