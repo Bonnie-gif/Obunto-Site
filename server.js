@@ -41,6 +41,11 @@ setInterval(() => {
         systemEnergy -= 0.035;
         if (systemEnergy < 0) systemEnergy = 0;
         io.emit('energy_update', Math.floor(systemEnergy));
+        
+        if (systemEnergy <= 0 && currentAlarm !== 'off') {
+            io.emit('alarm_update', 'off');
+            currentAlarm = 'off';
+        }
     }
 }, 60000);
 
@@ -277,6 +282,7 @@ io.on('connection', (socket) => {
 
     socket.on('admin_trigger_alarm', (alarmType) => {
         currentAlarm = alarmType;
+        if(currentAlarm !== 'off' && systemEnergy <= 0) systemEnergy = 50; 
         io.emit('alarm_update', currentAlarm);
         io.emit('play_alarm_sound', alarmType);
     });

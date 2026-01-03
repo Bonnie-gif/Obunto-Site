@@ -110,9 +110,9 @@
           <div class="session-line">NET: <span class="session-value">SECURE (TSC-INTRA)</span></div>
           <div class="session-line">USER: <span id="sbUser">UNKNOWN</span></div>
           <div class="session-line">RANK: <span id="sbRank">--</span></div>
-          <div class="session-line" style="margin-top: 5px;">ENERGY: <span id="energyVal">100</span>%</div>
+          <div class="session-line" style="margin-top: 8px;">ENERGY LEVEL: <span id="energyVal">100</span>%</div>
           <div class="energy-bar-container">
-             <div id="energyBar" class="energy-fill"></div>
+             <div id="energyBar" class="energy-fill" style="width: 100%;"></div>
           </div>
         </div>
       </div>
@@ -308,12 +308,16 @@
             <div class="admin-group">
                 <div class="group-label">SYSTEM STATE</div>
                 <button id="btnToggleStatus" class="btn-newton" style="width:100%">TOGGLE ONLINE/OFFLINE</button>
-                <div style="margin-top: 8px; font-weight: bold; font-size: 10px;">ENERGY LEVEL:</div>
-                <div style="display: flex; gap: 5px;">
-                   <button class="btn-newton" id="btnEnergyDec">-10</button>
-                   <button class="btn-newton" id="btnEnergyInc">+10</button>
+                
+                <div style="margin-top: 10px; border-top: 1px dashed var(--border-light); padding-top: 5px;">
+                  <div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">ENERGY CONTROL</div>
+                  <div style="display: flex; gap: 5px;">
+                     <button class="btn-newton" id="btnEnergyDec">-10</button>
+                     <button class="btn-newton" id="btnEnergyInc">+10</button>
+                  </div>
                 </div>
-                <button id="btnMonitor" class="btn-newton" style="width:100%; margin-top:5px;">OPEN PERSONNEL MONITOR</button>
+
+                <button id="btnMonitor" class="btn-newton" style="width:100%; margin-top: 10px;">OPEN PERSONNEL MONITOR</button>
             </div>
             
             <div class="admin-group">

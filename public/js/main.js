@@ -30,11 +30,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
 
     playSound('boot');
+    
+    // CORREÇÃO DA TELA DE LOGIN
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
             bootScreen.classList.add('hidden');
             bootScreen.style.display = 'none'; 
+            bootScreen.style.zIndex = -1;
         }
         switchScreen('login');
     }, 6000);
@@ -132,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alarmType === 'off') {
             powerOff.classList.remove('hidden');
             banner.classList.add('hidden');
-            
             if (currentUser && currentUser.isObunto) {
                 btnReboot.classList.remove('hidden');
             } else {
