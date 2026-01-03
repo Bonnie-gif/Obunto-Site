@@ -39,7 +39,7 @@
            <div id="protocol-task" class="hidden" style="width: 100%;">
               <div class="proto-desc" id="proto-desc" style="color: var(--ink); font-family: var(--font-mono); margin-bottom: 20px;">...</div>
               <div class="proto-game">
-                 <div id="proto-code-display" style="font-size: 24px; letter-spacing: 5px; margin-bottom: 15px; color: var(--ink); font-weight: bold; background: var(--paper-dark); padding: 5px; border: 1px solid var(--border);"></div>
+                 <div id="proto-code-display" style="font-size: 24px; letter-spacing: 5px; margin-bottom: 15px; color: var(--ink); font-weight: bold; background: var(--paper-dark); padding: 5px; border: 1px solid var(--border); border-radius: 4px;"></div>
                  <input type="text" id="proto-input" class="input-newton" style="text-align: center; font-size: 16px;" placeholder="ENTER SEQUENCE" autocomplete="off">
               </div>
            </div>
@@ -299,36 +299,28 @@
         <span class="win-title">OBUNTO CONTROL</span>
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body" style="gap: 15px;">
-        <div class="admin-grid-layout">
-            <div class="admin-group">
-                <div class="group-label">SYSTEM STATE</div>
-                <button id="btnToggleStatus" class="btn-newton" style="width:100%">TOGGLE ONLINE/OFFLINE</button>
-                <button id="btnMonitor" class="btn-newton" style="width:100%; margin-top:5px;">OPEN PERSONNEL MONITOR</button>
-            </div>
-            
-            <div class="admin-group">
-                <div class="group-label">INCOMING</div>
-                <div id="ticket-list" class="ticket-list">
-                    <div class="no-tickets">NO PENDING REQUESTS</div>
-                </div>
-            </div>
-
-            <div class="admin-group" style="grid-column: span 2;">
-                <div class="group-label">MOOD MATRIX</div>
-                <div id="mood-container" class="mood-grid"></div>
-            </div>
-
-            <div class="admin-group" style="grid-column: span 2;">
-                <div class="group-label">BROADCAST</div>
-                <div class="target-row">
-                    <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
-                </div>
-                <div style="display:flex; gap:5px; margin-top:5px;">
-                    <textarea id="adminMsg" class="admin-textarea" placeholder="Message..." style="height:40px; flex:1;"></textarea>
-                    <button id="btnBroadcast" class="btn-newton" style="width:auto;">SEND</button>
-                </div>
-            </div>
+      <div class="win-body">
+        <div class="admin-section">
+          <label class="admin-label">SYSTEM STATUS:</label>
+          <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
+        </div>
+        <div class="admin-section">
+          <label class="admin-label">INCOMING TICKETS:</label>
+          <div id="ticket-list" class="ticket-list">
+            <div class="no-tickets">NO PENDING REQUESTS</div>
+          </div>
+        </div>
+        <div class="admin-section">
+          <label class="admin-label">GLOBAL BROADCAST:</label>
+          <div id="mood-container" class="mood-grid mb-1"></div>
+          <div class="target-row">
+             <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
+          </div>
+          <textarea id="adminMsg" class="admin-textarea" placeholder="Broadcast message..."></textarea>
+          <button id="btnBroadcast" class="btn-newton">SEND MESSAGE</button>
+        </div>
+        <div class="admin-section">
+          <button id="btnMonitor" class="btn-newton">OPEN PERSONNEL MONITOR</button>
         </div>
       </div>
     </div>
