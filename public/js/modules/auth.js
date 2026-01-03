@@ -1,30 +1,34 @@
 import { UI, switchScreen } from './ui.js';
 import { populateDashboard } from './dashboard.js';
-import { initObunto } from './obunto.js';
-import { initHoltz } from './admin/holtz.js';
+import { initObunto } from './obunto.js'; // Importante para o painel admin funcionar
 
 export async function handleLogin(socket) {
     const id = UI.login.input.value.trim();
     if (!id) return null;
+    
     UI.login.status.textContent = "SYNCING WITH MAINFRAME...";
+    
     try {
         const res = await fetch('/api/login', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ userId: id })
         });
+        
         const data = await res.json();
+        
         if (data.success) {
             const user = data.userData;
             socket.emit('register_user', user.id);
+            
+            // Popula dados
             populateDashboard(user);
+            
+            // Troca tela
             switchScreen('desktop');
             
-            if (user.isObunto) {
-                initObunto(socket, user.id);
-            } else if (user.isHoltz) {
-                initHoltz(socket, user.id);
-            }
+            // Inicia sistemas do Obunto/Admin se necessário
+            initObunto(socket, user.id);
             
             return user; 
         } else {
@@ -32,6 +36,7 @@ export async function handleLogin(socket) {
             return null;
         }
     } catch (e) {
+        console.error(e);
         UI.login.status.textContent = "CONNECTION FAILURE";
         return null;
     }

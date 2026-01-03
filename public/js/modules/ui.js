@@ -20,8 +20,13 @@ export const UI = {
         rank: document.getElementById('sbRank'),
         btnDashboard: document.getElementById('btnMyDashboard')
     },
-    login: { btn: document.getElementById('btnLogin'), input: document.getElementById('inpId'), status: document.getElementById('loginStatus') },
+    login: { 
+        btn: document.getElementById('btnLogin'), 
+        input: document.getElementById('inpId'), 
+        status: document.getElementById('loginStatus') 
+    },
     status: { indicator: document.getElementById('statusIndicator'), text: document.getElementById('statusText') },
+    // Elementos do Obunto e Admin
     obunto: {
         panel: document.getElementById('admin-panel'),
         btnOpen: document.getElementById('btnObuntoControl'),
@@ -37,6 +42,7 @@ export const UI = {
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text'),
         btnMonitor: document.getElementById('btnMonitor'),
+        // Chat Admin
         adminChat: {
             window: document.getElementById('admin-chat-window'),
             history: document.getElementById('admin-chat-history'),
@@ -46,16 +52,19 @@ export const UI = {
             close: document.getElementById('admin-chat-close'),
             target: document.getElementById('admin-chat-target')
         },
+        // AOP
         aop: {
             window: document.getElementById('aop-window'),
             close: document.getElementById('closeAop'),
             btnReboot: document.getElementById('btnSystemReboot')
         },
+        // Monitoramento
         monitor: {
             window: document.getElementById('personnel-window'),
             list: document.getElementById('personnel-list'),
             close: document.getElementById('closePersonnel')
         },
+        // Espionagem
         spy: {
             window: document.getElementById('spy-window'),
             close: document.getElementById('closeSpy'),
@@ -63,6 +72,7 @@ export const UI = {
             title: document.getElementById('spy-target-name')
         }
     },
+    // Outras janelas
     help: {
         window: document.getElementById('help-window'),
         reqForm: document.getElementById('help-request-form'),
@@ -95,6 +105,7 @@ export const UI = {
         msgInput: document.getElementById('commMsgInput'),
         btnSend: document.getElementById('btnCommSend')
     },
+    // Modal genérico
     customModal: {
         overlay: document.getElementById('input-modal'),
         title: document.getElementById('input-modal-title'),
@@ -133,6 +144,7 @@ export function showCustomPrompt(title) {
 }
 
 export function switchScreen(screenName) {
+    // Esconde todas
     Object.values(UI.screens).forEach(el => {
         if(el) {
             el.classList.add('hidden');
@@ -140,9 +152,15 @@ export function switchScreen(screenName) {
         }
     });
     
+    // Mostra a desejada
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].style.display = 'flex';
+        
+        // Se for desktop, o display pode ser block ou flex dependendo do CSS, mas flex é seguro para centralizar se necessário
+        if(screenName === 'desktop') {
+             UI.screens[screenName].style.display = 'flex'; 
+        }
     }
 }
 
@@ -162,7 +180,6 @@ export function switchView(viewName) {
 }
 
 let topZIndex = 3000;
-
 export function bringToFront(win) {
     topZIndex++;
     win.style.zIndex = topZIndex;
