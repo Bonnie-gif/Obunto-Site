@@ -23,7 +23,8 @@ export function initObunto(socket, userId) {
         };
     }
 
-    if (userId === "8989") {
+    // Se for admin, habilita painel
+    if (userId === "8989" || userId === "36679824") {
         UI.dock.btnObuntoControl.classList.remove('hidden');
         UI.dock.btnObuntoControl.onclick = () => {
             UI.obunto.panel.classList.remove('hidden');
@@ -191,7 +192,6 @@ function setupAdminPanel(socket) {
         UI.obunto.notifyIcon.classList.add('hidden');
     };
 
-    // ENERGY CONTROLS
     const btnInc = document.getElementById('btnEnergyInc');
     const btnDec = document.getElementById('btnEnergyDec');
     if (btnInc) btnInc.onclick = () => socket.emit('admin_modify_energy', 10);

@@ -20,9 +20,8 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
-let systemEnergy = 100.0; // 100% de energia
+let systemEnergy = 100.0;
 let connectedSockets = {}; 
-let adminSocketId = null;
 
 if (fs.existsSync(DATA_FILE)) {
     try {
@@ -37,8 +36,6 @@ function saveData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
 }
 
-// Lógica de Energia: 100% dura ~48 horas (2880 minutos)
-// Decaimento: ~0.035 por minuto.
 setInterval(() => {
     if (systemEnergy > 0) {
         systemEnergy -= 0.035;
@@ -70,7 +67,6 @@ app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // OBUNTO
     if (userId === "8989") {
         return res.json({ 
             success: true, 
@@ -87,7 +83,6 @@ app.post('/api/login', async (req, res) => {
         });
     }
 
-    // DR. HOLTZ
     if (userId === "36679824") {
         return res.json({ 
             success: true, 
@@ -141,7 +136,6 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        // Fallback
         const fallbackData = {
             id: userId.toString(),
             username: `OPERATOR-${userId.substring(0,4)}`,
@@ -211,7 +205,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // SISTEMA DE ARQUIVOS
     socket.on('fs_get_files', () => {
         if(!currentUserId) return;
         if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
@@ -239,7 +232,6 @@ io.on('connection', (socket) => {
         if(file) { file.content = data.content; saveData(); }
     });
 
-    // COMMS
     socket.on('comm_send_msg', (data) => {
         if(!currentUserId) return;
         const msg = {
@@ -258,13 +250,11 @@ io.on('connection', (socket) => {
         }
     });
 
-    // TASKS & ENERGY
     socket.on('admin_assign_task', (data) => {
         io.to(data.targetId).emit('protocol_task_assigned', { type: data.taskType, id: Date.now() });
     });
 
     socket.on('task_complete', (data) => {
-        // Tarefa completa = +1 energia
         if(data.success) {
             systemEnergy = Math.min(100, systemEnergy + 1);
             io.emit('energy_update', Math.floor(systemEnergy));
@@ -281,7 +271,6 @@ io.on('connection', (socket) => {
         io.emit('energy_update', Math.floor(systemEnergy));
     });
 
-    // ADMIN GENERIC
     socket.on('admin_broadcast_message', (data) => {
         io.emit('receive_broadcast_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
     });
