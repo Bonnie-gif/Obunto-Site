@@ -2,6 +2,7 @@
   position: fixed; inset: 0; background: #000;
   display: flex; align-items: center; justify-content: center;
   z-index: 10000;
+  /* FORÇA A REMOÇÃO DA TELA DE BOOT APÓS A ANIMAÇÃO */
   animation: powerOn 6s ease-out forwards, forceHide 0.1s linear 6.5s forwards;
 }
 
@@ -32,6 +33,15 @@
 @keyframes fillProgress { 0% { width: 0%; } 100% { width: 100%; } }
 .progress-text { margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--paper); letter-spacing: 2px; text-align: center; }
 
+.power-flash { position: fixed; inset: 0; background: var(--paper-light); pointer-events: none; z-index: 10005; opacity: 0; animation: powerFlash 6s ease-out forwards; }
+@keyframes powerFlash { 0% { opacity: 0; } 2% { opacity: 1; } 4% { opacity: 0; } 6% { opacity: 0.6; } 8% { opacity: 0; } }
+.boot-scanlines { position: fixed; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15)); background-size: 100% 4px; pointer-events: none; z-index: 10003; opacity: 0; animation: scanlinesAppear 6s ease-out forwards; }
+@keyframes scanlinesAppear { 0%, 70% { opacity: 0; } 100% { opacity: 0.3; } }
+.boot-flicker { position: fixed; inset: 0; pointer-events: none; z-index: 10004; background: rgba(255,255,255,0.02); opacity: 0; animation: flicker 0.15s infinite, flickerAppear 6s ease-out forwards; }
+@keyframes flickerAppear { 0%, 40% { opacity: 0; } 100% { opacity: 1; } }
+.vignette { position: fixed; inset: 0; background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%); pointer-events: none; z-index: 10002; opacity: 0; animation: vignetteAppear 6s ease-out forwards; }
+@keyframes vignetteAppear { 0%, 50% { opacity: 0; } 100% { opacity: 1; } }
+
 .power-off-screen { position: fixed; inset: 0; background: #000; z-index: 6000; display: flex; align-items: center; justify-content: center; color: #333; font-family: var(--font-mono); animation: powerOffFadeIn 2s ease-out; }
 .power-off-content { text-align: center; animation: powerOffPulse 2s infinite; padding: 40px; border: 3px solid #222; background: #0a0a0a; box-shadow: 0 0 30px rgba(0,0,0,0.8); border-radius: 8px; }
 .power-off-icon { font-size: 48px; margin-bottom: 16px; color: #444; animation: iconBlink 1.5s infinite; }
@@ -46,16 +56,24 @@
 @keyframes bannerPulse { 0% { box-shadow: 0 0 20px var(--alert-color); } 50% { box-shadow: 0 0 40px var(--alert-color); } 100% { box-shadow: 0 0 20px var(--alert-color); } }
 @keyframes textBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-.boot-center { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.boot-logo-small { width: 60px; height: auto; }
 .boot-box { width: 450px; background: var(--paper); border: 3px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 8px 8px 0 var(--shadow); text-align: left; }
 .boot-title { font-size: 20px; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px; text-align: center; }
 .boot-subtitle { font-size: 11px; color: var(--ink-dim); margin-bottom: 16px; text-align: center; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
 
-.viewer { flex: 1; background: var(--paper); border: 3px solid var(--border); border-radius: 4px; padding: 20px; overflow-y: auto; box-shadow: inset 2px 2px 5px var(--shadow), 4px 4px 0 var(--shadow); }
+.viewer { flex: 1; background: var(--paper); border: 3px solid var(--border); padding: 20px; overflow-y: auto; box-shadow: inset 2px 2px 5px var(--shadow), 4px 4px 0 var(--shadow);
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--border-light) 1px, transparent 1px);
+  background-size: 100% 28px;
+  border-radius: 4px;
+}
 .active-view { display: block; }
 .dashboard-grid { display: grid; grid-template-columns: 2fr 1.5fr; grid-template-rows: auto auto; gap: 16px; height: 100%; }
-.dash-card { background: var(--paper-dark); border: 3px solid var(--border); border-radius: 4px; padding: 12px; display: flex; flex-direction: column; }
+.dash-card { background: var(--paper-dark); border: 3px solid var(--border); border-style: outset; padding: 12px; display: flex; flex-direction: column;
+  background-color: var(--paper-dark);
+  background-image: linear-gradient(var(--border-light) 1px, transparent 1px);
+  background-size: 100% 28px;
+  border-radius: 4px;
+}
 .dash-header { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 11px; border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
 .dash-header img { width: 20px; }
 .profile-card { grid-row: span 2; align-items: center; background: var(--paper); text-align: center; }
@@ -69,6 +87,7 @@
 .dept-row { background: var(--paper); border: 1px solid var(--border-light); padding: 8px; margin-bottom: 6px; border-radius: 4px; }
 .dept-name { font-weight: bold; font-size: 10px; }
 .dept-role { font-size: 9px; color: var(--ink-dim); margin-top: 2px; }
+.notice-text { font-family: var(--font-mono); font-size: 11px; line-height: 1.6; color: var(--ink-dim); }
 
 .window-newton { display: flex; flex-direction: column; position: fixed; min-width: 300px; min-height: 200px; background: var(--paper); border: 2px solid var(--border); border-radius: 8px; box-shadow: 12px 12px 0 var(--shadow); z-index: 1000; }
 .win-header { background: var(--ink); color: var(--paper); padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; cursor: move; user-select: none; border-bottom: 2px solid var(--border); border-radius: 6px 6px 0 0; }

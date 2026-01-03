@@ -5,6 +5,7 @@ button { font-family: var(--font-main); cursor: pointer; user-select: none; }
   border: 2px solid var(--border); border-radius: var(--radius);
   color: var(--ink); font-weight: bold; font-size: 13px; letter-spacing: 1px; transition: all 0.1s;
   box-shadow: 2px 2px 0 var(--shadow);
+  background-image: linear-gradient(rgba(255,255,255,0.1), transparent);
 }
 .btn-newton:hover { background: var(--button-hover); transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--shadow); }
 .btn-newton:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--shadow); }
@@ -14,6 +15,7 @@ button { font-family: var(--font-main); cursor: pointer; user-select: none; }
   border: 2px solid var(--border); border-radius: var(--radius);
   display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: bold;
   color: var(--ink);
+  background-image: linear-gradient(rgba(255,255,255,0.1), transparent);
 }
 .btn-action img { width: 18px; }
 .btn-action:hover { background: var(--button-hover); }
