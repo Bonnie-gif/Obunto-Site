@@ -110,6 +110,10 @@
           <div class="session-line">NET: <span class="session-value">SECURE (TSC-INTRA)</span></div>
           <div class="session-line">USER: <span id="sbUser">UNKNOWN</span></div>
           <div class="session-line">RANK: <span id="sbRank">--</span></div>
+          <div class="session-line" style="margin-top: 5px;">ENERGY: <span id="energyVal">100</span>%</div>
+          <div style="width: 100%; height: 8px; background: var(--paper-dark); border: 1px solid var(--border);">
+             <div id="energyBar" style="width: 100%; height: 100%; background: var(--ink);"></div>
+          </div>
         </div>
       </div>
     </aside>
@@ -299,28 +303,41 @@
         <span class="win-title">OBUNTO CONTROL</span>
         <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
       </div>
-      <div class="win-body">
-        <div class="admin-section">
-          <label class="admin-label">SYSTEM STATUS:</label>
-          <button id="btnToggleStatus" class="btn-newton">TOGGLE ONLINE/OFFLINE</button>
-        </div>
-        <div class="admin-section">
-          <label class="admin-label">INCOMING TICKETS:</label>
-          <div id="ticket-list" class="ticket-list">
-            <div class="no-tickets">NO PENDING REQUESTS</div>
-          </div>
-        </div>
-        <div class="admin-section">
-          <label class="admin-label">GLOBAL BROADCAST:</label>
-          <div id="mood-container" class="mood-grid mb-1"></div>
-          <div class="target-row">
-             <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
-          </div>
-          <textarea id="adminMsg" class="admin-textarea" placeholder="Broadcast message..."></textarea>
-          <button id="btnBroadcast" class="btn-newton">SEND MESSAGE</button>
-        </div>
-        <div class="admin-section">
-          <button id="btnMonitor" class="btn-newton">OPEN PERSONNEL MONITOR</button>
+      <div class="win-body" style="gap: 15px;">
+        <div class="admin-grid-layout">
+            <div class="admin-group">
+                <div class="group-label">SYSTEM STATE</div>
+                <button id="btnToggleStatus" class="btn-newton" style="width:100%">TOGGLE ONLINE/OFFLINE</button>
+                <div style="margin-top: 8px; font-weight: bold; font-size: 10px;">ENERGY LEVEL:</div>
+                <div style="display: flex; gap: 5px;">
+                   <button class="btn-newton" id="btnEnergyDec">-10</button>
+                   <button class="btn-newton" id="btnEnergyInc">+10</button>
+                </div>
+                <button id="btnMonitor" class="btn-newton" style="width:100%; margin-top:5px;">OPEN PERSONNEL MONITOR</button>
+            </div>
+            
+            <div class="admin-group">
+                <div class="group-label">INCOMING</div>
+                <div id="ticket-list" class="ticket-list">
+                    <div class="no-tickets">NO PENDING REQUESTS</div>
+                </div>
+            </div>
+
+            <div class="admin-group" style="grid-column: span 2;">
+                <div class="group-label">MOOD MATRIX</div>
+                <div id="mood-container" class="mood-grid"></div>
+            </div>
+
+            <div class="admin-group" style="grid-column: span 2;">
+                <div class="group-label">BROADCAST</div>
+                <div class="target-row">
+                    <input id="broadcastTarget" class="input-newton" placeholder="TARGET ID (OPTIONAL)">
+                </div>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <textarea id="adminMsg" class="admin-textarea" placeholder="Message..." style="height:40px; flex:1;"></textarea>
+                    <button id="btnBroadcast" class="btn-newton" style="width:auto;">SEND</button>
+                </div>
+            </div>
         </div>
       </div>
     </div>

@@ -20,8 +20,10 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
+let systemEnergy = 100.0; // Float para precisão
 let connectedSockets = {}; 
 
+// Carregar dados
 if (fs.existsSync(DATA_FILE)) {
     try {
         dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
@@ -34,6 +36,21 @@ if (fs.existsSync(DATA_FILE)) {
 function saveData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
 }
+
+// Sistema de Decaimento de Energia (Dura ~48h)
+// 100% / (48 horas * 60 minutos) = ~0.0347 por minuto
+setInterval(() => {
+    if (systemEnergy > 0) {
+        systemEnergy -= 0.035; 
+        if (systemEnergy < 0) systemEnergy = 0;
+        io.emit('energy_update', Math.floor(systemEnergy));
+        
+        // Se a energia acabar, dispara alarme Epsilon ou Power Off (Opcional, mantive simples por enquanto)
+        if (systemEnergy === 0 && currentAlarm !== 'off') {
+            // Opcional: Auto-shutdown se energia for 0
+        }
+    }
+}, 60000); // Roda a cada minuto
 
 function broadcastPersonnelUpdate() {
     const personnelList = Object.values(dataStore.knownUsers).map(u => ({
@@ -58,24 +75,22 @@ app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // OBUNTO
     if (userId === "8989") {
         return res.json({ 
             success: true, 
             userData: { 
                 id: "8989", 
                 username: "OBUNTO", 
-                displayName: "System AI", 
+                displayName: "System Artificial Intelligence", 
                 rank: "MAINFRAME", 
                 avatar: "/obunto/normal.png", 
-                affiliations: [{ groupName: "TSC CORE", role: "ADMIN", rank: 999 }],
+                affiliations: [{ groupName: "TSC MAINFRAME", role: "SYSTEM ADMINISTRATOR", rank: 999 }],
                 isObunto: true,
                 isHoltz: false
             } 
         });
     }
 
-    // DR. HOLTZ
     if (userId === "36679824") {
         return res.json({ 
             success: true, 
@@ -84,7 +99,7 @@ app.post('/api/login', async (req, res) => {
                 username: "DR. HOLTZ", 
                 displayName: "Head of Research", 
                 rank: "LEVEL 5", 
-                avatar: "/assets/icon-large-owner_info-28x14.png", 
+                avatar: "/obunto/normal.png", 
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
                 isObunto: false,
                 isHoltz: true
@@ -129,7 +144,6 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        // Fallback para testes
         const fallbackData = {
             id: userId.toString(),
             username: `OPERATOR-${userId.substring(0,4)}`,
@@ -154,6 +168,8 @@ app.post('/api/login', async (req, res) => {
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
+    socket.emit('energy_update', Math.floor(systemEnergy));
+
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
@@ -181,13 +197,21 @@ io.on('connection', (socket) => {
             connectedSockets[currentUserId].activity = data.view;
             connectedSockets[currentUserId].afk = data.afk;
             broadcastPersonnelUpdate();
-            io.to('admins').emit('spy_data_update', { targetId: currentUserId, state: data.fullState });
+            
+            io.to('admins').emit('spy_data_update', {
+                targetId: currentUserId,
+                state: data.fullState
+            });
         }
     });
 
     socket.on('live_input', (data) => {
         if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
-        io.to('admins').emit('spy_input_update', { targetId: currentUserId, field: data.fieldId, value: data.value });
+        io.to('admins').emit('spy_input_update', {
+            targetId: currentUserId,
+            field: data.fieldId,
+            value: data.value
+        });
     });
 
     socket.on('disconnect', () => {
@@ -221,14 +245,10 @@ io.on('connection', (socket) => {
     socket.on('fs_update_content', (data) => {
         if(!currentUserId) return;
         const file = dataStore.userFiles[currentUserId].find(f => f.id === data.id);
-        if(file) { file.content = data.content; saveData(); }
-    });
-
-    socket.on('comm_get_messages', () => {
-        if(!currentUserId) return;
-        // Simple chat history - returns global or DM
-        // For a full chat, we might want to filter only relevant ones. 
-        // For now, comm_receive handles real-time.
+        if(file) {
+            file.content = data.content;
+            saveData();
+        }
     });
 
     socket.on('comm_send_msg', (data) => {
@@ -240,9 +260,8 @@ io.on('connection', (socket) => {
             body: data.message,
             timestamp: new Date()
         };
-        dataStore.messages.push(msg);
         
-        socket.emit('comm_receive', msg); // Devolve para quem enviou
+        socket.emit('comm_receive', msg);
 
         if(data.target === 'GLOBAL') {
             socket.broadcast.emit('comm_receive', msg);
@@ -258,11 +277,29 @@ io.on('connection', (socket) => {
     });
 
     socket.on('task_complete', (data) => {
-        io.to('admins').emit('protocol_task_result', { userId: currentUserId, success: data.success, type: data.type });
+        // Aumenta energia ao completar tarefa
+        systemEnergy = Math.min(100, systemEnergy + 1);
+        io.emit('energy_update', Math.floor(systemEnergy));
+
+        io.to('admins').emit('protocol_task_result', {
+            userId: currentUserId,
+            success: data.success,
+            type: data.type
+        });
+    });
+
+    // ADMIN CONTROL
+    socket.on('admin_modify_energy', (amount) => {
+        systemEnergy = Math.min(100, Math.max(0, systemEnergy + amount));
+        io.emit('energy_update', Math.floor(systemEnergy));
     });
 
     socket.on('admin_broadcast_message', (data) => {
-        io.emit('receive_broadcast_message', { message: data.message, mood: data.mood || 'normal', targetId: data.targetId });
+        io.emit('receive_broadcast_message', { 
+            message: data.message, 
+            mood: data.mood || 'normal', 
+            targetId: data.targetId 
+        });
     });
 
     socket.on('admin_trigger_alarm', (alarmType) => {

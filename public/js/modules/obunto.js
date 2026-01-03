@@ -1,5 +1,5 @@
-import { UI, bringToFront, showCustomPrompt } from './ui.js';
-import { playSound } from './audio.js';
+import { UI, bringToFront } from '../ui.js';
+import { playSound } from '../audio.js';
 
 let currentMood = 'normal';
 let currentChatTarget = null;
@@ -24,13 +24,12 @@ export function initObunto(socket, userId) {
     }
 
     if (userId === "8989") {
-        UI.dock.btnHelp.onclick = (e) => {
-            e.stopImmediatePropagation();
-            UI.obunto.aop.window.classList.remove('hidden');
-            bringToFront(UI.obunto.aop.window);
+        UI.dock.btnObuntoControl.classList.remove('hidden');
+        UI.dock.btnObuntoControl.onclick = () => {
+            UI.obunto.panel.classList.remove('hidden');
+            bringToFront(UI.obunto.panel);
             playSound('click');
         };
-        UI.obunto.aop.close.onclick = () => UI.obunto.aop.window.classList.add('hidden');
 
         setupAdminPanel(socket);
         
@@ -192,6 +191,12 @@ function setupAdminPanel(socket) {
         UI.obunto.notifyIcon.classList.add('hidden');
     };
 
+    // ENERGY CONTROLS
+    const btnInc = document.getElementById('btnEnergyInc');
+    const btnDec = document.getElementById('btnEnergyDec');
+    if (btnInc) btnInc.onclick = () => socket.emit('admin_modify_energy', 10);
+    if (btnDec) btnDec.onclick = () => socket.emit('admin_modify_energy', -10);
+
     UI.obunto.moods.innerHTML = '';
     MOODS.forEach(mood => {
         const div = document.createElement('div');
@@ -206,7 +211,6 @@ function setupAdminPanel(socket) {
         UI.obunto.moods.appendChild(div);
     });
 
-    UI.obunto.btnOpen.onclick = () => UI.obunto.panel.classList.remove('hidden');
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
     
     UI.obunto.btnToggle.onclick = () => {
