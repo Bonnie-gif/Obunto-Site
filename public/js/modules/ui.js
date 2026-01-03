@@ -133,15 +133,28 @@ export function showCustomPrompt(title) {
 }
 
 export function switchScreen(screenName) {
+    console.log('switchScreen called with:', screenName);
+    console.log('Available screens:', Object.keys(UI.screens));
+    
     Object.values(UI.screens).forEach(el => {
         if(el) {
             el.classList.add('hidden');
             el.classList.remove('active');
+            el.style.display = 'none';
+            el.style.opacity = '0';
         }
     });
+    
     if(UI.screens[screenName]) {
+        console.log('Showing screen:', screenName);
         UI.screens[screenName].classList.remove('hidden');
         UI.screens[screenName].classList.add('active');
+        UI.screens[screenName].style.display = 'flex';
+        UI.screens[screenName].style.opacity = '1';
+        UI.screens[screenName].style.visibility = 'visible';
+        UI.screens[screenName].style.zIndex = '100';
+    } else {
+        console.error('Screen not found:', screenName);
     }
 }
 
