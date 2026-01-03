@@ -51,88 +51,54 @@ body.no-crt .crt-overlay, body.no-crt .screen-flicker {
   display: none;
 }
 
-/* CUSTOM ALARMS */
+/* ALARMS */
 
-/* BLUE: Cold / System Freeze / Network Error */
+/* BLUE */
 body.alarm-blue {
-  --bg-main: #0a1a2a; 
-  --bg-light: #1c3a5e; 
-  --bg-dark: #020b14;
-  --paper: #a4b8cc; 
-  --paper-dark: #7a94ad; 
-  --paper-light: #cce0f5;
-  --ink: #001a33; 
-  --border: #002b4d; 
-  --button: #4da6ff; 
-  --button-hover: #80bfff;
-  --alert-color: #00ccff;
+  --bg-main: #002b36; --bg-light: #073642; --bg-dark: #001e26;
+  --paper: #839496; --paper-dark: #586e75; --paper-light: #93a1a1;
+  --ink: #002b36; --border: #002b36; --button: #268bd2; --button-hover: #2aa198;
+  --alert-color: #268bd2;
 }
 
-/* RED: Lockdown / Security Breach / Hazard */
+/* RED */
 body.alarm-red {
-  --bg-main: #2a0505; 
-  --bg-light: #5e1c1c; 
-  --bg-dark: #140000;
-  --paper: #cc9999; 
-  --paper-dark: #ad6666; 
-  --paper-light: #f5cccc;
-  --ink: #330000; 
-  --border: #4d0000; 
-  --button: #ff4d4d; 
-  --button-hover: #ff8080;
-  --alert-color: #ff0000;
+  --bg-main: #2b0000; --bg-light: #420707; --bg-dark: #1e0000;
+  --paper: #cc9999; --paper-dark: #a67c7c; --paper-light: #e6b3b3;
+  --ink: #2b0000; --border: #2b0000; --button: #dc322f; --button-hover: #cb4b16;
+  --alert-color: #dc322f;
 }
-body.alarm-red .screen-flicker { animation: redFlash 0.5s infinite; background: rgba(255,0,0,0.2); }
-body.alarm-red .crt-overlay { animation: redPulse 1.5s infinite; }
-@keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.4; } }
-@keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.5); } 50% { box-shadow: inset 0 0 100px rgba(255,0,0,0.8); } }
+body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
+body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
+@keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
+@keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-/* GAMMA: Biological / Mechanical Failure / Nervous */
+/* GAMMA */
 body.alarm-gamma {
-  --bg-main: #2a2a00; 
-  --bg-light: #5e5e00; 
-  --bg-dark: #141400;
-  --paper: #cccc99; 
-  --paper-dark: #adad66; 
-  --paper-light: #f5f5cc;
-  --ink: #333300; 
-  --border: #4d4d00; 
-  --button: #e6e600; 
-  --button-hover: #ffff33;
-  --alert-color: #ffff00;
+  --bg-main: #362b00; --bg-light: #423607; --bg-dark: #261e00;
+  --paper: #cccc99; --paper-dark: #a6a67c; --paper-light: #e6e6b3;
+  --ink: #362b00; --border: #362b00; --button: #b58900; --button-hover: #d3a60f;
+  --alert-color: #b58900;
 }
-body.alarm-gamma .workspace { animation: gammaNervous 0.05s infinite; }
-body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; background: rgba(255,200,0,0.1); }
-
-/* Vibração rápida e tensa (Nervous) */
-@keyframes gammaNervous { 
-  0% { transform: translate(0, 0); } 
-  25% { transform: translate(1px, 0); } 
-  50% { transform: translate(0, 1px); } 
-  75% { transform: translate(-1px, 0); } 
+body.alarm-gamma .workspace { animation: gammaVibrate 0.08s infinite; }
+body.alarm-gamma .screen-flicker { animation: gammaStatic 0.1s infinite; background: rgba(255,140,0,0.05); }
+@keyframes gammaVibrate { 
+  0% { transform: translate(0, 0); } 25% { transform: translate(1px, 0); } 
+  50% { transform: translate(0, 1px); } 75% { transform: translate(-1px, 0); } 
   100% { transform: translate(0, -1px); } 
 }
-@keyframes gammaStatic { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.2; } }
+@keyframes gammaStatic { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.15; } }
 
-/* EPSILON: Mantido conforme solicitado (Glitch/Corrupt) */
+/* EPSILON */
 body.alarm-epsilon {
-  --bg-main: #000000;
-  --bg-light: #111111;
-  --bg-dark: #000000;
-  --paper: #a0a0a0;
-  --paper-dark: #505050;
-  --paper-light: #808080;
-  --ink: #ffffff;
-  --border: #ffffff;
-  --button: #303030;
-  --button-hover: #505050;
+  --bg-main: #000000; --bg-light: #111111; --bg-dark: #000000;
+  --paper: #a0a0a0; --paper-dark: #505050; --paper-light: #808080;
+  --ink: #ffffff; --border: #ffffff; --button: #303030; --button-hover: #505050;
   --alert-color: #ffffff;
   filter: contrast(200%) grayscale(100%);
   overflow: hidden;
 }
-body.alarm-epsilon .workspace,
-body.alarm-epsilon .sidebar,
-body.alarm-epsilon .window-newton {
+body.alarm-epsilon .workspace, body.alarm-epsilon .sidebar, body.alarm-epsilon .window-newton {
   animation: epsilonGlitch 0.2s infinite steps(1);
 }
 body.alarm-epsilon::before {
@@ -141,17 +107,13 @@ body.alarm-epsilon::before {
   animation: epsilonScroll 8s infinite linear;
 }
 body.alarm-epsilon .screen-flicker {
-  background: rgba(255,255,255,0.15);
-  animation: epsilonStatic 0.05s infinite;
-  mix-blend-mode: exclusion;
+  background: rgba(255,255,255,0.15); animation: epsilonStatic 0.05s infinite; mix-blend-mode: exclusion;
 }
 @keyframes epsilonGlitch {
-  0% { transform: translate(0,0); clip-path: inset(0 0 0 0); }
+  0% { transform: translate(0,0) skewX(0); clip-path: inset(0 0 0 0); }
   5% { transform: translate(-2px, 1px); clip-path: inset(10% 0 80% 0); }
   10% { transform: translate(2px, -1px); clip-path: inset(0 0 0 0); }
-  50% { filter: invert(0); }
-  52% { filter: invert(1); }
-  54% { filter: invert(0); }
+  50% { filter: invert(0); } 52% { filter: invert(1); } 54% { filter: invert(0); }
   80% { transform: translate(1px, 0); clip-path: inset(40% 0 40% 0); }
   100% { transform: translate(0,0); clip-path: inset(0 0 0 0); }
 }
