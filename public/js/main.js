@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initNotepad(socket);
     initHelp(socket);
     initFiles(socket);
+    initComms(socket);
     initProtocols(socket);
     initDraggables();
 
@@ -30,16 +31,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     playSound('boot');
     
-    // Força a remoção da tela de boot após 6 segundos
+    // Força o desaparecimento da tela de boot após a animação
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
             bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none'; // Redundância para garantir
-            bootScreen.style.zIndex = -100;
+            bootScreen.style.display = 'none';
         }
         switchScreen('login');
-    }, 6000);
+    }, 6000); // 6s corresponde ao tempo total das animações CSS
 
     UI.login.btn.onclick = async () => {
         currentUser = await handleLogin(socket);
@@ -85,16 +85,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function reportActivity(isAfk = false) {
         if (!currentUser) return;
+        
         const openWindows = [];
         document.querySelectorAll('.window-newton').forEach(win => {
             if (!win.classList.contains('hidden')) {
                 openWindows.push({ id: win.id, hidden: false });
             }
         });
+
         socket.emit('update_activity', { 
             view: isAfk ? 'AFK' : currentView, 
             afk: isAfk,
-            fullState: { view: currentView, afk: isAfk, windows: openWindows }
+            fullState: {
+                view: currentView,
+                afk: isAfk,
+                windows: openWindows
+            }
         });
     }
 
@@ -123,13 +129,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (alarmType === 'off') {
             powerOff.classList.remove('hidden');
             banner.classList.add('hidden');
-            if (currentUser && currentUser.isObunto) btnReboot.classList.remove('hidden');
-            else btnReboot.classList.add('hidden');
+            
+            if (currentUser && currentUser.isObunto) {
+                btnReboot.classList.remove('hidden');
+            } else {
+                btnReboot.classList.add('hidden');
+            }
+
         } else if (alarmType === 'on') {
             powerOff.classList.add('hidden');
             banner.classList.add('hidden');
-            document.body.style.opacity = '0';
-            setTimeout(() => { document.body.style.opacity = '1'; playSound('boot'); }, 1000);
+            document.body.classList.add('powering-on'); // Aciona a animação de CRT
+            setTimeout(() => { 
+                document.body.classList.remove('powering-on');
+                playSound('boot'); 
+            }, 4000);
         } else if (alarmType !== 'green') {
             powerOff.classList.add('hidden');
             document.body.classList.add(`alarm-${alarmType}`);
