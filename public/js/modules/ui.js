@@ -105,7 +105,8 @@ export const UI = {
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay'),
     dock: {
-        btnHelp: document.getElementById('btnOpenHelp')
+        btnHelp: document.getElementById('btnOpenHelp'),
+        btnObuntoControl: document.getElementById('btnObuntoControl')
     }
 };
 

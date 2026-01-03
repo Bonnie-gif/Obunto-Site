@@ -16,7 +16,6 @@
   --font-main: 'Chicago', 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
   --alert-color: #2b3323;
-  --radius: 6px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -25,14 +24,6 @@ html, body {
   height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
   font-size: 13px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
   transition: background 0.5s ease;
-}
-
-.hidden {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: -9999 !important;
 }
 
 .paper-texture {

@@ -13,7 +13,7 @@
 .brand-title { font-size: 18px; font-weight: bold; line-height: 1.1; }
 .brand-sub { font-size: 10px; color: var(--ink-dim); }
 
-.section-block { background: var(--paper-dark); border: 2px solid var(--border-light); border-radius: var(--radius); padding: 12px; }
+.section-block { background: var(--paper-dark); border: 2px solid var(--border-light); border-radius: 6px; padding: 12px; }
 .section-title { font-size: 10px; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 4px; }
 
 .session-info { font-family: var(--font-mono); font-size: 11px; }
@@ -27,7 +27,7 @@
 
 .topbar {
   display: flex; justify-content: space-between; align-items: center;
-  background: var(--paper); border: 3px solid var(--border); border-radius: var(--radius);
+  background: var(--paper); border: 3px solid var(--border); border-radius: 8px;
   padding: 8px 16px; margin-bottom: 16px; box-shadow: 4px 4px 0 var(--shadow);
 }
 .topbar-left, .topbar-center, .topbar-right { display: flex; align-items: center; gap: 8px; }
