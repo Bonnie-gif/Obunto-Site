@@ -36,11 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
         const bootScreen = document.getElementById('boot-sequence');
         if(bootScreen) {
-            bootScreen.style.opacity = '0';
-            setTimeout(() => { 
-                bootScreen.style.display = 'none'; 
-                bootScreen.classList.add('hidden');
-            }, 500);
+            bootScreen.classList.add('hidden');
+            bootScreen.style.display = 'none';
         }
         switchScreen('login');
     }, 6000);

@@ -75,8 +75,8 @@
           <div class="session-line">USER: <span id="sbUser">UNKNOWN</span></div>
           <div class="session-line">RANK: <span id="sbRank">--</span></div>
           <div class="session-line" style="margin-top: 5px;">ENERGY: <span id="energyVal">100</span>%</div>
-          <div style="width: 100%; height: 8px; background: var(--paper-dark); border: 1px solid var(--border);">
-             <div id="energyBar" style="width: 100%; height: 100%; background: var(--ink);"></div>
+          <div class="energy-bar-container">
+             <div id="energyBar" class="energy-fill" style="width: 100%;"></div>
           </div>
         </div>
       </div>
@@ -119,12 +119,48 @@
       </div>
     </main>
 
+    <div id="notepad-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">NOTES</span><button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body no-padding"><textarea id="notepad-area" class="notepad-lines"></textarea></div>
+    </div>
+
+    <div id="comms-window" class="window-newton hidden">
+        <div class="win-header"><span class="win-title">COMM-LINK</span><button id="closeComms" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+        <div class="win-body no-padding" style="flex-direction:column;">
+            <div class="comm-toolbar"><input id="commTargetInput" class="input-newton" value="GLOBAL"></div>
+            <div id="comm-list" class="comm-list"></div>
+            <div class="comm-input-area"><input id="commMsgInput" class="input-newton"><button id="btnCommSend" class="btn-newton">SEND</button></div>
+        </div>
+    </div>
+
+    <div id="darch-window" class="window-newton hidden">
+        <div class="win-header"><span class="win-title">D-ARCH</span><button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+        <div class="win-body no-padding" style="flex-direction:row;">
+           <div class="darch-sidebar"><div id="btnDarchHome" class="darch-nav-item">ROOT</div><div class="darch-actions"><button id="btnNewFolder" class="btn-newton">FOLDER</button><button id="btnNewFile" class="btn-newton">FILE</button><button id="btnDeleteFile" class="btn-newton">DEL</button></div></div>
+           <div class="darch-content"><div id="darchPath" class="darch-path">/</div><div id="darchGrid" class="darch-grid"></div></div>
+        </div>
+    </div>
+    
+    <div id="help-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">HELP</span><button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body chat-body">
+          <div id="help-request-form" class="help-layout">
+            <textarea id="help-req-msg" class="help-textarea" placeholder="Describe issue..."></textarea>
+            <button id="btnSendHelp" class="btn-newton mt-auto">SEND</button>
+            <div id="help-status" class="status-text hidden"></div>
+          </div>
+          <div id="help-chat-interface" class="hidden help-layout">
+            <div id="chat-history" class="chat-history"></div>
+            <div class="chat-input-area mt-auto">
+              <input id="chat-input" class="input-newton"><button id="btnChatSend" class="btn-newton">SEND</button>
+            </div>
+          </div>
+       </div>
+    </div>
+    
     <div id="admin-panel" class="window-newton hidden" style="top: 80px; left: 50%;">
-      <div class="win-header">
-        <span class="win-title">OBUNTO CONTROL</span>
-        <button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button>
-      </div>
-      <div class="win-body" style="gap: 10px;">
+      <div class="win-header"><span class="win-title">CONTROL</span><button id="closeAdmin" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+      <div class="win-body">
          <div class="admin-grid-layout">
             <div class="admin-group">
                 <div class="group-label">SYSTEM</div>
@@ -154,8 +190,8 @@
       <div class="win-header"><span class="win-title">PERSONNEL MONITOR</span><button id="closePersonnel" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
       <div class="win-body no-padding"><div id="personnel-list" class="personnel-grid"></div></div>
     </div>
-
-    <div id="spy-window" class="window-newton hidden" style="width: 500px; height: 400px; top: 120px; left: 120px;">
+    
+    <div id="spy-window" class="window-newton hidden" style="width: 500px; height: 400px;">
       <div class="win-header"><span class="win-title">SURVEILLANCE: <span id="spy-target-name"></span></span><button id="closeSpy" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
       <div class="win-body" style="padding:0; display:flex; flex-direction:column;">
          <div id="spy-content" class="spy-terminal" style="flex:1;">
@@ -164,8 +200,13 @@
          </div>
       </div>
     </div>
+    
+    <div id="admin-chat-window" class="window-newton hidden">
+       <div class="win-header"><span class="win-title">LINK (<span id="admin-chat-target"></span>)</span><button id="admin-chat-close" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
+       <div class="win-body"><div id="admin-chat-history" class="chat-history"></div><div class="chat-input-area"><input id="admin-chat-input" class="input-newton"><button id="admin-chat-send" class="btn-newton">SEND</button></div><button id="admin-chat-wait" class="btn-newton" style="margin-top:5px;">WAIT</button></div>
+    </div>
 
-    <div id="aop-window" class="window-newton hidden" style="width: 300px; top: 100px; left: 300px;">
+    <div id="aop-window" class="window-newton hidden" style="width: 300px;">
       <div class="win-header"><span class="win-title">AOP</span><button id="closeAop" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
       <div class="win-body">
         <div class="alarm-grid">
@@ -177,41 +218,6 @@
            <button class="btn-alarm btn-power-off" data-alarm="off">OFF</button>
         </div>
       </div>
-    </div>
-
-    <div id="help-window" class="window-newton hidden">
-       <div class="win-header"><span class="win-title">HELP</span><button id="closeHelp" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
-       <div class="win-body">
-          <div id="help-request-form"><textarea id="help-req-msg" class="help-textarea"></textarea><button id="btnSendHelp" class="btn-newton">SEND</button><div id="help-status" class="status-text"></div></div>
-          <div id="help-chat-interface" class="hidden"><div id="chat-history" class="chat-history"></div><div class="chat-input-area"><input id="chat-input" class="input-newton"><button id="btnChatSend" class="btn-newton">SEND</button></div></div>
-       </div>
-    </div>
-    
-    <div id="admin-chat-window" class="window-newton hidden">
-       <div class="win-header"><span class="win-title">LINK (<span id="admin-chat-target"></span>)</span><button id="admin-chat-close" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
-       <div class="win-body"><div id="admin-chat-history" class="chat-history"></div><div class="chat-input-area"><input id="admin-chat-input" class="input-newton"><button id="admin-chat-send" class="btn-newton">SEND</button></div><button id="admin-chat-wait" class="btn-newton" style="margin-top:5px;">WAIT</button></div>
-    </div>
-
-    <div id="notepad-window" class="window-newton hidden">
-       <div class="win-header"><span class="win-title">NOTES</span><button id="closeNotepad" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
-       <div class="win-body no-padding"><textarea id="notepad-area" class="notepad-lines"></textarea></div>
-    </div>
-
-    <div id="darch-window" class="window-newton hidden">
-        <div class="win-header"><span class="win-title">D-ARCH</span><button id="closeDarch" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
-        <div class="win-body no-padding" style="flex-direction:row;">
-           <div class="darch-sidebar"><div id="btnDarchHome" class="darch-nav-item">ROOT</div><div class="darch-actions"><button id="btnNewFolder" class="btn-newton">FOLDER</button><button id="btnNewFile" class="btn-newton">FILE</button><button id="btnDeleteFile" class="btn-newton">DEL</button></div></div>
-           <div class="darch-content"><div id="darchPath" class="darch-path">/</div><div id="darchGrid" class="darch-grid"></div></div>
-        </div>
-    </div>
-
-    <div id="comms-window" class="window-newton hidden">
-        <div class="win-header"><span class="win-title">COMM-LINK</span><button id="closeComms" class="close-btn"><img src="/assets/button-close-17x17.png"></button></div>
-        <div class="win-body no-padding" style="flex-direction:column;">
-            <div class="comm-toolbar"><input id="commTargetInput" class="input-newton" value="GLOBAL"></div>
-            <div id="comm-list" class="comm-list"></div>
-            <div class="comm-input-area"><input id="commMsgInput" class="input-newton"><button id="btnCommSend" class="btn-newton">SEND</button></div>
-        </div>
     </div>
 
     <div id="input-modal" class="modal-overlay hidden">
@@ -270,8 +276,9 @@
         const boot = document.getElementById('boot-sequence');
         const login = document.getElementById('login-screen');
         if(boot && getComputedStyle(boot).opacity !== '0') {
-            console.warn('Boot sequence fallback triggered');
+            console.warn('Boot sequence forced clear.');
             boot.style.display = 'none';
+            boot.classList.add('hidden');
             login.classList.remove('hidden');
             login.style.display = 'flex';
         }
