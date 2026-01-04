@@ -1,4 +1,3 @@
-// Módulo de Áudio Robusto
 const SOUNDS = {
     boot: document.getElementById('sfx-boot'),
     click: document.getElementById('sfx-click'),
@@ -6,18 +5,20 @@ const SOUNDS = {
     denied: document.getElementById('sfx-denied'),
     sent: document.getElementById('sfx-sent'),
     error: document.getElementById('sfx-error')
-    // Adicione outros conforme necessário
 };
 
 export function playSound(name) {
     const sound = SOUNDS[name];
     if (sound) {
-        // Tenta resetar o tempo para tocar do início
-        sound.currentTime = 0;
-        // Toca e ignora erros se o arquivo não existir
-        sound.play().catch(e => {
-            // console.warn(`Áudio '${name}' falhou ou não existe.`);
-        });
+        try {
+            sound.currentTime = 0;
+            sound.play().catch(e => {
+                // Ignora erro se o usuário não interagiu com a página ainda
+                console.warn('Audio play prevented:', e.message);
+            });
+        } catch (e) {
+            console.warn('Audio element error');
+        }
     }
 }
 

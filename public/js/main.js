@@ -7,9 +7,9 @@ import { initFiles } from './modules/files.js';
 import { initComms } from './modules/comms.js';
 import { initProtocols } from './modules/protocols.js';
 
-// Tenta carregar o script.js dinamicamente para restaurar funcionalidades extras
+// Carrega o script.js (Efeitos visuais e extras)
 const scriptExtras = document.createElement('script');
-scriptExtras.src = '../script.js'; // Caminho relativo saindo de js/ para raiz
+scriptExtras.src = '../script.js'; 
 document.body.appendChild(scriptExtras);
 
 const socket = io();
@@ -20,38 +20,33 @@ const IDLE_LIMIT = 60000;
 
 document.addEventListener("DOMContentLoaded", () => {
     initAudio();
-    initNotepad(socket);
+    initNotepad(socket); // Agora seguro com a correção
     initHelp(socket);
     initFiles(socket);
     initProtocols(socket);
     initDraggables();
 
-    // Relógio e Data
     setInterval(() => {
         const now = new Date();
-        const clockEl = document.getElementById('clock');
-        const dateEl = document.getElementById('dateDisplay');
-        
-        if(clockEl) clockEl.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        
-        if(dateEl) {
+        const clock = document.getElementById('clock');
+        const dateDisplay = document.getElementById('dateDisplay');
+        if (clock) clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        if (dateDisplay) {
             const year = now.getFullYear() + 16;
-            dateEl.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            dateDisplay.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
         }
     }, 1000);
 
-    // Boot Sequence
+    // Boot Logic
     const bootScreen = document.getElementById('boot-sequence');
-    if (bootScreen && !bootScreen.classList.contains('hidden')) {
+    if (bootScreen) {
         playSound('boot');
         setTimeout(() => {
             bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none';
             switchScreen('login');
-        }, 6000);
+        }, 5000);
     }
 
-    // Configuração de Login
     const btnLogin = document.getElementById('btnLogin');
     const inpId = document.getElementById('inpId');
 
@@ -71,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Dashboard
+    // Dashboard Button
     const btnDash = document.getElementById('btnMyDashboard');
     if (btnDash) {
         btnDash.onclick = () => {
@@ -82,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // Monitoramento de Input (Spy System)
+    // Spy Input Monitor
     document.addEventListener('input', (e) => {
         if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
             socket.emit('live_input', {
@@ -92,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Sistema de AFK
+    // AFK System
     document.addEventListener('mousemove', resetIdleTimer);
     document.addEventListener('keydown', resetIdleTimer);
 
@@ -124,49 +119,35 @@ document.addEventListener("DOMContentLoaded", () => {
         reportActivity();
     });
 
-    // Atualização de Status na Topbar
     socket.on('status_update', (status) => {
-        const statusText = document.getElementById('statusText');
-        const indicator = document.getElementById('statusIndicator');
-        
-        if(statusText) statusText.textContent = status;
-        if(indicator) {
-            if (status === 'ONLINE') {
-                indicator.style.backgroundColor = '#4ade80';
-                indicator.style.boxShadow = '0 0 5px #4ade80';
-            } else {
-                indicator.style.backgroundColor = '#9ca3af';
-                indicator.style.boxShadow = 'none';
-            }
+        const ind = document.getElementById('statusIndicator');
+        const txt = document.getElementById('statusText');
+        if (txt) txt.textContent = status;
+        if (ind) {
+            ind.style.backgroundColor = status === 'ONLINE' ? '#4ade80' : '#9ca3af';
+            ind.style.boxShadow = status === 'ONLINE' ? '0 0 5px #4ade80' : 'none';
         }
     });
 
-    // Sistema de Alarmes
     socket.on('alarm_update', (alarmType) => {
-        document.body.className = ''; // Reseta classes
+        document.body.className = '';
         const banner = document.getElementById('alarm-banner');
         const text = document.getElementById('alarm-type-text');
         const powerOff = document.getElementById('power-off-overlay');
-        const btnReboot = document.getElementById('btnSystemReboot');
         
-        // Esconde tudo inicialmente
-        if(powerOff) powerOff.classList.add('hidden');
-        if(banner) banner.classList.add('hidden');
-
         if (alarmType === 'off') {
-            if(powerOff) powerOff.classList.remove('hidden');
-            if (currentUser && currentUser.isObunto && btnReboot) {
-                btnReboot.classList.remove('hidden');
-            } else if (btnReboot) {
-                btnReboot.classList.add('hidden');
-            }
+            if (powerOff) powerOff.classList.remove('hidden');
+            if (banner) banner.classList.add('hidden');
         } else if (alarmType === 'on') {
             document.body.style.opacity = '0';
             setTimeout(() => { document.body.style.opacity = '1'; playSound('boot'); }, 1000);
-        } else if (alarmType !== 'green' && alarmType !== 'normal') {
+        } else if (alarmType !== 'green') {
+            if (powerOff) powerOff.classList.add('hidden');
             document.body.classList.add(`alarm-${alarmType}`);
-            if(banner) banner.classList.remove('hidden');
-            if(text) text.textContent = `${alarmType.toUpperCase()} ALERT`;
+            if (banner) {
+                banner.classList.remove('hidden');
+                if (text) text.textContent = `${alarmType.toUpperCase()} ALERT`;
+            }
         }
     });
 });

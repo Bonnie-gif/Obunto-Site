@@ -68,15 +68,6 @@ function deleteRecursive(userId, itemId) {
     dataStore.userFiles[userId] = dataStore.userFiles[userId].filter(f => f.id !== itemId);
 }
 
-app.get('/api/roblox/:id', async (req, res) => {
-    try {
-        const response = await axios.get(`https://users.roblox.com/v1/users/${req.params.id}`);
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch user data' });
-    }
-});
-
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
@@ -121,10 +112,6 @@ app.post('/api/login', async (req, res) => {
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
-        if (tscGroups.length === 0) {
-             return res.status(403).json({ success: false, message: "ACCESS DENIED" });
-        }
-
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
 
@@ -150,23 +137,19 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
+        console.error("Login Error:", e.message);
+        
+        // Permite login offline para testes se a API falhar, mas marca como visitante
         const fallbackData = {
             id: userId.toString(),
-            username: `OPERATOR-${userId.substring(0,4)}`,
-            displayName: "AUTHORIZED PERSONNEL",
+            username: `GUEST-${userId.substring(0,4)}`,
+            displayName: "VISITOR",
             avatar: "/assets/icon-large-owner_info-28x14.png", 
-            rank: "LEVEL ?",
-            affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
+            rank: "UNAUTHORIZED",
+            affiliations: [],
             isObunto: false,
             isHoltz: false
         };
-        dataStore.knownUsers[userId] = {
-            id: userId,
-            name: fallbackData.username,
-            rank: fallbackData.rank,
-            lastSeen: Date.now()
-        };
-        saveData();
         res.json({ success: true, userData: fallbackData });
     }
 });
