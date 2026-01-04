@@ -8,7 +8,6 @@ const MOODS = ['annoyed', 'bug', 'dizzy', 'happy', 'hollow', 'normal', 'panic', 
 let bubbleTimeout;
 
 export function initObunto(socket, userId) {
-    // Escuta mensagens do mascote
     socket.on('receive_broadcast_message', (data) => {
         if (data.targetId && data.targetId !== userId) return;
         speak(data.message, data.mood);
@@ -18,11 +17,10 @@ export function initObunto(socket, userId) {
         playSound(type);
     });
 
-    // Se for Admin (8989) ou Dr. Holtz (36679824), habilita o painel
+    // Se for admin, habilita controles
     if (userId === "8989" || userId === "36679824") {
         UI.dock.btnObuntoControl.classList.remove('hidden');
         
-        // Botão da Dock abre o painel
         UI.dock.btnObuntoControl.onclick = () => {
             UI.obunto.panel.classList.remove('hidden');
             bringToFront(UI.obunto.panel);
@@ -33,7 +31,6 @@ export function initObunto(socket, userId) {
         setupMonitor(socket);
         setupTicketSystem(socket);
         
-        // Admin Chat
         socket.on('chat_receive', (data) => {
             if (currentChatTarget) {
                 const div = document.createElement('div');
@@ -50,7 +47,7 @@ export function initObunto(socket, userId) {
 function setupAdminPanel(socket) {
     UI.obunto.btnClose.onclick = () => UI.obunto.panel.classList.add('hidden');
     
-    // Controles de Energia (+ e -)
+    // Controles de Energia
     const btnInc = document.getElementById('btnEnergyInc');
     const btnDec = document.getElementById('btnEnergyDec');
     if (btnInc) btnInc.onclick = () => socket.emit('admin_modify_energy', 10);
@@ -62,7 +59,7 @@ function setupAdminPanel(socket) {
         socket.emit('toggle_system_status', current === 'ONLINE' ? 'OFFLINE' : 'ONLINE');
     };
 
-    // Botões de Alarme
+    // BOTÕES DE ALARME (Agora dentro do painel)
     document.querySelectorAll('.btn-alarm').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-alarm');
@@ -118,18 +115,15 @@ function setupMonitor(socket) {
                 <div class="p-act">${p.activity}</div>
                 <button class="btn-newton" style="font-size:9px; padding:2px 4px;">TASK</button>
             `;
-            // Botão Task
             div.querySelector('button').onclick = (e) => {
                 e.stopPropagation();
                 socket.emit('admin_assign_task', { targetId: p.id, taskType: 'HEX' });
             };
-            // Clique na linha = Espionar
             div.onclick = () => startSpy(p.id, p.name, socket);
             container.appendChild(div);
         });
     });
 
-    // Spy Logic
     socket.on('spy_data_update', (data) => {
         if(currentSpyTarget === data.targetId) {
             const el = document.getElementById('spy-state-data');
@@ -182,7 +176,6 @@ function setupTicketSystem(socket) {
         UI.obunto.notifyIcon.classList.add('hidden');
     };
 
-    // Chat Admin Controls
     const { send, input, close } = UI.obunto.adminChat;
     send.onclick = () => {
         const msg = input.value.trim();
