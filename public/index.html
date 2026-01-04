@@ -23,7 +23,13 @@
         <div class="boot-box">
             <div class="boot-title">NEWTON OS</div>
             <div class="boot-subtitle">THUNDER SCIENTIFIC CORPORATION - ARCHIVE TERMINAL V.55</div>
-            <input type="text" id="inpId" class="input-newton" placeholder="ENTER ROBLOX USER ID" autocomplete="off">
+            <input 
+                type="text" 
+                id="inpId" 
+                class="input-newton" 
+                placeholder="ENTER ROBLOX USER ID"
+                autocomplete="off"
+            >
             <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
             <div id="loginStatus" class="status-text"></div>
         </div>
@@ -52,7 +58,9 @@
                     <div class="indicator-light" id="statusIndicator"></div>
                     <div id="statusText">ONLINE</div>
                 </div>
-                <div class="topbar-center">TSC MAINFRAME</div>
+                <div class="topbar-center">
+                    TSC MAINFRAME
+                </div>
                 <div class="topbar-right">
                     <div id="dateDisplay" class="date-display">2042-01-03</div>
                 </div>
@@ -76,14 +84,26 @@
         <div class="protocol-container">
             <div id="protocol-countdown" class="protocol-phase">
                 <div class="proto-title">PROTOCOL INITIATED</div>
-                <img id="proto-cnt-img" src="/assets/icon-small-priority_3-15x14.png" style="width: 60px; height: auto; margin: 20px auto;">
+                <img id="proto-cnt-img" src="/assets/icon-small-priority_3-15x14.png" 
+                     style="width: 60px; height: auto; margin: 20px auto;" 
+                     onerror="this.style.display='none'">
             </div>
 
             <div id="protocol-task" class="protocol-phase hidden">
                 <div class="proto-title">VERIFICATION REQUIRED</div>
-                <div id="proto-desc" class="proto-desc">INPUT VERIFICATION CODE TO STABILIZE SYSTEM.</div>
-                <div id="proto-code-display" style="font-size: 32px; font-weight: bold; font-family: var(--font-mono); margin: 20px 0; color: #2b3323; letter-spacing: 4px;">FFFFFF</div>
-                <input id="proto-input" type="text" class="input-newton" placeholder="ENTER CODE" autocomplete="off" style="text-align: center; font-size: 18px; text-transform: uppercase;">
+                <div id="proto-desc" class="proto-desc">
+                    INPUT VERIFICATION CODE TO STABILIZE SYSTEM.
+                </div>
+                <div id="proto-code-display" 
+                     style="font-size: 32px; font-weight: bold; font-family: monospace; margin: 20px 0; color: #2b3323; letter-spacing: 4px;">
+                    FFFFFF
+                </div>
+                <input id="proto-input" 
+                       type="text" 
+                       class="input-newton" 
+                       placeholder="ENTER CODE" 
+                       autocomplete="off"
+                       style="text-align: center; font-size: 18px; text-transform: uppercase;">
             </div>
         </div>
     </div>

@@ -1,56 +1,58 @@
+/* Importação dos módulos originais */
 @import 'base.css';
 @import 'components.css';
 @import 'layout.css';
 @import 'views.css';
 @import 'obunto.css';
 
+/* =========================================
+   CORREÇÕES CRÍTICAS DE LAYOUT E Z-INDEX
+   ========================================= */
+
+/* Garante que o desktop comece invisível e só apareça com a classe .active */
 #desktop-screen {
     display: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
 #desktop-screen.active {
     display: flex !important;
 }
 
+/* Garante que janelas não sobreponham o boot/login */
 .window-newton {
     display: none !important;
+    position: absolute;
+    background: var(--paper);
+    border: 3px solid var(--border);
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+    flex-direction: column;
 }
 
+/* Quando a janela não tem a classe hidden, ela aparece */
 .window-newton:not(.hidden) {
     display: flex !important;
+    z-index: 1000; /* Base Z-Index para janelas */
 }
 
-#notepad-window { top: 100px; left: 400px; width: 500px; height: 400px; }
-#comms-window { top: 80px; left: 350px; width: 450px; height: 500px; }
-#darch-window { top: 60px; left: 300px; width: 600px; height: 450px; }
-#help-window { top: 120px; left: 450px; width: 400px; height: 450px; }
-#admin-panel { top: 80px; left: 50%; transform: translateX(-50%); width: 600px; max-height: 600px; }
-#personnel-window { top: 100px; left: 100px; width: 700px; height: 400px; }
-#spy-window { top: 150px; left: 150px; width: 600px; height: 450px; }
-#admin-chat-window { top: 120px; left: 200px; width: 450px; height: 500px; }
-#aop-window { top: 200px; left: 50%; transform: translateX(-50%); width: 400px; height: auto; }
+/* Hierarquia Z-Index Corrigida */
+#boot-sequence { z-index: 10000; }
+#login-screen  { z-index: 9000; }
+.dock-newton   { z-index: 9500 !important; }
+.modal-overlay { z-index: 9999 !important; }
 
-#comms-window .win-body { flex-direction: column !important; }
-#darch-window .win-body { flex-direction: row !important; }
-
-.workspace { overflow: hidden; position: relative; }
-.viewer { position: relative; z-index: 1; }
-.sidebar { position: relative; z-index: 500; }
-.dock-newton { z-index: 2000 !important; }
-.modal-overlay { z-index: 5000 !important; }
-.obunto-overlay { z-index: 3000 !important; }
-#protocol-overlay { z-index: 4500 !important; }
-.alarm-banner { z-index: 4000 !important; }
-.power-off-screen { z-index: 6000 !important; }
-
+/* CSS DO PROTOCOLO (Estava faltando) */
 .protocol-container {
-    background: #c8d1c0;
-    border: 3px solid #2b3323;
+    background: #c8d1c0; /* var(--paper) */
+    border: 3px solid #2b3323; /* var(--border) */
     border-radius: 12px;
     padding: 40px;
-    box-shadow: 12px 12px 0 rgba(43, 51, 35, 0.4);
+    box-shadow: 12px 12px 0 rgba(43,51,35,0.4);
     text-align: center;
     min-width: 400px;
+    pointer-events: auto;
 }
 
 .protocol-phase {
@@ -77,31 +79,7 @@
     line-height: 1.6;
 }
 
-#boot-sequence {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-}
-
-#boot-sequence.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    z-index: -9999 !important;
-}
-
-.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-.active {
-    display: flex !important;
-}
+/* POSICIONAMENTO INICIAL DAS JANELAS (Para não abrirem todas juntas) */
+#notepad-window { top: 100px; left: 400px; width: 500px; height: 400px; }
+#comms-window { top: 80px; left: 350px; width: 450px; height: 500px; }
+#admin-panel { top: 50px; left: 50%; transform: translateX(-50%); width: 600px; }
