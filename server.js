@@ -68,6 +68,15 @@ function deleteRecursive(userId, itemId) {
     dataStore.userFiles[userId] = dataStore.userFiles[userId].filter(f => f.id !== itemId);
 }
 
+app.get('/api/roblox/:id', async (req, res) => {
+    try {
+        const response = await axios.get(`https://users.roblox.com/v1/users/${req.params.id}`);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+});
+
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
@@ -328,4 +337,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

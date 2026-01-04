@@ -17,7 +17,7 @@ audioIds.forEach(id => {
 });
 
 export function playSound(name) {
-    const path = `assets/audio/${name}.wav`;
+    const path = `/assets/audio/${name}.wav`;
     const audio = new Audio(path);
     audio.play().catch(() => {});
 }

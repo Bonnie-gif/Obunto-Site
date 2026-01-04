@@ -85,7 +85,8 @@ async function handleLogin() {
     playSound('click');
 
     try {
-        const response = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+        const response = await fetch(`/api/roblox/${userId}`);
+        
         if (!response.ok) throw new Error('User not found');
         const data = await response.json();
 
