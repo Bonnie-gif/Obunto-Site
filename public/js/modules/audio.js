@@ -1,25 +1,24 @@
-const SOUNDS = {};
-const audioIds = [
-    'sfx-boot', 'sfx-click', 'sfx-notify',
-    'sfx-alarm-green', 'sfx-alarm-blue', 'sfx-alarm-red',
-    'sfx-alarm-gamma', 'sfx-alarm-epsilon',
-    'sfx-power-on', 'sfx-power-off',
-    'sfx-msg', 'sfx-denied', 'sfx-sent', 'sfx-sleep', 'sfx-uhoh'
-];
-
-audioIds.forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-        element.addEventListener('error', () => {});
-        const shortName = id.replace('sfx-', '').replace('alarm-', '');
-        SOUNDS[shortName] = element;
-    }
-});
+// Módulo de Áudio Robusto
+const SOUNDS = {
+    boot: document.getElementById('sfx-boot'),
+    click: document.getElementById('sfx-click'),
+    notify: document.getElementById('sfx-notify'),
+    denied: document.getElementById('sfx-denied'),
+    sent: document.getElementById('sfx-sent'),
+    error: document.getElementById('sfx-error')
+    // Adicione outros conforme necessário
+};
 
 export function playSound(name) {
-    const path = `/assets/audio/${name}.wav`;
-    const audio = new Audio(path);
-    audio.play().catch(() => {});
+    const sound = SOUNDS[name];
+    if (sound) {
+        // Tenta resetar o tempo para tocar do início
+        sound.currentTime = 0;
+        // Toca e ignora erros se o arquivo não existir
+        sound.play().catch(e => {
+            // console.warn(`Áudio '${name}' falhou ou não existe.`);
+        });
+    }
 }
 
 export function initAudio() {

