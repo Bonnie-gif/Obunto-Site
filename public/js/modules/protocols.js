@@ -9,6 +9,10 @@ export function initProtocols(socket) {
     const input = document.getElementById('proto-input');
     const desc = document.getElementById('proto-desc');
 
+    if (!overlay || !cntDiv || !taskDiv || !input) {
+        return;
+    }
+
     let currentTask = null;
 
     socket.on('protocol_task_assigned', (task) => {
@@ -18,6 +22,7 @@ export function initProtocols(socket) {
 
     function startSequence() {
         overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
         cntDiv.classList.remove('hidden');
         taskDiv.classList.add('hidden');
         playSound('notify');
@@ -34,10 +39,12 @@ export function initProtocols(socket) {
             }
             
             const num = seq[idx];
-            if (num === 0) {
-                cntImg.src = '/assets/icon-small-priority_none-15x14.png';
-            } else {
-                cntImg.src = `/assets/icon-small-priority_${num}-15x14.png`;
+            if (cntImg) {
+                if (num === 0) {
+                    cntImg.src = '/assets/icon-small-priority_none-15x14.png';
+                } else {
+                    cntImg.src = `/assets/icon-small-priority_${num}-15x14.png`;
+                }
             }
             playSound('click');
             idx++;
@@ -49,22 +56,23 @@ export function initProtocols(socket) {
         input.value = '';
         input.focus();
 
-        if (currentTask.type === 'HEX') {
+        if (currentTask && currentTask.type === 'HEX') {
             const targetCode = Math.floor(Math.random()*16777215).toString(16).toUpperCase();
             currentTask.code = targetCode;
-            desc.textContent = "INPUT VERIFICATION CODE TO STABILIZE SYSTEM.";
-            codeDisplay.textContent = targetCode;
+            if (desc) desc.textContent = "INPUT VERIFICATION CODE TO STABILIZE SYSTEM.";
+            if (codeDisplay) codeDisplay.textContent = targetCode;
         }
     }
 
     input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && currentTask) {
             if (input.value.toUpperCase() === currentTask.code) {
                 playSound('click');
                 socket.emit('task_complete', { success: true, type: currentTask.type });
                 overlay.classList.add('hidden');
+                overlay.style.display = 'none';
             } else {
-                playSound('error');
+                playSound('denied');
                 input.value = '';
             }
         }
