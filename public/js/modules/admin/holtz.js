@@ -7,12 +7,12 @@ let currentSpyTarget = null;
 export function initHoltz(socket, userId) {
     if (userId !== "36679824") return;
 
-    // Remove o botão de reboot (o Dr. não deve resetar o sistema, só o Obunto)
+    // Dr. Holtz não pode reiniciar o sistema, então ocultamos esse botão
     if (UI.obunto.aop.btnReboot) {
         UI.obunto.aop.btnReboot.style.display = 'none';
     }
 
-    // Acesso ao Painel de Controle (reutiliza o painel do Obunto por enquanto)
+    // Acesso ao Painel de Controle
     UI.dock.btnObuntoControl.classList.remove('hidden');
     UI.dock.btnObuntoControl.onclick = () => {
         UI.obunto.panel.classList.remove('hidden');
@@ -29,6 +29,12 @@ export function initHoltz(socket, userId) {
         playSound('click');
     };
     UI.obunto.monitor.close.onclick = () => UI.obunto.monitor.window.classList.add('hidden');
+
+    // ENERGY CONTROLS (Holtz também pode usar)
+    const btnInc = document.getElementById('btnEnergyInc');
+    const btnDec = document.getElementById('btnEnergyDec');
+    if (btnInc) btnInc.onclick = () => socket.emit('admin_modify_energy', 10);
+    if (btnDec) btnDec.onclick = () => socket.emit('admin_modify_energy', -10);
 
     // Listeners
     socket.on('personnel_list_update', (list) => {
@@ -51,6 +57,8 @@ export function initHoltz(socket, userId) {
         UI.obunto.spy.window.classList.add('hidden');
         currentSpyTarget = null;
     };
+    
+    // Broadcast e outros controles de alarme funcionam via UI global (html) pois os eventos são emitidos pelos botões existentes.
 }
 
 function renderPersonnelList(list, socket) {

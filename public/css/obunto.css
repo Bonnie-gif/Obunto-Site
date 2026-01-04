@@ -1,9 +1,75 @@
 .obunto-overlay { position: fixed; bottom: 100px; right: 80px; z-index: 3000; pointer-events: none; }
-.obunto-container { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-.obunto-avatar { width: 100px; height: 100px; background: var(--paper); border: 3px solid var(--border); border-radius: 8px; padding: 4px; box-shadow: 6px 6px 0 var(--shadow); animation: float 3s ease-in-out infinite; }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-.speech-bubble { background: var(--paper); border: 3px solid var(--border); border-radius: 12px; padding: 16px 20px; max-width: 320px; font-family: var(--font-mono); font-size: 14px; font-weight: bold; line-height: 1.4; color: var(--ink); box-shadow: 6px 6px 0 var(--shadow); position: relative; }
-.speech-bubble::after { content: ''; position: absolute; bottom: -10px; right: 20px; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid var(--border); }
+.obunto-container { display: flex; flex-direction: column; align-items: flex-end; gap: 15px; }
+
+.obunto-avatar { 
+  width: 100px; height: 100px; 
+  background: var(--paper); 
+  border: 3px solid var(--border); 
+  border-radius: 8px; 
+  padding: 4px; 
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.4); 
+  animation: float 4s ease-in-out infinite; 
+}
+
+@keyframes float { 
+  0%, 100% { transform: translateY(0); } 
+  50% { transform: translateY(-8px); } 
+}
+
+.speech-bubble { 
+  background: var(--paper); 
+  border: 3px solid var(--border); 
+  border-radius: 6px; 
+  padding: 0;
+  min-width: 200px;
+  max-width: 320px; 
+  font-family: var(--font-mono); 
+  font-size: 13px; 
+  font-weight: bold; 
+  line-height: 1.5; 
+  color: var(--ink); 
+  box-shadow: 10px 10px 0 rgba(0,0,0,0.3); 
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 12px;
+  padding-top: 28px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.speech-bubble::before {
+  content: "/// SYSTEM MESSAGE ///";
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 9px;
+  padding: 4px 8px;
+  text-align: center;
+  letter-spacing: 1px;
+  border-bottom: 2px solid var(--border);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.speech-bubble::first-line {
+  line-height: 2.5;
+}
+
+.speech-bubble::after { 
+  content: ''; 
+  position: absolute; 
+  top: -10px;
+  right: 35px;
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent; 
+  border-right: 10px solid transparent; 
+  border-bottom: 10px solid var(--border);
+  border-top: 0;
+}
 
 .admin-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .admin-group { background: var(--paper-light); border: 1px solid var(--border-light); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }

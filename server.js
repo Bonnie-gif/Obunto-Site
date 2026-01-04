@@ -20,6 +20,7 @@ const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 1202666
 let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
+let systemEnergy = 100.0;
 let connectedSockets = {}; 
 
 if (fs.existsSync(DATA_FILE)) {
@@ -34,6 +35,19 @@ if (fs.existsSync(DATA_FILE)) {
 function saveData() {
     fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
 }
+
+setInterval(() => {
+    if (systemEnergy > 0) {
+        systemEnergy -= 0.035;
+        if (systemEnergy < 0) systemEnergy = 0;
+        io.emit('energy_update', Math.floor(systemEnergy));
+        
+        if (systemEnergy <= 0 && currentAlarm !== 'off') {
+            io.emit('alarm_update', 'off');
+            currentAlarm = 'off';
+        }
+    }
+}, 60000);
 
 function broadcastPersonnelUpdate() {
     const personnelList = Object.values(dataStore.knownUsers).map(u => ({
@@ -58,7 +72,6 @@ app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
 
-    // OBUNTO
     if (userId === "8989") {
         return res.json({ 
             success: true, 
@@ -68,14 +81,13 @@ app.post('/api/login', async (req, res) => {
                 displayName: "System AI", 
                 rank: "MAINFRAME", 
                 avatar: "/obunto/normal.png", 
-                affiliations: [{ groupName: "TSC CORE", role: "ADMIN", rank: 999 }],
+                affiliations: [{ groupName: "TSC MAINFRAME", role: "ADMIN", rank: 999 }],
                 isObunto: true,
                 isHoltz: false
             } 
         });
     }
 
-    // DR. HOLTZ
     if (userId === "36679824") {
         return res.json({ 
             success: true, 
@@ -84,7 +96,7 @@ app.post('/api/login', async (req, res) => {
                 username: "DR. HOLTZ", 
                 displayName: "Head of Research", 
                 rank: "LEVEL 5", 
-                avatar: "/assets/icon-large-owner_info-28x14.png", 
+                avatar: "/assets/icon-large-owner_info-28x14.png",
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
                 isObunto: false,
                 isHoltz: true
@@ -99,10 +111,6 @@ app.post('/api/login', async (req, res) => {
 
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
-
-        if (tscGroups.length === 0) {
-             return res.status(403).json({ success: false, message: "ACCESS DENIED" });
-        }
 
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
@@ -129,24 +137,19 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        // Fallback para testes
+        console.error("Login Error:", e.message);
+        
+        // Permite login offline para testes se a API falhar, mas marca como visitante
         const fallbackData = {
             id: userId.toString(),
-            username: `OPERATOR-${userId.substring(0,4)}`,
-            displayName: "AUTHORIZED PERSONNEL",
+            username: `GUEST-${userId.substring(0,4)}`,
+            displayName: "VISITOR",
             avatar: "/assets/icon-large-owner_info-28x14.png", 
-            rank: "LEVEL ?",
-            affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
+            rank: "UNAUTHORIZED",
+            affiliations: [],
             isObunto: false,
             isHoltz: false
         };
-        dataStore.knownUsers[userId] = {
-            id: userId,
-            name: fallbackData.username,
-            rank: fallbackData.rank,
-            lastSeen: Date.now()
-        };
-        saveData();
         res.json({ success: true, userData: fallbackData });
     }
 });
@@ -154,6 +157,8 @@ app.post('/api/login', async (req, res) => {
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
+    socket.emit('energy_update', Math.floor(systemEnergy));
+
     let currentUserId = null;
 
     socket.on('register_user', (userId) => {
@@ -224,13 +229,6 @@ io.on('connection', (socket) => {
         if(file) { file.content = data.content; saveData(); }
     });
 
-    socket.on('comm_get_messages', () => {
-        if(!currentUserId) return;
-        // Simple chat history - returns global or DM
-        // For a full chat, we might want to filter only relevant ones. 
-        // For now, comm_receive handles real-time.
-    });
-
     socket.on('comm_send_msg', (data) => {
         if(!currentUserId) return;
         const msg = {
@@ -240,25 +238,34 @@ io.on('connection', (socket) => {
             body: data.message,
             timestamp: new Date()
         };
-        dataStore.messages.push(msg);
-        
-        socket.emit('comm_receive', msg); // Devolve para quem enviou
-
+        socket.emit('comm_receive', msg);
         if(data.target === 'GLOBAL') {
             socket.broadcast.emit('comm_receive', msg);
         } else {
             io.to(data.target).emit('comm_receive', msg);
-            io.to('admins').emit('comm_receive', msg); 
+            io.to('admins').emit('comm_receive', msg);
         }
     });
 
     socket.on('admin_assign_task', (data) => {
-        const { targetId, taskType } = data;
-        io.to(targetId).emit('protocol_task_assigned', { type: taskType, id: Date.now() });
+        io.to(data.targetId).emit('protocol_task_assigned', { type: data.taskType, id: Date.now() });
     });
 
     socket.on('task_complete', (data) => {
-        io.to('admins').emit('protocol_task_result', { userId: currentUserId, success: data.success, type: data.type });
+        if(data.success) {
+            systemEnergy = Math.min(100, systemEnergy + 1);
+            io.emit('energy_update', Math.floor(systemEnergy));
+        }
+        io.to('admins').emit('protocol_task_result', {
+            userId: currentUserId,
+            success: data.success,
+            type: data.type
+        });
+    });
+
+    socket.on('admin_modify_energy', (amount) => {
+        systemEnergy = Math.min(100, Math.max(0, systemEnergy + amount));
+        io.emit('energy_update', Math.floor(systemEnergy));
     });
 
     socket.on('admin_broadcast_message', (data) => {
@@ -267,6 +274,7 @@ io.on('connection', (socket) => {
 
     socket.on('admin_trigger_alarm', (alarmType) => {
         currentAlarm = alarmType;
+        if(currentAlarm !== 'off' && systemEnergy <= 0) systemEnergy = 50; 
         io.emit('alarm_update', currentAlarm);
         io.emit('play_alarm_sound', alarmType);
     });
@@ -312,4 +320,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

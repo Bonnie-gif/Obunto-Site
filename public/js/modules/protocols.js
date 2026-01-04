@@ -9,6 +9,8 @@ export function initProtocols(socket) {
     const input = document.getElementById('proto-input');
     const desc = document.getElementById('proto-desc');
 
+    if (!overlay || !cntDiv || !taskDiv || !input) return;
+
     let currentTask = null;
 
     socket.on('protocol_task_assigned', (task) => {
@@ -25,6 +27,8 @@ export function initProtocols(socket) {
         const seq = [3, 2, 1, 0];
         let idx = 0;
 
+        updateImage(3);
+
         const interval = setInterval(() => {
             if (idx >= seq.length) {
                 clearInterval(interval);
@@ -34,14 +38,17 @@ export function initProtocols(socket) {
             }
             
             const num = seq[idx];
-            if (num === 0) {
-                cntImg.src = '/assets/icon-small-priority_none-15x14.png';
-            } else {
-                cntImg.src = `/assets/icon-small-priority_${num}-15x14.png`;
-            }
+            updateImage(num);
             playSound('click');
             idx++;
         }, 1000);
+    }
+
+    function updateImage(num) {
+        if (cntImg) {
+            const suffix = num === 0 ? 'none' : num;
+            cntImg.src = `assets/icon-small-priority_${suffix}-15x14.png`;
+        }
     }
 
     function startTask() {
@@ -49,24 +56,26 @@ export function initProtocols(socket) {
         input.value = '';
         input.focus();
 
-        if (currentTask.type === 'HEX') {
+        if (currentTask && currentTask.type === 'HEX') {
             const targetCode = Math.floor(Math.random()*16777215).toString(16).toUpperCase();
             currentTask.code = targetCode;
-            desc.textContent = "INPUT VERIFICATION CODE TO STABILIZE SYSTEM.";
-            codeDisplay.textContent = targetCode;
+            if (desc) desc.textContent = "INPUT VERIFICATION CODE TO STABILIZE SYSTEM.";
+            if (codeDisplay) codeDisplay.textContent = targetCode;
         }
     }
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            if (input.value.toUpperCase() === currentTask.code) {
-                playSound('click');
-                socket.emit('task_complete', { success: true, type: currentTask.type });
-                overlay.classList.add('hidden');
-            } else {
-                playSound('error');
-                input.value = '';
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && currentTask) {
+                if (input.value.toUpperCase() === currentTask.code) {
+                    playSound('click');
+                    socket.emit('task_complete', { success: true, type: currentTask.type });
+                    overlay.classList.add('hidden');
+                } else {
+                    playSound('denied');
+                    input.value = '';
+                }
             }
-        }
-    });
+        });
+    }
 }

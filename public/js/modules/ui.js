@@ -20,8 +20,13 @@ export const UI = {
         rank: document.getElementById('sbRank'),
         btnDashboard: document.getElementById('btnMyDashboard')
     },
-    login: { btn: document.getElementById('btnLogin'), input: document.getElementById('inpId'), status: document.getElementById('loginStatus') },
+    login: { 
+        btn: document.getElementById('btnLogin'), 
+        input: document.getElementById('inpId'), 
+        status: document.getElementById('loginStatus') 
+    },
     status: { indicator: document.getElementById('statusIndicator'), text: document.getElementById('statusText') },
+    // Elementos do Obunto e Admin
     obunto: {
         panel: document.getElementById('admin-panel'),
         btnOpen: document.getElementById('btnObuntoControl'),
@@ -37,6 +42,7 @@ export const UI = {
         img: document.getElementById('obunto-img'),
         text: document.getElementById('obunto-text'),
         btnMonitor: document.getElementById('btnMonitor'),
+        // Chat Admin
         adminChat: {
             window: document.getElementById('admin-chat-window'),
             history: document.getElementById('admin-chat-history'),
@@ -46,16 +52,19 @@ export const UI = {
             close: document.getElementById('admin-chat-close'),
             target: document.getElementById('admin-chat-target')
         },
+        // AOP
         aop: {
             window: document.getElementById('aop-window'),
             close: document.getElementById('closeAop'),
             btnReboot: document.getElementById('btnSystemReboot')
         },
+        // Monitoramento
         monitor: {
             window: document.getElementById('personnel-window'),
             list: document.getElementById('personnel-list'),
             close: document.getElementById('closePersonnel')
         },
+        // Espionagem
         spy: {
             window: document.getElementById('spy-window'),
             close: document.getElementById('closeSpy'),
@@ -63,6 +72,7 @@ export const UI = {
             title: document.getElementById('spy-target-name')
         }
     },
+    // Outras janelas
     help: {
         window: document.getElementById('help-window'),
         reqForm: document.getElementById('help-request-form'),
@@ -95,6 +105,7 @@ export const UI = {
         msgInput: document.getElementById('commMsgInput'),
         btnSend: document.getElementById('btnCommSend')
     },
+    // Modal genérico
     customModal: {
         overlay: document.getElementById('input-modal'),
         title: document.getElementById('input-modal-title'),
@@ -105,7 +116,8 @@ export const UI = {
     clock: document.getElementById('clock'),
     date: document.getElementById('dateDisplay'),
     dock: {
-        btnHelp: document.getElementById('btnOpenHelp')
+        btnHelp: document.getElementById('btnOpenHelp'),
+        btnObuntoControl: document.getElementById('btnObuntoControl')
     }
 };
 
@@ -132,15 +144,23 @@ export function showCustomPrompt(title) {
 }
 
 export function switchScreen(screenName) {
+    // Esconde todas
     Object.values(UI.screens).forEach(el => {
         if(el) {
             el.classList.add('hidden');
-            el.classList.remove('active');
+            el.style.display = 'none';
         }
     });
+    
+    // Mostra a desejada
     if(UI.screens[screenName]) {
         UI.screens[screenName].classList.remove('hidden');
-        UI.screens[screenName].classList.add('active');
+        UI.screens[screenName].style.display = 'flex';
+        
+        // Se for desktop, o display pode ser block ou flex dependendo do CSS, mas flex é seguro para centralizar se necessário
+        if(screenName === 'desktop') {
+             UI.screens[screenName].style.display = 'flex'; 
+        }
     }
 }
 
@@ -160,69 +180,38 @@ export function switchView(viewName) {
 }
 
 let topZIndex = 3000;
-
 export function bringToFront(win) {
     topZIndex++;
     win.style.zIndex = topZIndex;
 }
 
-export function makeDraggable(win) {
-    win.addEventListener('mousedown', () => bringToFront(win));
-    
-    const header = win.querySelector('.win-header');
-    if (!header) return;
-    
-    let isDragging = false, startX, startY, initialLeft, initialTop;
-    
-    header.addEventListener('mousedown', (e) => {
-        if(e.target.closest('.close-btn')) return;
-        isDragging = true;
-        startX = e.clientX; startY = e.clientY;
-        initialLeft = win.offsetLeft; initialTop = win.offsetTop;
-        win.style.cursor = 'grabbing';
-    });
-    
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        win.style.left = `${initialLeft + dx}px`;
-        win.style.top = `${initialTop + dy}px`;
-    });
-    
-    window.addEventListener('mouseup', () => { isDragging = false; win.style.cursor = 'default'; });
-}
-
-export function makeResizable(win) {
-    if(win.querySelector('.resize-handle')) return;
-    const handle = document.createElement('div');
-    handle.className = 'resize-handle';
-    win.appendChild(handle);
-    handle.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        bringToFront(win);
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startWidth = parseInt(document.defaultView.getComputedStyle(win).width, 10);
-        const startHeight = parseInt(document.defaultView.getComputedStyle(win).height, 10);
-        function doDrag(e) {
-            win.style.width = (startWidth + e.clientX - startX) + 'px';
-            win.style.height = (startHeight + e.clientY - startY) + 'px';
-        }
-        function stopDrag() {
-            document.documentElement.removeEventListener('mousemove', doDrag);
-            document.documentElement.removeEventListener('mouseup', stopDrag);
-        }
-        document.documentElement.addEventListener('mousemove', doDrag);
-        document.documentElement.addEventListener('mouseup', stopDrag);
-    });
-}
-
 export function initDraggables() {
     document.querySelectorAll('.window-newton').forEach(win => {
-        makeDraggable(win);
-        makeResizable(win);
+        const header = win.querySelector('.win-header');
+        if(!header) return;
+        
+        header.onmousedown = (e) => {
+            if(e.target.closest('.close-btn')) return;
+            bringToFront(win);
+            
+            let shiftX = e.clientX - win.getBoundingClientRect().left;
+            let shiftY = e.clientY - win.getBoundingClientRect().top;
+            
+            function moveAt(pageX, pageY) {
+                win.style.left = pageX - shiftX + 'px';
+                win.style.top = pageY - shiftY + 'px';
+            }
+            
+            function onMouseMove(event) {
+                moveAt(event.pageX, event.pageY);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            
+            win.onmouseup = function() {
+                document.removeEventListener('mousemove', onMouseMove);
+                win.onmouseup = null;
+            };
+        };
     });
 }
