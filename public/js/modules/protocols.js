@@ -9,9 +9,7 @@ export function initProtocols(socket) {
     const input = document.getElementById('proto-input');
     const desc = document.getElementById('proto-desc');
 
-    if (!overlay || !cntDiv || !taskDiv || !input) {
-        return;
-    }
+    if (!overlay || !cntDiv || !taskDiv || !input) return;
 
     let currentTask = null;
 
@@ -22,7 +20,6 @@ export function initProtocols(socket) {
 
     function startSequence() {
         overlay.classList.remove('hidden');
-        overlay.style.display = 'flex';
         cntDiv.classList.remove('hidden');
         taskDiv.classList.add('hidden');
         playSound('notify');
@@ -64,17 +61,18 @@ export function initProtocols(socket) {
         }
     }
 
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && currentTask) {
-            if (input.value.toUpperCase() === currentTask.code) {
-                playSound('click');
-                socket.emit('task_complete', { success: true, type: currentTask.type });
-                overlay.classList.add('hidden');
-                overlay.style.display = 'none';
-            } else {
-                playSound('denied');
-                input.value = '';
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && currentTask) {
+                if (input.value.toUpperCase() === currentTask.code) {
+                    playSound('click');
+                    socket.emit('task_complete', { success: true, type: currentTask.type });
+                    overlay.classList.add('hidden');
+                } else {
+                    playSound('error');
+                    input.value = '';
+                }
             }
-        }
-    });
+        });
+    }
 }
