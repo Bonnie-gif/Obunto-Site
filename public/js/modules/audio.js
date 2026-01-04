@@ -1,5 +1,4 @@
 const SOUNDS = {};
-
 const audioIds = [
     'sfx-boot', 'sfx-click', 'sfx-notify',
     'sfx-alarm-green', 'sfx-alarm-blue', 'sfx-alarm-red',
@@ -21,7 +20,7 @@ export function playSound(name) {
     if (SOUNDS[name]) {
         try {
             SOUNDS[name].currentTime = 0;
-            SOUNDS[name].play().catch(e => {});
+            SOUNDS[name].play().catch(() => {});
         } catch (e) {}
     }
 }

@@ -37,11 +37,9 @@ export function initProtocols(socket) {
             
             const num = seq[idx];
             if (cntImg) {
-                if (num === 0) {
-                    cntImg.src = '/assets/icon-small-priority_none-15x14.png';
-                } else {
-                    cntImg.src = `/assets/icon-small-priority_${num}-15x14.png`;
-                }
+                cntImg.src = num === 0 ? 
+                    '/assets/icon-small-priority_none-15x14.png' : 
+                    `/assets/icon-small-priority_${num}-15x14.png`;
             }
             playSound('click');
             idx++;
@@ -69,7 +67,7 @@ export function initProtocols(socket) {
                     socket.emit('task_complete', { success: true, type: currentTask.type });
                     overlay.classList.add('hidden');
                 } else {
-                    playSound('error');
+                    playSound('denied');
                     input.value = '';
                 }
             }

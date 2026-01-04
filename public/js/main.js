@@ -1,168 +1,124 @@
-import { UI, switchScreen, switchView, initDraggables } from './modules/ui.js';
-import { handleLogin } from './modules/auth.js';
-import { initAudio, playSound } from './modules/audio.js';
-import { initNotepad } from './modules/notepad.js';
-import { initHelp } from './modules/help.js';
-import { initFiles } from './modules/files.js';
-import { initComms } from './modules/comms.js';
-import { initProtocols } from './modules/protocols.js';
+import { initAudio, playSound } from './audio.js';
+import { initProtocols } from './protocols.js';
 
-const socket = io();
-let currentUser = null;
-let idleTimer;
-const IDLE_LIMIT = 60000;
+let socket;
 
-document.addEventListener("DOMContentLoaded", () => {
+try {
+    socket = io();
+} catch (e) {
+    console.warn('Socket.io server not found. Running in offline mode.');
+    socket = { on: () => {}, emit: () => {} };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
     initAudio();
-    initNotepad(socket);
-    initHelp(socket);
-    initFiles(socket);
-    initComms(socket);
     initProtocols(socket);
-    initDraggables();
+    startBootSequence();
+    updateClock();
+    setInterval(updateClock, 1000);
 
-    setInterval(() => {
-        const now = new Date();
-        if(UI.clock) UI.clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        if(UI.date) {
-            const year = now.getFullYear() + 16;
-            UI.date.textContent = `${year}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-        }
-    }, 1000);
+    const loginBtn = document.getElementById('btnLogin');
+    const loginInput = document.getElementById('inpId');
 
-    playSound('boot');
-    
-    // JS Logic to switch screen
-    setTimeout(() => {
-        const bootScreen = document.getElementById('boot-sequence');
-        if(bootScreen) {
-            bootScreen.classList.add('hidden');
-            bootScreen.style.display = 'none';
-        }
-        switchScreen('login');
-    }, 6000);
-
-    if(UI.login.btn) {
-        UI.login.btn.onclick = async () => {
-            currentUser = await handleLogin(socket);
-            if(currentUser) initComms(socket, currentUser);
-        };
-    }
-    
-    if(UI.login.input) {
-        UI.login.input.addEventListener("keydown", async e => { 
-            if (e.key === "Enter") {
-                currentUser = await handleLogin(socket);
-                if(currentUser) initComms(socket, currentUser);
-            }
+    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+    if (loginInput) {
+        loginInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
         });
     }
-
-    if (UI.sidebar.btnDashboard) {
-        UI.sidebar.btnDashboard.onclick = () => {
-            switchView('dashboard');
-            playSound('click');
-            reportActivity();
-        };
-    }
-
-    document.addEventListener('input', (e) => {
-        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            socket.emit('live_input', {
-                fieldId: e.target.id || 'unknown',
-                value: e.target.value
-            });
-        }
-    });
-
-    socket.on('energy_update', (val) => {
-        const energyVal = document.getElementById('energyVal');
-        const energyBar = document.getElementById('energyBar');
-        if(energyVal) energyVal.textContent = val;
-        if(energyBar) energyBar.style.width = `${val}%`;
-    });
-
-    document.addEventListener('mousemove', resetIdleTimer);
-    document.addEventListener('keydown', resetIdleTimer);
-
-    function resetIdleTimer() {
-        if (!currentUser) return;
-        clearTimeout(idleTimer);
-        reportActivity(false);
-        idleTimer = setTimeout(() => {
-            reportActivity(true);
-        }, IDLE_LIMIT);
-    }
-
-    function reportActivity(isAfk = false) {
-        if (!currentUser) return;
-        const openWindows = [];
-        document.querySelectorAll('.window-newton').forEach(win => {
-            if (!win.classList.contains('hidden')) {
-                openWindows.push({ id: win.id, hidden: false });
-            }
-        });
-        socket.emit('update_activity', { 
-            view: isAfk ? 'AFK' : 'ACTIVE', 
-            afk: isAfk,
-            fullState: {
-                view: 'ACTIVE',
-                afk: isAfk,
-                windows: openWindows
-            }
-        });
-    }
-
-    socket.on('force_state_report', () => {
-        reportActivity();
-    });
-
-    socket.on('status_update', (status) => {
-        if(UI.status.text) UI.status.text.textContent = status;
-        if(UI.status.indicator) {
-            if (status === 'ONLINE') {
-                UI.status.indicator.style.backgroundColor = '#4ade80';
-                UI.status.indicator.style.boxShadow = '0 0 5px #4ade80';
-            } else {
-                UI.status.indicator.style.backgroundColor = '#9ca3af';
-                UI.status.indicator.style.boxShadow = 'none';
-            }
-        }
-    });
-
-    socket.on('alarm_update', (alarmType) => {
-        document.body.className = '';
-        const banner = document.getElementById('alarm-banner');
-        const text = document.getElementById('alarm-type-text');
-        const powerOff = document.getElementById('power-off-overlay');
-        const btnReboot = document.getElementById('btnSystemReboot');
-        
-        if (alarmType === 'off') {
-            if(powerOff) powerOff.classList.remove('hidden');
-            if(banner) banner.classList.add('hidden');
-            
-            if (currentUser && currentUser.isObunto && btnReboot) {
-                btnReboot.classList.remove('hidden');
-            } else if (btnReboot) {
-                btnReboot.classList.add('hidden');
-            }
-
-        } else if (alarmType === 'on') {
-            if(powerOff) powerOff.classList.add('hidden');
-            if(banner) banner.classList.add('hidden');
-            document.body.classList.add('powering-on');
-            setTimeout(() => { 
-                document.body.classList.remove('powering-on');
-                playSound('boot'); 
-            }, 4000);
-        } else if (alarmType !== 'green') {
-            if(powerOff) powerOff.classList.add('hidden');
-            document.body.classList.add(`alarm-${alarmType}`);
-            if(banner) banner.classList.remove('hidden');
-            if(text) text.textContent = `${alarmType.toUpperCase()} ALERT`;
-        } else {
-            if(powerOff) powerOff.classList.add('hidden');
-            if(banner) banner.classList.add('hidden');
-        }
-    });
 });
+
+function switchScreen(screenName) {
+    const screens = {
+        boot: document.getElementById('boot-sequence'),
+        login: document.getElementById('login-screen'),
+        desktop: document.getElementById('desktop-screen')
+    };
+
+    Object.values(screens).forEach(s => {
+        if (s) {
+            s.classList.remove('active');
+            s.classList.add('hidden');
+        }
+    });
+
+    if (screens[screenName]) {
+        screens[screenName].classList.remove('hidden');
+        screens[screenName].classList.add('active');
+    }
+}
+
+function startBootSequence() {
+    const progressFill = document.getElementById('progress-fill');
+    let progress = 0;
+    
+    const interval = setInterval(() => {
+        progress += 2;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => switchScreen('login'), 500);
+        }
+    }, 50);
+}
+
+async function handleLogin() {
+    const input = document.getElementById('inpId');
+    const status = document.getElementById('loginStatus');
+    const userId = input.value.trim();
+
+    if (!userId) {
+        status.textContent = 'ID REQUIRED';
+        return;
+    }
+
+    status.textContent = 'AUTHENTICATING...';
+    playSound('click');
+
+    try {
+        const response = await fetch(`https://users.roblox.com/v1/users/${userId}`);
+        if (!response.ok) throw new Error('User not found');
+        
+        const data = await response.json();
+        
+        const sessionInfo = document.getElementById('sessionInfo');
+        if (sessionInfo) {
+            sessionInfo.innerHTML = `
+                <div class="session-line">STATUS: <span class="session-value">ACTIVE</span></div>
+                <div class="session-line">USER: <span class="session-value">${data.name}</span></div>
+                <div class="session-line">ID: <span class="session-value">${data.id}</span></div>
+            `;
+        }
+
+        playSound('boot'); 
+        status.textContent = 'ACCESS GRANTED';
+        
+        setTimeout(() => {
+            switchScreen('desktop');
+            socket.emit('login', { userId: data.id, username: data.name });
+        }, 1000);
+
+    } catch (error) {
+        status.textContent = 'AUTHENTICATION FAILED';
+        playSound('denied');
+    }
+}
+
+function updateClock() {
+    const clock = document.getElementById('clock');
+    const dateDisplay = document.getElementById('dateDisplay');
+    const now = new Date();
+    
+    if (clock) {
+        clock.textContent = now.toLocaleTimeString('en-US', { 
+            hour: '2-digit', minute: '2-digit', hour12: false 
+        });
+    }
+    
+    if (dateDisplay) {
+        const futureDate = new Date(now);
+        futureDate.setFullYear(now.getFullYear() + 16);
+        dateDisplay.textContent = futureDate.toISOString().split('T')[0];
+    }
+}
