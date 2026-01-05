@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSC NEWTON OS</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="icon" href="assets/icon-large-dock-35x23.png">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="icon" href="/assets/icon-large-dock-35x23.png">
 </head>
 <body class="alarm-green">
     <div class="crt-overlay"></div>
@@ -31,7 +31,7 @@
     <div id="desktop-screen" class="screen hidden">
         <div class="sidebar">
             <div class="brand">
-                <img src="assets/icon-large-dock-35x23.png" width="32">
+                <img src="/assets/icon-large-dock-35x23.png" width="32">
                 <div class="brand-title">TERMINAL WCRI</div>
             </div>
             <div class="section-block">
@@ -53,7 +53,7 @@
             <div id="obunto-window" class="window-newton hidden" style="top: 50px; right: 50px; width: 300px; z-index: 2000;">
                 <div class="win-header">OBUNTO AI</div>
                 <div class="win-body obunto-container">
-                    <img id="obunto-avatar" src="Sprites/normal.png" class="obunto-avatar">
+                    <img id="obunto-avatar" src="/Sprites/normal.png" class="obunto-avatar">
                     <div id="obunto-bubble" class="speech-bubble">System operational.</div>
                 </div>
             </div>
@@ -66,19 +66,19 @@
 
         <div class="dock-newton">
             <div class="dock-apps">
-                <button id="btnNotepad" class="dock-btn"><img src="assets/button-note-15x15.png"></button>
-                <button id="btnObunto" class="dock-btn"><img src="assets/icon-large-preferences-19x19.png"></button>
+                <button id="btnNotepad" class="dock-btn"><img src="/assets/button-note-15x15.png"></button>
+                <button id="btnObunto" class="dock-btn"><img src="/assets/icon-large-preferences-19x19.png"></button>
             </div>
             <div id="clock" class="dock-clock">00:00</div>
         </div>
     </div>
 
-    <audio id="sfx-boot" src="audio/loading1.wav"></audio>
-    <audio id="sfx-click" src="audio/requestsent.wav"></audio>
-    <audio id="sfx-notify" src="audio/newmessage.wav"></audio>
-    <audio id="sfx-denied" src="audio/requestdenied.wav"></audio>
+    <audio id="sfx-boot" src="/audio/loading1.wav"></audio>
+    <audio id="sfx-click" src="/audio/requestsent.wav"></audio>
+    <audio id="sfx-notify" src="/audio/newmessage.wav"></audio>
+    <audio id="sfx-denied" src="/audio/requestdenied.wav"></audio>
     
     <script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="/js/main.js"></script>
 </body>
 </html>

@@ -4,10 +4,6 @@ import { initUI } from './ui.js';
 import { initObunto } from './obunto.js';
 import { initSystem } from './system.js';
 import { initNotepad } from './notepad.js';
-import { initFiles } from './files.js';
-import { initComms } from './comms.js';
-import { initHelp } from './help.js';
-import { initProtocols } from './protocols.js';
 
 const socket = io();
 
@@ -16,12 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSystem(socket);
     initUI();
     initObunto(socket);
-    
     initNotepad(socket);
-    initFiles(socket);
-    initComms(socket);
-    initHelp(socket);
-    initProtocols(socket);
 
     const loginBtn = document.getElementById('btnLogin');
     const inpId = document.getElementById('inpId');

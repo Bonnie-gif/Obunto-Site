@@ -15,7 +15,6 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 const DATA_FILE = path.join(__dirname, 'data_store.json');
-const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
 let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
 let systemStatus = 'ONLINE'; 
@@ -76,10 +75,8 @@ app.post('/api/login', async (req, res) => {
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
-    socket.on('register_user', (userId) => {
-        socket.join(userId);
-    });
+    socket.on('register_user', (userId) => { socket.join(userId); });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

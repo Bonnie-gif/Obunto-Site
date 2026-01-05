@@ -1,3 +1,5 @@
+import { playSound } from './audio.js';
+
 export function initFiles(socket) {
     const grid = document.getElementById('darchGrid');
     const pathDisplay = document.getElementById('darchPath');
@@ -18,8 +20,9 @@ export function initFiles(socket) {
                 if (file.type === 'folder') {
                     currentPath += file.name + '/';
                     requestFiles();
+                    playSound('click');
                 } else {
-                    alert(`Opening ${file.name}...`);
+                    playSound('denied');
                 }
             };
             grid.appendChild(el);
@@ -34,7 +37,6 @@ export function initFiles(socket) {
 
     socket.on('fs_load', (files) => {
         if (!files || files.length === 0) {
-            // Arquivos de exemplo se vazio
             renderFiles([
                 { name: 'SYSTEM', type: 'folder' },
                 { name: 'LOGS', type: 'folder' },
@@ -50,6 +52,18 @@ export function initFiles(socket) {
         btnHome.onclick = () => {
             currentPath = '/';
             requestFiles();
+            playSound('click');
+        };
+    }
+    
+    const btnNewFolder = document.getElementById('btnNewFolder');
+    if (btnNewFolder) {
+        btnNewFolder.onclick = () => {
+            const name = prompt("FOLDER NAME:");
+            if(name) {
+                socket.emit('fs_create_item', { name, type: 'folder', parentId: currentPath });
+                playSound('click');
+            }
         };
     }
 }

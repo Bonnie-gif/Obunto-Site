@@ -23,12 +23,12 @@ export function initProtocols(socket) {
         playSound('notify');
 
         let count = 3;
-        img.src = `assets/icon-small-priority_${count}-15x14.png`; 
+        if(img) img.src = `assets/icon-small-priority_${count}-15x14.png`; 
 
         const interval = setInterval(() => {
             count--;
             if (count > 0) {
-                img.src = `assets/icon-small-priority_${count}-15x14.png`;
+                if(img) img.src = `assets/icon-small-priority_${count}-15x14.png`;
                 playSound('click');
             } else {
                 clearInterval(interval);
@@ -58,8 +58,8 @@ export function initProtocols(socket) {
                     overlay.classList.add('hidden');
                 } else {
                     playSound('denied');
-                    input.classList.add('error');
-                    setTimeout(() => input.classList.remove('error'), 500);
+                    input.style.borderColor = '#ef4444';
+                    setTimeout(() => input.style.borderColor = '', 500);
                 }
             }
         });
