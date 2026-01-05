@@ -12,7 +12,7 @@ const io = new Server(server);
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
@@ -33,7 +33,7 @@ if (fs.existsSync(DATA_FILE)) {
 }
 
 function saveData() {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
+    try { fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2)); } catch(e) {}
 }
 
 setInterval(() => {
@@ -68,6 +68,15 @@ function deleteRecursive(userId, itemId) {
     dataStore.userFiles[userId] = dataStore.userFiles[userId].filter(f => f.id !== itemId);
 }
 
+app.get('/api/roblox/:id', async (req, res) => {
+    try {
+        const response = await axios.get(`https://users.roblox.com/v1/users/${req.params.id}`);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+});
+
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
@@ -76,14 +85,10 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "8989", 
-                username: "OBUNTO", 
-                displayName: "System AI", 
-                rank: "MAINFRAME", 
-                avatar: "/obunto/normal.png", 
+                id: "8989", username: "OBUNTO", displayName: "System AI", rank: "MAINFRAME", 
+                avatar: "/assets/obunto_avatar.png", 
                 affiliations: [{ groupName: "TSC MAINFRAME", role: "ADMIN", rank: 999 }],
-                isObunto: true,
-                isHoltz: false
+                isObunto: true, isHoltz: false
             } 
         });
     }
@@ -92,14 +97,10 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "36679824", 
-                username: "DR. HOLTZ", 
-                displayName: "Head of Research", 
-                rank: "LEVEL 5", 
+                id: "36679824", username: "DR. HOLTZ", displayName: "Head of Research", rank: "LEVEL 5", 
                 avatar: "/assets/icon-large-owner_info-28x14.png",
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
-                isObunto: false,
-                isHoltz: true
+                isObunto: false, isHoltz: true
             } 
         });
     }
@@ -112,6 +113,10 @@ app.post('/api/login', async (req, res) => {
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
+        if (tscGroups.length === 0) {
+             return res.status(403).json({ success: false, message: "ACCESS DENIED" });
+        }
+
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
 
@@ -122,34 +127,30 @@ app.post('/api/login', async (req, res) => {
             avatar: avatarRes.data.data[0]?.imageUrl,
             rank: level,
             affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-            isObunto: false,
-            isHoltz: false
+            isObunto: false, isHoltz: false
         };
 
         dataStore.knownUsers[userId] = {
-            id: userId,
-            name: userData.username,
-            rank: level,
-            lastSeen: Date.now()
+            id: userId, name: userData.username, rank: level, lastSeen: Date.now()
         };
         saveData();
 
         res.json({ success: true, userData });
 
     } catch (e) {
-        console.error("Login Error:", e.message);
-        
-        // Permite login offline para testes se a API falhar, mas marca como visitante
         const fallbackData = {
             id: userId.toString(),
-            username: `GUEST-${userId.substring(0,4)}`,
-            displayName: "VISITOR",
+            username: `OPERATOR-${userId.substring(0,4)}`,
+            displayName: "AUTHORIZED PERSONNEL",
             avatar: "/assets/icon-large-owner_info-28x14.png", 
-            rank: "UNAUTHORIZED",
-            affiliations: [],
-            isObunto: false,
-            isHoltz: false
+            rank: "LEVEL ?",
+            affiliations: [{ groupName: "OFFLINE MODE", role: "CONNECTION BYPASS", rank: 1 }],
+            isObunto: false, isHoltz: false
         };
+        dataStore.knownUsers[userId] = {
+            id: userId, name: fallbackData.username, rank: fallbackData.rank, lastSeen: Date.now()
+        };
+        saveData();
         res.json({ success: true, userData: fallbackData });
     }
 });
@@ -175,7 +176,6 @@ io.on('connection', (socket) => {
         }
         
         if (dataStore.notes[userId]) socket.emit('load_notes', dataStore.notes[userId]);
-        
         const activeTicket = dataStore.helpTickets.find(t => t.userId === userId && t.status === 'active');
         if (activeTicket) socket.emit('chat_force_open');
     });
@@ -234,9 +234,7 @@ io.on('connection', (socket) => {
         const msg = {
             id: Date.now(),
             fromName: dataStore.knownUsers[currentUserId]?.name || 'UNKNOWN',
-            to: data.target, 
-            body: data.message,
-            timestamp: new Date()
+            to: data.target, body: data.message, timestamp: new Date()
         };
         socket.emit('comm_receive', msg);
         if(data.target === 'GLOBAL') {
@@ -256,11 +254,7 @@ io.on('connection', (socket) => {
             systemEnergy = Math.min(100, systemEnergy + 1);
             io.emit('energy_update', Math.floor(systemEnergy));
         }
-        io.to('admins').emit('protocol_task_result', {
-            userId: currentUserId,
-            success: data.success,
-            type: data.type
-        });
+        io.to('admins').emit('protocol_task_result', { userId: currentUserId, success: data.success, type: data.type });
     });
 
     socket.on('admin_modify_energy', (amount) => {
