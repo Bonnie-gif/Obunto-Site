@@ -1,82 +1,51 @@
 :root {
-  --bg-main: #89937a;
-  --bg-light: #9da896;
-  --bg-dark: #6a7462;
-  --ink: #2b3323;
-  --ink-dim: #4a5544;
-  --ink-light: #6a7562;
-  --paper: #c8d1c0;
-  --paper-dark: #b0baa8;
-  --paper-light: #d8e1d0;
-  --border: #2b3323;
-  --border-light: #5a6552;
-  --shadow: rgba(43, 51, 35, 0.4);
-  --button: #a8b2a0;
-  --button-hover: #b8c2b0;
-  --font-main: 'Chicago', 'System', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: 'Monaco', 'Menlo', 'Courier New', monospace;
-  --alert-color: #2b3323;
-  --radius: 6px;
+  --bg-main: #c0c0c0;
+  --bg-light: #d4d0c8;
+  --bg-dark: #808080;
+  --ink: #000000;
+  --ink-dim: #808080;
+  --ink-light: #404040;
+  --paper: #ffffff;
+  --paper-dark: #dfdfdf;
+  --paper-light: #ffffff;
+  --border: #000000;
+  --border-light: #808080;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --button: #c0c0c0;
+  --button-hover: #d4d0c8;
+  --font-main: 'Chicago', 'System', sans-serif;
+  --font-mono: 'Monaco', monospace;
+  --alert-color: #000000;
+  --radius: 0px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
-  font-size: 13px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
+  font-size: 12px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
   transition: background 0.5s ease;
 }
 
-.hidden {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: -9999 !important;
-}
-
+.hidden { display: none !important; }
 .active { display: flex !important; }
 
-body.alarm-blue {
-  --bg-main: #002b36; --bg-light: #073642; --bg-dark: #001e26;
-  --paper: #839496; --paper-dark: #586e75; --paper-light: #93a1a1;
-  --ink: #002b36; --border: #002b36; --button: #268bd2; --button-hover: #2aa198;
-  --alert-color: #268bd2;
-}
-
-body.alarm-red {
-  --bg-main: #2b0000; --bg-light: #420707; --bg-dark: #1e0000;
-  --paper: #cc9999; --paper-dark: #a67c7c; --paper-light: #e6b3b3;
-  --ink: #2b0000; --border: #2b0000; --button: #dc322f; --button-hover: #cb4b16;
-  --alert-color: #dc322f;
-}
-
+body.alarm-blue { --bg-main: #000080; --ink: #ffffff; --paper: #0000a0; --alert-color: #00ffff; }
+body.alarm-red { --bg-main: #800000; --ink: #ffffff; --paper: #a00000; --alert-color: #ff0000; }
 body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
 body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
 
 @keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
 @keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
 
-body.alarm-gamma {
-  --bg-main: #362b00; --bg-light: #423607; --bg-dark: #261e00;
-  --paper: #cccc99; --paper-dark: #a6a67c; --paper-light: #e6e6b3;
-  --ink: #362b00; --border: #362b00; --button: #b58900; --button-hover: #d3a60f;
-  --alert-color: #b58900;
-}
-
-body.alarm-epsilon {
-  --bg-main: #000000; --bg-light: #111111; --bg-dark: #000000;
-  --paper: #a0a0a0; --paper-dark: #505050; --paper-light: #808080;
-  --ink: #ffffff; --border: #ffffff; --button: #303030; --button-hover: #505050;
-  --alert-color: #ffffff;
-  filter: contrast(200%) grayscale(100%);
-}
+body.alarm-gamma { --bg-main: #808000; --ink: #ffff00; --paper: #a0a000; --alert-color: #ffff00; }
+body.alarm-epsilon { --bg-main: #400040; --ink: #ff00ff; --paper: #600060; --alert-color: #ff00ff; filter: contrast(150%); }
 
 .crt-overlay {
     position: fixed; inset: 0; pointer-events: none; z-index: 9998;
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+    background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.1) 100%);
 }
 .scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.1;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15), rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.05;
+    background: repeating-linear-gradient(0deg, #000, #000 1px, transparent 1px, transparent 2px);
 }

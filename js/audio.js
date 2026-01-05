@@ -11,14 +11,14 @@ export function playSound(name) {
     if (audio) {
         try {
             audio.currentTime = 0;
-            audio.play().catch(e => {});
-        } catch(e) {}
+            audio.play().catch(() => {});
+        } catch (e) {}
     }
 }
 
 export function initAudio() {
     document.addEventListener('click', (e) => {
-        if(e.target.closest('button') && !e.target.closest('.mood-icon')) {
+        if (e.target.closest('button') || e.target.closest('.dock-btn') || e.target.closest('.nav-item')) {
             playSound('click');
         }
     });

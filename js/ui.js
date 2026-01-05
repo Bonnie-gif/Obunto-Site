@@ -34,15 +34,32 @@ export function initUI() {
         };
     });
 
-    setupWindowToggle('btnNotepad', 'notepad-window', 'closeNote');
-    setupWindowToggle('btnObunto', 'obunto-window', null);
-    setupWindowToggle('btnOpenDarch', 'darch-window', 'closeDarch');
-    setupWindowToggle('btnOpenComms', 'comms-window', 'closeComms');
-    setupWindowToggle('btnOpenHelp', 'help-window', 'closeHelp');
-    setupWindowToggle('btnObuntoControl', 'admin-panel', 'closeAdmin');
+    document.querySelectorAll('[data-action="minimize"]').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const win = e.target.closest('.window-newton');
+            win.classList.toggle('minimized');
+            playSound('click');
+        };
+    });
+
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const win = e.target.closest('.window-newton');
+            win.classList.add('hidden');
+            playSound('click');
+        };
+    });
+
+    setupWindowToggle('btnNotepad', 'notepad-window');
+    setupWindowToggle('btnOpenDarch', 'darch-window');
+    setupWindowToggle('btnOpenRadio', 'radio-window');
+    setupWindowToggle('btnOpenHelp', 'help-window');
+    setupWindowToggle('btnObuntoControl', 'admin-panel');
     
     const btnDashboard = document.getElementById('btnMyDashboard');
-    if(btnDashboard) {
+    if (btnDashboard) {
         btnDashboard.onclick = () => {
             document.querySelectorAll('.viewer').forEach(v => v.classList.add('hidden'));
             document.getElementById('view-dashboard').classList.remove('hidden');
@@ -51,10 +68,9 @@ export function initUI() {
     }
 }
 
-function setupWindowToggle(btnId, winId, closeId) {
+function setupWindowToggle(btnId, winId) {
     const btn = document.getElementById(btnId);
     const win = document.getElementById(winId);
-    const close = document.getElementById(closeId);
 
     if (btn && win) {
         btn.onclick = () => {
@@ -68,13 +84,6 @@ function setupWindowToggle(btnId, winId, closeId) {
             } else {
                 win.classList.add('hidden');
             }
-        };
-    }
-
-    if (close && win) {
-        close.onclick = () => {
-            win.classList.add('hidden');
-            playSound('click');
         };
     }
 }
@@ -91,18 +100,20 @@ export function renderDashboard(userData) {
     if (dashRank) dashRank.textContent = userData.rank;
     if (dashAvatar && userData.avatar) dashAvatar.src = userData.avatar;
 
-    if (dashDepts && userData.affiliations && userData.affiliations.length > 0) {
+    if (dashDepts && userData.affiliations) {
         dashDepts.innerHTML = '';
-        userData.affiliations.forEach(aff => {
-            const row = document.createElement('div');
-            row.className = 'dept-row';
-            row.innerHTML = `
-                <div class="dept-name">${aff.groupName}</div>
-                <div class="dept-role">${aff.role} (RANK ${aff.rank})</div>
-            `;
-            dashDepts.appendChild(row);
-        });
-    } else if (dashDepts) {
-        dashDepts.innerHTML = '<div class="dept-row"><div class="dept-name">NO AFFILIATIONS</div></div>';
+        if(userData.affiliations.length === 0) {
+            dashDepts.innerHTML = '<div class="dept-row">NO AFFILIATIONS DETECTED</div>';
+        } else {
+            userData.affiliations.forEach(aff => {
+                const row = document.createElement('div');
+                row.className = 'dept-row';
+                row.innerHTML = `
+                    <div class="dept-name">${aff.groupName}</div>
+                    <div class="dept-role">${aff.role} (Rank ${aff.rank})</div>
+                `;
+                dashDepts.appendChild(row);
+            });
+        }
     }
 }

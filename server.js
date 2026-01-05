@@ -120,9 +120,12 @@ io.on('connection', (socket) => {
         
         if (userId === "8989" || userId === "36679824") {
             socket.join('admins');
+            socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'pending'));
         } else {
             connectedSockets[userId] = { socketId: socket.id, activity: 'IDLE' };
         }
+        
+        socket.emit('radio_history', dataStore.messages.slice(-20));
     });
 
     socket.on('live_input', (data) => {
@@ -144,6 +147,72 @@ io.on('connection', (socket) => {
         io.emit('alarm_update', currentAlarm);
     });
 
+    socket.on('radio_broadcast', (data) => {
+        const msg = {
+            username: data.username,
+            message: data.message,
+            timestamp: Date.now()
+        };
+        
+        dataStore.messages.push(msg);
+        if (dataStore.messages.length > 100) dataStore.messages.shift();
+        saveData();
+        
+        io.emit('radio_message', msg);
+    });
+
+    socket.on('request_help', (data) => {
+        if (currentUserId === "8989" || currentUserId === "36679824") return;
+        
+        const ticket = {
+            id: Date.now().toString(),
+            userId: currentUserId,
+            message: data.message,
+            timestamp: Date.now(),
+            status: 'pending'
+        };
+        
+        dataStore.helpTickets.push(ticket);
+        saveData();
+        
+        io.to('admins').emit('help_request_received', ticket);
+        socket.emit('help_request_sent', { ticketId: ticket.id });
+    });
+
+    socket.on('accept_help_ticket', (ticketId) => {
+        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
+        if(ticket) {
+            ticket.status = 'accepted';
+            ticket.adminId = currentUserId;
+            saveData();
+            
+            io.to(ticket.userId).emit('help_accepted', { 
+                ticketId, 
+                message: 'OPERATOR CONNECTED. YOU MAY NOW COMMUNICATE.',
+                adminId: currentUserId
+            });
+            
+            io.to(currentUserId).emit('help_session_started', {
+                userId: ticket.userId,
+                ticketId: ticketId
+            });
+        }
+    });
+
+    socket.on('reject_help_ticket', (ticketId) => {
+        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
+        if(ticket) {
+            ticket.status = 'rejected';
+            dataStore.helpTickets = dataStore.helpTickets.filter(t => t.id !== ticketId);
+            saveData();
+            
+            io.to(ticket.userId).emit('help_rejected', { 
+                ticketId, 
+                message: 'REQUEST DENIED. SYSTEM OVERLOAD.' 
+            });
+        }
+    });
+
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
         if (sender === 'ADMIN') {
@@ -153,10 +222,33 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('fs_get_files', (data) => {
+        if(!currentUserId) return;
+        if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
+        const files = dataStore.userFiles[currentUserId].filter(f => f.parentId === data.path);
+        socket.emit('fs_load', files);
+    });
+
+    socket.on('fs_create_item', (item) => {
+        if(!currentUserId) return;
+        if(!dataStore.userFiles[currentUserId]) dataStore.userFiles[currentUserId] = [];
+        const newItem = { 
+            id: Date.now().toString(),
+            name: item.name, 
+            type: item.type, 
+            parentId: item.parentId || '/',
+            content: "" 
+        };
+        dataStore.userFiles[currentUserId].push(newItem);
+        saveData();
+        const files = dataStore.userFiles[currentUserId].filter(f => f.parentId === item.parentId);
+        socket.emit('fs_load', files);
+    });
+
     socket.on('disconnect', () => {
         if (currentUserId) delete connectedSockets[currentUserId];
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => console.log('TSC System running on port 3000'));

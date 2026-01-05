@@ -1,17 +1,16 @@
 import { playSound } from './audio.js';
 
 export function initComms(socket) {
-    const list = document.querySelector('.comm-list');
-    const input = document.getElementById('commMsgInput');
-    const btn = document.getElementById('btnCommSend');
-    const targetInput = document.getElementById('commTargetInput');
+    const list = document.querySelector('.radio-list');
+    const input = document.getElementById('radioMsgInput');
+    const btn = document.getElementById('btnRadioSend');
 
     function addMessage(msg, type) {
         if (!list) return;
         const el = document.createElement('div');
         el.className = `comm-msg ${type}`;
         el.innerHTML = `
-            <div class="comm-meta">${msg.sender || 'UNKNOWN'}</div>
+            <div class="comm-meta">${msg.username || 'UNKNOWN'} [${new Date(msg.timestamp).toLocaleTimeString()}]</div>
             <div class="comm-body">${msg.message}</div>
         `;
         list.appendChild(el);
@@ -21,14 +20,13 @@ export function initComms(socket) {
 
     function send() {
         const text = input.value.trim();
-        const target = targetInput ? targetInput.value.trim() : 'ADMIN';
         if (!text) {
             playSound('denied');
             return;
         }
 
-        socket.emit('chat_message', { message: text, targetId: target, sender: 'USER' });
-        addMessage({ sender: 'ME', message: text }, 'self');
+        const username = document.getElementById('sbUser').textContent;
+        socket.emit('radio_broadcast', { message: text, username: username });
         input.value = '';
         playSound('sent');
     }
@@ -40,9 +38,17 @@ export function initComms(socket) {
         });
     }
 
-    socket.on('chat_receive', (msg) => {
-        if(msg.sender === 'ADMIN' || msg.sender !== 'USER') {
-            addMessage({ sender: msg.sender || 'SYSTEM', message: msg.message }, 'other');
-        }
+    socket.on('radio_message', (msg) => {
+        const currentUser = document.getElementById('sbUser').textContent;
+        const type = msg.username === currentUser ? 'self' : 'other';
+        addMessage(msg, type);
+    });
+
+    socket.on('radio_history', (messages) => {
+        messages.forEach(msg => {
+            const currentUser = document.getElementById('sbUser').textContent;
+            const type = msg.username === currentUser ? 'self' : 'other';
+            addMessage(msg, type);
+        });
     });
 }

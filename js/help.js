@@ -18,51 +18,54 @@ export function initHelp(socket) {
                 return;
             }
 
-            socket.emit('request_help', msg);
+            socket.emit('request_help', { message: msg });
             txt.value = '';
             playSound('sent');
             
             if (status) {
                 status.classList.remove('hidden');
-                status.textContent = "REQUEST TRANSMITTED. STANDBY.";
+                status.textContent = "TRANSMITTING TO ADMIN...";
             }
         };
     }
 
-    function addChatMessage(msg, type) {
-        if(!chatHistory) return;
-        const el = document.createElement('div');
-        el.className = `chat-msg ${type}`;
-        el.textContent = msg;
-        chatHistory.appendChild(el);
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-
-    socket.on('admin_chat_opened', (ticket) => {
-        if (status) status.textContent = "OPERATOR CONNECTED.";
-        playSound('notify');
-        if(requestForm) requestForm.classList.add('hidden');
-        if(chatInterface) chatInterface.classList.remove('hidden');
-        addChatMessage("Connection established with TSC Support.", "system");
+    socket.on('help_request_sent', () => {
+        if(status) status.textContent = "REQUEST SENT. STANDBY.";
     });
 
-    socket.on('help_chat_receive', (data) => {
-        addChatMessage(data.message, data.sender === 'ADMIN' ? 'admin' : 'user');
-        if(data.sender === 'ADMIN') playSound('notify');
+    socket.on('help_accepted', (data) => {
+        if (status) status.textContent = "OPERATOR CONNECTED.";
+        playSound('notify');
+        requestForm.classList.add('hidden');
+        chatInterface.classList.remove('hidden');
+        
+        const el = document.createElement('div');
+        el.className = 'chat-msg system';
+        el.textContent = data.message;
+        chatHistory.appendChild(el);
+    });
+
+    socket.on('help_rejected', (data) => {
+        if (status) status.textContent = "REQUEST DECLINED.";
+        playSound('denied');
+        alert(data.message);
     });
 
     if(btnChatSend && chatInput) {
         const sendChat = () => {
             const val = chatInput.value.trim();
-            if(!val) {
-                playSound('denied');
-                return;
-            }
-            socket.emit('chat_message', { message: val, sender: 'USER' });
-            addChatMessage(val, 'user');
+            if(!val) return;
+            
+            const el = document.createElement('div');
+            el.className = 'chat-msg user';
+            el.textContent = val;
+            chatHistory.appendChild(el);
+            
+            socket.emit('chat_message', { message: val, targetId: 'ADMIN', sender: 'USER' });
             chatInput.value = '';
             playSound('click');
         };
+        
         btnChatSend.onclick = sendChat;
         chatInput.addEventListener('keydown', (e) => {
             if(e.key === 'Enter') sendChat();

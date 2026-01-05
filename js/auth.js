@@ -41,11 +41,16 @@ export async function handleLogin(socket) {
                 
                 const dockAdmin = document.getElementById('btnObuntoControl');
                 if (dockAdmin) dockAdmin.classList.remove('hidden');
+
+                const helpBtn = document.querySelector('[data-personnel-only]');
+                if(helpBtn) helpBtn.style.display = 'none';
+            } else {
+                const helpBtn = document.querySelector('[data-personnel-only]');
+                if(helpBtn) helpBtn.style.display = 'flex';
             }
 
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('login-screen').classList.remove('active');
                 document.getElementById('desktop-screen').classList.remove('hidden');
                 document.getElementById('desktop-screen').classList.add('active');
             }, 1000);

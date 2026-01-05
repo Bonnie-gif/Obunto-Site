@@ -11,6 +11,10 @@
     <div class="crt-overlay"></div>
     <div class="scanlines"></div>
 
+    <div id="alarm-banner" class="alarm-banner hidden">
+        <div class="alarm-text">WARNING: <span id="alarm-type-text">SYSTEM ALERT</span></div>
+    </div>
+
     <div id="boot-sequence" class="screen active full-screen">
         <div class="loading-container">
             <div class="logo">TSC</div>
@@ -22,7 +26,7 @@
     <div id="login-screen" class="screen full-screen hidden">
         <div class="boot-box">
             <div class="boot-title">IDENTITY VERIFICATION</div>
-            <input type="text" id="inpId" class="input-newton" placeholder="ENTER ROBLOX ID" autocomplete="off">
+            <input type="text" id="inpId" class="input-newton" placeholder="ENTER ID" autocomplete="off">
             <button id="btnLogin" class="btn-newton">AUTHENTICATE</button>
             <div id="loginStatus" class="status-text"></div>
         </div>
@@ -49,7 +53,7 @@
             <div class="section-block">
                 <div class="section-title">NAVIGATION</div>
                 <button id="btnMyDashboard" class="btn-action">
-                    <img src="/assets/icon-large-owner-info-28x14.png">
+                    <img src="/assets/icon-large-owner_info-28x14.png">
                     MY DASHBOARD
                 </button>
             </div>
@@ -80,40 +84,33 @@
             </div>
 
             <div class="viewer-container">
-                <div id="view-dashboard" class="viewer">
-                    <div class="dash-header">
-                        <div class="dash-avatar-container">
-                            <img id="dashAvatar" src="/assets/icon-large-owner-info-28x14.png" class="dash-avatar">
+                <div id="view-dashboard" class="viewer hidden">
+                    <div class="dashboard-grid">
+                        <div class="dash-card profile-card">
+                            <div class="dash-header">
+                                <img id="dashAvatar" src="/assets/icon-large-owner_info-28x14.png" class="dash-avatar">
+                                <div class="dash-info">
+                                    <div class="dash-name" id="dashName">LOADING...</div>
+                                    <div class="dash-id">ID: <span id="dashId">--</span></div>
+                                    <div class="dash-rank">RANK: <span id="dashRank">--</span></div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="dash-info">
-                            <div class="dash-name" id="dashName">LOADING...</div>
-                            <div class="dash-id">ID: <span id="dashId">--</span></div>
-                            <div class="dash-rank">RANK: <span id="dashRank">--</span></div>
+                        <div class="dash-card">
+                            <div class="dash-section-title">AFFILIATIONS</div>
+                            <div id="dashDepts" class="dept-list"></div>
                         </div>
-                    </div>
-                    <div class="dash-section">
-                        <div class="dash-section-title">AFFILIATIONS</div>
-                        <div id="dashDepts" class="dept-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="obunto-window" class="window-newton hidden" style="top: 80px; right: 80px; width: 340px;">
-                <div class="win-header">
-                    <span>OBUNTO AI ASSISTANT</span>
-                </div>
-                <div class="win-body" style="padding: 20px;">
-                    <div class="obunto-display">
-                        <img id="obunto-avatar" src="/Sprites/normal.png" class="obunto-avatar">
-                        <div id="obunto-bubble" class="speech-bubble">System operational.</div>
                     </div>
                 </div>
             </div>
 
             <div id="notepad-window" class="window-newton hidden" style="top: 100px; left: 100px; width: 450px; height: 350px;">
                 <div class="win-header">
-                    <span>NOTEPAD</span>
-                    <button class="close-btn" id="closeNote">×</button>
+                    <span class="win-title">NOTEPAD</span>
+                    <div class="win-controls">
+                        <button class="win-btn" data-action="minimize">_</button>
+                        <button class="win-btn close-btn" id="closeNote">×</button>
+                    </div>
                 </div>
                 <div class="win-body">
                     <textarea class="notepad-area" placeholder="ENTER NOTES..."></textarea>
@@ -122,8 +119,11 @@
 
             <div id="darch-window" class="window-newton hidden" style="top: 120px; left: 150px; width: 600px; height: 450px;">
                 <div class="win-header">
-                    <span>D.A.R.C.H FILE SYSTEM</span>
-                    <button class="close-btn" id="closeDarch">×</button>
+                    <span class="win-title">D.A.R.C.H FILE SYSTEM</span>
+                    <div class="win-controls">
+                        <button class="win-btn" data-action="minimize">_</button>
+                        <button class="win-btn close-btn" id="closeDarch">×</button>
+                    </div>
                 </div>
                 <div class="win-body">
                     <div class="file-toolbar">
@@ -132,7 +132,7 @@
                             HOME
                         </button>
                         <button id="btnNewFolder" class="btn-action">
-                            <img src="/assets/button-folder-21x17.png">
+                            <img src="/assets/icon-small-folder-15x11.png">
                             NEW FOLDER
                         </button>
                         <div class="path-display">
@@ -144,19 +144,21 @@
                 </div>
             </div>
 
-            <div id="comms-window" class="window-newton hidden" style="top: 140px; left: 200px; width: 500px; height: 400px;">
+            <div id="radio-window" class="window-newton hidden" style="top: 140px; left: 200px; width: 500px; height: 400px;">
                 <div class="win-header">
-                    <span>COMMUNICATIONS</span>
-                    <button class="close-btn" id="closeComms">×</button>
+                    <span class="win-title">TSC RADIO</span>
+                    <div class="win-controls">
+                        <button class="win-btn" data-action="minimize">_</button>
+                        <button class="win-btn close-btn" id="closeRadio">×</button>
+                    </div>
                 </div>
                 <div class="win-body">
-                    <div class="comm-container">
-                        <div class="comm-list"></div>
-                        <div class="comm-input-area">
-                            <input type="text" id="commTargetInput" class="input-newton" placeholder="TARGET ID (ADMIN)" style="margin-bottom: 8px;">
+                    <div class="radio-container">
+                        <div class="radio-list comm-list"></div>
+                        <div class="radio-input-area comm-input-area">
                             <div style="display: flex; gap: 8px;">
-                                <input type="text" id="commMsgInput" class="input-newton" placeholder="MESSAGE" style="flex: 1; margin: 0;">
-                                <button id="btnCommSend" class="btn-newton" style="width: 80px; margin: 0;">SEND</button>
+                                <input type="text" id="radioMsgInput" class="input-newton" placeholder="BROADCAST MESSAGE..." style="flex: 1; margin: 0;">
+                                <button id="btnRadioSend" class="btn-newton" style="width: 80px; margin: 0;">SEND</button>
                             </div>
                         </div>
                     </div>
@@ -165,8 +167,11 @@
 
             <div id="help-window" class="window-newton hidden" style="top: 160px; left: 250px; width: 500px; height: 450px;">
                 <div class="win-header">
-                    <span>TSC SUPPORT</span>
-                    <button class="close-btn" id="closeHelp">×</button>
+                    <span class="win-title">TSC SUPPORT</span>
+                    <div class="win-controls">
+                        <button class="win-btn" data-action="minimize">_</button>
+                        <button class="win-btn close-btn" id="closeHelp">×</button>
+                    </div>
                 </div>
                 <div class="win-body">
                     <div id="help-request-form" class="help-form">
@@ -175,8 +180,8 @@
                         <button id="btnSendHelp" class="btn-newton">SUBMIT REQUEST</button>
                         <div id="help-status" class="status-text hidden"></div>
                     </div>
-                    <div id="help-chat-interface" class="hidden">
-                        <div id="chat-history" class="comm-list"></div>
+                    <div id="help-chat-interface" class="hidden" style="height: 100%; display: flex; flex-direction: column;">
+                        <div id="chat-history" class="comm-list" style="flex: 1;"></div>
                         <div class="comm-input-area">
                             <div style="display: flex; gap: 8px;">
                                 <input type="text" id="chat-input" class="input-newton" placeholder="MESSAGE" style="flex: 1; margin: 0;">
@@ -187,10 +192,13 @@
                 </div>
             </div>
 
-            <div id="admin-panel" class="window-newton hidden" style="top: 60px; left: 300px; width: 700px; height: 600px; overflow-y: auto;">
+            <div id="admin-panel" class="window-newton hidden" style="top: 60px; left: 300px; width: 750px; max-height: 80vh; overflow-y: auto;">
                 <div class="win-header">
-                    <span>OBUNTO CONTROL PANEL</span>
-                    <button class="close-btn" id="closeAdmin">×</button>
+                    <span class="win-title">OBUNTO CONTROL PANEL</span>
+                    <div class="win-controls">
+                        <button class="win-btn" data-action="minimize">_</button>
+                        <button class="win-btn close-btn" id="closeAdmin">×</button>
+                    </div>
                 </div>
                 <div class="win-body" style="padding: 16px;">
                     <div class="admin-grid-layout">
@@ -201,7 +209,6 @@
                                 CURRENT: <span id="adminStatus" class="session-value">ONLINE</span>
                             </div>
                         </div>
-
                         <div class="admin-group">
                             <div class="group-label">SYSTEM ENERGY</div>
                             <div class="session-line">
@@ -212,65 +219,24 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="admin-section" style="margin-top: 16px;">
                         <div class="admin-label">OBUNTO MOOD SELECTOR</div>
-                        <div class="mood-grid">
-                            <div class="mood-icon" data-mood="normal">
-                                <img src="/Sprites/normal.png">
-                                <span>NORMAL</span>
-                            </div>
-                            <div class="mood-icon" data-mood="happy">
-                                <img src="/Sprites/happy.png">
-                                <span>HAPPY</span>
-                            </div>
-                            <div class="mood-icon" data-mood="sad">
-                                <img src="/Sprites/sad.png">
-                                <span>SAD</span>
-                            </div>
-                            <div class="mood-icon" data-mood="annoyed">
-                                <img src="/Sprites/annoyed.png">
-                                <span>ANNOYED</span>
-                            </div>
-                            <div class="mood-icon" data-mood="panic">
-                                <img src="/Sprites/panic.png">
-                                <span>PANIC</span>
-                            </div>
-                            <div class="mood-icon" data-mood="suspicious">
-                                <img src="/Sprites/suspicious.png">
-                                <span>SUSPICIOUS</span>
-                            </div>
-                            <div class="mood-icon" data-mood="sleeping">
-                                <img src="/Sprites/sleeping.png">
-                                <span>SLEEP</span>
-                            </div>
-                            <div class="mood-icon" data-mood="Smug">
-                                <img src="/Sprites/Smug.png">
-                                <span>SMUG</span>
-                            </div>
-                            <div class="mood-icon" data-mood="stare">
-                                <img src="/Sprites/stare.png">
-                                <span>STARE</span>
-                            </div>
-                            <div class="mood-icon" data-mood="dizzy">
-                                <img src="/Sprites/dizzy.png">
-                                <span>DIZZY</span>
-                            </div>
-                            <div class="mood-icon" data-mood="hollow">
-                                <img src="/Sprites/hollow.png">
-                                <span>HOLLOW</span>
-                            </div>
-                            <div class="mood-icon" data-mood="bug">
-                                <img src="/Sprites/bug.png">
-                                <span>BUG</span>
-                            </div>
-                            <div class="mood-icon" data-mood="werror">
-                                <img src="/Sprites/werror.png">
-                                <span>ERROR</span>
-                            </div>
+                        <div class="mood-grid" id="moodGrid">
+                            <div class="mood-icon active" data-mood="normal"><img src="/Sprites/normal.png"><span>NORMAL</span></div>
+                            <div class="mood-icon" data-mood="happy"><img src="/Sprites/happy.png"><span>HAPPY</span></div>
+                            <div class="mood-icon" data-mood="sad"><img src="/Sprites/sad.png"><span>SAD</span></div>
+                            <div class="mood-icon" data-mood="annoyed"><img src="/Sprites/annoyed.png"><span>ANNOYED</span></div>
+                            <div class="mood-icon" data-mood="panic"><img src="/Sprites/panic.png"><span>PANIC</span></div>
+                            <div class="mood-icon" data-mood="suspicious"><img src="/Sprites/suspicious.png"><span>SUSPICIOUS</span></div>
+                            <div class="mood-icon" data-mood="sleeping"><img src="/Sprites/sleeping.png"><span>SLEEP</span></div>
+                            <div class="mood-icon" data-mood="Smug"><img src="/Sprites/Smug.png"><span>SMUG</span></div>
+                            <div class="mood-icon" data-mood="stare"><img src="/Sprites/stare.png"><span>STARE</span></div>
+                            <div class="mood-icon" data-mood="dizzy"><img src="/Sprites/dizzy.png"><span>DIZZY</span></div>
+                            <div class="mood-icon" data-mood="hollow"><img src="/Sprites/hollow.png"><span>HOLLOW</span></div>
+                            <div class="mood-icon" data-mood="bug"><img src="/Sprites/bug.png"><span>BUG</span></div>
+                            <div class="mood-icon" data-mood="werror"><img src="/Sprites/werror.png"><span>ERROR</span></div>
                         </div>
                     </div>
-
                     <div class="admin-section">
                         <div class="admin-label">BROADCAST MESSAGE</div>
                         <div class="target-row">
@@ -278,7 +244,6 @@
                             <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
                         </div>
                     </div>
-
                     <div class="admin-section">
                         <div class="admin-label">ALARM PROTOCOLS</div>
                         <div class="alarm-grid">
@@ -290,26 +255,15 @@
                             <button class="btn-alarm btn-power-off" data-alarm="green">RESET</button>
                         </div>
                     </div>
-
                     <div class="admin-section">
                         <div class="admin-label">USER INPUT MONITORING</div>
                         <div class="spy-container">
                             <pre id="spy-input-data" class="spy-display"></pre>
                         </div>
                     </div>
-
                     <div class="admin-section">
-                        <div class="admin-label">PRIVATE COMMUNICATIONS</div>
-                        <div class="comm-container">
-                            <div class="comm-list" id="admin-comm-list"></div>
-                            <div class="comm-input-area">
-                                <input type="text" id="adminCommTarget" class="input-newton" placeholder="TARGET USER ID" style="margin-bottom: 8px;">
-                                <div style="display: flex; gap: 8px;">
-                                    <input type="text" id="adminCommMsg" class="input-newton" placeholder="MESSAGE" style="flex: 1; margin: 0;">
-                                    <button id="btnAdminCommSend" class="btn-newton" style="width: 80px; margin: 0;">SEND</button>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="admin-label">HELP REQUESTS QUEUE</div>
+                        <div id="help-queue" class="help-queue"></div>
                     </div>
                 </div>
             </div>
@@ -317,7 +271,7 @@
             <div id="protocol-overlay" class="protocol-screen hidden">
                 <div class="protocol-box">
                     <div id="protocol-countdown" class="protocol-countdown">
-                        <img id="proto-cnt-img" src="/assets/icon-small-priority-3-15x14.png" class="protocol-icon">
+                        <img id="proto-cnt-img" src="/assets/icon-small-priority_none-15x14.png" class="protocol-icon">
                         <div class="protocol-count-text">STANDBY</div>
                     </div>
                     <div id="protocol-task" class="protocol-task hidden">
@@ -330,25 +284,29 @@
             </div>
         </div>
 
+        <div id="obunto-overlay" class="obunto-overlay hidden">
+            <div class="obunto-container">
+                <div class="speech-bubble" id="obunto-bubble">SYSTEM MESSAGE</div>
+                <img id="obunto-avatar" src="/Sprites/normal.png" alt="Obunto" class="obunto-avatar">
+            </div>
+        </div>
+
         <div class="dock-newton">
             <div class="dock-apps">
                 <button id="btnNotepad" class="dock-btn" title="Notepad">
                     <img src="/assets/button-note-15x15.png">
                 </button>
                 <button id="btnOpenDarch" class="dock-btn" title="File System">
-                    <img src="/assets/button-folder-21x17.png">
+                    <img src="/assets/icon-small-folder-15x11.png">
                 </button>
-                <button id="btnOpenComms" class="dock-btn" title="Communications">
-                    <img src="/assets/icon-large-hamburger-28x19.png">
+                <button id="btnOpenRadio" class="dock-btn" title="Radio">
+                    <img src="/assets/icon-small-speaker-11x11.png">
                 </button>
-                <button id="btnOpenHelp" class="dock-btn" title="Support">
-                    <img src="/assets/icon-large-help-highlighted-30x23.png">
-                </button>
-                <button id="btnObunto" class="dock-btn" title="Obunto AI">
-                    <img src="/assets/icon-large-preferences-19x19.png">
+                <button id="btnOpenHelp" class="dock-btn" title="Support" data-personnel-only>
+                    <img src="/assets/icon-small-info-14x13.png">
                 </button>
                 <button id="btnObuntoControl" class="dock-btn hidden" title="Admin Panel">
-                    <img src="/assets/icon-large-setup-2x32.png">
+                    <img src="/assets/icon-small-newton-17x12.png">
                 </button>
             </div>
             <div class="dock-clock">

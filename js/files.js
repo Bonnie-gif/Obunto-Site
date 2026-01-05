@@ -13,7 +13,7 @@ export function initFiles(socket) {
             const el = document.createElement('div');
             el.className = 'file-item';
             el.innerHTML = `
-                <img src="/assets/${file.type === 'folder' ? 'button-folder-21x17.png' : 'button-text-22x17.png'}" class="file-icon">
+                <img src="/assets/${file.type === 'folder' ? 'icon-small-folder-15x11.png' : 'icon-small-text-3x10.png'}" class="file-icon">
                 <span class="file-name">${file.name}</span>
             `;
             el.onclick = () => {
@@ -39,8 +39,8 @@ export function initFiles(socket) {
         if (!files || files.length === 0) {
             renderFiles([
                 { name: 'SYSTEM', type: 'folder' },
-                { name: 'LOGS', type: 'folder' },
                 { name: 'PERSONNEL', type: 'folder' },
+                { name: 'LOGS', type: 'folder' },
                 { name: 'README.txt', type: 'file' }
             ]);
         } else {
