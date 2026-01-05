@@ -1,46 +1,72 @@
 import { playSound } from './audio.js';
 
 export async function handleLogin(socket) {
-    const idInput = document.getElementById('inpId');
+    const input = document.getElementById('inpId');
     const status = document.getElementById('loginStatus');
-    const id = idInput.value.trim();
+    const userId = input.value.trim();
 
-    if(!id) return;
+    if (!userId) {
+        status.textContent = 'ID REQUIRED';
+        return null;
+    }
 
-    status.textContent = "AUTHENTICATING...";
-    
+    status.textContent = 'AUTHENTICATING...';
+
     try {
-        const res = await fetch('/api/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ userId: id })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
         });
-        const data = await res.json();
+        
+        const data = await response.json();
 
-        if(data.success) {
+        if (data.success) {
+            status.textContent = 'ACCESS GRANTED';
             playSound('notify');
-            status.textContent = "ACCESS GRANTED";
             
-            // Atualiza Interface
-            document.getElementById('sbUser').textContent = data.userData.username;
-            document.getElementById('sbRank').textContent = data.userData.rank;
+            socket.emit('register_user', userId);
             
-            // Se for Obunto, mostra janela dele
-            if(data.userData.isObunto) {
-                document.getElementById('obunto-window').classList.remove('hidden');
-            }
+            const userData = data.userData;
+            document.getElementById('sbUser').textContent = userData.username.toUpperCase();
+            document.getElementById('sbRank').textContent = userData.rank;
+            
+            const dashName = document.getElementById('dashName');
+            if (dashName) dashName.textContent = userData.displayName.toUpperCase();
+            
+            const dashId = document.getElementById('dashId');
+            if (dashId) dashId.textContent = userData.id;
+            
+            const dashRank = document.getElementById('dashRank');
+            if (dashRank) dashRank.textContent = userData.rank;
+            
+            const dashAvatar = document.getElementById('dashAvatar');
+            if (dashAvatar && userData.avatar) dashAvatar.src = userData.avatar;
 
-            socket.emit('register_user', id);
+            if (userData.isObunto || userData.isHoltz) {
+                const adminPanel = document.getElementById('admin-panel');
+                if (adminPanel) adminPanel.classList.remove('hidden');
+                
+                const dockAdmin = document.getElementById('btnObuntoControl');
+                if (dockAdmin) dockAdmin.classList.remove('hidden');
+            }
 
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('desktop-screen').classList.remove('hidden');
+                document.getElementById('desktop-screen').classList.add('active');
             }, 1000);
+
+            return userData;
         } else {
+            status.textContent = data.message || 'ACCESS DENIED';
             playSound('denied');
-            status.textContent = "ACCESS DENIED";
+            return null;
         }
-    } catch(e) {
-        status.textContent = "SERVER ERROR";
+
+    } catch (error) {
+        status.textContent = 'CONNECTION ERROR';
+        playSound('denied');
+        return null;
     }
 }

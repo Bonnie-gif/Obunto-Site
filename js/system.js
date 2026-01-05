@@ -1,17 +1,24 @@
 export function initSystem(socket) {
-    socket.on('alarm_update', (type) => {
-        document.body.className = `alarm-${type}`;
-    });
-    
-    // Konami Code
-    const code = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','b','a'];
-    let idx = 0;
+    const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    let kIdx = 0;
+
     document.addEventListener('keydown', (e) => {
-        if(e.key === code[idx]) idx++;
-        else idx = 0;
-        if(idx === code.length) {
-            alert("CHEAT MODE ENABLED");
-            idx = 0;
+        if (e.key === konami[kIdx]) {
+            kIdx++;
+            if (kIdx === konami.length) {
+                alert("SYSTEM OVERRIDE: GOD MODE ENABLED");
+                kIdx = 0;
+            }
+        } else {
+            kIdx = 0;
         }
     });
+
+    const btnReboot = document.getElementById('btnSystemReboot');
+    if(btnReboot) {
+        btnReboot.onclick = () => {
+            socket.emit('toggle_system_status', 'REBOOTING');
+            location.reload();
+        };
+    }
 }

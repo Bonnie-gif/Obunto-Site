@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSC NEWTON OS</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="css/main.css">
     <link rel="icon" href="assets/icon-large-dock-35x23.png">
 </head>
 <body class="alarm-green">
@@ -37,6 +37,7 @@
             <div class="section-block">
                 <div class="session-line">USER: <span id="sbUser">--</span></div>
                 <div class="session-line">RANK: <span id="sbRank">--</span></div>
+                <button id="btnMyDashboard" class="btn-action" style="margin-top: 10px;">MY DASHBOARD</button>
             </div>
         </div>
 
@@ -49,12 +50,17 @@
                 </div>
             </div>
             
-            <div id="obunto-window" class="window-newton hidden" style="top: 50px; right: 50px; width: 300px;">
+            <div id="obunto-window" class="window-newton hidden" style="top: 50px; right: 50px; width: 300px; z-index: 2000;">
                 <div class="win-header">OBUNTO AI</div>
                 <div class="win-body obunto-container">
-                    <img id="obunto-avatar" src="assets/Sprites/normal.png" class="obunto-avatar">
-                    <div id="obunto-bubble" class="speech-bubble">System operational. How can I assist?</div>
+                    <img id="obunto-avatar" src="Sprites/normal.png" class="obunto-avatar">
+                    <div id="obunto-bubble" class="speech-bubble">System operational.</div>
                 </div>
+            </div>
+
+            <div id="notepad-window" class="window-newton hidden" style="top: 100px; left: 100px; width: 400px; height: 300px;">
+                <div class="win-header">NOTEPAD <button class="close-btn" id="closeNote">X</button></div>
+                <div class="win-body"><textarea class="notepad-area"></textarea></div>
             </div>
         </div>
 
@@ -68,10 +74,11 @@
     </div>
 
     <audio id="sfx-boot" src="audio/loading1.wav"></audio>
-    <audio id="sfx-click" src="audio/requestsent.wav"></audio> <audio id="sfx-notify" src="audio/newmessage.wav"></audio>
+    <audio id="sfx-click" src="audio/requestsent.wav"></audio>
+    <audio id="sfx-notify" src="audio/newmessage.wav"></audio>
     <audio id="sfx-denied" src="audio/requestdenied.wav"></audio>
     
     <script src="/socket.io/socket.io.js"></script>
-    <script type="module" src="main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
