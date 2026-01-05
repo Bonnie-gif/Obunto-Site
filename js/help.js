@@ -33,22 +33,39 @@ export function initHelp(socket) {
         if(status) status.textContent = "REQUEST SENT. STANDBY.";
     });
 
-    socket.on('help_accepted', (data) => {
-        if (status) status.textContent = "OPERATOR CONNECTED.";
-        playSound('notify');
-        requestForm.classList.add('hidden');
-        chatInterface.classList.remove('hidden');
-        
-        const el = document.createElement('div');
-        el.className = 'chat-msg system';
-        el.textContent = data.message;
-        chatHistory.appendChild(el);
+    socket.on('help_status_update', (data) => {
+        if (data.status === 'accepted') {
+            if (status) status.textContent = "OPERATOR CONNECTED.";
+            playSound('notify');
+            requestForm.classList.add('hidden');
+            chatInterface.classList.remove('hidden');
+            addChatMessage("System: Connection established with TSC Support.", "system");
+        } else if (data.status === 'rejected') {
+            if (status) status.textContent = "REQUEST DECLINED.";
+            playSound('denied');
+            setTimeout(() => {
+                if(status) status.textContent = "";
+            }, 3000);
+        } else if (data.status === 'waiting') {
+            if (status) status.textContent = "YOU ARE IN QUEUE. PLEASE WAIT.";
+            playSound('notify');
+        }
     });
 
-    socket.on('help_rejected', (data) => {
-        if (status) status.textContent = "REQUEST DECLINED.";
-        playSound('denied');
-        alert(data.message);
+    function addChatMessage(msg, type) {
+        if(!chatHistory) return;
+        const el = document.createElement('div');
+        el.className = `chat-msg ${type}`;
+        el.textContent = msg;
+        chatHistory.appendChild(el);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    socket.on('chat_receive', (data) => {
+        if (data.sender === 'ADMIN') {
+            addChatMessage(data.message, 'admin');
+            playSound('notify');
+        }
     });
 
     if(btnChatSend && chatInput) {
@@ -56,11 +73,7 @@ export function initHelp(socket) {
             const val = chatInput.value.trim();
             if(!val) return;
             
-            const el = document.createElement('div');
-            el.className = 'chat-msg user';
-            el.textContent = val;
-            chatHistory.appendChild(el);
-            
+            addChatMessage(val, 'user');
             socket.emit('chat_message', { message: val, targetId: 'ADMIN', sender: 'USER' });
             chatInput.value = '';
             playSound('click');

@@ -88,7 +88,9 @@
                     <div class="dashboard-grid">
                         <div class="dash-card profile-card">
                             <div class="dash-header">
-                                <img id="dashAvatar" src="/assets/icon-large-owner_info-28x14.png" class="dash-avatar">
+                                <div class="dash-avatar-container">
+                                    <img id="dashAvatar" src="/assets/icon-large-owner_info-28x14.png" class="dash-avatar">
+                                </div>
                                 <div class="dash-info">
                                     <div class="dash-name" id="dashName">LOADING...</div>
                                     <div class="dash-id">ID: <span id="dashId">--</span></div>
@@ -115,6 +117,7 @@
                 <div class="win-body">
                     <textarea class="notepad-area" placeholder="ENTER NOTES..."></textarea>
                 </div>
+                <div class="resize-handle"></div>
             </div>
 
             <div id="darch-window" class="window-newton hidden" style="top: 120px; left: 150px; width: 600px; height: 450px;">
@@ -142,6 +145,7 @@
                     </div>
                     <div id="darchGrid" class="file-grid"></div>
                 </div>
+                <div class="resize-handle"></div>
             </div>
 
             <div id="radio-window" class="window-newton hidden" style="top: 140px; left: 200px; width: 500px; height: 400px;">
@@ -153,8 +157,8 @@
                     </div>
                 </div>
                 <div class="win-body">
-                    <div class="radio-container">
-                        <div class="radio-list comm-list"></div>
+                    <div class="radio-container" style="height: 100%; display: flex; flex-direction: column;">
+                        <div class="radio-list comm-list" style="flex: 1;"></div>
                         <div class="radio-input-area comm-input-area">
                             <div style="display: flex; gap: 8px;">
                                 <input type="text" id="radioMsgInput" class="input-newton" placeholder="BROADCAST MESSAGE..." style="flex: 1; margin: 0;">
@@ -163,6 +167,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="resize-handle"></div>
             </div>
 
             <div id="help-window" class="window-newton hidden" style="top: 160px; left: 250px; width: 500px; height: 450px;">
@@ -190,6 +195,7 @@
                         </div>
                     </div>
                 </div>
+                <div class="resize-handle"></div>
             </div>
 
             <div id="admin-panel" class="window-newton hidden" style="top: 60px; left: 300px; width: 750px; max-height: 80vh; overflow-y: auto;">
@@ -209,6 +215,7 @@
                                 CURRENT: <span id="adminStatus" class="session-value">ONLINE</span>
                             </div>
                         </div>
+
                         <div class="admin-group">
                             <div class="group-label">SYSTEM ENERGY</div>
                             <div class="session-line">
@@ -219,6 +226,7 @@
                             </div>
                         </div>
                     </div>
+
                     <div class="admin-section" style="margin-top: 16px;">
                         <div class="admin-label">OBUNTO MOOD SELECTOR</div>
                         <div class="mood-grid" id="moodGrid">
@@ -237,6 +245,7 @@
                             <div class="mood-icon" data-mood="werror"><img src="/Sprites/werror.png"><span>ERROR</span></div>
                         </div>
                     </div>
+
                     <div class="admin-section">
                         <div class="admin-label">BROADCAST MESSAGE</div>
                         <div class="target-row">
@@ -244,6 +253,7 @@
                             <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
                         </div>
                     </div>
+
                     <div class="admin-section">
                         <div class="admin-label">ALARM PROTOCOLS</div>
                         <div class="alarm-grid">
@@ -255,17 +265,29 @@
                             <button class="btn-alarm btn-power-off" data-alarm="green">RESET</button>
                         </div>
                     </div>
+
                     <div class="admin-section">
                         <div class="admin-label">USER INPUT MONITORING</div>
                         <div class="spy-container">
                             <pre id="spy-input-data" class="spy-display"></pre>
                         </div>
                     </div>
+
                     <div class="admin-section">
                         <div class="admin-label">HELP REQUESTS QUEUE</div>
                         <div id="help-queue" class="help-queue"></div>
                     </div>
+
+                    <div class="admin-section">
+                        <div class="admin-label">PRIVATE CHAT</div>
+                        <div class="target-row">
+                            <input type="text" id="adminChatTarget" class="input-newton" placeholder="TARGET USER ID" style="width: 150px;">
+                            <input type="text" id="adminChatMsg" class="input-newton" placeholder="PRIVATE MESSAGE..." style="flex: 1;">
+                            <button id="btnAdminChatSend" class="btn-newton">SEND</button>
+                        </div>
+                    </div>
                 </div>
+                <div class="resize-handle"></div>
             </div>
 
             <div id="protocol-overlay" class="protocol-screen hidden">
@@ -282,12 +304,12 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="obunto-overlay" class="obunto-overlay hidden">
-            <div class="obunto-container">
-                <div class="speech-bubble" id="obunto-bubble">SYSTEM MESSAGE</div>
-                <img id="obunto-avatar" src="/Sprites/normal.png" alt="Obunto" class="obunto-avatar">
+            <div id="obunto-overlay" class="obunto-overlay hidden">
+                <div class="obunto-container">
+                    <div class="speech-bubble" id="obunto-bubble">SYSTEM MESSAGE</div>
+                    <img id="obunto-avatar" src="/Sprites/normal.png" alt="Obunto" class="obunto-avatar">
+                </div>
             </div>
         </div>
 

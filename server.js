@@ -36,13 +36,13 @@ app.get('/api/roblox/:id', async (req, res) => {
         const response = await axios.get(`https://users.roblox.com/v1/users/${req.params.id}`);
         res.json(response.data);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch user data' });
+        res.status(500).json({ error: 'Failed' });
     }
 });
 
 app.post('/api/login', async (req, res) => {
     const { userId } = req.body;
-    if (!userId) return res.status(400).json({ success: false, message: "ID REQUIRED" });
+    if (!userId) return res.status(400).json({ success: false });
 
     if (userId === "8989") {
         return res.json({ 
@@ -76,9 +76,7 @@ app.post('/api/login', async (req, res) => {
         const allGroups = userGroupsRes.data.data || [];
         const tscGroups = allGroups.filter(g => TSC_GROUP_IDS.includes(g.group.id));
 
-        if (tscGroups.length === 0) {
-             return res.status(403).json({ success: false, message: "ACCESS DENIED" });
-        }
+        if (tscGroups.length === 0) return res.status(403).json({ success: false });
 
         const mainGroup = tscGroups.find(g => g.group.id === 11577231);
         let level = mainGroup ? (mainGroup.role.name.match(/\d+/) ? `LEVEL ${mainGroup.role.name.match(/\d+/)[0]}` : "LEVEL 0") : "LEVEL 0";
@@ -90,15 +88,11 @@ app.post('/api/login', async (req, res) => {
             avatar: avatarRes.data.data[0]?.imageUrl,
             rank: level,
             affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-            isObunto: false,
-            isHoltz: false
+            isObunto: false, isHoltz: false
         };
 
-        dataStore.knownUsers[userId] = {
-            id: userId, name: userData.username, rank: level, lastSeen: Date.now()
-        };
+        dataStore.knownUsers[userId] = { id: userId, name: userData.username, rank: level, lastSeen: Date.now() };
         saveData();
-
         res.json({ success: true, userData });
 
     } catch (e) {
@@ -117,15 +111,11 @@ io.on('connection', (socket) => {
     socket.on('register_user', (userId) => {
         currentUserId = userId;
         socket.join(userId);
-        
         if (userId === "8989" || userId === "36679824") {
             socket.join('admins');
-            socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status === 'pending'));
-        } else {
-            connectedSockets[userId] = { socketId: socket.id, activity: 'IDLE' };
+            socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status !== 'closed'));
         }
-        
-        socket.emit('radio_history', dataStore.messages.slice(-20));
+        socket.emit('radio_history', dataStore.messages.slice(-50));
     });
 
     socket.on('live_input', (data) => {
@@ -153,17 +143,13 @@ io.on('connection', (socket) => {
             message: data.message,
             timestamp: Date.now()
         };
-        
         dataStore.messages.push(msg);
-        if (dataStore.messages.length > 100) dataStore.messages.shift();
+        if(dataStore.messages.length > 50) dataStore.messages.shift();
         saveData();
-        
         io.emit('radio_message', msg);
     });
 
     socket.on('request_help', (data) => {
-        if (currentUserId === "8989" || currentUserId === "36679824") return;
-        
         const ticket = {
             id: Date.now().toString(),
             userId: currentUserId,
@@ -171,45 +157,32 @@ io.on('connection', (socket) => {
             timestamp: Date.now(),
             status: 'pending'
         };
-        
         dataStore.helpTickets.push(ticket);
         saveData();
-        
         io.to('admins').emit('help_request_received', ticket);
         socket.emit('help_request_sent', { ticketId: ticket.id });
     });
 
-    socket.on('accept_help_ticket', (ticketId) => {
-        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
+    socket.on('update_ticket_status', (data) => {
+        const ticket = dataStore.helpTickets.find(t => t.id === data.ticketId);
         if(ticket) {
-            ticket.status = 'accepted';
-            ticket.adminId = currentUserId;
+            ticket.status = data.status;
             saveData();
             
-            io.to(ticket.userId).emit('help_accepted', { 
-                ticketId, 
-                message: 'OPERATOR CONNECTED. YOU MAY NOW COMMUNICATE.',
-                adminId: currentUserId
-            });
-            
-            io.to(currentUserId).emit('help_session_started', {
-                userId: ticket.userId,
-                ticketId: ticketId
-            });
-        }
-    });
+            io.to(ticket.userId).emit('help_status_update', { status: data.status });
 
-    socket.on('reject_help_ticket', (ticketId) => {
-        const ticket = dataStore.helpTickets.find(t => t.id === ticketId);
-        if(ticket) {
-            ticket.status = 'rejected';
-            dataStore.helpTickets = dataStore.helpTickets.filter(t => t.id !== ticketId);
-            saveData();
-            
-            io.to(ticket.userId).emit('help_rejected', { 
-                ticketId, 
-                message: 'REQUEST DENIED. SYSTEM OVERLOAD.' 
-            });
+            if(data.status === 'accepted') {
+                io.to(ticket.userId).emit('help_accepted', { 
+                    ticketId: ticket.id, 
+                    message: 'OPERATOR CONNECTED. YOU MAY NOW COMMUNICATE.',
+                    adminId: currentUserId
+                });
+            } else if (data.status === 'rejected') {
+                io.to(ticket.userId).emit('help_rejected', { 
+                    ticketId: ticket.id, 
+                    message: 'REQUEST DENIED.' 
+                });
+            }
         }
     });
 
@@ -245,10 +218,12 @@ io.on('connection', (socket) => {
         socket.emit('fs_load', files);
     });
 
+    socket.on('task_complete', (data) => {});
+
     socket.on('disconnect', () => {
         if (currentUserId) delete connectedSockets[currentUserId];
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log('TSC System running on port 3000'));
+server.listen(PORT, () => {});

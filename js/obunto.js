@@ -11,10 +11,14 @@ export function initObunto(socket) {
         
         if(overlay) {
             overlay.classList.remove('hidden');
+            overlay.classList.add('slide-up');
             playSound('notify');
             
             setTimeout(() => {
-                overlay.classList.add('hidden');
+                overlay.classList.remove('slide-up');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 500);
             }, 8000);
         }
     };
@@ -73,6 +77,22 @@ export function initObunto(socket) {
         });
     }
 
+    const btnAdminChatSend = document.getElementById('btnAdminChatSend');
+    const adminChatTarget = document.getElementById('adminChatTarget');
+    const adminChatMsg = document.getElementById('adminChatMsg');
+
+    if (btnAdminChatSend) {
+        btnAdminChatSend.onclick = () => {
+            const target = adminChatTarget.value.trim();
+            const msg = adminChatMsg.value.trim();
+            if (target && msg) {
+                socket.emit('chat_message', { message: msg, targetId: target, sender: 'ADMIN' });
+                adminChatMsg.value = '';
+                playSound('sent');
+            }
+        };
+    }
+
     initHelpQueue(socket);
 }
 
@@ -81,18 +101,23 @@ function initHelpQueue(socket) {
     if(!queue) return;
     
     socket.on('help_request_received', (ticket) => {
+        const existing = document.getElementById(`ticket-${ticket.id}`);
+        if(existing) return;
+
         const el = document.createElement('div');
         el.className = 'help-ticket';
         el.id = `ticket-${ticket.id}`;
+        el.dataset.userid = ticket.userId; 
         el.innerHTML = `
             <div class="ticket-header">
                 <span>USER: ${ticket.userId}</span>
-                <span>TIME: ${new Date(ticket.timestamp).toLocaleTimeString()}</span>
+                <span>${new Date(ticket.timestamp).toLocaleTimeString()}</span>
             </div>
             <div class="ticket-message">${ticket.message}</div>
             <div class="ticket-actions">
                 <button class="btn-newton" onclick="window.acceptTicket('${ticket.id}')">ACCEPT</button>
                 <button class="btn-newton" onclick="window.rejectTicket('${ticket.id}')">REJECT</button>
+                <button class="btn-newton" onclick="window.waitTicket('${ticket.id}')">WAITING</button>
             </div>
         `;
         queue.appendChild(el);
@@ -101,13 +126,28 @@ function initHelpQueue(socket) {
 
     window.acceptTicket = (id) => {
         socket.emit('update_ticket_status', { ticketId: id, status: 'accepted' });
-        document.getElementById(`ticket-${id}`)?.remove();
+        const el = document.getElementById(`ticket-${id}`);
+        if(el) {
+            el.style.backgroundColor = '#90ee90';
+            const userId = el.dataset.userid;
+            const adminTarget = document.getElementById('adminChatTarget');
+            if(adminTarget && userId) adminTarget.value = userId;
+            
+            setTimeout(() => el.remove(), 2000);
+        }
         playSound('click');
     };
 
     window.rejectTicket = (id) => {
         socket.emit('update_ticket_status', { ticketId: id, status: 'rejected' });
         document.getElementById(`ticket-${id}`)?.remove();
+        playSound('click');
+    };
+
+    window.waitTicket = (id) => {
+        socket.emit('update_ticket_status', { ticketId: id, status: 'waiting' });
+        const el = document.getElementById(`ticket-${id}`);
+        if(el) el.style.backgroundColor = '#ffd700';
         playSound('click');
     };
 }

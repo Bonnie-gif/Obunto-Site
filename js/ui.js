@@ -3,35 +3,57 @@ import { playSound } from './audio.js';
 export function initUI() {
     document.querySelectorAll('.window-newton').forEach(win => {
         const header = win.querySelector('.win-header');
-        if(!header) return;
-
-        header.onmousedown = (e) => {
-            if(e.target.closest('button')) return;
-            
-            let shiftX = e.clientX - win.getBoundingClientRect().left;
-            let shiftY = e.clientY - win.getBoundingClientRect().top;
-
-            function moveAt(pageX, pageY) {
-                win.style.left = pageX - shiftX + 'px';
-                win.style.top = pageY - shiftY + 'px';
-            }
-
-            function onMouseMove(event) {
-                moveAt(event.pageX, event.pageY);
-            }
-
-            document.addEventListener('mousemove', onMouseMove);
-
-            header.onmouseup = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                header.onmouseup = null;
-            };
-        };
+        const resizeHandle = win.querySelector('.resize-handle');
         
+        if (header) {
+            header.onmousedown = (e) => {
+                if(e.target.closest('button')) return;
+                
+                let shiftX = e.clientX - win.getBoundingClientRect().left;
+                let shiftY = e.clientY - win.getBoundingClientRect().top;
+
+                function moveAt(pageX, pageY) {
+                    win.style.left = pageX - shiftX + 'px';
+                    win.style.top = pageY - shiftY + 'px';
+                }
+
+                function onMouseMove(event) {
+                    moveAt(event.pageX, event.pageY);
+                }
+
+                document.addEventListener('mousemove', onMouseMove);
+
+                header.onmouseup = () => {
+                    document.removeEventListener('mousemove', onMouseMove);
+                    header.onmouseup = null;
+                };
+            };
+        }
+
         win.onmousedown = () => {
             document.querySelectorAll('.window-newton').forEach(w => w.style.zIndex = 1000);
             win.style.zIndex = 1001;
         };
+
+        if (resizeHandle) {
+            resizeHandle.onmousedown = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                
+                function resize(event) {
+                    win.style.width = (event.clientX - win.getBoundingClientRect().left) + 'px';
+                    win.style.height = (event.clientY - win.getBoundingClientRect().top) + 'px';
+                }
+                
+                function stopResize() {
+                    document.removeEventListener('mousemove', resize);
+                    document.removeEventListener('mouseup', stopResize);
+                }
+                
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+            };
+        }
     });
 
     document.querySelectorAll('[data-action="minimize"]').forEach(btn => {
