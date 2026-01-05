@@ -2,7 +2,8 @@ const SOUNDS = {
     boot: document.getElementById('sfx-boot'),
     click: document.getElementById('sfx-click'),
     notify: document.getElementById('sfx-notify'),
-    denied: document.getElementById('sfx-denied')
+    denied: document.getElementById('sfx-denied'),
+    sent: document.getElementById('sfx-sent')
 };
 
 export function playSound(name) {
@@ -17,6 +18,8 @@ export function playSound(name) {
 
 export function initAudio() {
     document.addEventListener('click', (e) => {
-        if(e.target.closest('button')) playSound('click');
+        if(e.target.closest('button') && !e.target.closest('.mood-icon')) {
+            playSound('click');
+        }
     });
 }

@@ -8,6 +8,7 @@ export async function handleLogin(socket) {
 
     if (!userId) {
         status.textContent = 'ID REQUIRED';
+        playSound('denied');
         return null;
     }
 
@@ -44,6 +45,7 @@ export async function handleLogin(socket) {
 
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('active');
                 document.getElementById('desktop-screen').classList.remove('hidden');
                 document.getElementById('desktop-screen').classList.add('active');
             }, 1000);

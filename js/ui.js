@@ -41,11 +41,14 @@ export function initUI() {
     setupWindowToggle('btnOpenHelp', 'help-window', 'closeHelp');
     setupWindowToggle('btnObuntoControl', 'admin-panel', 'closeAdmin');
     
-    document.getElementById('btnMyDashboard').onclick = () => {
-        document.querySelectorAll('.viewer').forEach(v => v.classList.add('hidden'));
-        document.getElementById('view-dashboard').classList.remove('hidden');
-        playSound('click');
-    };
+    const btnDashboard = document.getElementById('btnMyDashboard');
+    if(btnDashboard) {
+        btnDashboard.onclick = () => {
+            document.querySelectorAll('.viewer').forEach(v => v.classList.add('hidden'));
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            playSound('click');
+        };
+    }
 }
 
 function setupWindowToggle(btnId, winId, closeId) {
@@ -88,16 +91,18 @@ export function renderDashboard(userData) {
     if (dashRank) dashRank.textContent = userData.rank;
     if (dashAvatar && userData.avatar) dashAvatar.src = userData.avatar;
 
-    if (dashDepts && userData.affiliations) {
+    if (dashDepts && userData.affiliations && userData.affiliations.length > 0) {
         dashDepts.innerHTML = '';
         userData.affiliations.forEach(aff => {
             const row = document.createElement('div');
             row.className = 'dept-row';
             row.innerHTML = `
                 <div class="dept-name">${aff.groupName}</div>
-                <div class="dept-role">${aff.role} (Rank ${aff.rank})</div>
+                <div class="dept-role">${aff.role} (RANK ${aff.rank})</div>
             `;
             dashDepts.appendChild(row);
         });
+    } else if (dashDepts) {
+        dashDepts.innerHTML = '<div class="dept-row"><div class="dept-name">NO AFFILIATIONS</div></div>';
     }
 }

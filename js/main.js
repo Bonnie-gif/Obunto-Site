@@ -5,6 +5,9 @@ import { initObunto } from './obunto.js';
 import { initSystem } from './system.js';
 import { initNotepad } from './notepad.js';
 import { initComms } from './comms.js';
+import { initFiles } from './files.js';
+import { initHelp } from './help.js';
+import { initProtocols } from './protocols.js';
 
 const socket = io();
 
@@ -15,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initObunto(socket);
     initNotepad(socket);
     initComms(socket);
+    initFiles(socket);
+    initHelp(socket);
+    initProtocols(socket);
 
     setTimeout(() => {
         const boot = document.getElementById('boot-sequence');
@@ -23,7 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
             boot.classList.remove('active');
             boot.classList.add('hidden');
         }
-        if (login) login.classList.remove('hidden');
+        if (login) {
+            login.classList.remove('hidden');
+            login.classList.add('active');
+        }
     }, 6500);
 
     const loginBtn = document.getElementById('btnLogin');
@@ -53,5 +62,48 @@ document.addEventListener('DOMContentLoaded', () => {
             const now = new Date();
             clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
+        
+        const dateDisplay = document.getElementById('dateDisplay');
+        if(dateDisplay) {
+            const now = new Date();
+            dateDisplay.textContent = now.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            }).toUpperCase();
+        }
     }, 1000);
+
+    socket.on('status_update', (status) => {
+        const statusText = document.getElementById('statusText');
+        const sbStatus = document.getElementById('sbStatus');
+        const adminStatus = document.getElementById('adminStatus');
+        const indicator = document.getElementById('statusIndicator');
+        
+        if(statusText) statusText.textContent = status;
+        if(sbStatus) sbStatus.textContent = status;
+        if(adminStatus) adminStatus.textContent = status;
+        
+        if(indicator) {
+            indicator.style.backgroundColor = status === 'ONLINE' ? '#4ade80' : '#ef4444';
+            indicator.style.boxShadow = status === 'ONLINE' ? '0 0 5px #4ade80' : '0 0 5px #ef4444';
+        }
+    });
+
+    socket.on('alarm_update', (alarm) => {
+        document.body.className = `alarm-${alarm}`;
+        playSound('click');
+    });
+
+    socket.on('energy_update', (energy) => {
+        const sbEnergy = document.getElementById('sbEnergy');
+        const energyFill = document.getElementById('energyFill');
+        const adminEnergy = document.getElementById('adminEnergy');
+        const adminEnergyBar = document.getElementById('adminEnergyBar');
+        
+        if(sbEnergy) sbEnergy.textContent = `${Math.round(energy)}%`;
+        if(energyFill) energyFill.style.width = `${energy}%`;
+        if(adminEnergy) adminEnergy.textContent = `${Math.round(energy)}%`;
+        if(adminEnergyBar) adminEnergyBar.style.width = `${energy}%`;
+    });
 });

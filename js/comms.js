@@ -22,7 +22,10 @@ export function initComms(socket) {
     function send() {
         const text = input.value.trim();
         const target = targetInput ? targetInput.value.trim() : 'ADMIN';
-        if (!text) return;
+        if (!text) {
+            playSound('denied');
+            return;
+        }
 
         socket.emit('chat_message', { message: text, targetId: target, sender: 'USER' });
         addMessage({ sender: 'ME', message: text }, 'self');
@@ -38,6 +41,8 @@ export function initComms(socket) {
     }
 
     socket.on('chat_receive', (msg) => {
-        addMessage(msg, 'other');
+        if(msg.sender === 'ADMIN' || msg.sender !== 'USER') {
+            addMessage({ sender: msg.sender || 'SYSTEM', message: msg.message }, 'other');
+        }
     });
 }

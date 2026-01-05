@@ -23,12 +23,12 @@ export function initProtocols(socket) {
         playSound('notify');
 
         let count = 3;
-        if(img) img.src = `assets/icon-small-priority_${count}-15x14.png`; 
+        if(img) img.src = `/assets/icon-small-priority-${count}-15x14.png`; 
 
         const interval = setInterval(() => {
             count--;
             if (count > 0) {
-                if(img) img.src = `assets/icon-small-priority_${count}-15x14.png`;
+                if(img) img.src = `/assets/icon-small-priority-${count}-15x14.png`;
                 playSound('click');
             } else {
                 clearInterval(interval);
