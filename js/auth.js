@@ -1,72 +1,45 @@
 import { playSound } from './audio.js';
 
 export async function handleLogin(socket) {
-    const input = document.getElementById('inpId');
+    const idInput = document.getElementById('inpId');
     const status = document.getElementById('loginStatus');
-    const userId = input.value.trim();
+    const id = idInput.value.trim();
 
-    if (!userId) {
-        status.textContent = 'ID REQUIRED';
-        return null;
-    }
+    if(!id) return;
 
-    status.textContent = 'AUTHENTICATING...';
-
+    status.textContent = "AUTHENTICATING...";
+    
     try {
-        const response = await fetch('/api/login', {
+        const res = await fetch('/api/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId })
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ userId: id })
         });
-        
-        const data = await response.json();
+        const data = await res.json();
 
-        if (data.success) {
-            status.textContent = 'ACCESS GRANTED';
+        if(data.success) {
             playSound('notify');
+            status.textContent = "ACCESS GRANTED";
             
-            socket.emit('register_user', userId);
+            document.getElementById('sbUser').textContent = data.userData.username;
+            document.getElementById('sbRank').textContent = data.userData.rank;
             
-            const userData = data.userData;
-            document.getElementById('sbUser').textContent = userData.username.toUpperCase();
-            document.getElementById('sbRank').textContent = userData.rank;
-            
-            const dashName = document.getElementById('dashName');
-            if (dashName) dashName.textContent = userData.displayName.toUpperCase();
-            
-            const dashId = document.getElementById('dashId');
-            if (dashId) dashId.textContent = userData.id;
-            
-            const dashRank = document.getElementById('dashRank');
-            if (dashRank) dashRank.textContent = userData.rank;
-            
-            const dashAvatar = document.getElementById('dashAvatar');
-            if (dashAvatar && userData.avatar) dashAvatar.src = userData.avatar;
-
-            if (userData.isObunto || userData.isHoltz) {
-                const adminPanel = document.getElementById('admin-panel');
-                if (adminPanel) adminPanel.classList.remove('hidden');
-                
-                const dockAdmin = document.getElementById('btnObuntoControl');
-                if (dockAdmin) dockAdmin.classList.remove('hidden');
+            if(data.userData.isObunto) {
+                document.getElementById('obunto-window').classList.remove('hidden');
             }
+
+            socket.emit('register_user', id);
 
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('desktop-screen').classList.remove('hidden');
                 document.getElementById('desktop-screen').classList.add('active');
             }, 1000);
-
-            return userData;
         } else {
-            status.textContent = data.message || 'ACCESS DENIED';
             playSound('denied');
-            return null;
+            status.textContent = "ACCESS DENIED";
         }
-
-    } catch (error) {
-        status.textContent = 'CONNECTION ERROR';
-        playSound('denied');
-        return null;
+    } catch(e) {
+        status.textContent = "SERVER ERROR";
     }
 }

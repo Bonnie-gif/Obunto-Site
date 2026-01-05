@@ -1,8 +1,8 @@
-@import 'base.css';
-@import 'components.css';
-@import 'layout.css';
-@import 'views.css';
-@import 'obunto.css';
+@import '/css/base.css';
+@import '/css/components.css';
+@import '/css/layout.css';
+@import '/css/views.css';
+@import '/css/obunto.css';
 
 #desktop-screen {
     display: none;
@@ -31,8 +31,3 @@
 #boot-sequence { z-index: 10000; }
 #login-screen  { z-index: 9000; }
 .dock-newton   { z-index: 5000 !important; }
-.modal-overlay { z-index: 9999 !important; }
-
-#notepad-window { top: 100px; left: 100px; width: 500px; height: 400px; }
-#comms-window { top: 80px; left: 350px; width: 450px; height: 500px; }
-#admin-panel { top: 50px; left: 50%; transform: translateX(-50%); width: 600px; }

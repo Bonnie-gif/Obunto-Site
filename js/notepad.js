@@ -3,6 +3,9 @@ export function initNotepad(socket) {
     let timeout;
 
     if (area) {
+        const saved = localStorage.getItem('tsc_user_notes');
+        if (saved) area.value = saved;
+
         area.addEventListener('input', () => {
             clearTimeout(timeout);
             timeout = setTimeout(() => {
@@ -10,10 +13,4 @@ export function initNotepad(socket) {
             }, 1000);
         });
     }
-
-    socket.on('load_notes', (notes) => {
-        if (area) {
-            area.value = notes || localStorage.getItem('tsc_user_notes') || "";
-        }
-    });
 }

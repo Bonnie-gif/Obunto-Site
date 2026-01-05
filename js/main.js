@@ -14,6 +14,16 @@ document.addEventListener('DOMContentLoaded', () => {
     initObunto(socket);
     initNotepad(socket);
 
+    setTimeout(() => {
+        const boot = document.getElementById('boot-sequence');
+        const login = document.getElementById('login-screen');
+        if (boot) {
+            boot.classList.remove('active');
+            boot.classList.add('hidden');
+        }
+        if (login) login.classList.remove('hidden');
+    }, 6500);
+
     const loginBtn = document.getElementById('btnLogin');
     const inpId = document.getElementById('inpId');
 
@@ -26,4 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if(e.key === 'Enter') handleLogin(socket);
         });
     }
+
+    setInterval(() => {
+        const clock = document.getElementById('clock');
+        if(clock) {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            clock.textContent = `${hours}:${minutes}`;
+        }
+    }, 1000);
 });

@@ -1,10 +1,9 @@
 export function initObunto(socket) {
-    const win = document.getElementById('obunto-window');
     const avatar = document.getElementById('obunto-avatar');
-    const bubble = document.getElementById('obunto-bubble');
     const btn = document.getElementById('btnObunto');
+    const win = document.getElementById('obunto-window');
 
-    if(btn) {
+    if(btn && win) {
         btn.onclick = () => {
             win.classList.toggle('hidden');
         };
@@ -12,17 +11,7 @@ export function initObunto(socket) {
 
     window.setObuntoMood = (mood) => {
         if(avatar) {
-            avatar.src = `Sprites/${mood}.png`;
+            avatar.src = `/Sprites/${mood}.png`;
         }
     };
-
-    window.obuntoSay = (text, mood = 'normal') => {
-        if(bubble) bubble.textContent = text;
-        window.setObuntoMood(mood);
-        if(win) win.classList.remove('hidden');
-    };
-    
-    socket.on('receive_broadcast_message', (data) => {
-        window.obuntoSay(data.message, data.mood);
-    });
 }

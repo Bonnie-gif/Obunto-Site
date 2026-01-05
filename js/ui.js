@@ -7,7 +7,7 @@ export function initUI() {
 
         header.onmousedown = (e) => {
             if(e.target.closest('button')) return;
-            
+
             let shiftX = e.clientX - win.getBoundingClientRect().left;
             let shiftY = e.clientY - win.getBoundingClientRect().top;
 
@@ -34,37 +34,28 @@ export function initUI() {
         };
     });
 
-    setupWindowToggle('btnOpenNotepad', 'notepad-window', 'closeNotepad');
-    setupWindowToggle('btnOpenDarch', 'darch-window', 'closeDarch');
-    setupWindowToggle('btnOpenComms', 'comms-window', 'closeComms');
-    setupWindowToggle('btnOpenHelp', 'help-window', 'closeHelp');
-    setupWindowToggle('btnObuntoControl', 'admin-panel', 'closeAdmin');
-    setupWindowToggle('btnMonitor', 'personnel-window', 'closePersonnel');
-}
+    const btnNotepad = document.getElementById('btnNotepad');
+    const winNotepad = document.getElementById('notepad-window');
+    const closeNotepad = document.getElementById('closeNote');
 
-function setupWindowToggle(btnId, winId, closeId) {
-    const btn = document.getElementById(btnId);
-    const win = document.getElementById(winId);
-    const close = document.getElementById(closeId);
-
-    if (btn && win) {
-        btn.onclick = () => {
-            const isHidden = win.classList.contains('hidden');
+    if (btnNotepad && winNotepad) {
+        btnNotepad.onclick = () => {
+            const isHidden = winNotepad.classList.contains('hidden');
             document.querySelectorAll('.window-newton').forEach(w => w.style.zIndex = 1000);
             
             if (isHidden) {
-                win.classList.remove('hidden');
-                win.style.zIndex = 1001;
+                winNotepad.classList.remove('hidden');
+                winNotepad.style.zIndex = 1001;
                 playSound('click');
             } else {
-                win.classList.add('hidden');
+                winNotepad.classList.add('hidden');
             }
         };
     }
 
-    if (close && win) {
-        close.onclick = () => {
-            win.classList.add('hidden');
+    if (closeNotepad && winNotepad) {
+        closeNotepad.onclick = () => {
+            winNotepad.classList.add('hidden');
             playSound('click');
         };
     }
