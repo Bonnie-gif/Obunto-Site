@@ -1,38 +1,241 @@
-button { font-family: var(--font-main); cursor: pointer; user-select: none; }
+button { 
+  font-family: var(--font-main); 
+  cursor: pointer; 
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
 
+/* Newton OS Classic Button - Deep embossed 3D effect */
 .btn-newton {
-  width: 100%; padding: 8px; background: var(--button);
-  border-style: outset; border-width: 2px;
-  border-color: #ffffff #000000 #000000 #ffffff;
-  color: var(--ink); font-weight: bold; font-size: 11px;
-  box-shadow: 1px 1px 0 #000;
+  width: 100%; 
+  padding: 10px 14px; 
+  background: var(--button);
+  border: none;
+  box-shadow: 
+    /* Outer highlight */
+    2px 2px 0 rgba(0, 0, 0, 0.3),
+    /* Top-left highlight */
+    inset 2px 2px 0 rgba(255, 255, 255, 0.8),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.4),
+    /* Bottom-right shadow */
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.15);
+  color: var(--ink); 
+  font-weight: bold; 
+  font-size: 12px;
+  text-align: center;
+  position: relative;
+  transition: all 0.08s ease;
+  letter-spacing: 0.3px;
 }
-.btn-newton:hover { background: var(--button-hover); }
-.btn-newton:active { border-style: inset; border-color: #000000 #ffffff #ffffff #000000; transform: translate(1px, 1px); }
 
+.btn-newton:hover { 
+  background: var(--button-hover);
+  box-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.35),
+    inset 2px 2px 0 rgba(255, 255, 255, 0.85),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.5),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.35),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.18);
+}
+
+.btn-newton:active { 
+  background: var(--button-active);
+  box-shadow: 
+    1px 1px 0 rgba(0, 0, 0, 0.2),
+    /* Inverted shadows for pressed effect */
+    inset -2px -2px 0 rgba(255, 255, 255, 0.5),
+    inset -3px -3px 0 rgba(255, 255, 255, 0.2),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.2);
+  transform: translate(1px, 1px);
+}
+
+.btn-newton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--ink-dim);
+}
+
+/* Action Button with Icon - Newton style */
 .btn-action {
-  width: 100%; padding: 8px; background: var(--button);
-  border: 2px outset #ffffff; border-radius: 0px;
-  display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: bold;
+  width: 100%; 
+  padding: 10px 14px; 
+  background: var(--button);
+  border: none;
+  box-shadow: 
+    2px 2px 0 rgba(0, 0, 0, 0.3),
+    inset 2px 2px 0 rgba(255, 255, 255, 0.8),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.4),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.15);
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  font-size: 12px; 
+  font-weight: bold;
   color: var(--ink);
+  cursor: pointer;
+  transition: all 0.08s ease;
+  letter-spacing: 0.3px;
 }
-.btn-action img { width: 16px; }
-.btn-action:active { border-style: inset; }
 
-input, textarea { font-family: var(--font-mono); outline: none; }
+.btn-action img { 
+  width: 18px; 
+  height: 18px;
+  image-rendering: pixelated;
+  filter: contrast(1.1);
+}
+
+.btn-action:hover {
+  background: var(--button-hover);
+}
+
+.btn-action:active { 
+  background: var(--button-active);
+  box-shadow: 
+    1px 1px 0 rgba(0, 0, 0, 0.2),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.5),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.2);
+  transform: translate(1px, 1px);
+}
+
+/* Newton OS Input Fields - Inset style */
+input, textarea { 
+  font-family: var(--font-mono); 
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
 
 .input-newton {
-  width: 100%; padding: 8px; background: var(--paper);
-  border-style: inset; border-width: 2px;
-  border-color: #000000 #ffffff #ffffff #000000;
-  font-family: var(--font-mono); font-size: 12px; color: var(--ink); margin-bottom: 10px;
-  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2);
+  width: 100%; 
+  padding: 8px 10px; 
+  background: var(--paper);
+  border: none;
+  box-shadow: 
+    /* Deep inset effect */
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.25),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.6),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.3);
+  font-family: var(--font-mono); 
+  font-size: 12px; 
+  color: var(--ink); 
+  margin-bottom: 10px;
+  transition: background 0.15s ease;
 }
-.input-newton:focus { background: #ffffff; }
-.input-newton::placeholder { color: var(--ink-dim); font-style: italic; }
 
-::-webkit-scrollbar { width: 16px; height: 16px; background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: var(--button); border: 2px outset #ffffff; border-right-color: #000000; border-bottom-color: #000000; }
-::-webkit-scrollbar-button { background: var(--button); border: 2px outset #ffffff; height: 16px; width: 16px; }
+.input-newton:focus { 
+  background: #ffffff;
+  box-shadow: 
+    inset 2px 2px 0 rgba(0, 0, 0, 0.6),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.3),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.7),
+    0 0 0 2px #000000;
+}
 
-.status-text { text-align: center; height: 20px; margin: 8px 0; color: var(--ink); font-family: var(--font-mono); font-size: 10px; }
+.input-newton::placeholder { 
+  color: var(--ink-dim); 
+  font-style: italic; 
+  opacity: 0.6;
+}
+
+/* Newton OS Scrollbar - Chunky and functional */
+::-webkit-scrollbar { 
+  width: 18px; 
+  height: 18px; 
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+  box-shadow: 
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb { 
+  background: var(--button);
+  border: 1px solid var(--border-dark);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.7),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+  min-height: 40px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--button-hover);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.8),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--button-active);
+  box-shadow: 
+    inset -2px -2px 0 rgba(255, 255, 255, 0.5),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-button { 
+  background: var(--button);
+  height: 18px; 
+  width: 18px;
+  border: 1px solid var(--border-dark);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.7),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar-button:hover {
+  background: var(--button-hover);
+}
+
+::-webkit-scrollbar-button:active {
+  box-shadow: 
+    inset -2px -2px 0 rgba(255, 255, 255, 0.5),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M9 6 L5 11 L13 11 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M9 12 L5 7 L13 7 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M6 9 L11 5 L11 13 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path d="M12 9 L7 5 L7 13 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Status Text - Newton style */
+.status-text { 
+  text-align: center; 
+  min-height: 24px; 
+  margin: 10px 0; 
+  color: var(--ink); 
+  font-family: var(--font-mono); 
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  padding: 4px 8px;
+  background: var(--bg-light);
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}

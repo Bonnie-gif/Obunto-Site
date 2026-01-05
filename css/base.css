@@ -1,51 +1,168 @@
 :root {
-  --bg-main: #c0c0c0;
-  --bg-light: #d4d0c8;
-  --bg-dark: #808080;
+  /* Newton OS Color Palette - Authentic grayscale with slight warmth */
+  --bg-main: #c8c8c8;
+  --bg-light: #e0e0e0;
+  --bg-dark: #909090;
   --ink: #000000;
-  --ink-dim: #808080;
-  --ink-light: #404040;
-  --paper: #ffffff;
-  --paper-dark: #dfdfdf;
-  --paper-light: #ffffff;
+  --ink-dim: #707070;
+  --ink-light: #303030;
+  --paper: #f5f5f5;
+  --paper-dark: #e8e8e8;
+  --paper-light: #fafafa;
   --border: #000000;
-  --border-light: #808080;
-  --shadow: rgba(0, 0, 0, 0.5);
-  --button: #c0c0c0;
-  --button-hover: #d4d0c8;
-  --font-main: 'Chicago', 'System', sans-serif;
-  --font-mono: 'Monaco', monospace;
+  --border-dark: #606060;
+  --border-light: #909090;
+  --border-highlight: #ffffff;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --shadow-dark: rgba(0, 0, 0, 0.7);
+  --button: #c8c8c8;
+  --button-hover: #d8d8d8;
+  --button-active: #a8a8a8;
+  --font-main: 'Chicago', 'Espy Sans', 'Geneva', 'System', sans-serif;
+  --font-mono: 'Monaco', 'Courier New', 'Courier', monospace;
   --alert-color: #000000;
   --radius: 0px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
 
 html, body {
-  height: 100%; margin: 0; background: var(--bg-main); font-family: var(--font-main);
-  font-size: 12px; color: var(--ink); overflow: hidden; image-rendering: pixelated;
-  transition: background 0.5s ease;
+  height: 100%; 
+  margin: 0; 
+  background: var(--bg-main);
+  font-family: var(--font-main);
+  font-size: 12px; 
+  color: var(--ink); 
+  overflow: hidden;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  transition: background 0.3s ease, filter 0.3s ease;
+  cursor: default;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle dithering pattern for authentic Newton look */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      rgba(0, 0, 0, 0.02) 1px,
+      rgba(0, 0, 0, 0.02) 2px
+    );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
 }
 
 .hidden { display: none !important; }
 .active { display: flex !important; }
 
-body.alarm-blue { --bg-main: #000080; --ink: #ffffff; --paper: #0000a0; --alert-color: #00ffff; }
-body.alarm-red { --bg-main: #800000; --ink: #ffffff; --paper: #a00000; --alert-color: #ff0000; }
-body.alarm-red .screen-flicker { animation: redFlash 1s infinite; background: rgba(255,0,0,0.1); }
-body.alarm-red .crt-overlay { animation: redPulse 2s infinite; }
-
-@keyframes redFlash { 0%, 100% { opacity: 0.1; } 50% { opacity: 0.3; } }
-@keyframes redPulse { 0%, 100% { box-shadow: inset 0 0 50px rgba(255,0,0,0.3); } 50% { box-shadow: inset 0 0 80px rgba(255,0,0,0.5); } }
-
-body.alarm-gamma { --bg-main: #808000; --ink: #ffff00; --paper: #a0a000; --alert-color: #ffff00; }
-body.alarm-epsilon { --bg-main: #400040; --ink: #ff00ff; --paper: #600060; --alert-color: #ff00ff; filter: contrast(150%); }
-
-.crt-overlay {
-    position: fixed; inset: 0; pointer-events: none; z-index: 9998;
-    background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.1) 100%);
+/* Alarm States - Newton OS inspired alert modes */
+body.alarm-green {
+  --bg-main: #c8c8c8;
+  --alert-color: #00aa00;
 }
+
+body.alarm-blue { 
+  --bg-main: #7a9ab8; 
+  --bg-light: #95b0ca;
+  --bg-dark: #5a7a98;
+  --ink: #001030; 
+  --paper: #dce8f5; 
+  --alert-color: #0055cc;
+  --button: #95b0ca;
+}
+
+body.alarm-red { 
+  --bg-main: #b86060; 
+  --bg-light: #ca8080;
+  --bg-dark: #984040;
+  --ink: #300000; 
+  --paper: #f5dcdc; 
+  --alert-color: #cc0000;
+  --button: #ca8080;
+}
+
+body.alarm-red .crt-overlay { 
+  animation: redPulse 1.5s infinite; 
+}
+
+body.alarm-gamma { 
+  --bg-main: #b8b860; 
+  --bg-light: #caca80;
+  --bg-dark: #989840;
+  --ink: #303000; 
+  --paper: #f5f5dc; 
+  --alert-color: #cccc00;
+  --button: #caca80;
+}
+
+body.alarm-epsilon { 
+  --bg-main: #7a2d7a; 
+  --bg-light: #954a95;
+  --bg-dark: #5a1d5a;
+  --ink: #180018; 
+  --paper: #e8d8e8; 
+  --alert-color: #cc00cc; 
+  filter: contrast(125%) saturate(110%);
+  --button: #954a95;
+}
+
+@keyframes redPulse { 
+  0%, 100% { box-shadow: inset 0 0 100px rgba(200, 0, 0, 0.2); } 
+  50% { box-shadow: inset 0 0 140px rgba(200, 0, 0, 0.35); } 
+}
+
+/* Minimal CRT Effects - Newton used LCD, not CRT */
+.crt-overlay {
+  position: fixed; 
+  inset: 0; 
+  pointer-events: none; 
+  z-index: 9997;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.05) 100%);
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, 0.08);
+}
+
 .scanlines {
-    position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.05;
-    background: repeating-linear-gradient(0deg, #000, #000 1px, transparent 1px, transparent 2px);
+  position: fixed; 
+  inset: 0; 
+  pointer-events: none; 
+  z-index: 9998; 
+  opacity: 0.02;
+  background: repeating-linear-gradient(
+    0deg, 
+    rgba(0, 0, 0, 0.1), 
+    rgba(0, 0, 0, 0.1) 1px, 
+    transparent 1px, 
+    transparent 3px
+  );
+}
+
+/* Newton-style selection */
+::selection {
+  background: #000000;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: #000000;
+  color: #ffffff;
 }
