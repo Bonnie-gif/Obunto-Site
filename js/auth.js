@@ -1,45 +1,63 @@
 import { playSound } from './audio.js';
+import { renderDashboard } from './ui.js';
 
 export async function handleLogin(socket) {
-    const idInput = document.getElementById('inpId');
+    const input = document.getElementById('inpId');
     const status = document.getElementById('loginStatus');
-    const id = idInput.value.trim();
+    const userId = input.value.trim();
 
-    if(!id) return;
+    if (!userId) {
+        status.textContent = 'ID REQUIRED';
+        return null;
+    }
 
-    status.textContent = "AUTHENTICATING...";
-    
+    status.textContent = 'AUTHENTICATING...';
+
     try {
-        const res = await fetch('/api/login', {
+        const response = await fetch('/api/login', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ userId: id })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userId })
         });
-        const data = await res.json();
+        
+        const data = await response.json();
 
-        if(data.success) {
+        if (data.success) {
+            status.textContent = 'ACCESS GRANTED';
             playSound('notify');
-            status.textContent = "ACCESS GRANTED";
             
-            document.getElementById('sbUser').textContent = data.userData.username;
-            document.getElementById('sbRank').textContent = data.userData.rank;
+            const userData = data.userData;
+            socket.emit('register_user', userData.id);
             
-            if(data.userData.isObunto) {
-                document.getElementById('obunto-window').classList.remove('hidden');
-            }
+            document.getElementById('sbUser').textContent = userData.username.toUpperCase();
+            document.getElementById('sbRank').textContent = userData.rank;
+            
+            renderDashboard(userData);
 
-            socket.emit('register_user', id);
+            if (userData.isObunto || userData.isHoltz) {
+                const adminPanel = document.getElementById('admin-panel');
+                if (adminPanel) adminPanel.classList.remove('hidden');
+                
+                const dockAdmin = document.getElementById('btnObuntoControl');
+                if (dockAdmin) dockAdmin.classList.remove('hidden');
+            }
 
             setTimeout(() => {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('desktop-screen').classList.remove('hidden');
                 document.getElementById('desktop-screen').classList.add('active');
             }, 1000);
+
+            return userData;
         } else {
+            status.textContent = data.message || 'ACCESS DENIED';
             playSound('denied');
-            status.textContent = "ACCESS DENIED";
+            return null;
         }
-    } catch(e) {
-        status.textContent = "SERVER ERROR";
+
+    } catch (error) {
+        status.textContent = 'CONNECTION ERROR';
+        playSound('denied');
+        return null;
     }
 }

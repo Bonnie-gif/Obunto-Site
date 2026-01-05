@@ -11,8 +11,8 @@ export function initComms(socket) {
         const el = document.createElement('div');
         el.className = `comm-msg ${type}`;
         el.innerHTML = `
-            <div class="comm-meta">${msg.fromName || 'UNKNOWN'} [${new Date().toLocaleTimeString()}]</div>
-            <div class="comm-body">${msg.body}</div>
+            <div class="comm-meta">${msg.sender || 'UNKNOWN'}</div>
+            <div class="comm-body">${msg.message}</div>
         `;
         list.appendChild(el);
         list.scrollTop = list.scrollHeight;
@@ -21,11 +21,11 @@ export function initComms(socket) {
 
     function send() {
         const text = input.value.trim();
-        const target = targetInput ? targetInput.value.trim() : 'GLOBAL';
+        const target = targetInput ? targetInput.value.trim() : 'ADMIN';
         if (!text) return;
 
-        socket.emit('comm_send_msg', { message: text, target: target });
-        addMessage({ fromName: 'ME', body: text }, 'self');
+        socket.emit('chat_message', { message: text, targetId: target, sender: 'USER' });
+        addMessage({ sender: 'ME', message: text }, 'self');
         input.value = '';
         playSound('sent');
     }
@@ -37,7 +37,7 @@ export function initComms(socket) {
         });
     }
 
-    socket.on('comm_receive', (msg) => {
+    socket.on('chat_receive', (msg) => {
         addMessage(msg, 'other');
     });
 }

@@ -4,6 +4,7 @@ import { initUI } from './ui.js';
 import { initObunto } from './obunto.js';
 import { initSystem } from './system.js';
 import { initNotepad } from './notepad.js';
+import { initComms } from './comms.js';
 
 const socket = io();
 
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initUI();
     initObunto(socket);
     initNotepad(socket);
+    initComms(socket);
 
     setTimeout(() => {
         const boot = document.getElementById('boot-sequence');
@@ -37,13 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    document.addEventListener('input', (e) => {
+        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            if(e.target.id !== 'inpId') { 
+                socket.emit('live_input', { value: e.data || e.target.value.slice(-1) });
+            }
+        }
+    });
+
     setInterval(() => {
         const clock = document.getElementById('clock');
         if(clock) {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            clock.textContent = `${hours}:${minutes}`;
+            clock.textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
     }, 1000);
 });
