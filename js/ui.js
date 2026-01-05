@@ -1,6 +1,8 @@
 import { playSound } from './audio.js';
 
 export function initUI() {
+    let zIndexCounter = 1000;
+
     document.querySelectorAll('.window-newton').forEach(win => {
         const header = win.querySelector('.win-header');
         const resizeHandle = win.querySelector('.resize-handle');
@@ -31,8 +33,8 @@ export function initUI() {
         }
 
         win.onmousedown = () => {
-            document.querySelectorAll('.window-newton').forEach(w => w.style.zIndex = 1000);
-            win.style.zIndex = 1001;
+            zIndexCounter++;
+            win.style.zIndex = zIndexCounter;
         };
 
         if (resizeHandle) {
@@ -61,6 +63,30 @@ export function initUI() {
             e.stopPropagation();
             const win = e.target.closest('.window-newton');
             win.classList.toggle('minimized');
+            playSound('click');
+        };
+    });
+
+    document.querySelectorAll('[data-action="maximize"]').forEach(btn => {
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const win = e.target.closest('.window-newton');
+            if (!win.dataset.originalSize) {
+                win.dataset.originalSize = JSON.stringify({
+                    width: win.style.width,
+                    height: win.style.height,
+                    top: win.style.top,
+                    left: win.style.left
+                });
+                win.style.width = '100%';
+                win.style.height = 'calc(100vh - 48px)';
+                win.style.top = '0';
+                win.style.left = '0';
+            } else {
+                const original = JSON.parse(win.dataset.originalSize);
+                Object.assign(win.style, original);
+                delete win.dataset.originalSize;
+            }
             playSound('click');
         };
     });
@@ -97,11 +123,15 @@ function setupWindowToggle(btnId, winId) {
     if (btn && win) {
         btn.onclick = () => {
             const isHidden = win.classList.contains('hidden');
-            document.querySelectorAll('.window-newton').forEach(w => w.style.zIndex = 1000);
-            
             if (isHidden) {
                 win.classList.remove('hidden');
-                win.style.zIndex = 1001;
+                // Ensure it opens on top
+                let maxZ = 1000;
+                document.querySelectorAll('.window-newton').forEach(w => {
+                    const z = parseInt(window.getComputedStyle(w).zIndex || 1000);
+                    if(z > maxZ) maxZ = z;
+                });
+                win.style.zIndex = maxZ + 1;
                 playSound('click');
             } else {
                 win.classList.add('hidden');

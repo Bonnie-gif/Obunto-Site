@@ -28,6 +28,7 @@ export async function handleLogin(socket) {
             playSound('notify');
             
             const userData = data.userData;
+            window.userData = userData; 
             socket.emit('register_user', userData.id);
             
             document.getElementById('sbUser').textContent = userData.username.toUpperCase();
@@ -35,6 +36,7 @@ export async function handleLogin(socket) {
             
             renderDashboard(userData);
 
+            const helpBtn = document.querySelector('[data-personnel-only]');
             if (userData.isObunto || userData.isHoltz) {
                 const adminPanel = document.getElementById('admin-panel');
                 if (adminPanel) adminPanel.classList.remove('hidden');
@@ -42,10 +44,8 @@ export async function handleLogin(socket) {
                 const dockAdmin = document.getElementById('btnObuntoControl');
                 if (dockAdmin) dockAdmin.classList.remove('hidden');
 
-                const helpBtn = document.querySelector('[data-personnel-only]');
                 if(helpBtn) helpBtn.style.display = 'none';
             } else {
-                const helpBtn = document.querySelector('[data-personnel-only]');
                 if(helpBtn) helpBtn.style.display = 'flex';
             }
 

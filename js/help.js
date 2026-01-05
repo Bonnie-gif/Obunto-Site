@@ -18,6 +18,11 @@ export function initHelp(socket) {
                 return;
             }
 
+            if (window.userData && (window.userData.isObunto || window.userData.isHoltz)) {
+                playSound('denied');
+                return;
+            }
+
             socket.emit('request_help', { message: msg });
             txt.value = '';
             playSound('sent');

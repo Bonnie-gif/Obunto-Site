@@ -150,6 +150,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('request_help', (data) => {
+        if (currentUserId === "8989" || currentUserId === "36679824") {
+            socket.emit('help_denied', { message: 'ADMINS CANNOT REQUEST HELP' });
+            return;
+        }
         const ticket = {
             id: Date.now().toString(),
             userId: currentUserId,
@@ -169,7 +173,7 @@ io.on('connection', (socket) => {
             ticket.status = data.status;
             saveData();
             
-            io.to(ticket.userId).emit('help_status_update', { status: data.status });
+            io.to(ticket.userId).emit('help_status_update', { status: data.status, adminId: currentUserId });
 
             if(data.status === 'accepted') {
                 io.to(ticket.userId).emit('help_accepted', { 
@@ -182,16 +186,25 @@ io.on('connection', (socket) => {
                     ticketId: ticket.id, 
                     message: 'REQUEST DENIED.' 
                 });
+            } else if (data.status === 'waiting') {
+                io.to(ticket.userId).emit('help_status_update', { status: 'waiting' });
             }
         }
     });
 
     socket.on('chat_message', (data) => {
         const { targetId, message, sender } = data;
+        const payload = { 
+            message, 
+            sender, 
+            fromId: currentUserId,
+            timestamp: Date.now()
+        };
+
         if (sender === 'ADMIN') {
-            io.to(targetId).emit('chat_receive', { message, sender: 'ADMIN' });
+            io.to(targetId).emit('chat_receive', payload);
         } else {
-            io.to('admins').emit('chat_receive', { message, sender: currentUserId, fromId: currentUserId });
+            io.to('admins').emit('chat_receive', payload);
         }
     });
 
@@ -217,8 +230,6 @@ io.on('connection', (socket) => {
         const files = dataStore.userFiles[currentUserId].filter(f => f.parentId === item.parentId);
         socket.emit('fs_load', files);
     });
-
-    socket.on('task_complete', (data) => {});
 
     socket.on('disconnect', () => {
         if (currentUserId) delete connectedSockets[currentUserId];

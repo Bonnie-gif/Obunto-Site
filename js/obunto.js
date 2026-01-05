@@ -11,11 +11,11 @@ export function initObunto(socket) {
         
         if(overlay) {
             overlay.classList.remove('hidden');
-            overlay.classList.add('slide-up');
+            overlay.style.animation = 'slideInUp 0.5s ease-out forwards';
             playSound('notify');
             
             setTimeout(() => {
-                overlay.classList.remove('slide-up');
+                overlay.style.animation = 'slideOutDown 0.5s ease-in forwards';
                 setTimeout(() => {
                     overlay.classList.add('hidden');
                 }, 500);
@@ -125,9 +125,9 @@ function initHelpQueue(socket) {
     });
 
     window.acceptTicket = (id) => {
-        socket.emit('update_ticket_status', { ticketId: id, status: 'accepted' });
         const el = document.getElementById(`ticket-${id}`);
         if(el) {
+            socket.emit('update_ticket_status', { ticketId: id, status: 'accepted' });
             el.style.backgroundColor = '#90ee90';
             const userId = el.dataset.userid;
             const adminTarget = document.getElementById('adminChatTarget');

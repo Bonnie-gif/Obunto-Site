@@ -45,8 +45,8 @@ export function initComms(socket) {
     });
 
     socket.on('radio_history', (messages) => {
+        const currentUser = document.getElementById('sbUser').textContent;
         messages.forEach(msg => {
-            const currentUser = document.getElementById('sbUser').textContent;
             const type = msg.username === currentUser ? 'self' : 'other';
             addMessage(msg, type);
         });
