@@ -24,6 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     playSound('boot');
 
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 100) progress = 100;
+            progressFill.style.width = progress + '%';
+            if (progress >= 100) clearInterval(interval);
+        }, 200);
+    }
+
     setTimeout(() => {
         const boot = document.getElementById('boot-sequence');
         const login = document.getElementById('login-screen');
@@ -58,13 +69,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    setInterval(() => {
+    function updateDateTime() {
         const clock = document.getElementById('clock');
+        const dateDisplay = document.getElementById('dateDisplay');
+        
         if(clock) {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             clock.textContent = `${hours}:${minutes}`;
         }
-    }, 1000);
+        
+        if(dateDisplay) {
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            };
+            dateDisplay.textContent = now.toLocaleDateString('en-US', options).toUpperCase();
+        }
+    }
+    
+    updateDateTime();
+    setInterval(updateDateTime, 1000);
 });

@@ -1,16 +1,30 @@
+let notepadContent = '';
+
 export function initNotepad(socket) {
     const area = document.querySelector('.notepad-area');
     
     if (area) {
-        const saved = localStorage.getItem('tsc_user_notes');
-        if (saved) {
-            area.value = saved;
-        }
-
+        area.value = notepadContent;
+        
         area.addEventListener('input', () => {
-            setTimeout(() => {
-                localStorage.setItem('tsc_user_notes', area.value);
-            }, 1000);
+            notepadContent = area.value;
+            
+            if (socket && socket.connected) {
+                socket.emit('save_note', { content: notepadContent });
+            }
         });
+    }
+    
+    if (socket) {
+        socket.on('load_note', (data) => {
+            if (data && data.content) {
+                notepadContent = data.content;
+                if (area) {
+                    area.value = notepadContent;
+                }
+            }
+        });
+        
+        socket.emit('request_note');
     }
 }

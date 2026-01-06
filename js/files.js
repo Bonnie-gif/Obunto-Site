@@ -12,10 +12,16 @@ export function initFiles(socket) {
         files.forEach(file => {
             const el = document.createElement('div');
             el.className = 'file-item';
+            
+            const iconSrc = file.type === 'folder' 
+                ? '/assets/icon-small-folder-15x11.png' 
+                : '/assets/icon-small-text-3x10.png';
+            
             el.innerHTML = `
-                <img src="/assets/${file.type === 'folder' ? 'icon-small-folder-15x11.png' : 'icon-small-text-3x10.png'}" class="file-icon">
+                <img src="${iconSrc}" class="file-icon">
                 <span class="file-name">${file.name}</span>
             `;
+            
             el.onclick = () => {
                 if (file.type === 'folder') {
                     currentPath += file.name + '/';
@@ -61,8 +67,12 @@ export function initFiles(socket) {
     if (btnNewFolder) {
         btnNewFolder.onclick = () => {
             const name = prompt("FOLDER NAME:");
-            if(name) {
-                socket.emit('fs_create_item', { name, type: 'folder', parentId: currentPath });
+            if(name && name.trim()) {
+                socket.emit('fs_create_item', { 
+                    name: name.trim().toUpperCase(), 
+                    type: 'folder', 
+                    parentId: currentPath 
+                });
                 playSound('click');
             }
         };

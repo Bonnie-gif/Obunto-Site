@@ -20,6 +20,7 @@ export function initSystem(socket) {
     socket.on('status_update', (status) => {
         const el = document.getElementById('sbStatus');
         if(el) el.textContent = status;
+        
         const adminEl = document.getElementById('adminStatus');
         if(adminEl) adminEl.textContent = status;
         
@@ -27,20 +28,22 @@ export function initSystem(socket) {
         const txt = document.getElementById('statusText');
         
         if(status === 'ONLINE') {
-            ind.style.backgroundColor = '#4ade80';
-            txt.textContent = 'ONLINE';
+            if (ind) ind.style.backgroundColor = '#00ff00';
+            if (txt) txt.textContent = 'ONLINE';
         } else {
-            ind.style.backgroundColor = '#ef4444';
-            txt.textContent = 'OFFLINE';
+            if (ind) ind.style.backgroundColor = '#ff0000';
+            if (txt) txt.textContent = 'OFFLINE';
         }
     });
 
     socket.on('alarm_update', (type) => {
         document.body.className = `alarm-${type}`;
+        
+        const banner = document.getElementById('alarm-banner');
         if(type === 'green') {
-            document.getElementById('alarm-banner')?.classList.add('hidden');
+            if (banner) banner.classList.add('hidden');
         } else {
-            document.getElementById('alarm-banner')?.classList.remove('hidden');
+            if (banner) banner.classList.remove('hidden');
             const txt = document.getElementById('alarm-type-text');
             if(txt) txt.textContent = `${type.toUpperCase()} ALERT`;
         }

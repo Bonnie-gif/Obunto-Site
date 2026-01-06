@@ -15,8 +15,8 @@ export function initUI() {
                 let shiftY = e.clientY - win.getBoundingClientRect().top;
 
                 function moveAt(pageX, pageY) {
-                    win.style.left = pageX - shiftX + 'px';
-                    win.style.top = pageY - shiftY + 'px';
+                    win.style.left = Math.max(0, pageX - shiftX) + 'px';
+                    win.style.top = Math.max(0, pageY - shiftY) + 'px';
                 }
 
                 function onMouseMove(event) {
@@ -30,6 +30,8 @@ export function initUI() {
                     header.onmouseup = null;
                 };
             };
+            
+            header.ondragstart = () => false;
         }
 
         win.onmousedown = () => {
@@ -42,9 +44,17 @@ export function initUI() {
                 e.stopPropagation();
                 e.preventDefault();
                 
+                const startWidth = win.offsetWidth;
+                const startHeight = win.offsetHeight;
+                const startX = e.clientX;
+                const startY = e.clientY;
+                
                 function resize(event) {
-                    win.style.width = (event.clientX - win.getBoundingClientRect().left) + 'px';
-                    win.style.height = (event.clientY - win.getBoundingClientRect().top) + 'px';
+                    const newWidth = startWidth + (event.clientX - startX);
+                    const newHeight = startHeight + (event.clientY - startY);
+                    
+                    win.style.width = Math.max(300, newWidth) + 'px';
+                    win.style.height = Math.max(200, newHeight) + 'px';
                 }
                 
                 function stopResize() {
@@ -79,7 +89,7 @@ export function initUI() {
                     left: win.style.left
                 });
                 win.style.width = '100%';
-                win.style.height = 'calc(100vh - 48px)';
+                win.style.height = 'calc(100vh - 65px)';
                 win.style.top = '0';
                 win.style.left = '0';
             } else {
@@ -110,7 +120,8 @@ export function initUI() {
     if (btnDashboard) {
         btnDashboard.onclick = () => {
             document.querySelectorAll('.viewer').forEach(v => v.classList.add('hidden'));
-            document.getElementById('view-dashboard').classList.remove('hidden');
+            const dashboard = document.getElementById('view-dashboard');
+            if (dashboard) dashboard.classList.remove('hidden');
             playSound('click');
         };
     }
@@ -125,7 +136,6 @@ function setupWindowToggle(btnId, winId) {
             const isHidden = win.classList.contains('hidden');
             if (isHidden) {
                 win.classList.remove('hidden');
-                // Ensure it opens on top
                 let maxZ = 1000;
                 document.querySelectorAll('.window-newton').forEach(w => {
                     const z = parseInt(window.getComputedStyle(w).zIndex || 1000);
@@ -135,6 +145,7 @@ function setupWindowToggle(btnId, winId) {
                 playSound('click');
             } else {
                 win.classList.add('hidden');
+                playSound('click');
             }
         };
     }

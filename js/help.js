@@ -42,8 +42,8 @@ export function initHelp(socket) {
         if (data.status === 'accepted') {
             if (status) status.textContent = "OPERATOR CONNECTED.";
             playSound('notify');
-            requestForm.classList.add('hidden');
-            chatInterface.classList.remove('hidden');
+            if (requestForm) requestForm.classList.add('hidden');
+            if (chatInterface) chatInterface.classList.remove('hidden');
             addChatMessage("System: Connection established with TSC Support.", "system");
         } else if (data.status === 'rejected') {
             if (status) status.textContent = "REQUEST DECLINED.";
@@ -79,14 +79,21 @@ export function initHelp(socket) {
             if(!val) return;
             
             addChatMessage(val, 'user');
-            socket.emit('chat_message', { message: val, targetId: 'ADMIN', sender: 'USER' });
+            socket.emit('chat_message', { 
+                message: val, 
+                targetId: 'ADMIN', 
+                sender: 'USER' 
+            });
             chatInput.value = '';
             playSound('click');
         };
         
         btnChatSend.onclick = sendChat;
         chatInput.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter') sendChat();
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChat();
+            }
         });
     }
 }

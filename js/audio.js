@@ -18,7 +18,7 @@ export function playSound(name) {
 
 export function initAudio() {
     document.addEventListener('click', (e) => {
-        if (e.target.closest('button') || e.target.closest('.dock-btn') || e.target.closest('.nav-item')) {
+        if (e.target.closest('button:not(.win-btn)') || e.target.closest('.dock-btn')) {
             playSound('click');
         }
     });

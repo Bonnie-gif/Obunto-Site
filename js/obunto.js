@@ -31,7 +31,7 @@ export function initObunto(socket) {
     if(btnToggleStatus) {
         btnToggleStatus.onclick = () => {
             const statusEl = document.getElementById('adminStatus');
-            const current = statusEl.textContent;
+            const current = statusEl?.textContent;
             const newStatus = current === 'ONLINE' ? 'OFFLINE' : 'ONLINE';
             socket.emit('toggle_system_status', newStatus);
         };
@@ -72,7 +72,7 @@ export function initObunto(socket) {
     if(spyLog) {
         socket.on('spy_input_update', (data) => {
             const time = new Date().toLocaleTimeString();
-            spyLog.textContent += `[${time}] ${data.value}`;
+            spyLog.textContent += `[${time}] USER ${data.targetId}: ${data.value}\n`;
             spyLog.scrollTop = spyLog.scrollHeight;
         });
     }
@@ -83,10 +83,14 @@ export function initObunto(socket) {
 
     if (btnAdminChatSend) {
         btnAdminChatSend.onclick = () => {
-            const target = adminChatTarget.value.trim();
-            const msg = adminChatMsg.value.trim();
+            const target = adminChatTarget?.value.trim();
+            const msg = adminChatMsg?.value.trim();
             if (target && msg) {
-                socket.emit('chat_message', { message: msg, targetId: target, sender: 'ADMIN' });
+                socket.emit('chat_message', { 
+                    message: msg, 
+                    targetId: target, 
+                    sender: 'ADMIN' 
+                });
                 adminChatMsg.value = '';
                 playSound('sent');
             }
@@ -150,4 +154,14 @@ function initHelpQueue(socket) {
         if(el) el.style.backgroundColor = '#ffd700';
         playSound('click');
     };
+
+    socket.on('load_pending_tickets', (tickets) => {
+        tickets.forEach(ticket => {
+            const fakeEvent = {
+                ...ticket,
+                timestamp: ticket.timestamp || Date.now()
+            };
+            socket.emit('help_request_received', fakeEvent);
+        });
+    });
 }

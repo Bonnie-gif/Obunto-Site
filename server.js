@@ -24,11 +24,19 @@ let systemEnergy = 100.0;
 let connectedSockets = {}; 
 
 if (fs.existsSync(DATA_FILE)) {
-    try { dataStore = JSON.parse(fs.readFileSync(DATA_FILE)); } catch (e) {}
+    try { 
+        dataStore = JSON.parse(fs.readFileSync(DATA_FILE)); 
+    } catch (e) {
+        console.error('Error loading data:', e);
+    }
 }
 
 function saveData() {
-    try { fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2)); } catch(e) {}
+    try { 
+        fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2)); 
+    } catch(e) {
+        console.error('Error saving data:', e);
+    }
 }
 
 app.get('/api/roblox/:id', async (req, res) => {
@@ -48,7 +56,10 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "8989", username: "OBUNTO", displayName: "System AI", rank: "MAINFRAME", 
+                id: "8989", 
+                username: "OBUNTO", 
+                displayName: "System AI", 
+                rank: "MAINFRAME", 
                 avatar: "Sprites/normal.png", 
                 affiliations: [{ groupName: "TSC MAINFRAME", role: "ADMIN", rank: 999 }],
                 isObunto: true 
@@ -60,10 +71,14 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "36679824", username: "DR. HOLTZ", displayName: "Head of Research", rank: "LEVEL 5", 
+                id: "36679824", 
+                username: "DR. HOLTZ", 
+                displayName: "Head of Research", 
+                rank: "LEVEL 5", 
                 avatar: "assets/icon-large-owner_info-28x14.png",
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
-                isObunto: false, isHoltz: true
+                isObunto: false, 
+                isHoltz: true
             } 
         });
     }
@@ -87,18 +102,36 @@ app.post('/api/login', async (req, res) => {
             displayName: profileRes.data.displayName,
             avatar: avatarRes.data.data[0]?.imageUrl,
             rank: level,
-            affiliations: tscGroups.map(g => ({ groupName: g.group.name.toUpperCase(), role: g.role.name.toUpperCase(), rank: g.role.rank })).sort((a, b) => b.rank - a.rank),
-            isObunto: false, isHoltz: false
+            affiliations: tscGroups.map(g => ({ 
+                groupName: g.group.name.toUpperCase(), 
+                role: g.role.name.toUpperCase(), 
+                rank: g.role.rank 
+            })).sort((a, b) => b.rank - a.rank),
+            isObunto: false, 
+            isHoltz: false
         };
 
-        dataStore.knownUsers[userId] = { id: userId, name: userData.username, rank: level, lastSeen: Date.now() };
+        dataStore.knownUsers[userId] = { 
+            id: userId, 
+            name: userData.username, 
+            rank: level, 
+            lastSeen: Date.now() 
+        };
         saveData();
         res.json({ success: true, userData });
 
     } catch (e) {
-        res.json({ success: true, userData: {
-            id: userId, username: `USER-${userId}`, displayName: "Visitor", avatar: "assets/icon-large-owner_info-28x14.png", rank: "GUEST", isObunto: false
-        }});
+        res.json({ 
+            success: true, 
+            userData: {
+                id: userId, 
+                username: `USER-${userId}`, 
+                displayName: "Visitor", 
+                avatar: "assets/icon-large-owner_info-28x14.png", 
+                rank: "GUEST", 
+                isObunto: false
+            }
+        });
     }
 });
 
@@ -111,16 +144,34 @@ io.on('connection', (socket) => {
     socket.on('register_user', (userId) => {
         currentUserId = userId;
         socket.join(userId);
+        connectedSockets[userId] = socket.id;
+        
         if (userId === "8989" || userId === "36679824") {
             socket.join('admins');
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status !== 'closed'));
         }
+        
         socket.emit('radio_history', dataStore.messages.slice(-50));
+    });
+
+    socket.on('save_note', (data) => {
+        if (!currentUserId) return;
+        dataStore.notes[currentUserId] = data.content;
+        saveData();
+    });
+
+    socket.on('request_note', () => {
+        if (!currentUserId) return;
+        const content = dataStore.notes[currentUserId] || '';
+        socket.emit('load_note', { content });
     });
 
     socket.on('live_input', (data) => {
         if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
-        io.to('admins').emit('spy_input_update', { targetId: currentUserId, value: data.value });
+        io.to('admins').emit('spy_input_update', { 
+            targetId: currentUserId, 
+            value: data.value 
+        });
     });
 
     socket.on('toggle_system_status', (status) => {
@@ -129,7 +180,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('admin_broadcast_message', (data) => {
-        io.emit('receive_broadcast_message', { message: data.message, mood: data.mood || 'normal' });
+        io.emit('receive_broadcast_message', { 
+            message: data.message, 
+            mood: data.mood || 'normal' 
+        });
     });
 
     socket.on('admin_trigger_alarm', (alarmType) => {
@@ -154,6 +208,7 @@ io.on('connection', (socket) => {
             socket.emit('help_denied', { message: 'ADMINS CANNOT REQUEST HELP' });
             return;
         }
+        
         const ticket = {
             id: Date.now().toString(),
             userId: currentUserId,
@@ -173,7 +228,10 @@ io.on('connection', (socket) => {
             ticket.status = data.status;
             saveData();
             
-            io.to(ticket.userId).emit('help_status_update', { status: data.status, adminId: currentUserId });
+            io.to(ticket.userId).emit('help_status_update', { 
+                status: data.status, 
+                adminId: currentUserId 
+            });
 
             if(data.status === 'accepted') {
                 io.to(ticket.userId).emit('help_accepted', { 
@@ -237,4 +295,6 @@ io.on('connection', (socket) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {});
+server.listen(PORT, () => {
+    console.log(`Newton OS Server running on port ${PORT}`);
+});
