@@ -66,11 +66,10 @@
     font-weight: bold;
     border-color: #000;
     position: relative;
-    top: 1px; /* Visual effect to connect to content */
+    top: 1px;
     z-index: 5;
 }
 
-/* Banner e Home Styles */
 .banner-section {
     height: 220px;
     background: #f0f0f0;

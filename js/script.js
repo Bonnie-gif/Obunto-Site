@@ -1,7 +1,6 @@
 let currentUser = null;
 const ADMIN_ID = '118107921024376';
-// Inicializa o tempo para AGORA, assim mensagens antigas não aparecem no load
-let lastBroadcastTime = Date.now(); 
+let lastBroadcastTime = Date.now();
 
 const storage = {
     async get(key, shared = false) {
@@ -81,7 +80,6 @@ async function handleLogin() {
             playSound('sfx-poweron');
             showScreen('main-screen');
             
-            // Define o menu inicial
             if (userId === ADMIN_ID) {
                 document.getElementById('admin-toggle').classList.remove('hidden');
                 document.getElementById('admin-tabs').classList.remove('hidden');
@@ -92,7 +90,6 @@ async function handleLogin() {
                 document.getElementById('personnel-tabs').classList.remove('hidden');
             }
             
-            // Sempre vai para a HOME ao logar (onde tem o banner)
             goToHome();
             
         } else if (!users[userId]) {
@@ -131,7 +128,6 @@ function closeAdmin() {
     document.getElementById('admin-panel').classList.add('hidden');
 }
 
-// Função para ir para a Home (Banner visível)
 function goToHome() {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -202,20 +198,17 @@ async function sendBroadcast() {
     
     if (!text) return;
     
-    // Salva o broadcast com timestamp atual
     const broadcast = { text, sprite, timestamp: Date.now() };
     await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
     
     playSound('sfx-sent');
     document.getElementById('broadcast-text').value = '';
     
-    // Mostra localmente para o admin ver que enviou
     showBroadcast(broadcast);
 }
 
 function showBroadcast(data) {
     const spriteImg = document.getElementById('notif-sprite');
-    // Correção do caminho do sprite
     spriteImg.src = `sprites/${data.sprite}.png`;
     
     document.getElementById('notif-text').textContent = data.text;
@@ -223,14 +216,12 @@ function showBroadcast(data) {
     
     playSound('sfx-newmessage');
     
-    // Esconde após 8 segundos
     setTimeout(() => {
         document.getElementById('broadcast-notification').classList.add('hidden');
     }, 8000);
 }
 
 async function checkBroadcasts() {
-    // Só checa se o usuário estiver logado
     if (!currentUser) return;
 
     try {
@@ -238,7 +229,6 @@ async function checkBroadcasts() {
         if (data) {
             const broadcast = JSON.parse(data.value);
             
-            // Só mostra se for mais novo que a última verificação E mais novo que o login
             if (broadcast.timestamp > lastBroadcastTime) {
                 lastBroadcastTime = broadcast.timestamp;
                 showBroadcast(broadcast);
@@ -254,11 +244,9 @@ function switchTab(targetId) {
     document.getElementById(targetId).classList.add('active');
 }
 
-// Logica de troca de abas
 document.querySelectorAll('.tab').forEach(tab => {
     tab.addEventListener('click', () => {
         const parentId = tab.parentElement.id;
-        // Remove active de todas as abas deste menu
         document.querySelectorAll(`#${parentId} .tab`).forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
         
@@ -286,6 +274,5 @@ async function init() {
 window.addEventListener('load', async () => {
     await init();
     setTimeout(startLoading, 1000);
-    // Checa broadcasts a cada 2 segundos
     setInterval(checkBroadcasts, 2000);
 });
