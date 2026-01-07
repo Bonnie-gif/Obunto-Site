@@ -36,12 +36,9 @@ html, body {
   margin: 0; 
   background: var(--bg-main);
   font-family: var(--font-main);
-  font-size: 12px; 
+  font-size: 13px; 
   color: var(--ink); 
   overflow: hidden;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
   transition: background 0.3s ease, filter 0.3s ease;
   cursor: default;
   -webkit-font-smoothing: none;
@@ -56,20 +53,13 @@ body::before {
     repeating-linear-gradient(
       0deg,
       transparent,
-      transparent 1px,
-      rgba(0, 0, 0, 0.015) 1px,
-      rgba(0, 0, 0, 0.015) 2px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 1px,
-      rgba(0, 0, 0, 0.015) 1px,
-      rgba(0, 0, 0, 0.015) 2px
+      transparent 2px,
+      rgba(0, 0, 0, 0.01) 2px,
+      rgba(0, 0, 0, 0.01) 4px
     );
   pointer-events: none;
   z-index: 1;
-  opacity: 0.6;
+  opacity: 0.3;
 }
 
 .hidden { 
@@ -107,10 +97,6 @@ body.alarm-red {
   --accent: #ff3333;
 }
 
-body.alarm-red .crt-overlay { 
-  animation: redPulse 1.2s infinite; 
-}
-
 body.alarm-gamma { 
   --bg-main: #d0d080; 
   --bg-light: #e0e090;
@@ -129,18 +115,9 @@ body.alarm-epsilon {
   --ink: #200020; 
   --paper: #f0e0f0; 
   --alert-color: #ee00ee; 
-  filter: contrast(130%) saturate(120%);
+  filter: contrast(115%) saturate(110%);
   --button: #a858b0;
   --accent: #ff33ff;
-}
-
-@keyframes redPulse { 
-  0%, 100% { 
-    box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.25); 
-  } 
-  50% { 
-    box-shadow: inset 0 0 160px rgba(255, 0, 0, 0.4); 
-  } 
 }
 
 .crt-overlay {
@@ -148,8 +125,7 @@ body.alarm-epsilon {
   inset: 0; 
   pointer-events: none; 
   z-index: 9997;
-  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.06) 100%);
-  box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.1);
+  display: none;
 }
 
 .scanlines {
@@ -157,14 +133,7 @@ body.alarm-epsilon {
   inset: 0; 
   pointer-events: none; 
   z-index: 9998; 
-  opacity: 0.025;
-  background: repeating-linear-gradient(
-    0deg, 
-    rgba(0, 0, 0, 0.15), 
-    rgba(0, 0, 0, 0.15) 1px, 
-    transparent 1px, 
-    transparent 3px
-  );
+  display: none;
 }
 
 ::selection {

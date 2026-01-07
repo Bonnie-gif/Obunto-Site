@@ -17,15 +17,25 @@ app.use(express.static(__dirname));
 const DATA_FILE = path.join(__dirname, 'data_store.json');
 const TSC_GROUP_IDS = [11577231, 11608337, 11649027, 12045972, 12026513, 12026669, 12045419, 12022092, 14159717];
 
-let dataStore = { notes: {}, helpTickets: [], knownUsers: {}, userFiles: {}, messages: [] };
+let dataStore = { 
+    notes: {}, 
+    helpTickets: [], 
+    knownUsers: {}, 
+    userFiles: {}, 
+    messages: [],
+    systemEnergy: 100,
+    energyLastUpdate: Date.now()
+};
+
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
-let systemEnergy = 100.0;
 let connectedSockets = {}; 
 
 if (fs.existsSync(DATA_FILE)) {
     try { 
-        dataStore = JSON.parse(fs.readFileSync(DATA_FILE)); 
+        dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
+        if (!dataStore.systemEnergy) dataStore.systemEnergy = 100;
+        if (!dataStore.energyLastUpdate) dataStore.energyLastUpdate = Date.now();
     } catch (e) {
         console.error('Error loading data:', e);
     }
@@ -138,6 +148,7 @@ app.post('/api/login', async (req, res) => {
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
+    socket.emit('energy_update', dataStore.systemEnergy);
     
     let currentUserId = null;
 
@@ -170,6 +181,7 @@ io.on('connection', (socket) => {
         if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
         io.to('admins').emit('spy_input_update', { 
             targetId: currentUserId, 
+            field: data.field,
             value: data.value 
         });
     });
@@ -189,6 +201,47 @@ io.on('connection', (socket) => {
     socket.on('admin_trigger_alarm', (alarmType) => {
         currentAlarm = alarmType;
         io.emit('alarm_update', currentAlarm);
+    });
+
+    socket.on('assign_task', (data) => {
+        io.to(data.targetId).emit('protocol_task_assigned', {
+            type: data.type,
+            energyBoost: data.energyBoost
+        });
+    });
+
+    socket.on('task_complete', (data) => {
+        if (currentUserId && data.success) {
+            const boost = data.type === 'EXTREME' ? 50 : 
+                         data.type === 'HARD' ? 35 : 
+                         data.type === 'MEDIUM' ? 20 : 10;
+            
+            dataStore.systemEnergy = Math.min(100, dataStore.systemEnergy + boost);
+            saveData();
+            
+            io.emit('energy_update', dataStore.systemEnergy);
+            
+            socket.emit('energy_boost', { amount: boost });
+        }
+    });
+
+    socket.on('update_energy', (energy) => {
+        dataStore.systemEnergy = energy;
+        dataStore.energyLastUpdate = Date.now();
+        saveData();
+    });
+
+    socket.on('request_energy', () => {
+        socket.emit('energy_update', dataStore.systemEnergy);
+    });
+
+    socket.on('system_shutdown', () => {
+        systemStatus = 'OFFLINE';
+        io.emit('status_update', systemStatus);
+        io.emit('receive_broadcast_message', {
+            message: 'CRITICAL: SYSTEM ENERGY DEPLETED. ENTERING EMERGENCY SHUTDOWN.',
+            mood: 'panic'
+        });
     });
 
     socket.on('radio_broadcast', (data) => {

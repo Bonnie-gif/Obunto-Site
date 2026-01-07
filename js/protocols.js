@@ -58,15 +58,26 @@ export function initProtocols(socket) {
             if(e.key === 'Enter') {
                 if(input.value.toUpperCase() === input.dataset.code) {
                     playSound('click');
+                    
                     socket.emit('task_complete', { 
                         success: true, 
                         type: currentTask?.type 
                     });
+                    
                     if (overlay) overlay.classList.add('hidden');
+                    
+                    setTimeout(() => {
+                        window.obuntoSay(`TASK COMPLETED. ENERGY BOOST: +${currentTask?.energyBoost}%`, 'happy');
+                    }, 500);
+                    
                 } else {
                     playSound('denied');
                     input.style.border = '4px solid #ff0000';
-                    setTimeout(() => input.style.border = '', 500);
+                    input.style.background = '#ffdddd';
+                    setTimeout(() => {
+                        input.style.border = '';
+                        input.style.background = '';
+                    }, 500);
                 }
             }
         });

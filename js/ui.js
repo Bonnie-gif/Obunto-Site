@@ -11,24 +11,30 @@ export function initUI() {
             header.onmousedown = (e) => {
                 if(e.target.closest('button')) return;
                 
-                let shiftX = e.clientX - win.getBoundingClientRect().left;
-                let shiftY = e.clientY - win.getBoundingClientRect().top;
+                const rect = win.getBoundingClientRect();
+                const shiftX = e.clientX - rect.left;
+                const shiftY = e.clientY - rect.top;
 
                 function moveAt(pageX, pageY) {
-                    win.style.left = Math.max(0, pageX - shiftX) + 'px';
-                    win.style.top = Math.max(0, pageY - shiftY) + 'px';
+                    const newLeft = Math.max(0, Math.min(pageX - shiftX, window.innerWidth - rect.width));
+                    const newTop = Math.max(0, Math.min(pageY - shiftY, window.innerHeight - 100));
+                    
+                    win.style.left = newLeft + 'px';
+                    win.style.top = newTop + 'px';
                 }
 
                 function onMouseMove(event) {
-                    moveAt(event.pageX, event.pageY);
+                    moveAt(event.clientX, event.clientY);
                 }
 
                 document.addEventListener('mousemove', onMouseMove);
 
-                header.onmouseup = () => {
+                function stopDrag() {
                     document.removeEventListener('mousemove', onMouseMove);
-                    header.onmouseup = null;
-                };
+                    document.removeEventListener('mouseup', stopDrag);
+                }
+
+                document.addEventListener('mouseup', stopDrag);
             };
             
             header.ondragstart = () => false;
@@ -53,8 +59,8 @@ export function initUI() {
                     const newWidth = startWidth + (event.clientX - startX);
                     const newHeight = startHeight + (event.clientY - startY);
                     
-                    win.style.width = Math.max(300, newWidth) + 'px';
-                    win.style.height = Math.max(200, newHeight) + 'px';
+                    win.style.width = Math.max(350, newWidth) + 'px';
+                    win.style.height = Math.max(250, newHeight) + 'px';
                 }
                 
                 function stopResize() {
