@@ -16,25 +16,23 @@ export function initUI() {
                 const shiftY = e.clientY - rect.top;
 
                 function moveAt(pageX, pageY) {
-                    const newLeft = Math.max(0, Math.min(pageX - shiftX, window.innerWidth - rect.width));
-                    const newTop = Math.max(0, Math.min(pageY - shiftY, window.innerHeight - 100));
+                    const newLeft = pageX - shiftX;
+                    const newTop = pageY - shiftY;
                     
                     win.style.left = newLeft + 'px';
                     win.style.top = newTop + 'px';
                 }
 
                 function onMouseMove(event) {
-                    moveAt(event.clientX, event.clientY);
+                    moveAt(event.pageX, event.pageY);
                 }
 
                 document.addEventListener('mousemove', onMouseMove);
 
-                function stopDrag() {
+                document.onmouseup = () => {
                     document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', stopDrag);
-                }
-
-                document.addEventListener('mouseup', stopDrag);
+                    document.onmouseup = null;
+                };
             };
             
             header.ondragstart = () => false;
@@ -50,17 +48,12 @@ export function initUI() {
                 e.stopPropagation();
                 e.preventDefault();
                 
-                const startWidth = win.offsetWidth;
-                const startHeight = win.offsetHeight;
-                const startX = e.clientX;
-                const startY = e.clientY;
-                
                 function resize(event) {
-                    const newWidth = startWidth + (event.clientX - startX);
-                    const newHeight = startHeight + (event.clientY - startY);
+                    const newWidth = event.clientX - win.getBoundingClientRect().left;
+                    const newHeight = event.clientY - win.getBoundingClientRect().top;
                     
-                    win.style.width = Math.max(350, newWidth) + 'px';
-                    win.style.height = Math.max(250, newHeight) + 'px';
+                    if (newWidth > 300) win.style.width = newWidth + 'px';
+                    if (newHeight > 200) win.style.height = newHeight + 'px';
                 }
                 
                 function stopResize() {
@@ -74,34 +67,20 @@ export function initUI() {
         }
     });
 
+    // Botão minimizar corrigido
     document.querySelectorAll('[data-action="minimize"]').forEach(btn => {
         btn.onclick = (e) => {
             e.stopPropagation();
             const win = e.target.closest('.window-newton');
-            win.classList.toggle('minimized');
-            playSound('click');
-        };
-    });
-
-    document.querySelectorAll('[data-action="maximize"]').forEach(btn => {
-        btn.onclick = (e) => {
-            e.stopPropagation();
-            const win = e.target.closest('.window-newton');
-            if (!win.dataset.originalSize) {
-                win.dataset.originalSize = JSON.stringify({
-                    width: win.style.width,
-                    height: win.style.height,
-                    top: win.style.top,
-                    left: win.style.left
-                });
-                win.style.width = '100%';
-                win.style.height = 'calc(100vh - 65px)';
-                win.style.top = '0';
-                win.style.left = '0';
+            
+            if (win.classList.contains('minimized')) {
+                win.classList.remove('minimized');
+                win.style.opacity = '1';
+                win.style.pointerEvents = 'auto';
             } else {
-                const original = JSON.parse(win.dataset.originalSize);
-                Object.assign(win.style, original);
-                delete win.dataset.originalSize;
+                win.classList.add('minimized');
+                win.style.opacity = '0.3';
+                win.style.pointerEvents = 'none';
             }
             playSound('click');
         };
@@ -126,8 +105,7 @@ export function initUI() {
     if (btnDashboard) {
         btnDashboard.onclick = () => {
             document.querySelectorAll('.viewer').forEach(v => v.classList.add('hidden'));
-            const dashboard = document.getElementById('view-dashboard');
-            if (dashboard) dashboard.classList.remove('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
             playSound('click');
         };
     }
@@ -142,6 +120,10 @@ function setupWindowToggle(btnId, winId) {
             const isHidden = win.classList.contains('hidden');
             if (isHidden) {
                 win.classList.remove('hidden');
+                win.classList.remove('minimized');
+                win.style.opacity = '1';
+                win.style.pointerEvents = 'auto';
+                
                 let maxZ = 1000;
                 document.querySelectorAll('.window-newton').forEach(w => {
                     const z = parseInt(window.getComputedStyle(w).zIndex || 1000);
@@ -151,7 +133,6 @@ function setupWindowToggle(btnId, winId) {
                 playSound('click');
             } else {
                 win.classList.add('hidden');
-                playSound('click');
             }
         };
     }

@@ -23,19 +23,20 @@ let dataStore = {
     knownUsers: {}, 
     userFiles: {}, 
     messages: [],
-    systemEnergy: 100,
-    energyLastUpdate: Date.now()
+    tasks: [],
+    energyLevels: {}
 };
 
 let systemStatus = 'ONLINE'; 
 let currentAlarm = 'green';
+let systemEnergy = 100.0;
 let connectedSockets = {}; 
 
 if (fs.existsSync(DATA_FILE)) {
     try { 
-        dataStore = JSON.parse(fs.readFileSync(DATA_FILE));
-        if (!dataStore.systemEnergy) dataStore.systemEnergy = 100;
-        if (!dataStore.energyLastUpdate) dataStore.energyLastUpdate = Date.now();
+        dataStore = JSON.parse(fs.readFileSync(DATA_FILE)); 
+        if (!dataStore.tasks) dataStore.tasks = [];
+        if (!dataStore.energyLevels) dataStore.energyLevels = {};
     } catch (e) {
         console.error('Error loading data:', e);
     }
@@ -66,10 +67,7 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "8989", 
-                username: "OBUNTO", 
-                displayName: "System AI", 
-                rank: "MAINFRAME", 
+                id: "8989", username: "OBUNTO", displayName: "System AI", rank: "MAINFRAME", 
                 avatar: "Sprites/normal.png", 
                 affiliations: [{ groupName: "TSC MAINFRAME", role: "ADMIN", rank: 999 }],
                 isObunto: true 
@@ -81,14 +79,10 @@ app.post('/api/login', async (req, res) => {
         return res.json({ 
             success: true, 
             userData: { 
-                id: "36679824", 
-                username: "DR. HOLTZ", 
-                displayName: "Head of Research", 
-                rank: "LEVEL 5", 
+                id: "36679824", username: "DR. HOLTZ", displayName: "Head of Research", rank: "LEVEL 5", 
                 avatar: "assets/icon-large-owner_info-28x14.png",
                 affiliations: [{ groupName: "TSC RESEARCH", role: "DIRECTOR", rank: 999 }],
-                isObunto: false, 
-                isHoltz: true
+                isObunto: false, isHoltz: true
             } 
         });
     }
@@ -117,8 +111,7 @@ app.post('/api/login', async (req, res) => {
                 role: g.role.name.toUpperCase(), 
                 rank: g.role.rank 
             })).sort((a, b) => b.rank - a.rank),
-            isObunto: false, 
-            isHoltz: false
+            isObunto: false, isHoltz: false
         };
 
         dataStore.knownUsers[userId] = { 
@@ -131,24 +124,21 @@ app.post('/api/login', async (req, res) => {
         res.json({ success: true, userData });
 
     } catch (e) {
-        res.json({ 
-            success: true, 
-            userData: {
-                id: userId, 
-                username: `USER-${userId}`, 
-                displayName: "Visitor", 
-                avatar: "assets/icon-large-owner_info-28x14.png", 
-                rank: "GUEST", 
-                isObunto: false
-            }
-        });
+        console.error('Login error:', e.message);
+        res.json({ success: true, userData: {
+            id: userId, 
+            username: `USER-${userId}`, 
+            displayName: "Visitor", 
+            avatar: "assets/icon-large-owner_info-28x14.png", 
+            rank: "GUEST", 
+            isObunto: false
+        }});
     }
 });
 
 io.on('connection', (socket) => {
     socket.emit('status_update', systemStatus);
     socket.emit('alarm_update', currentAlarm);
-    socket.emit('energy_update', dataStore.systemEnergy);
     
     let currentUserId = null;
 
@@ -161,27 +151,13 @@ io.on('connection', (socket) => {
             socket.join('admins');
             socket.emit('load_pending_tickets', dataStore.helpTickets.filter(t => t.status !== 'closed'));
         }
-        
         socket.emit('radio_history', dataStore.messages.slice(-50));
-    });
-
-    socket.on('save_note', (data) => {
-        if (!currentUserId) return;
-        dataStore.notes[currentUserId] = data.content;
-        saveData();
-    });
-
-    socket.on('request_note', () => {
-        if (!currentUserId) return;
-        const content = dataStore.notes[currentUserId] || '';
-        socket.emit('load_note', { content });
     });
 
     socket.on('live_input', (data) => {
         if (!currentUserId || currentUserId === "8989" || currentUserId === "36679824") return;
         io.to('admins').emit('spy_input_update', { 
             targetId: currentUserId, 
-            field: data.field,
             value: data.value 
         });
     });
@@ -204,44 +180,57 @@ io.on('connection', (socket) => {
     });
 
     socket.on('assign_task', (data) => {
-        io.to(data.targetId).emit('protocol_task_assigned', {
-            type: data.type,
-            energyBoost: data.energyBoost
+        const task = {
+            id: Date.now().toString(),
+            targetId: data.targetId,
+            description: data.description,
+            energyReward: data.energyReward || 5,
+            status: 'pending',
+            timestamp: Date.now()
+        };
+        
+        dataStore.tasks.push(task);
+        saveData();
+        
+        // Enviar tarefa para o usuário específico
+        io.to(data.targetId).emit('task_assigned', task);
+        
+        // Confirmar para admin
+        socket.emit('task_assigned_confirmation', { 
+            success: true, 
+            taskId: task.id 
         });
     });
 
     socket.on('task_complete', (data) => {
-        if (currentUserId && data.success) {
-            const boost = data.type === 'EXTREME' ? 50 : 
-                         data.type === 'HARD' ? 35 : 
-                         data.type === 'MEDIUM' ? 20 : 10;
-            
-            dataStore.systemEnergy = Math.min(100, dataStore.systemEnergy + boost);
+        const task = dataStore.tasks.find(t => t.id === data.taskId);
+        if (task && task.targetId === currentUserId) {
+            task.status = 'completed';
+            task.completedAt = Date.now();
             saveData();
             
-            io.emit('energy_update', dataStore.systemEnergy);
+            // Dar recompensa de energia
+            io.to(currentUserId).emit('energy_reward', { 
+                amount: task.energyReward,
+                reason: 'Task completed' 
+            });
             
-            socket.emit('energy_boost', { amount: boost });
+            // Notificar admins
+            io.to('admins').emit('task_completed', {
+                taskId: task.id,
+                userId: currentUserId,
+                energyReward: task.energyReward
+            });
         }
     });
 
-    socket.on('update_energy', (energy) => {
-        dataStore.systemEnergy = energy;
-        dataStore.energyLastUpdate = Date.now();
-        saveData();
-    });
-
-    socket.on('request_energy', () => {
-        socket.emit('energy_update', dataStore.systemEnergy);
-    });
-
-    socket.on('system_shutdown', () => {
-        systemStatus = 'OFFLINE';
-        io.emit('status_update', systemStatus);
-        io.emit('receive_broadcast_message', {
-            message: 'CRITICAL: SYSTEM ENERGY DEPLETED. ENTERING EMERGENCY SHUTDOWN.',
-            mood: 'panic'
-        });
+    socket.on('energy_update', (level) => {
+        if (currentUserId) {
+            dataStore.energyLevels[currentUserId] = level;
+            if (currentUserId === "8989") {
+                systemEnergy = level;
+            }
+        }
     });
 
     socket.on('radio_broadcast', (data) => {
@@ -261,7 +250,6 @@ io.on('connection', (socket) => {
             socket.emit('help_denied', { message: 'ADMINS CANNOT REQUEST HELP' });
             return;
         }
-        
         const ticket = {
             id: Date.now().toString(),
             userId: currentUserId,
@@ -279,6 +267,7 @@ io.on('connection', (socket) => {
         const ticket = dataStore.helpTickets.find(t => t.id === data.ticketId);
         if(ticket) {
             ticket.status = data.status;
+            ticket.adminId = currentUserId;
             saveData();
             
             io.to(ticket.userId).emit('help_status_update', { 
@@ -343,11 +332,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        if (currentUserId) delete connectedSockets[currentUserId];
+        if (currentUserId) {
+            delete connectedSockets[currentUserId];
+        }
     });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Newton OS Server running on port ${PORT}`);
+    console.log(`TSC Newton OS Server running on port ${PORT}`);
 });

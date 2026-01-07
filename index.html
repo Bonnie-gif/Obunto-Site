@@ -198,7 +198,7 @@
                 <div class="resize-handle"></div>
             </div>
 
-            <div id="admin-panel" class="window-newton hidden" style="top: 60px; left: 300px; width: 750px; max-height: 80vh; overflow-y: auto;">
+            <div id="admin-panel" class="window-newton hidden" style="top: 60px; left: 300px; width: 800px; max-height: 85vh; overflow-y: auto;">
                 <div class="win-header">
                     <span class="win-title">OBUNTO CONTROL PANEL</span>
                     <div class="win-controls">
@@ -206,7 +206,9 @@
                         <button class="win-btn close-btn" id="closeAdmin">×</button>
                     </div>
                 </div>
-                <div class="win-body" style="padding: 16px;">
+                <div class="win-body" style="padding: 20px;">
+                    
+                    <!-- System Status e Energy -->
                     <div class="admin-grid-layout">
                         <div class="admin-group">
                             <div class="group-label">SYSTEM STATUS</div>
@@ -227,33 +229,36 @@
                         </div>
                     </div>
 
-                    <div class="admin-section" style="margin-top: 16px;">
-                        <div class="admin-label">OBUNTO MOOD SELECTOR</div>
-                        <div class="mood-grid" id="moodGrid">
-                            <div class="mood-icon active" data-mood="normal"><img src="/Sprites/normal.png"><span>NORMAL</span></div>
-                            <div class="mood-icon" data-mood="happy"><img src="/Sprites/happy.png"><span>HAPPY</span></div>
-                            <div class="mood-icon" data-mood="sad"><img src="/Sprites/sad.png"><span>SAD</span></div>
-                            <div class="mood-icon" data-mood="annoyed"><img src="/Sprites/annoyed.png"><span>ANNOYED</span></div>
-                            <div class="mood-icon" data-mood="panic"><img src="/Sprites/panic.png"><span>PANIC</span></div>
-                            <div class="mood-icon" data-mood="suspicious"><img src="/Sprites/suspicious.png"><span>SUSPICIOUS</span></div>
-                            <div class="mood-icon" data-mood="sleeping"><img src="/Sprites/sleeping.png"><span>SLEEP</span></div>
-                            <div class="mood-icon" data-mood="Smug"><img src="/Sprites/Smug.png"><span>SMUG</span></div>
-                            <div class="mood-icon" data-mood="stare"><img src="/Sprites/stare.png"><span>STARE</span></div>
-                            <div class="mood-icon" data-mood="dizzy"><img src="/Sprites/dizzy.png"><span>DIZZY</span></div>
-                            <div class="mood-icon" data-mood="hollow"><img src="/Sprites/hollow.png"><span>HOLLOW</span></div>
-                            <div class="mood-icon" data-mood="bug"><img src="/Sprites/bug.png"><span>BUG</span></div>
-                            <div class="mood-icon" data-mood="werror"><img src="/Sprites/werror.png"><span>ERROR</span></div>
+                    <!-- Obunto Mood e Broadcast -->
+                    <div class="admin-section" style="margin-top: 20px;">
+                        <div class="admin-label">OBUNTO BROADCAST SYSTEM</div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <div style="font-size: 10px; font-weight: bold; margin-bottom: 8px; color: var(--ink-dim);">SELECT MOOD:</div>
+                            <div class="mood-grid" id="moodGrid">
+                                <div class="mood-icon active" data-mood="normal"><img src="/Sprites/normal.png"><span>NORMAL</span></div>
+                                <div class="mood-icon" data-mood="happy"><img src="/Sprites/happy.png"><span>HAPPY</span></div>
+                                <div class="mood-icon" data-mood="sad"><img src="/Sprites/sad.png"><span>SAD</span></div>
+                                <div class="mood-icon" data-mood="annoyed"><img src="/Sprites/annoyed.png"><span>ANNOYED</span></div>
+                                <div class="mood-icon" data-mood="panic"><img src="/Sprites/panic.png"><span>PANIC</span></div>
+                                <div class="mood-icon" data-mood="suspicious"><img src="/Sprites/suspicious.png"><span>SUSPICIOUS</span></div>
+                                <div class="mood-icon" data-mood="sleeping"><img src="/Sprites/sleeping.png"><span>SLEEP</span></div>
+                                <div class="mood-icon" data-mood="Smug"><img src="/Sprites/Smug.png"><span>SMUG</span></div>
+                                <div class="mood-icon" data-mood="stare"><img src="/Sprites/stare.png"><span>STARE</span></div>
+                                <div class="mood-icon" data-mood="dizzy"><img src="/Sprites/dizzy.png"><span>DIZZY</span></div>
+                                <div class="mood-icon" data-mood="hollow"><img src="/Sprites/hollow.png"><span>HOLLOW</span></div>
+                                <div class="mood-icon" data-mood="bug"><img src="/Sprites/bug.png"><span>BUG</span></div>
+                                <div class="mood-icon" data-mood="werror"><img src="/Sprites/werror.png"><span>ERROR</span></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="admin-section">
-                        <div class="admin-label">BROADCAST MESSAGE</div>
                         <div class="target-row">
-                            <textarea id="adminMsg" class="admin-textarea" placeholder="MESSAGE TO ALL USERS..."></textarea>
-                            <button id="btnBroadcast" class="btn-newton">BROADCAST</button>
+                            <textarea id="adminMsg" class="admin-textarea" placeholder="TYPE BROADCAST MESSAGE HERE..." style="height: 90px;"></textarea>
+                            <button id="btnBroadcast" class="btn-newton" style="width: 120px;">BROADCAST</button>
                         </div>
                     </div>
 
+                    <!-- Alarm Protocols -->
                     <div class="admin-section">
                         <div class="admin-label">ALARM PROTOCOLS</div>
                         <div class="alarm-grid">
@@ -262,24 +267,46 @@
                             <button class="btn-alarm btn-red" data-alarm="red">RED</button>
                             <button class="btn-alarm btn-gamma" data-alarm="gamma">GAMMA</button>
                             <button class="btn-alarm btn-epsilon" data-alarm="epsilon">EPSILON</button>
-                            <button class="btn-alarm btn-power-off" data-alarm="green">RESET</button>
                         </div>
                     </div>
 
+                    <!-- Task Assignment System -->
                     <div class="admin-section">
-                        <div class="admin-label">USER INPUT MONITORING</div>
+                        <div class="admin-label">TASK ASSIGNMENT SYSTEM</div>
+                        <div style="display: grid; grid-template-columns: 150px 1fr 120px auto; gap: 8px; align-items: end;">
+                            <div>
+                                <label style="font-size: 9px; margin-bottom: 4px; display: block;">TARGET USER ID:</label>
+                                <input type="text" id="taskTargetId" class="input-newton" placeholder="USER ID" style="margin: 0;">
+                            </div>
+                            <div>
+                                <label style="font-size: 9px; margin-bottom: 4px; display: block;">TASK DESCRIPTION:</label>
+                                <input type="text" id="taskDescription" class="input-newton" placeholder="DESCRIBE TASK..." style="margin: 0;">
+                            </div>
+                            <div>
+                                <label style="font-size: 9px; margin-bottom: 4px; display: block;">ENERGY REWARD:</label>
+                                <input type="number" id="taskEnergyReward" class="input-newton" value="5" min="1" max="50" style="margin: 0;">
+                            </div>
+                            <button id="btnSendTask" class="btn-newton" style="margin: 0;">ASSIGN</button>
+                        </div>
+                    </div>
+
+                    <!-- Personnel Monitor -->
+                    <div class="admin-section">
+                        <div class="admin-label">PERSONNEL INPUT MONITOR</div>
                         <div class="spy-container">
                             <pre id="spy-input-data" class="spy-display"></pre>
                         </div>
                     </div>
 
+                    <!-- Help Queue -->
                     <div class="admin-section">
-                        <div class="admin-label">HELP REQUESTS QUEUE</div>
+                        <div class="admin-label">SUPPORT REQUESTS QUEUE</div>
                         <div id="help-queue" class="help-queue"></div>
                     </div>
 
+                    <!-- Private Chat -->
                     <div class="admin-section">
-                        <div class="admin-label">PRIVATE CHAT</div>
+                        <div class="admin-label">PRIVATE COMMUNICATION</div>
                         <div class="target-row">
                             <input type="text" id="adminChatTarget" class="input-newton" placeholder="TARGET USER ID" style="width: 150px;">
                             <input type="text" id="adminChatMsg" class="input-newton" placeholder="PRIVATE MESSAGE..." style="flex: 1;">

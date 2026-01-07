@@ -1,101 +1,244 @@
-button {
-  font-family: var(--font-main);
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  color: var(--ink);
-  background: var(--bg-panel);
-  border: 1px solid var(--border-outer);
-  box-shadow: var(--bevel-out);
-  padding: 6px 12px;
-  outline: none;
-  border-radius: 2px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  transition: background var(--transition-speed) var(--transition-ease), transform 0.1s var(--transition-ease);
+button { 
+  font-family: var(--font-main); 
+  cursor: pointer; 
+  user-select: none;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-button:hover {
-  background: #909090;
+/* Newton OS Button - Clean 3D embossed effect */
+.btn-newton {
+  width: 100%; 
+  padding: 12px 16px; 
+  background: var(--button);
+  border: 2px solid var(--border);
+  box-shadow: 
+    /* Outer shadow */
+    3px 3px 0 rgba(0, 0, 0, 0.25),
+    /* Top-left highlight */
+    inset 2px 2px 0 rgba(255, 255, 255, 0.9),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.5),
+    /* Bottom-right shadow */
+    inset -2px -2px 0 rgba(0, 0, 0, 0.25),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.1);
+  color: var(--ink); 
+  font-weight: bold; 
+  font-size: 13px;
+  text-align: center;
+  position: relative;
+  transition: all 0.08s ease;
+  letter-spacing: 0.5px;
 }
 
-button:active {
-  background: #808080;
-  box-shadow: var(--bevel-in);
+.btn-newton:hover { 
+  background: var(--button-hover);
+  box-shadow: 
+    3px 3px 0 rgba(0, 0, 0, 0.3),
+    inset 2px 2px 0 rgba(255, 255, 255, 1),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.6),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.3),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.15);
+}
+
+.btn-newton:active { 
+  background: var(--button-active);
+  box-shadow: 
+    1px 1px 0 rgba(0, 0, 0, 0.2),
+    /* Inverted shadows for pressed effect */
+    inset -2px -2px 0 rgba(255, 255, 255, 0.6),
+    inset -3px -3px 0 rgba(255, 255, 255, 0.3),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.2);
   transform: translate(1px, 1px);
 }
 
-button:disabled {
+.btn-newton:disabled {
   opacity: 0.5;
-  pointer-events: none;
-  box-shadow: none;
-  border-color: var(--ink-dim);
+  cursor: not-allowed;
+  color: var(--ink-dim);
 }
 
-.btn-newton { width: 100%; }
-
-.btn-action img {
-  width: 14px;
-  height: 14px;
-  filter: grayscale(100%);
-}
-
-input, textarea {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  background: var(--paper);
+/* Action Button with Icon */
+.btn-action {
+  width: 100%; 
+  padding: 12px 16px; 
+  background: var(--button);
+  border: 2px solid var(--border);
+  box-shadow: 
+    3px 3px 0 rgba(0, 0, 0, 0.25),
+    inset 2px 2px 0 rgba(255, 255, 255, 0.9),
+    inset 3px 3px 0 rgba(255, 255, 255, 0.5),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.25),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.1);
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  font-size: 13px; 
+  font-weight: bold;
   color: var(--ink);
-  border: 1px solid var(--border-shadow);
-  border-bottom: 1px solid var(--border-light);
-  border-right: 1px solid var(--border-light);
-  box-shadow: var(--shadow-inset);
-  padding: 8px;
+  cursor: pointer;
+  transition: all 0.08s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-action img { 
+  width: 20px; 
+  height: 20px;
+  image-rendering: pixelated;
+  filter: contrast(1.2);
+}
+
+.btn-action:hover {
+  background: var(--button-hover);
+}
+
+.btn-action:active { 
+  background: var(--button-active);
+  box-shadow: 
+    1px 1px 0 rgba(0, 0, 0, 0.2),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.6),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.4),
+    inset 3px 3px 0 rgba(0, 0, 0, 0.2);
+  transform: translate(1px, 1px);
+}
+
+/* Newton OS Input Fields - Deep inset style */
+input, textarea { 
+  font-family: var(--font-mono); 
   outline: none;
-  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-input:focus, textarea:focus {
-  background: #c0c0c0;
-  border: 1px solid var(--border-outer);
+.input-newton {
+  width: 100%; 
+  padding: 10px 12px; 
+  background: var(--paper);
+  border: 2px solid var(--border-dark);
+  box-shadow: 
+    /* Deep inset effect */
+    inset 3px 3px 0 rgba(0, 0, 0, 0.4),
+    inset 4px 4px 0 rgba(0, 0, 0, 0.2),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.7),
+    inset -2px -2px 0 rgba(255, 255, 255, 0.4);
+  font-family: var(--font-mono); 
+  font-size: 13px; 
+  color: var(--ink); 
+  margin-bottom: 12px;
+  transition: background 0.15s ease;
 }
 
-input::placeholder { color: var(--ink-dim); font-style: italic; }
-
-::-webkit-scrollbar {
-  width: 14px;
-  height: 14px;
-  background: var(--bg-panel);
-  border-left: 1px solid var(--border-outer);
+.input-newton:focus { 
+  background: #ffffff;
+  box-shadow: 
+    inset 3px 3px 0 rgba(0, 0, 0, 0.5),
+    inset 4px 4px 0 rgba(0, 0, 0, 0.25),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.8),
+    0 0 0 2px #000000;
 }
 
-::-webkit-scrollbar-thumb {
+.input-newton::placeholder { 
+  color: var(--ink-dim); 
+  font-style: italic; 
+  opacity: 0.6;
+}
+
+/* Newton OS Scrollbar - Clean and functional */
+::-webkit-scrollbar { 
+  width: 20px; 
+  height: 20px; 
+  background: var(--bg-main);
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+  border: 2px solid var(--border-dark);
+  box-shadow: 
+    inset 2px 2px 0 rgba(0, 0, 0, 0.3),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar-thumb { 
+  background: var(--button);
+  border: 2px solid var(--border);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.8),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+  min-height: 40px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--button-hover);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.9),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.45);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--button-active);
+  box-shadow: 
+    inset -2px -2px 0 rgba(255, 255, 255, 0.6),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-button { 
+  background: var(--button);
+  height: 20px; 
+  width: 20px;
+  border: 2px solid var(--border);
+  box-shadow: 
+    inset 2px 2px 0 rgba(255, 255, 255, 0.8),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.4);
+}
+
+::-webkit-scrollbar-button:hover {
+  background: var(--button-hover);
+}
+
+::-webkit-scrollbar-button:active {
+  box-shadow: 
+    inset -2px -2px 0 rgba(255, 255, 255, 0.6),
+    inset 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-button:vertical:decrement {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 7 L5 12 L15 12 Z" fill="%23000" stroke="%23000" stroke-width="1"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 13 L5 8 L15 8 Z" fill="%23000" stroke="%23000" stroke-width="1"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M7 10 L12 5 L12 15 Z" fill="%23000" stroke="%23000" stroke-width="1"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:horizontal:increment {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M13 10 L8 5 L8 15 Z" fill="%23000" stroke="%23000" stroke-width="1"/></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Status Text - Newton style */
+.status-text { 
+  text-align: center; 
+  min-height: 28px; 
+  margin: 12px 0; 
+  color: var(--ink); 
+  font-family: var(--font-mono); 
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  padding: 6px 10px;
   background: var(--bg-light);
-  border: 1px solid var(--border-outer);
-  box-shadow: inset 1px 1px 0 #b0b0b0;
-}
-
-::-webkit-scrollbar-button {
-  background: var(--bg-panel);
-  border: 1px solid var(--border-outer);
-  height: 14px;
-  display: block;
-}
-
-.status-text {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-align: center;
-  padding: 6px;
-  background: var(--bg-light);
-  border: 1px solid var(--border-outer);
-  margin-top: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-@media (pointer: coarse) {
-  button { padding: 10px 16px; min-height: 40px; }
-  ::-webkit-scrollbar { width: 8px; }
+  border: 2px solid var(--border-light);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.6),
+    inset -1px -1px 0 rgba(0, 0, 0, 0.2);
 }
