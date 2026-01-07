@@ -1,30 +1,66 @@
 :root {
-  /* Paleta Newton OS / Tech Professional */
-  --bg-desktop: #757575;     /* Fundo da tela (Desktop) */
-  --bg-panel: #d4d4d4;       /* Painéis e janelas */
-  --bg-light: #e8e8e8;       /* Áreas de destaque */
-  --bg-dark: #a0a0a0;        /* Elementos inativos/fundo escuro */
+  --bg-desktop: #505050;
+  --bg-panel: #a0a0a0;
+  --bg-light: #b8b8b8;
+  --bg-dark: #707070;
   
-  --ink: #101010;            /* Texto principal */
-  --ink-dim: #505050;        /* Texto secundário */
-  --paper: #ffffff;          /* Fundo de inputs e áreas de texto */
+  --ink: #101010;
+  --ink-dim: #404040;
+  --paper: #d0d0d0;
   
-  --border-outer: #000000;   /* Borda externa forte */
-  --border-light: #ffffff;   /* Bevel claro (luz) */
-  --border-shadow: #404040;  /* Bevel escuro (sombra) */
+  --border-outer: #000000;
+  --border-light: #c0c0c0;
+  --border-shadow: #303030;
   
-  --accent-color: #000000;   /* Cor de destaque (monocromático) */
+  --accent-color: #000000;
   --selection-bg: #000000;
-  --selection-text: #ffffff;
+  --selection-text: #d0d0d0;
   
   --font-main: 'Chicago', 'Geneva', 'Segoe UI', sans-serif;
   --font-mono: 'Monaco', 'Courier New', monospace;
   
-  /* Sombras de interface (Bevels rígidos) */
   --bevel-out: inset 1px 1px 0 var(--border-light), inset -1px -1px 0 var(--border-shadow), 1px 1px 0 #000;
   --bevel-in: inset 1px 1px 0 var(--border-shadow), inset -1px -1px 0 var(--border-light);
-  --shadow-window: 4px 4px 0 rgba(0, 0, 0, 0.25);
+  --shadow-window: 4px 4px 0 rgba(0, 0, 0, 0.35);
+  --shadow-inset: inset 2px 2px 5px rgba(0, 0, 0, 0.1);
+  
+  --transition-speed: 0.2s;
+  --transition-ease: ease;
 }
+
+body.dark-mode {
+  --bg-desktop: #303030;
+  --bg-panel: #606060;
+  --bg-light: #808080;
+  --bg-dark: #202020;
+  --ink: #e0e0e0;
+  --ink-dim: #a0a0a0;
+  --paper: #505050;
+  --border-light: #909090;
+  --border-shadow: #101010;
+  --shadow-window: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+body.theme-high-contrast {
+  --bg-desktop: #000000;
+  --bg-panel: #ffffff;
+  --bg-light: #ffffff;
+  --bg-dark: #000000;
+  --ink: #000000;
+  --ink-dim: #000000;
+  --paper: #ffffff;
+  --border-outer: #000000;
+  --border-light: #ffffff;
+  --border-shadow: #000000;
+  --bevel-out: 2px 2px 0 #000000;
+  --bevel-in: inset 2px 2px 0 #000000;
+}
+
+body.alarm-red { --bg-desktop: #401010; --accent-color: #802020; }
+body.alarm-green { --bg-desktop: #103010; --accent-color: #206020; }
+
+[data-accent="blue"] { --accent-color: #004080; }
+[data-accent="purple"] { --accent-color: #602080; }
 
 * {
   box-sizing: border-box;
@@ -32,16 +68,21 @@
   padding: 0;
   cursor: default;
   user-select: none;
-  -webkit-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+.selectable, input, textarea {
+  user-select: text;
+  cursor: text;
 }
 
 html, body {
   width: 100%;
   height: 100%;
+  background-color: #505050;
   background-color: var(--bg-desktop);
-  /* Padrão pontilhado sutil para o fundo (Grid Tech) */
   background-image: radial-gradient(var(--ink-dim) 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-size: 15px 15px;
   font-family: var(--font-main);
   font-size: 13px;
   color: var(--ink);
@@ -59,15 +100,48 @@ html, body {
 .hidden { display: none !important; }
 .active { display: flex !important; }
 
-/* Modos de Alerta (Mantendo o estilo tech, sem ser chocante) */
-body.alarm-red { --bg-desktop: #502020; --accent-color: #800000; }
-body.alarm-green { --bg-desktop: #204020; --accent-color: #004000; }
+.shadow-bevel { box-shadow: var(--bevel-out); }
+.shadow-inset { box-shadow: var(--shadow-inset); }
+.inset-panel { 
+  background: var(--bg-panel); 
+  border: 1px solid var(--border-outer); 
+  padding: 10px; 
+}
 
 .crt-overlay {
   position: fixed;
   inset: 0;
   background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
-  background-size: 100% 4px;
+  background-size: 100% 2px;
   pointer-events: none;
   z-index: 9999;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 8px;
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 10000;
+  border: 1px solid var(--border-light);
+  pointer-events: none;
+  margin-bottom: 5px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
 }

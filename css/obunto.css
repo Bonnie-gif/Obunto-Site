@@ -1,19 +1,20 @@
 .obunto-overlay {
   position: fixed;
   bottom: 90px;
-  right: 30px;
+  right: 50%;
+  transform: translateX(50%);
   z-index: 9000;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  pointer-events: none; /* Permite clicar através da área vazia */
+  align-items: center;
+  pointer-events: none;
 }
 
 .obunto-container {
   pointer-events: auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
 }
 
 .speech-bubble {
@@ -22,19 +23,19 @@
   padding: 14px;
   margin-bottom: 20px;
   max-width: 320px;
-  box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-window);
   font-family: var(--font-main);
   font-size: 12px;
   position: relative;
   line-height: 1.4;
 }
 
-/* Seta do balão */
 .speech-bubble:after {
   content: '';
   position: absolute;
   bottom: -12px;
-  right: 40px;
+  left: 50%;
+  transform: translateX(-50%);
   border-width: 12px 12px 0;
   border-style: solid;
   border-color: var(--border-outer) transparent;
@@ -44,7 +45,8 @@
   content: '';
   position: absolute;
   bottom: -8px;
-  right: 43px;
+  left: 50%;
+  transform: translateX(-50%);
   border-width: 9px 9px 0;
   border-style: solid;
   border-color: var(--paper) transparent;
@@ -57,7 +59,7 @@
   border: 2px solid var(--border-outer);
   background: var(--bg-panel);
   padding: 4px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-window);
   image-rendering: pixelated;
 }
 
@@ -81,7 +83,8 @@
 .group-label {
   position: absolute;
   top: -8px;
-  left: 10px;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--paper);
   padding: 0 6px;
   font-size: 9px;
@@ -100,29 +103,30 @@
 .mood-icon {
   width: 100%;
   aspect-ratio: 1;
-  border: 1px solid var(--border-dim);
+  border: 1px solid var(--border-shadow);
   background: var(--bg-light);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.1s;
+  transition: all var(--transition-speed) var(--transition-ease);
 }
 
 .mood-icon:hover {
-  background: #fff;
+  background: #c0c0c0;
   border-color: #000;
+  transform: scale(1.05);
 }
 
 .mood-icon.active {
   background: #000;
-  color: #fff;
+  color: #d0d0d0;
   border: 2px solid #000;
 }
 
 .spy-container {
-  background: #000;
-  color: #00ff00; /* Verde terminal clássico */
+  background: #101010;
+  color: #00c000;
   font-family: var(--font-mono);
   padding: 10px;
   height: 160px;
@@ -130,7 +134,8 @@
   border: 2px solid var(--border-outer);
   font-size: 11px;
   line-height: 1.3;
-  box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
+  box-shadow: inset 0 0 10px rgba(0,200,0,0.2);
+  contain: strict;
 }
 
 .alarm-grid {
@@ -151,11 +156,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.1s;
 }
 
-/* Cores de Alarme (Controladas) */
-.btn-green { background: #4caf50; color: #fff; }
-.btn-red { background: #f44336; color: #fff; }
-.btn-blue { background: #2196f3; color: #fff; }
-.btn-gamma { background: #ffeb3b; color: #000; }
-.btn-epsilon { background: #9c27b0; color: #fff; }
+.btn-alarm:active { transform: translateY(1px); }
+
+.btn-green { background: #204020; color: #e0e0e0; }
+.btn-red { background: #602020; color: #e0e0e0; }
+.btn-blue { background: #204060; color: #e0e0e0; }
+.btn-gamma { background: #808020; color: #101010; }
+.btn-epsilon { background: #501060; color: #d0d0d0; }

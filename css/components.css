@@ -14,15 +14,15 @@ button {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: all 0.05s;
+  transition: background var(--transition-speed) var(--transition-ease), transform 0.1s var(--transition-ease);
 }
 
 button:hover {
-  background: #e0e0e0;
+  background: #909090;
 }
 
 button:active {
-  background: #cccccc;
+  background: #808080;
   box-shadow: var(--bevel-in);
   transform: translate(1px, 1px);
 }
@@ -50,20 +50,19 @@ input, textarea {
   border: 1px solid var(--border-shadow);
   border-bottom: 1px solid var(--border-light);
   border-right: 1px solid var(--border-light);
-  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-inset);
   padding: 8px;
   outline: none;
   width: 100%;
 }
 
 input:focus, textarea:focus {
-  background: #ffffff;
+  background: #c0c0c0;
   border: 1px solid var(--border-outer);
 }
 
 input::placeholder { color: var(--ink-dim); font-style: italic; }
 
-/* Scrollbars Retro */
 ::-webkit-scrollbar {
   width: 14px;
   height: 14px;
@@ -74,7 +73,7 @@ input::placeholder { color: var(--ink-dim); font-style: italic; }
 ::-webkit-scrollbar-thumb {
   background: var(--bg-light);
   border: 1px solid var(--border-outer);
-  box-shadow: inset 1px 1px 0 #fff;
+  box-shadow: inset 1px 1px 0 #b0b0b0;
 }
 
 ::-webkit-scrollbar-button {
@@ -94,4 +93,9 @@ input::placeholder { color: var(--ink-dim); font-style: italic; }
   margin-top: 8px;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+@media (pointer: coarse) {
+  button { padding: 10px 16px; min-height: 40px; }
+  ::-webkit-scrollbar { width: 8px; }
 }

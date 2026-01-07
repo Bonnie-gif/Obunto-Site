@@ -28,7 +28,7 @@
   padding: 14px;
   gap: 18px;
   z-index: 20;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.15);
 }
 
 .brand {
@@ -122,7 +122,6 @@
   font-weight: bold;
 }
 
-/* Dock Centralizada e Estilizada */
 .dock-newton {
   position: absolute;
   bottom: 20px;
@@ -134,7 +133,7 @@
   padding: 8px 12px;
   display: flex;
   gap: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4);
   z-index: 5000;
 }
 
@@ -147,12 +146,13 @@
   align-items: center;
   justify-content: center;
   box-shadow: var(--bevel-out);
-  transition: transform 0.1s;
+  transition: background var(--transition-speed) var(--transition-ease), transform 0.1s var(--transition-ease);
+  will-change: transform;
 }
 
 .dock-btn:hover {
   transform: translateY(-2px);
-  background: #fff;
+  background: var(--paper);
 }
 
 .dock-btn:active {
@@ -165,6 +165,12 @@
   height: 32px;
   image-rendering: pixelated;
   opacity: 0.8;
+  transition: opacity var(--transition-speed);
 }
 
 .dock-btn:hover img { opacity: 1; }
+
+@media (pointer: coarse) {
+  .dock-btn { width: 60px; height: 60px; }
+  .topbar { height: 44px; }
+}

@@ -6,11 +6,12 @@
 
 .window-newton {
   position: absolute;
-  top: 50px;
-  left: 50px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: var(--bg-panel);
   border: 2px solid var(--border-outer);
-  box-shadow: 6px 6px 12px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-window);
   display: flex;
   flex-direction: column;
   min-width: 300px;
@@ -29,7 +30,6 @@
   justify-content: space-between;
   padding: 0 6px;
   cursor: move;
-  /* Textura de "Pega" para arrastar */
   background-image: repeating-linear-gradient(90deg, transparent, transparent 2px, var(--ink-dim) 2px, var(--ink-dim) 3px);
   background-size: 100% 100%;
 }
@@ -65,8 +65,8 @@
 }
 
 .win-btn:active {
-  background: #000;
-  color: #fff;
+  background: #101010;
+  color: #d0d0d0;
   transform: translate(1px, 1px);
   box-shadow: none;
 }
@@ -91,7 +91,7 @@
   font-size: 12px;
   line-height: 1.5;
   resize: none;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-inset);
 }
 
 .file-toolbar {
@@ -106,7 +106,7 @@
 
 .path-display {
   flex: 1;
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--border-outer);
   padding: 4px 8px;
   font-family: var(--font-mono);
@@ -119,7 +119,7 @@
   gap: 16px;
   padding: 10px;
   overflow-y: auto;
-  background: #fff;
+  background: var(--paper);
   border: 1px solid var(--border-shadow);
 }
 
@@ -131,6 +131,7 @@
   cursor: pointer;
   padding: 8px;
   border: 1px solid transparent;
+  transition: background 0.1s;
 }
 
 .file-item:hover {
@@ -147,34 +148,34 @@
   font-family: var(--font-main);
 }
 
-/* Chat Styles Profissional */
 .comm-list {
   flex: 1;
   border: 1px solid var(--border-outer);
-  background: #fff;
+  background: var(--paper);
   padding: 12px;
   font-family: var(--font-mono);
   margin-bottom: 10px;
   overflow-y: auto;
-  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-inset);
+  contain: paint;
 }
 
 .comm-msg {
   margin-bottom: 12px;
   padding: 8px;
   border: 1px solid var(--border-light);
-  background: #f5f5f5;
+  background: #b8b8b8;
   border-left: 3px solid var(--ink-dim);
 }
 
 .comm-msg.self {
   border-left: 3px solid #000;
-  background: #e8e8e8;
+  background: #a0a0a0;
   text-align: right;
 }
 
 .comm-msg.system {
-  border: 1px dashed #aaa;
+  border: 1px dashed #808080;
   background: transparent;
   text-align: center;
   font-style: italic;
@@ -189,5 +190,10 @@
   height: 16px;
   background: linear-gradient(135deg, transparent 50%, var(--ink-dim) 50%);
   cursor: se-resize;
-  opacity: 0.5;
+  opacity: 0.6;
+}
+
+@media (pointer: coarse) {
+  .win-btn { width: 28px; height: 28px; }
+  .file-item { padding: 12px; }
 }
