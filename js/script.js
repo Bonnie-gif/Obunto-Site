@@ -1,22 +1,5 @@
-let currentUser = null;
 const ADMIN_ID = '118107921024376';
-
-const storage = {
-    async get(key, shared = false) {
-        if (window.storage && typeof window.storage.get === 'function') {
-            return await window.storage.get(key, shared);
-        }
-        const value = localStorage.getItem(key);
-        return value ? { key, value, shared } : null;
-    },
-    async set(key, value, shared = false) {
-        if (window.storage && typeof window.storage.set === 'function') {
-            return await window.storage.set(key, value, shared);
-        }
-        localStorage.setItem(key, value);
-        return { key, value, shared };
-    }
-};
+let lastBroadcastTime = 0;
 
 function playSound(id) {
     const audio = document.getElementById(id);
@@ -24,11 +7,6 @@ function playSound(id) {
         audio.currentTime = 0;
         audio.play().catch(e => {});
     }
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
 }
 
 function showStatus(message, isError = false) {
@@ -59,182 +37,157 @@ function startLoading() {
     }, 200);
 }
 
-async function handleLogin() {
+function handleLogin() {
     const userId = document.getElementById('operator-id').value.trim();
     
     if (!userId) {
         playSound('sfx-error');
-        showStatus('PLEASE ENTER AN OPERATOR ID', true);
+        showStatus('ENTER OPERATOR ID', true);
         return;
     }
     
-    try {
-        await init();
+    const users = JSON.parse(localStorage.getItem('arcs_users') || `{"${ADMIN_ID}":{"id":"${ADMIN_ID}","approved":true}}`);
+    const pending = JSON.parse(localStorage.getItem('arcs_pending') || '[]');
+
+    if (users[userId] && users[userId].approved) {
+        playSound('sfx-poweron');
+        document.getElementById('loading-screen').classList.remove('active');
+        document.getElementById('main-screen').classList.add('active');
         
-        const usersData = await storage.get('arcs_users');
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        if (users[userId] && users[userId].approved) {
-            currentUser = users[userId];
-            playSound('sfx-poweron');
-            showScreen('main-screen');
-            
-            if (userId === ADMIN_ID) {
-                document.getElementById('admin-toggle').classList.remove('hidden');
-                document.getElementById('admin-tabs').classList.remove('hidden');
-                document.getElementById('personnel-tabs').classList.add('hidden');
-            } else {
-                document.getElementById('admin-tabs').classList.add('hidden');
-                document.getElementById('personnel-tabs').classList.remove('hidden');
-            }
-        } else if (!users[userId]) {
-            const pendingData = await storage.get('arcs_pending');
-            const pending = pendingData ? JSON.parse(pendingData.value) : [];
-            
-            if (!pending.includes(userId)) {
-                pending.push(userId);
-                await storage.set('arcs_pending', JSON.stringify(pending));
-            }
-            
-            playSound('sfx-sent');
-            showStatus('REQUEST SENT - AWAITING APPROVAL');
-            document.getElementById('operator-id').value = '';
-        } else {
-            playSound('sfx-denied');
-            showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
+        if (userId === ADMIN_ID) {
+            document.getElementById('admin-toggle').classList.remove('hidden');
         }
-    } catch (e) {
-        console.error('Login error:', e);
-        playSound('sfx-error');
-        showStatus('SYSTEM ERROR - TRY AGAIN', true);
+    } else if (!users[userId]) {
+        if (!pending.includes(userId)) {
+            pending.push(userId);
+            localStorage.setItem('arcs_pending', JSON.stringify(pending));
+        }
+        playSound('sfx-sent');
+        showStatus('REQUEST SENT - WAIT FOR APPROVAL');
+        document.getElementById('operator-id').value = '';
+    } else {
+        playSound('sfx-denied');
+        showStatus('ACCESS DENIED - NOT APPROVED', true);
     }
 }
 
-document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-});
-
-function openAdmin() {
-    document.getElementById('admin-panel').classList.remove('hidden');
-    loadPending();
-}
-
-function closeAdmin() {
-    document.getElementById('admin-panel').classList.add('hidden');
-}
-
-async function loadPending() {
-    try {
-        const data = await storage.get('arcs_pending');
-        const pending = data ? JSON.parse(data.value) : [];
-        const list = document.getElementById('pending-list');
-        list.innerHTML = '';
-        
-        if (pending.length === 0) {
-            list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO PENDING REQUESTS</div>';
-            return;
-        }
-        
-        pending.forEach(id => {
-            const item = document.createElement('div');
-            item.className = 'pending-item';
-            item.innerHTML = `
-                <span>${id}</span>
-                <button onclick="approve('${id}')">APPROVE</button>
-                <button onclick="deny('${id}')">DENY</button>
-            `;
-            list.appendChild(item);
-        });
-    } catch (e) {
-        console.error('Load pending error:', e);
+function toggleAdmin() {
+    const panel = document.getElementById('admin-panel');
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        loadPending();
+    } else {
+        panel.classList.add('hidden');
     }
 }
 
-async function approve(id) {
-    const users = await storage.get('arcs_users');
-    const data = users ? JSON.parse(users.value) : {};
-    data[id] = { id, approved: true };
-    await storage.set('arcs_users', JSON.stringify(data));
+function loadPending() {
+    const pending = JSON.parse(localStorage.getItem('arcs_pending') || '[]');
+    const list = document.getElementById('pending-list');
+    list.innerHTML = '';
     
-    const pending = await storage.get('arcs_pending');
-    const pend = pending ? JSON.parse(pending.value) : [];
-    await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+    if (pending.length === 0) {
+        list.innerHTML = '<div style="padding:10px;text-align:center;">NO REQUESTS</div>';
+        return;
+    }
+    
+    pending.forEach(id => {
+        const item = document.createElement('div');
+        item.className = 'pending-item';
+        item.innerHTML = `
+            <span>${id}</span>
+            <div class="actions">
+                <button onclick="approve('${id}')">OK</button>
+                <button onclick="deny('${id}')">NO</button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function approve(id) {
+    const users = JSON.parse(localStorage.getItem('arcs_users') || '{}');
+    let pending = JSON.parse(localStorage.getItem('arcs_pending') || '[]');
+    
+    users[id] = { id, approved: true };
+    pending = pending.filter(p => p !== id);
+    
+    localStorage.setItem('arcs_users', JSON.stringify(users));
+    localStorage.setItem('arcs_pending', JSON.stringify(pending));
     
     playSound('sfx-blue');
     loadPending();
 }
 
-async function deny(id) {
-    const pending = await storage.get('arcs_pending');
-    const pend = pending ? JSON.parse(pending.value) : [];
-    await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
-    
+function deny(id) {
+    let pending = JSON.parse(localStorage.getItem('arcs_pending') || '[]');
+    pending = pending.filter(p => p !== id);
+    localStorage.setItem('arcs_pending', JSON.stringify(pending));
     playSound('sfx-denied');
     loadPending();
 }
 
-document.getElementById('send-broadcast')?.addEventListener('click', async () => {
+function sendBroadcast() {
     const text = document.getElementById('broadcast-text').value.trim();
     const sprite = document.getElementById('sprite-select').value;
     
     if (!text) return;
-    
-    const broadcast = { text, sprite, timestamp: Date.now() };
-    await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
-    
+
+    const message = {
+        text: text,
+        sprite: sprite,
+        timestamp: Date.now()
+    };
+
+    localStorage.setItem('arcs_broadcast_msg', JSON.stringify(message));
     playSound('sfx-sent');
-    showBroadcast(broadcast);
     document.getElementById('broadcast-text').value = '';
+}
+
+function checkBroadcast() {
+    const data = localStorage.getItem('arcs_broadcast_msg');
+    if (!data) return;
+
+    const msg = JSON.parse(data);
+    
+    if (msg.timestamp > lastBroadcastTime) {
+        lastBroadcastTime = msg.timestamp;
+        showBroadcastPopup(msg);
+    }
+}
+
+function showBroadcastPopup(msg) {
+    const overlay = document.getElementById('broadcast-overlay');
+    const textEl = document.getElementById('broadcast-message');
+    const imgEl = document.getElementById('broadcast-image');
+
+    textEl.innerText = msg.text;
+    imgEl.src = `sprites/${msg.sprite}.png`;
+    
+    overlay.classList.remove('hidden');
+    playSound('sfx-newmessage');
+
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+    }, 6000); 
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+    });
 });
 
-function showBroadcast(data) {
-    const spriteImg = document.getElementById('notif-sprite');
-    spriteImg.src = `sprites/${data.sprite}.png`;
-    
-    document.getElementById('notif-text').textContent = data.text;
-    document.getElementById('broadcast-notification').classList.remove('hidden');
-    
-    playSound('sfx-newmessage');
-    setTimeout(() => {
-        document.getElementById('broadcast-notification').classList.add('hidden');
-    }, 8000);
-}
+window.onload = () => {
+    setTimeout(startLoading, 800);
+    setInterval(checkBroadcast, 1000);
+};
 
-async function checkBroadcasts() {
-    try {
-        const data = await storage.get('arcs_broadcast', true);
-        if (data) {
-            const broadcast = JSON.parse(data.value);
-            const lastSeen = localStorage.getItem('arcs_last_broadcast');
-            
-            if (!lastSeen || broadcast.timestamp > parseInt(lastSeen)) {
-                showBroadcast(broadcast);
-                localStorage.setItem('arcs_last_broadcast', broadcast.timestamp.toString());
-            }
-        }
-    } catch (e) {
-        console.error('Check broadcasts error:', e);
-    }
-}
-
-async function init() {
-    try {
-        const users = await storage.get('arcs_users');
-        if (!users) {
-            await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
-        }
-        
-        const pending = await storage.get('arcs_pending');
-        if (!pending) {
-            await storage.set('arcs_pending', JSON.stringify([]));
-        }
-    } catch (e) {
-        console.error('Init error:', e);
-    }
-}
-
-window.addEventListener('load', async () => {
-    await init();
-    setTimeout(startLoading, 1000);
-    setInterval(checkBroadcasts, 5000);
+document.getElementById('operator-id').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
 });

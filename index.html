@@ -18,10 +18,9 @@
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
             <div class="upeo-section">
-                <img src="logos/logo.png" class="upeo-logo" alt="UPEO Logo">
+                <img src="logos/logo.png" class="upeo-logo" alt="UPEO">
                 <div class="upeo-text">UPEO</div>
             </div>
-            
             <div class="loading-info">
                 RESTARTING OS VER.3.2.2<br>
                 UPEO ID confirmed<br>
@@ -29,13 +28,12 @@
                 is for registered use only.
             </div>
         </div>
-
         <div class="loading-right">
             <div class="login-panel hidden" id="login-panel">
                 <div class="login-header">OPERATOR ACCESS</div>
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
-                    <input type="text" id="operator-id" class="login-input" maxlength="20">
+                    <input type="text" id="operator-id" class="login-input" maxlength="20" autocomplete="off">
                     <div class="login-status" id="login-status"></div>
                     <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
@@ -45,7 +43,6 @@
                 </div>
             </div>
         </div>
-
         <div class="data-swallow-container">
             <div class="swallow-box">
                 <div class="swallow-header">
@@ -83,128 +80,164 @@
         <div class="main-window">
             <div class="menu-bar">
                 <div class="menu-button">MENU</div>
-                <div class="menu-tabs" id="admin-tabs">
-                    <div class="tab active">BROADCAST</div>
-                    <div class="tab">MONITORING</div>
-                    <div class="tab">ALARMS</div>
-                    <div class="tab">TICKETS</div>
-                    <div class="tab">RADIO</div>
-                    <div class="tab">CREDENTIALS</div>
-                </div>
-                <div class="menu-tabs hidden" id="personnel-tabs">
-                    <div class="tab active">PROFILE</div>
-                    <div class="tab">WORKSTATION</div>
-                    <div class="tab">RADIO</div>
-                    <div class="tab">HELP REQUEST</div>
-                    <div class="tab">SUGGESTIONS</div>
+                <div class="menu-tabs">
+                    <div class="tab active" data-target="view-main">MAIN</div>
+                    <div class="tab" data-target="view-who">WHO</div>
+                    <div class="tab" data-target="view-containment">CONTAINMENT</div>
+                    <div class="tab" data-target="view-work">WORK</div>
+                    <div class="tab" data-target="view-stuff">STUFF</div>
+                    <div class="tab" data-target="view-inspiration">INSPIRATION</div>
                 </div>
             </div>
 
             <div class="banner-section">
-                <img src="logos/header.png" class="banner-img" onerror="this.style.display='none'">
-                <div class="mascot-placeholder"></div>
+                <img src="logos/header.png" class="banner-img">
             </div>
 
-            <div class="content-grid">
-                <div class="grid-cell empty-cell">
-                    <div class="x-mark">
-                        <div class="line"></div>
-                        <div class="line"></div>
+            <div class="content-area">
+                
+                <div id="view-main" class="tab-content active grid-layout">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark">
+                            <div class="line"></div>
+                            <div class="line"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-cell news-cell">
+                        <div class="sticker yellow">STAY, STAY, READ THE REPORT !!</div>
+                        <div class="cell-header">SYSTEM STATUS</div>
+                        <div class="news-box">
+                            <div class="date-badge">
+                                <div class="date-icon">⚡</div>
+                                <div class="date-text">ONLINE</div>
+                            </div>
+                            <div class="news-text">
+                                ALL SYSTEMS OPERATIONAL -- ARCS VERSION 3.2.2 RUNNING STABLE -- WAITING FOR ADMIN INPUT
+                            </div>
+                            <div class="scroll-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">UPDATES</div>
+                        <div class="updates-box">
+                            <div class="updates-title">WHAT'S NEW?</div>
+                            <div class="updates-text">
+                                > CHECK THIS SECTION<br>
+                                > FOR THE LATEST<br>
+                                > ARCS UPDATES
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-cell release-cell">
+                        <div class="sticker yellow">CHECK THE LATEST ACTIVITY HERE</div>
+                        <div class="cell-header">RECENT ACTIVITY</div>
+                        <div class="release-box">
+                            <div class="release-icon">📊</div>
+                            <div class="release-content">
+                                <div class="release-title">INTERPRETATIONZZ</div>
+                                <div class="release-desc">SYSTEM ANALYSIS AND DATA RECONSTRUCTION IN PROGRESS.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">ATTENTION REQUIRED</div>
+                        <div class="cell-header">FEATURED SITE</div>
+                        <div class="featured-box">
+                            <div class="featured-title">NO DATA</div>
+                            <div class="featured-desc">NO SITE FEATURE YET ... SO JUST CHECK SOME OF MY WORK UNTIL I HAVE FOUND A KICKASS SITE TO SHOW ..</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid-cell news-cell">
-                    <div class="sticker yellow">STAY, STAY, READ THE REPORT !!</div>
-                    <div class="cell-header">SYSTEM STATUS</div>
-                    <div class="news-box">
-                        <div class="date-badge">
-                            <div class="date-icon">⚡</div>
-                            <div class="date-text">ONLINE</div>
-                        </div>
-                        <div class="news-text">
-                            ALL SYSTEMS OPERATIONAL -- ARCS VERSION 3.2.2 RUNNING STABLE -- NO CRITICAL ALERTS
-                        </div>
-                        <div class="scroll-bar"></div>
-                    </div>
+                <div id="view-who" class="tab-content text-layout">
+                    <h3>WHO AM I?</h3>
+                    <p>ARC SYSTEM ADMINISTRATOR: OBUNTO</p>
+                    <p>ID: 118107921024376</p>
+                    <br>
+                    <p>ACCESS LEVEL: OMNI</p>
+                    <p>STATUS: MONITORING</p>
                 </div>
 
-                <div class="grid-cell updates-cell">
-                    <div class="cell-header">UPDATES</div>
-                    <div class="updates-box">
-                        <div class="updates-title">WHAT'S NEW?</div>
-                        <div class="updates-text">
-                            > CHECK THIS SECTION<br>
-                            FOR THE LATEST<br>
-                            INCIDENTS AND UPDATES
-                        </div>
-                    </div>
+                <div id="view-containment" class="tab-content text-layout">
+                    <h3>CONTAINMENT PROTOCOLS</h3>
+                    <p>CURRENTLY CONTAINING [REDACTED] ENTITIES.</p>
+                    <p>ALL SYSTEMS GREEN.</p>
                 </div>
 
-                <div class="grid-cell release-cell">
-                    <div class="sticker yellow">CHECK THE LATEST ACTIVITY HERE</div>
-                    <div class="cell-header">RECENT ACTIVITY</div>
-                    <div class="release-box">
-                        <div class="release-icon">📊</div>
-                        <div class="release-content">
-                            <div class="release-title">SYSTEM LOGS</div>
-                            <div class="release-desc">MONITORING ACTIVE OPERATIONS AND PERSONNEL ACTIVITY ACROSS ALL DEPARTMENTS</div>
-                        </div>
-                    </div>
+                <div id="view-work" class="tab-content text-layout">
+                    <h3>WORK LOGS</h3>
+                    <p>- INITIALIZED NEWTON OS V3.2.2</p>
+                    <p>- PURGED CACHE FILES</p>
+                    <p>- UPDATED SECURITY DEFINITIONS</p>
                 </div>
 
-                <div class="grid-cell featured-cell">
-                    <div class="sticker yellow">ATTENTION REQUIRED</div>
-                    <div class="cell-header">NOTIFICATIONS</div>
-                    <div class="featured-box">
-                        <div class="featured-title">NO ALERTS</div>
-                        <div class="featured-desc">ALL SYSTEMS OPERATING WITHIN NORMAL PARAMETERS -- CHECK BACK FOR UPDATES</div>
-                    </div>
+                <div id="view-stuff" class="tab-content text-layout">
+                    <h3>STUFF & ASSETS</h3>
+                    <p>ARCHIVE EMPTY.</p>
                 </div>
+
+                <div id="view-inspiration" class="tab-content text-layout">
+                    <h3>INSPIRATION</h3>
+                    <p>DATA SWALLOW TECHNOLOGY</p>
+                    <p>UPEO STANDARDS</p>
+                </div>
+
             </div>
         </div>
     </div>
 
     <div id="admin-panel" class="admin-window hidden">
         <div class="window-titlebar">
-            <span>ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">×</div>
+            <span>ADMIN - OBUNTO CONTROL</span>
+            <div class="close-btn" onclick="toggleAdmin()">×</div>
         </div>
         <div class="window-body">
             <div class="admin-section">
-                <h3>PENDING ACCOUNTS</h3>
+                <h3>PENDING REQUESTS</h3>
                 <div id="pending-list"></div>
             </div>
+            <hr class="admin-divider">
             <div class="admin-section">
-                <h3>BROADCAST</h3>
-                <select id="sprite-select">
-                    <option value="normal">Normal</option>
-                    <option value="happy">Happy</option>
-                    <option value="sad">Sad</option>
-                    <option value="annoyed">Annoyed</option>
-                    <option value="bug">Bug</option>
-                    <option value="dizzy">Dizzy</option>
-                    <option value="hollow">Hollow</option>
-                    <option value="panic">Panic</option>
-                    <option value="sleeping">Sleeping</option>
-                    <option value="smug">Smug</option>
-                    <option value="stare">Stare</option>
-                    <option value="suspicious">Suspicious</option>
-                    <option value="werror">W.Error</option>
-                </select>
-                <textarea id="broadcast-text" placeholder="Message..."></textarea>
-                <button id="send-broadcast">SEND</button>
+                <h3>GLOBAL BROADCAST</h3>
+                <div class="broadcast-ui">
+                    <div class="sprite-selector">
+                        <label>EMOTION:</label>
+                        <select id="sprite-select">
+                            <option value="normal">Normal</option>
+                            <option value="happy">Happy</option>
+                            <option value="sad">Sad</option>
+                            <option value="annoyed">Annoyed</option>
+                            <option value="bug">Bug</option>
+                            <option value="dizzy">Dizzy</option>
+                            <option value="hollow">Hollow</option>
+                            <option value="panic">Panic</option>
+                            <option value="sleeping">Sleeping</option>
+                            <option value="Smug">Smug</option>
+                            <option value="stare">Stare</option>
+                            <option value="suspicious">Suspicious</option>
+                            <option value="werror">Error</option>
+                        </select>
+                    </div>
+                    <textarea id="broadcast-text" placeholder="TYPE MESSAGE TO ALL USERS..."></textarea>
+                    <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="toggleAdmin()">⚙</div>
 
-    <div id="broadcast-notification" class="notification hidden">
-        <div class="notification-content">
-            <img id="notif-sprite" class="notification-sprite" src="" alt="sprite">
-            <div class="notification-text" id="notif-text"></div>
+    <div id="broadcast-overlay" class="hidden">
+        <div class="broadcast-container">
+            <div class="broadcast-bubble">
+                <p id="broadcast-message"></p>
+            </div>
+            <img id="broadcast-image" src="" alt="Obunto">
         </div>
-        <div class="notification-footer">- BROADCAST FROM OPERATOR OBUNTO</div>
     </div>
 
     <script src="js/script.js"></script>
