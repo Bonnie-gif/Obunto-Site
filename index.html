@@ -1,1231 +1,1065 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ARCS - Advanced Research & Containment System</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=VT323&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --newton-bg: #e8e4d8;
-  --newton-fg: #1a1a1a;
-  --newton-border: #2a2a2a;
-  --newton-highlight: #4a4a4a;
-  --newton-shadow: rgba(0, 0, 0, 0.3);
-  --newton-light: #f5f1e8;
-  --loading-bg: #9b8b6f;
-  --loading-fg: #f5f1e8;
-  --pink: #ff69b4;
-  --yellow: #ffd700;
-  --gray: #666666;
-}
-
-body {
-  font-family: 'IBM Plex Mono', 'VT323', monospace;
-  background: var(--newton-bg);
-  color: var(--newton-fg);
-  overflow: hidden;
-  cursor: default;
-  -webkit-font-smoothing: none;
-  font-smooth: never;
-  image-rendering: pixelated;
-}
-
-.screen {
-  display: none;
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-.screen.active {
-  display: block;
-}
-
-#loading-screen {
-  background: var(--loading-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  animation: fadeIn 0.5s;
-}
-
-.loading-content {
-  display: flex;
-  align-items: center;
-  gap: 40px;
-}
-
-.upeo-logo {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  animation: pulse 2s infinite;
-}
-
-.upeo-bird {
-  width: 100%;
-  height: 100%;
-  fill: var(--loading-fg);
-}
-
-.loading-text {
-  color: var(--loading-fg);
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  letter-spacing: 2px;
-  line-height: 1.8;
-  text-align: left;
-}
-
-.loading-bar {
-  position: absolute;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 2px solid var(--loading-fg);
-}
-
-.loading-progress {
-  height: 100%;
-  background: var(--loading-fg);
-  width: 0%;
-  transition: width 0.3s;
-}
-
-.plugin-icons {
-  position: fixed;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.plugin-icon {
-  width: 50px;
-  height: 50px;
-  border: 3px solid var(--newton-fg);
-  background: var(--loading-fg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.data-swallow {
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
-  width: 400px;
-  border: 3px solid var(--newton-fg);
-  background: var(--loading-fg);
-  padding: 20px;
-}
-
-.swallow-header {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.swallow-logo {
-  font-family: 'VT323', monospace;
-  font-size: 24px;
-  font-weight: bold;
-  padding: 5px 15px;
-  background: #7dd3c0;
-  color: var(--newton-fg);
-  border: 2px solid var(--newton-fg);
-}
-
-.swallow-disk {
-  width: 100px;
-  height: 80px;
-  background: var(--newton-fg);
-  border: 2px solid var(--newton-fg);
-  position: relative;
-  padding: 10px;
-  color: var(--loading-fg);
-  font-size: 9px;
-  line-height: 1.2;
-}
-
-.disk-circle {
-  position: absolute;
-  bottom: 5px;
-  right: 5px;
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--loading-fg);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.swallow-text {
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  letter-spacing: 1px;
-}
-
-#login-screen {
-  background: var(--loading-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-container {
-  width: 600px;
-  background: var(--newton-light);
-  border: 4px solid var(--newton-border);
-  box-shadow: 8px 8px 0 var(--newton-shadow);
-  padding: 40px;
-  position: relative;
-}
-
-.login-title {
-  font-family: 'VT323', monospace;
-  font-size: 32px;
-  margin-bottom: 10px;
-  text-align: center;
-  letter-spacing: 3px;
-}
-
-.login-subtitle {
-  font-size: 12px;
-  text-align: center;
-  margin-bottom: 30px;
-  letter-spacing: 2px;
-}
-
-.input-group {
-  margin-bottom: 25px;
-}
-
-.input-label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-.newton-input {
-  width: 100%;
-  padding: 12px;
-  border: 3px solid var(--newton-border);
-  background: white;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 16px;
-  letter-spacing: 2px;
-}
-
-.newton-input:focus {
-  outline: none;
-  border-color: var(--newton-fg);
-}
-
-.button-group {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.newton-btn {
-  flex: 1;
-  padding: 15px;
-  border: 3px solid var(--newton-border);
-  background: var(--newton-highlight);
-  color: white;
-  font-family: 'VT323', monospace;
-  font-size: 20px;
-  cursor: pointer;
-  letter-spacing: 2px;
-  transition: all 0.1s;
-}
-
-.newton-btn:hover {
-  background: var(--newton-border);
-  transform: translateY(-2px);
-}
-
-.newton-btn:active {
-  transform: translateY(0);
-  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.newton-btn.primary {
-  background: var(--newton-fg);
-}
-
-.status-message {
-  margin-top: 20px;
-  padding: 15px;
-  border: 2px solid var(--newton-border);
-  background: var(--yellow);
-  text-align: center;
-  font-size: 13px;
-  letter-spacing: 1px;
-  display: none;
-}
-
-.status-message.show {
-  display: block;
-  animation: slideDown 0.3s;
-}
-
-#dashboard {
-  background: var(--newton-bg);
-  padding: 20px;
-  overflow-y: auto;
-  height: 100vh;
-}
-
-.window {
-  background: var(--newton-light);
-  border: 3px solid var(--newton-border);
-  box-shadow: 6px 6px 0 var(--newton-shadow);
-  margin-bottom: 20px;
-}
-
-.window-title-bar {
-  background: var(--newton-fg);
-  color: white;
-  padding: 8px 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  letter-spacing: 2px;
-}
-
-.window-close {
-  width: 20px;
-  height: 20px;
-  background: var(--gray);
-  border: 2px solid white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.window-content {
-  padding: 20px;
-}
-
-.menu-bar {
-  background: var(--newton-fg);
-  color: white;
-  padding: 10px 20px;
-  display: flex;
-  gap: 30px;
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-}
-
-.menu-item {
-  cursor: pointer;
-  padding: 5px 10px;
-  transition: background 0.2s;
-}
-
-.menu-item:hover {
-  background: var(--newton-highlight);
-}
-
-.menu-item.active {
-  background: var(--yellow);
-  color: var(--newton-fg);
-}
-
-.banner-area {
-  width: 100%;
-  height: 250px;
-  background: white;
-  border: 3px solid var(--newton-border);
-  margin-bottom: 20px;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.banner-mascot {
-  width: 200px;
-  height: 200px;
-  position: relative;
-}
-
-.mascot-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.mascot-img {
-  max-width: 100%;
-  max-height: 100%;
-  image-rendering: pixelated;
-}
-
-.mascot-speech {
-  position: absolute;
-  left: 220px;
-  top: 20px;
-  background: white;
-  border: 3px solid var(--newton-fg);
-  padding: 15px;
-  min-width: 250px;
-  max-width: 400px;
-  font-size: 14px;
-  line-height: 1.4;
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.2);
-}
-
-.mascot-speech::before {
-  content: '';
-  position: absolute;
-  left: -20px;
-  top: 30px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 10px 20px 10px 0;
-  border-color: transparent var(--newton-fg) transparent transparent;
-}
-
-.mascot-speech::after {
-  content: '';
-  position: absolute;
-  left: -14px;
-  top: 33px;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 7px 14px 7px 0;
-  border-color: transparent white transparent transparent;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.content-card {
-  background: white;
-  border: 3px solid var(--newton-border);
-  padding: 20px;
-  position: relative;
-}
-
-.card-label {
-  position: absolute;
-  top: -15px;
-  left: 20px;
-  background: var(--yellow);
-  padding: 5px 15px;
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  letter-spacing: 2px;
-  border: 2px solid var(--newton-border);
-}
-
-.card-title {
-  font-family: 'VT323', monospace;
-  font-size: 24px;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
-}
-
-.card-description {
-  font-size: 12px;
-  line-height: 1.6;
-  letter-spacing: 1px;
-}
-
-.card-thumbnail {
-  width: 100%;
-  height: 120px;
-  background: var(--gray);
-  border: 2px solid var(--newton-border);
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 48px;
-}
-
-.admin-panel {
-  margin-top: 20px;
-  background: var(--pink);
-  border: 4px solid var(--newton-border);
-  padding: 25px;
-}
-
-.admin-title {
-  font-family: 'VT323', monospace;
-  font-size: 28px;
-  margin-bottom: 20px;
-  letter-spacing: 3px;
-  color: white;
-  text-shadow: 2px 2px 0 var(--newton-border);
-}
-
-.broadcast-input {
-  width: 100%;
-  padding: 15px;
-  border: 3px solid var(--newton-border);
-  background: white;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  min-height: 100px;
-  margin-bottom: 15px;
-  resize: vertical;
-}
-
-.sprite-selector {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-}
-
-.sprite-option {
-  width: 60px;
-  height: 60px;
-  border: 3px solid var(--newton-border);
-  background: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  text-align: center;
-  line-height: 1.2;
-  padding: 5px;
-  transition: all 0.2s;
-}
-
-.sprite-option:hover {
-  background: var(--yellow);
-}
-
-.sprite-option.selected {
-  border-color: var(--pink);
-  border-width: 4px;
-  background: var(--yellow);
-}
-
-.pending-accounts {
-  margin-top: 25px;
-  padding-top: 25px;
-  border-top: 3px solid var(--newton-border);
-}
-
-.pending-title {
-  font-family: 'VT323', monospace;
-  font-size: 22px;
-  margin-bottom: 15px;
-  letter-spacing: 2px;
-}
-
-.pending-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.pending-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  background: white;
-  border: 2px solid var(--newton-border);
-}
-
-.pending-id {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-
-.pending-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.action-btn {
-  padding: 8px 20px;
-  border: 2px solid var(--newton-border);
-  background: var(--newton-highlight);
-  color: white;
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  cursor: pointer;
-  letter-spacing: 1px;
-}
-
-.action-btn.approve {
-  background: #4CAF50;
-}
-
-.action-btn.deny {
-  background: #f44336;
-}
-
-.broadcast-notification {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  border: 4px solid var(--newton-border);
-  box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.5);
-  padding: 30px;
-  min-width: 400px;
-  max-width: 600px;
-  z-index: 1000;
-  display: none;
-  animation: bounceIn 0.5s;
-}
-
-.broadcast-notification.show {
-  display: block;
-}
-
-.broadcast-header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.broadcast-sprite {
-  width: 80px;
-  height: 80px;
-  border: 3px solid var(--newton-border);
-  background: var(--newton-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  flex-shrink: 0;
-}
-
-.broadcast-text {
-  flex: 1;
-  font-size: 16px;
-  line-height: 1.6;
-  letter-spacing: 1px;
-}
-
-.broadcast-from {
-  text-align: right;
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  margin-top: 15px;
-  letter-spacing: 2px;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-@keyframes slideDown {
-  from {
-    transform: translateY(-20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes bounceIn {
-  0% {
-    transform: translate(-50%, -50%) scale(0.3);
-    opacity: 0;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.05);
-  }
-  70% {
-    transform: translate(-50%, -50%) scale(0.9);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-.logout-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  background: var(--newton-fg);
-  color: white;
-  border: 3px solid var(--newton-border);
-  font-family: 'VT323', monospace;
-  font-size: 18px;
-  cursor: pointer;
-  letter-spacing: 2px;
-  z-index: 100;
-}
-
-.logout-btn:hover {
-  background: var(--newton-highlight);
-}
-
-audio {
-  display: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCS - Advanced Research & Containment System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            overflow: hidden;
+        }
+
+        .boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8b7355 0%, #a0826d 50%, #8b7355 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .boot-content {
+            text-align: left;
+            color: #f5f5dc;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo-eagle {
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle, #f5f5dc 0%, #d4c4a8 100%);
+            border-radius: 50%;
+            position: relative;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .eagle-shape {
+            width: 80px;
+            height: 80px;
+            background: #8b7355;
+            clip-path: polygon(50% 10%, 70% 30%, 90% 30%, 75% 50%, 85% 70%, 50% 60%, 15% 70%, 25% 50%, 10% 30%, 30% 30%);
+            animation: eagleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes eagleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .logo-text {
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .boot-info {
+            font-size: 14px;
+            line-height: 1.8;
+            margin-top: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .loading-bar {
+            width: 400px;
+            height: 30px;
+            background: #5a4a3a;
+            border: 2px solid #f5f5dc;
+            margin-top: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loading-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4a9eff 0%, #6fbfff 100%);
+            width: 0%;
+            animation: load 3s ease-in-out forwards;
+        }
+
+        @keyframes load {
+            to { width: 100%; }
+        }
+
+        .side-icons {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .side-icon {
+            width: 60px;
+            height: 60px;
+            background: #f5f5dc;
+            border: 3px solid #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .side-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(245,245,220,0.5);
+        }
+
+        .login-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #8b7355 0%, #a0826d 100%);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-container {
+            background: #f5f5dc;
+            border: 5px solid #1a1a1a;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .login-title {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-label {
+            color: #1a1a1a;
+            font-size: 14px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #1a1a1a;
+            background: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: 3px solid #1a1a1a;
+            background: #4a9eff;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #3585e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(74,158,255,0.4);
+        }
+
+        .btn-secondary {
+            background: #8b7355;
+        }
+
+        .btn-secondary:hover {
+            background: #6d5a43;
+        }
+
+        .main-interface {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: #e8e8e8;
+            overflow-y: auto;
+        }
+
+        .browser-bar {
+            background: linear-gradient(180deg, #d4d4d4 0%, #b8b8b8 100%);
+            padding: 8px 15px;
+            border-bottom: 2px solid #888;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .window-button {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid #555;
+            cursor: pointer;
+        }
+
+        .window-button.close { background: #ff5f57; }
+        .window-button.minimize { background: #ffbd2e; }
+        .window-button.maximize { background: #28ca42; }
+
+        .url-bar {
+            flex: 1;
+            background: #fff;
+            border: 1px solid #888;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .menu-bar {
+            background: #1a1a1a;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 3px solid #00ff00;
+        }
+
+        .menu-item {
+            color: #00ff00;
+            cursor: pointer;
+            padding: 8px 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            border: 2px solid #00ff00;
+            background: rgba(0,255,0,0.1);
+        }
+
+        .banner-section {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+        }
+
+        .banner-mascot {
+            position: absolute;
+            left: 30px;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, #ff69b4 0%, #ff1493 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #1a1a1a;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .mascot-face {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .mascot-eye {
+            width: 25px;
+            height: 35px;
+            background: #ff69b4;
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+        }
+
+        .mascot-eye.left { left: 15px; }
+        .mascot-eye.right { right: 15px; }
+
+        .banner-text {
+            margin-left: 200px;
+            flex: 1;
+        }
+
+        .banner-title {
+            font-size: 32px;
+            color: #1a1a1a;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .banner-subtitle {
+            font-size: 14px;
+            color: #555;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px;
+        }
+
+        .content-card {
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            box-shadow: 5px 5px 0 rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
+        }
+
+        .card-label {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #ffff00;
+            color: #1a1a1a;
+            padding: 5px 15px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid #1a1a1a;
+            border-radius: 5px;
+            transform: rotate(-3deg);
+        }
+
+        .card-title {
+            font-size: 20px;
+            color: #1a1a1a;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        .card-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .broadcast-notification {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            width: 350px;
+            background: #fff;
+            border: 4px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 9998;
+            transition: right 0.5s ease-in-out;
+        }
+
+        .broadcast-notification.show {
+            right: 20px;
+        }
+
+        .broadcast-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1a1a1a;
+        }
+
+        .broadcast-icon {
+            width: 60px;
+            height: 60px;
+            border: 3px solid #1a1a1a;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .broadcast-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+
+        .broadcast-message {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .admin-panel {
+            margin: 20px;
+            background: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .admin-title {
+            font-size: 24px;
+            color: #1a1a1a;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1a1a1a;
+            padding-bottom: 10px;
+        }
+
+        .pending-users {
+            margin-top: 20px;
+        }
+
+        .user-card {
+            background: #f5f5f5;
+            border: 2px solid #1a1a1a;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            color: #1a1a1a;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            border: 2px solid #1a1a1a;
+            background: #4a9eff;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-small.reject {
+            background: #ff5f57;
+        }
+
+        .btn-small:hover {
+            transform: scale(1.05);
+        }
+
+        .broadcast-panel {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 3px solid #1a1a1a;
+        }
+
+        .sprite-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .sprite-option {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #1a1a1a;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            background: #f5f5f5;
+        }
+
+        .sprite-option:hover, .sprite-option.selected {
+            border-color: #4a9eff;
+            background: #e8f4ff;
+            transform: scale(1.1);
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #ff5f57;
+            color: #fff;
+            border: 3px solid #1a1a1a;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            z-index: 100;
+        }
+
+        .system-info {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 8px 20px;
+            font-size: 12px;
+            border-top: 2px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .error-message {
+            color: #ff5f57;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #28ca42;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-
-<div id="loading-screen" class="screen active">
-  <div class="loading-content">
-    <div class="upeo-logo">
-      <svg class="upeo-bird" viewBox="0 0 200 200">
-        <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z M100,80 Q110,85 105,95 Q100,100 90,95 Q85,85 100,80 Z"/>
-        <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
-        <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
-      </svg>
-    </div>
-    <div class="loading-text">
-      RESTARTING OS VER.3.2.2<br>
-      UPEO ID confirmed<br>
-      DATA SWALLOW<br>
-      is for registered use only.
-    </div>
-  </div>
-  
-  <div class="loading-bar">
-    <div class="loading-progress" id="progress-bar"></div>
-  </div>
-
-  <div class="plugin-icons">
-    <div class="plugin-icon">⚙</div>
-    <div class="plugin-icon">✈</div>
-    <div class="plugin-icon">🎮</div>
-    <div class="plugin-icon">⊕</div>
-    <div class="plugin-icon">語</div>
-    <div class="plugin-icon">☺</div>
-  </div>
-
-  <div class="data-swallow">
-    <div class="swallow-header">
-      <div class="swallow-logo">DATA SWALLOW</div>
-      <div class="swallow-disk">
-        DATA SWALLOW 40
-        UPEO VER.3.2
-        SYSTEM STARTUP
-        ACE-C QUANTUM SYSTEMS
-        <div class="disk-circle">⊕</div>
-      </div>
-    </div>
-    <div class="swallow-text">DATA SWALLOW 40 を起動中です。</div>
-  </div>
-</div>
-
-<div id="login-screen" class="screen">
-  <div class="login-container">
-    <div class="login-title">ARCS</div>
-    <div class="login-subtitle">ADVANCED RESEARCH & CONTAINMENT SYSTEM</div>
-    
-    <div class="input-group">
-      <label class="input-label">OPERATOR ID</label>
-      <input type="text" id="login-id" class="newton-input" placeholder="Enter your ID">
-    </div>
-    
-    <div class="button-group">
-      <button class="newton-btn primary" onclick="login()">LOGIN</button>
-      <button class="newton-btn" onclick="createAccount()">CREATE ACCOUNT</button>
-    </div>
-    
-    <div id="status-message" class="status-message"></div>
-  </div>
-</div>
-
-<div id="dashboard" class="screen">
-  <button class="logout-btn" onclick="logout()">LOGOUT</button>
-  
-  <div class="menu-bar">
-    <div class="menu-item active">MENU</div>
-    <div class="menu-item">REPORTS</div>
-    <div class="menu-item">WHO</div>
-    <div class="menu-item">ORIGINS</div>
-    <div class="menu-item">WORLD</div>
-    <div class="menu-item">STAFF</div>
-    <div class="menu-item">INFORMATION</div>
-  </div>
-
-  <div class="window">
-    <div class="window-title-bar">
-      <span>SYSTEM STATUS</span>
-      <div class="window-close">×</div>
-    </div>
-    <div class="window-content">
-      <div class="banner-area" id="banner-area">
-        <div class="banner-mascot">
-          <div class="mascot-container">
-            <div class="mascot-img" id="mascot-display">🎭</div>
-          </div>
+    <div class="boot-screen" id="bootScreen">
+        <div class="boot-content">
+            <div class="logo-container">
+                <div class="logo-eagle">
+                    <div class="eagle-shape"></div>
+                </div>
+                <div class="logo-text">UPEO</div>
+            </div>
+            <div class="boot-info">
+                RESTARTING OS VER.3.2.2<br>
+                SYSTEM ID confirmed<br>
+                DATA SWALLOW<br>
+                is for registered use only.
+            </div>
+            <div class="loading-bar">
+                <div class="loading-fill"></div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="content-grid">
-    <div class="content-card">
-      <div class="card-label">STAY, STAY, READ THE REPORT !!</div>
-      <div class="card-thumbnail">📰</div>
-      <div class="card-title">SCP 2025</div>
-      <div class="card-description">
-        THE CURSE IS LIFTED !!! THE WRITING IS OVER !!! I FINALLY FINISHED THIS ARTICLE !!! ETSA
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="card-label">CHECK THE LATEST INCIDENTS HERE</div>
-      <div class="card-thumbnail">📋</div>
-      <div class="card-title">WHAT'S NEW?</div>
-      <div class="card-description">
-        > CHECK THIS SECTION FOR THE LATEST INCIDENTS AND UPDATES
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="card-label">FEATURED SITE</div>
-      <div class="card-thumbnail">🌐</div>
-      <div class="card-title">GARY SYMOR</div>
-      <div class="card-description">
-        NO SITE FEATURE YET -- SO JUST CHECK SOME OF MY WORK UNTIL I HAVE FOUND A SUITABLE SITE TO JOIN
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="card-label">BE SURE TO TAKE A LOOK, IT IS NEW !!!</div>
-      <div class="card-thumbnail">🎨</div>
-      <div class="card-title">INTERPRETATIONZZ</div>
-      <div class="card-description">
-        MUSIC & DANCE SHOW INSPIRED BY THE GOLDEN AGE OF AFRO-AMERICAN CULTURE -- JAZZ ME UP IT
-      </div>
-    </div>
-  </div>
-
-  <div id="admin-panel" style="display: none;">
-    <div class="admin-panel">
-      <div class="admin-title">OPERATOR ADMIN PANEL - OBUNTO</div>
-      
-      <label class="input-label">BROADCAST MESSAGE</label>
-      <textarea id="broadcast-text" class="broadcast-input" placeholder="Type your broadcast message here..."></textarea>
-      
-      <label class="input-label">SELECT SPRITE</label>
-      <div class="sprite-selector">
-        <div class="sprite-option selected" data-sprite="normal">NORMAL</div>
-        <div class="sprite-option" data-sprite="happy">HAPPY</div>
-        <div class="sprite-option" data-sprite="sad">SAD</div>
-        <div class="sprite-option" data-sprite="annoyed">ANNOYED</div>
-        <div class="sprite-option" data-sprite="bug">BUG</div>
-        <div class="sprite-option" data-sprite="dizzy">DIZZY</div>
-        <div class="sprite-option" data-sprite="hollow">HOLLOW</div>
-        <div class="sprite-option" data-sprite="panic">PANIC</div>
-        <div class="sprite-option" data-sprite="sleeping">SLEEPING</div>
-        <div class="sprite-option" data-sprite="smug">SMUG</div>
-        <div class="sprite-option" data-sprite="stare">STARE</div>
-        <div class="sprite-option" data-sprite="suspicious">SUSPICIOUS</div>
-        <div class="sprite-option" data-sprite="werror">W.ERROR</div>
-      </div>
-      
-      <button class="newton-btn primary" onclick="sendBroadcast()">BROADCAST</button>
-
-      <div class="pending-accounts">
-        <div class="pending-title">PENDING ACCOUNT APPROVALS</div>
-        <div class="pending-list" id="pending-list"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="broadcast-notification" class="broadcast-notification">
-  <div class="broadcast-header">
-    <div class="broadcast-sprite" id="broadcast-sprite-display">🎭</div>
-    <div class="broadcast-text" id="broadcast-text-display"></div>
-  </div>
-  <div class="broadcast-from">- BROADCAST FROM OPERATOR OBUNTO</div>
-</div>
-
-<audio id="audio-loading" src="assets/audio/loading1.wav"></audio>
-<audio id="audio-poweron" src="assets/audio/poweron.wav"></audio>
-<audio id="audio-request-sent" src="assets/audio/requestsent.wav"></audio>
-<audio id="audio-request-denied" src="assets/audio/requestdenied.wav"></audio>
-<audio id="audio-new-message" src="assets/audio/newmessage.wav"></audio>
-<audio id="audio-bluecode" src="assets/audio/bluecode.wav"></audio>
-
-<script>
-const ADMIN_ID = '118107921024376';
-let currentUser = null;
-let selectedSprite = 'normal';
-
-const spriteEmojis = {
-  'normal': '🎭',
-  'happy': '😊',
-  'sad': '😢',
-  'annoyed': '😤',
-  'bug': '🐛',
-  'dizzy': '😵',
-  'hollow': '😶',
-  'panic': '😱',
-  'sleeping': '😴',
-  'smug': '😏',
-  'stare': '👀',
-  'suspicious': '🤨',
-  'werror': '⚠️'
-};
-
-async function initStorage() {
-  try {
-    const users = await window.storage.get('arcs_users');
-    if (!users) {
-      await window.storage.set('arcs_users', JSON.stringify({
-        [ADMIN_ID]: { id: ADMIN_ID, approved: true, name: 'Obunto' }
-      }));
-    }
-    
-    const pending = await window.storage.get('arcs_pending');
-    if (!pending) {
-      await window.storage.set('arcs_pending', JSON.stringify([]));
-    }
-  } catch (e) {
-    console.log('Storage initialization:', e);
-  }
-}
-
-function playSound(audioId) {
-  try {
-    const audio = document.getElementById(audioId);
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play().catch(e => console.log('Audio play failed:', e));
-    }
-  } catch (e) {
-    console.log('Sound error:', e);
-  }
-}
-
-async function startLoading() {
-  playSound('audio-loading');
-  
-  let progress = 0;
-  const progressBar = document.getElementById('progress-bar');
-  
-  const interval = setInterval(() => {
-    progress += Math.random() * 15;
-    if (progress >= 100) {
-      progress = 100;
-      clearInterval(interval);
-      setTimeout(() => {
-        playSound('audio-poweron');
-        showScreen('login-screen');
-      }, 500);
-    }
-    progressBar.style.width = progress + '%';
-  }, 200);
-}
-
-function showScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-}
-
-function showStatus(message, isError = false) {
-  const statusEl = document.getElementById('status-message');
-  statusEl.textContent = message;
-  statusEl.style.background = isError ? '#f44336' : '#ffd700';
-  statusEl.style.color = isError ? 'white' : '#1a1a1a';
-  statusEl.classList.add('show');
-  
-  setTimeout(() => {
-    statusEl.classList.remove('show');
-  }, 4000);
-}
-
-async function login() {
-  const id = document.getElementById('login-id').value.trim();
-  
-  if (!id) {
-    showStatus('Please enter an Operator ID', true);
-    return;
-  }
-  
-  try {
-    const usersData = await window.storage.get('arcs_users');
-    const users = usersData ? JSON.parse(usersData.value) : {};
-    
-    const user = users[id];
-    
-    if (!user) {
-      playSound('audio-request-denied');
-      showStatus('Operator ID not found. Please create an account.', true);
-      return;
-    }
-    
-    if (!user.approved) {
-      playSound('audio-request-denied');
-      showStatus('Account pending approval. Please wait for administrator authorization.', true);
-      return;
-    }
-    
-    playSound('audio-poweron');
-    currentUser = user;
-    document.getElementById('login-id').value = '';
-    showScreen('dashboard');
-    
-    if (id === ADMIN_ID) {
-      document.getElementById('admin-panel').style.display = 'block';
-      loadPendingAccounts();
-    } else {
-      document.getElementById('admin-panel').style.display = 'none';
-    }
-    
-    checkForBroadcasts();
-  } catch (e) {
-    console.error('Login error:', e);
-    showStatus('System error. Please try again.', true);
-  }
-}
-
-async function createAccount() {
-  const id = document.getElementById('login-id').value.trim();
-  
-  if (!id) {
-    showStatus('Please enter an Operator ID', true);
-    return;
-  }
-  
-  if (id.length < 5) {
-    showStatus('Operator ID must be at least 5 characters', true);
-    return;
-  }
-  
-  try {
-    const usersData = await window.storage.get('arcs_users');
-    const users = usersData ? JSON.parse(usersData.value) : {};
-    
-    if (users[id]) {
-      showStatus('This Operator ID already exists', true);
-      return;
-    }
-    
-    const pendingData = await window.storage.get('arcs_pending');
-    const pending = pendingData ? JSON.parse(pendingData.value) : [];
-    
-    if (pending.includes(id)) {
-      showStatus('This ID is already pending approval', true);
-      return;
-    }
-    
-    pending.push(id);
-    await window.storage.set('arcs_pending', JSON.stringify(pending));
-    
-    playSound('audio-request-sent');
-    showStatus('Account creation request sent! Waiting for administrator approval.');
-    document.getElementById('login-id').value = '';
-  } catch (e) {
-    console.error('Create account error:', e);
-    showStatus('System error. Please try again.', true);
-  }
-}
-
-async function loadPendingAccounts() {
-  try {
-    const pendingData = await window.storage.get('arcs_pending');
-    const pending = pendingData ? JSON.parse(pendingData.value) : [];
-    
-    const listEl = document.getElementById('pending-list');
-    listEl.innerHTML = '';
-    
-    if (pending.length === 0) {
-      listEl.innerHTML = '<div style="text-align: center; padding: 20px;">No pending accounts</div>';
-      return;
-    }
-    
-    pending.forEach(id => {
-      const item = document.createElement('div');
-      item.className = 'pending-item';
-      item.innerHTML = `
-        <div class="pending-id">${id}</div>
-        <div class="pending-actions">
-          <button class="action-btn approve" onclick="approveAccount('${id}')">APPROVE</button>
-          <button class="action-btn deny" onclick="denyAccount('${id}')">DENY</button>
+        <div class="side-icons">
+            <div class="side-icon">⚙️</div>
+            <div class="side-icon">✈️</div>
+            <div class="side-icon">📁</div>
+            <div class="side-icon">🎯</div>
+            <div class="side-icon">🈴</div>
+            <div class="side-icon">😊</div>
         </div>
-      `;
-      listEl.appendChild(item);
-    });
-  } catch (e) {
-    console.error('Load pending error:', e);
-  }
-}
+    </div>
 
-async function approveAccount(id) {
-  try {
-    const usersData = await window.storage.get('arcs_users');
-    const users = usersData ? JSON.parse(usersData.value) : {};
-    
-    users[id] = { id: id, approved: true, name: `Operator_${id.slice(-4)}` };
-    await window.storage.set('arcs_users', JSON.stringify(users));
-    
-    const pendingData = await window.storage.get('arcs_pending');
-    const pending = pendingData ? JSON.parse(pendingData.value) : [];
-    const newPending = pending.filter(p => p !== id);
-    await window.storage.set('arcs_pending', JSON.stringify(newPending));
-    
-    playSound('audio-bluecode');
-    loadPendingAccounts();
-  } catch (e) {
-    console.error('Approve error:', e);
-  }
-}
+    <div class="login-screen" id="loginScreen">
+        <div class="login-container">
+            <div class="login-title">ARCS LOGIN SYSTEM</div>
+            <div class="input-group">
+                <label class="input-label">OPERATOR ID:</label>
+                <input type="text" class="input-field" id="loginId" placeholder="Digite seu ID de operador">
+                <div class="error-message" id="loginError"></div>
+            </div>
+            <button class="btn" onclick="login()">LOGIN</button>
+            <button class="btn btn-secondary" onclick="showCreateAccount()">CRIAR CONTA</button>
+        </div>
+    </div>
 
-async function denyAccount(id) {
-  try {
-    const pendingData = await window.storage.get('arcs_pending');
-    const pending = pendingData ? JSON.parse(pendingData.value) : [];
-    const newPending = pending.filter(p => p !== id);
-    await window.storage.set('arcs_pending', JSON.stringify(newPending));
-    
-    playSound('audio-request-denied');
-    loadPendingAccounts();
-  } catch (e) {
-    console.error('Deny error:', e);
-  }
-}
+    <div class="main-interface" id="mainInterface">
+        <div class="browser-bar">
+            <div class="window-button close"></div>
+            <div class="window-button minimize"></div>
+            <div class="window-button maximize"></div>
+            <div class="url-bar">Pi-Air.com - ARCS System ++++++++++++++++++</div>
+        </div>
 
-async function sendBroadcast() {
-  const text = document.getElementById('broadcast-text').value.trim();
-  
-  if (!text) {
-    alert('Please enter a broadcast message');
-    return;
-  }
-  
-  try {
-    const broadcast = {
-      text: text,
-      sprite: selectedSprite,
-      timestamp: Date.now()
-    };
-    
-    await window.storage.set('arcs_latest_broadcast', JSON.stringify(broadcast), true);
-    
-    playSound('audio-new-message');
-    showBroadcast(broadcast);
-    
-    document.getElementById('broadcast-text').value = '';
-  } catch (e) {
-    console.error('Broadcast error:', e);
-    alert('Error sending broadcast');
-  }
-}
+        <button class="logout-btn" onclick="logout()">LOGOUT</button>
 
-function showBroadcast(broadcast) {
-  const notif = document.getElementById('broadcast-notification');
-  const spriteDisplay = document.getElementById('broadcast-sprite-display');
-  const textDisplay = document.getElementById('broadcast-text-display');
-  
-  spriteDisplay.textContent = spriteEmojis[broadcast.sprite] || '🎭';
-  textDisplay.textContent = broadcast.text;
-  
-  notif.classList.add('show');
-  
-  setTimeout(() => {
-    notif.classList.remove('show');
-  }, 8000);
-}
+        <div class="menu-bar">
+            <div class="menu-item active" onclick="switchTab('connect')">CONNECT</div>
+            <div class="menu-item" onclick="switchTab('info')">INFO</div>
+            <div class="menu-item" onclick="switchTab('racing')">RACING</div>
+            <div class="menu-item" onclick="switchTab('worm')">WORM</div>
+            <div class="menu-item" onclick="switchTab('stuff')">STUFF</div>
+            <div class="menu-item" onclick="switchTab('information')">INFORMATION</div>
+        </div>
 
-async function checkForBroadcasts() {
-  try {
-    const broadcastData = await window.storage.get('arcs_latest_broadcast', true);
-    if (broadcastData) {
-      const broadcast = JSON.parse(broadcastData.value);
-      const lastSeen = localStorage.getItem('lastBroadcastSeen');
-      
-      if (!lastSeen || broadcast.timestamp > parseInt(lastSeen)) {
+        <div class="tab-content active" id="tab-connect">
+            <div class="banner-section">
+                <div class="banner-mascot">
+                    <div class="mascot-face">
+                        <div class="mascot-eye left"></div>
+                        <div class="mascot-eye right"></div>
+                    </div>
+                </div>
+                <div class="banner-text">
+                    <div class="banner-title">ARCS SYSTEM ONLINE</div>
+                    <div class="banner-subtitle">Advanced Research & Containment System v3.2.2</div>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="content-card">
+                    <div class="card-label">LATEST NEWS</div>
+                    <div class="card-title">SYSTEM UPDATE</div>
+                    <div class="card-content">
+                        THE CURSE IS LIFTED !!! THE WRITING IS OVER !!! I FINALLY FINISHED THIS WEBSITE !!! STAY
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-label">WHAT'S NEW?</div>
+                    <div class="card-title">UPDATES</div>
+                    <div class="card-content">
+                        • CHECK THIS SECTION<br>
+                        • FOR THE LATEST<br>
+                        • SYSTEM UPDATES
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-label">CHECK ON LATEST</div>
+                    <div class="card-title">INTERPRETATIONZZ</div>
+                    <div class="card-content">
+                        MUSIC & DANCE SHOW INSPIRED BY THE GOLDEN AGE OF AFRO-AMERICAN CULTURE - JAZZ OR IS IT?
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <div class="card-label">BE SURE TO TAKE A LOOK, IT'S SHOW !!!</div>
+                    <div class="card-title">GARY SYMOR</div>
+                    <div class="card-content">
+                        NO SITE FEATURE YET -- SO JUST CHECK SOME OF MY WORK UNTIL I HAVE FOUND A SUITABLE SITE TO JOIN
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-info">
+            <div class="admin-panel" id="adminPanel" style="display: none;">
+                <div class="admin-title">🛡️ PAINEL DE ADMINISTRAÇÃO - OBUNTO</div>
+                
+                <div class="pending-users">
+                    <h3 style="color: #1a1a1a; margin-bottom: 15px;">Contas Pendentes de Aprovação:</h3>
+                    <div id="pendingUsersList"></div>
+                </div>
+
+                <div class="broadcast-panel">
+                    <h3 style="color: #1a1a1a; margin-bottom: 15px;">📢 Enviar Broadcast</h3>
+                    <div class="sprite-selector" id="spriteSelector">
+                        <div class="sprite-option" data-sprite="normal">😐</div>
+                        <div class="sprite-option" data-sprite="happy">😊</div>
+                        <div class="sprite-option" data-sprite="sad">😢</div>
+                        <div class="sprite-option" data-sprite="annoyed">😤</div>
+                        <div class="sprite-option" data-sprite="smug">😏</div>
+                        <div class="sprite-option" data-sprite="panic">😱</div>
+                        <div class="sprite-option" data-sprite="sleeping">😴</div>
+                        <div class="sprite-option" data-sprite="suspicious">🤨</div>
+                        <div class="sprite-option" data-sprite="stare">👁️</div>
+                        <div class="sprite-option" data-sprite="dizzy">😵</div>
+                        <div class="sprite-option" data-sprite="bug">🐛</div>
+                        <div class="sprite-option" data-sprite="werror">⚠️</div>
+                        <div class="sprite-option" data-sprite="hollow">👻</div>
+                    </div>
+                    <textarea class="input-field" id="broadcastMessage" rows="4" placeholder="Digite sua mensagem de broadcast..."></textarea>
+                    <button class="btn" onclick="sendBroadcast()" style="margin-top: 10px;">ENVIAR BROADCAST</button>
+                </div>
+            </div>
+
+            <div class="admin-panel" id="userPanel">
+                <div class="admin-title">📊 INFORMAÇÕES DO SISTEMA</div>
+                <div class="card-content">
+                    <p style="color: #1a1a1a; line-height: 2;">
+                        <strong>Usuário:</strong> <span id="currentUserDisplay"></span><br>
+                        <strong>Status:</strong> ATIVO<br>
+                        <strong>Nível de Acesso:</strong> <span id="accessLevel"></span><br>
+                        <strong>Sistema:</strong> ARCS v3.2.2<br>
+                        <strong>Última Conexão:</strong> <span id="lastConnection"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-racing">
+            <div class="admin-panel">
+                <div class="admin-title">🏁 RACING</div>
+                <div class="card-content">
+                    <p style="color: #1a1a1a;">Módulo de corridas em desenvolvimento...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-worm">
+            <div class="admin-panel">
+                <div class="admin-title">🐛 WORM</div>
+                <div class="card-content">
+                    <p style="color: #1a1a1a;">Módulo de análise em desenvolvimento...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-stuff">
+            <div class="admin-panel">
+                <div class="admin-title">📦 STUFF</div>
+                <div class="card-content">
+                    <p style="color: #1a1a1a;">Arquivos e recursos do sistema...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="tab-information">
+            <div class="admin-panel">
+                <div class="admin-title">ℹ️ INFORMATION</div>
+                <div class="card-content">
+                    <p style="color: #1a1a1a; line-height: 2;">
+                        <strong>ARCS - Advanced Research & Containment System</strong><br><br>
+                        Sistema de pesquisa avançada e contenção desenvolvido para operações especiais.<br><br>
+                        <strong>Recursos:</strong><br>
+                        • Sistema de autenticação por ID<br>
+                        • Controle de acesso administrativo<br>
+                        • Sistema de broadcast<br>
+                        • Interface Newton OS<br>
+                        • Múltiplos módulos de operação
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-info">
+            <div>ARCS v3.2.2 | System Status: ONLINE</div>
+            <div id="currentTime"></div>
+        </div>
+    </div>
+
+    <div class="broadcast-notification" id="broadcastNotif">
+        <div class="broadcast-header">
+            <div class="broadcast-icon" id="broadcastIcon">😐</div>
+            <div>
+                <div class="broadcast-title">BROADCAST - OBUNTO</div>
+            </div>
+        </div>
+        <div class="broadcast-message" id="broadcastText"></div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const ADMIN_ID = '118107921024376';
+        let currentUser = null;
+        let selectedSprite = 'normal';
+
+        function initializeSystem() {
+            if (!localStorage.getItem('arcsUsers')) {
+                localStorage.setItem('arcsUsers', JSON.stringify({}));
+            }
+            if (!localStorage.getItem('arcsPendingUsers')) {
+                localStorage.setItem('arcsPendingUsers', JSON.stringify({}));
+            }
+
+            const adminUsers = JSON.parse(localStorage.getItem('arcsUsers'));
+            if (!adminUsers[ADMIN_ID]) {
+                adminUsers[ADMIN_ID] = {
+                    id: ADMIN_ID,
+                    name: 'OBUNTO',
+                    isAdmin: true,
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('arcsUsers', JSON.stringify(adminUsers));
+            }
+        }
+
+        function playSound(soundName) {
+            const audio = document.getElementById('audioPlayer');
+            audio.src = `assets/${soundName}`;
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+
         setTimeout(() => {
-          playSound('audio-new-message');
-          showBroadcast(broadcast);
-        }, 2000);
-        
-        localStorage.setItem('lastBroadcastSeen', broadcast.timestamp);
-      }
-    }
-  } catch (e) {
-    console.log('No broadcast found');
-  }
-}
+            playSound('loading1.wav');
+        }, 500);
 
-function logout() {
-  currentUser = null;
-  document.getElementById('login-id').value = '';
-  showScreen('login-screen');
-  playSound('audio-request-sent');
-}
+        setTimeout(() => {
+            playSound('poweron.wav');
+            document.getElementById('bootScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+        }, 3500);
 
-document.querySelectorAll('.sprite-option').forEach(option => {
-  option.addEventListener('click', function() {
-    document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('selected'));
-    this.classList.add('selected');
-    selectedSprite = this.dataset.sprite;
-  });
-});
+        function login() {
+            const id = document.getElementById('loginId').value.trim();
+            const errorDiv = document.getElementById('loginError');
 
-window.addEventListener('load', async () => {
-  await initStorage();
-  setTimeout(startLoading, 1000);
-});
-</script>
+            if (!id) {
+                errorDiv.textContent = 'Por favor, insira um ID';
+                playSound('requestdenied.wav');
+                return;
+            }
 
+            const users = JSON.parse(localStorage.getItem('arcsUsers'));
+
+            if (users[id]) {
+                playSound('bluecode.wav');
+                currentUser = users[id];
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainInterface').style.display = 'block';
+                updateUserInterface();
+            } else {
+                errorDiv.textContent = 'ID não encontrado ou conta pendente de aprovação';
+                playSound('requestdenied.wav');
+            }
+        }
+
+        function showCreateAccount() {
+            const id = prompt('Digite seu ID de operador:');
+            if (!id) return;
+
+            const name = prompt('Digite seu nome:');
+            if (!name) return;
+
+            const users = JSON.parse(localStorage.getItem('arcsUsers'));
+            const pendingUsers = JSON.parse(localStorage.getItem('arcsPendingUsers'));
+
+            if (users[id] || pendingUsers[id]) {
+                alert('Este ID já existe ou está pendente de aprovação');
+                playSound('requestdenied.wav');
+                return;
+            }
+
+            pendingUsers[id] = {
+                id: id,
+                name: name,
+                requestedAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('arcsPendingUsers', JSON.stringify(pendingUsers));
+            alert('Solicitação de conta enviada! Aguarde aprovação do administrador.');
+            playSound('requestsent.wav');
+        }
+
+        function updateUserInterface() {
+            document.getElementById('currentUserDisplay').textContent = currentUser.name;
+            document.getElementById('accessLevel').textContent = currentUser.isAdmin ? 'ADMINISTRADOR' : 'OPERADOR';
+            document.getElementById('lastConnection').textContent = new Date().toLocaleString('pt-BR');
+
+            if (currentUser.isAdmin) {
+                document.getElementById('adminPanel').style.display = 'block';
+                document.getElementById('userPanel').style.display = 'none';
+                loadPendingUsers();
+            } else {
+                document.getElementById('adminPanel').style.display = 'none';
+                document.getElementById('userPanel').style.display = 'block';
+            }
+
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        function loadPendingUsers() {
+            const pendingUsers = JSON.parse(localStorage.getItem('arcsPendingUsers'));
+            const container = document.getElementById('pendingUsersList');
+            
+            if (Object.keys(pendingUsers).length === 0) {
+                container.innerHTML = '<p style="color: #666;">Nenhuma conta pendente</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            for (const id in pendingUsers) {
+                const user = pendingUsers[id];
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <div class="user-info">
+                        <strong>${user.name}</strong><br>
+                        ID: ${user.id}
+                    </div>
+                    <div class="user-actions">
+                        <button class="btn-small" onclick="approveUser('${id}')">APROVAR</button>
+                        <button class="btn-small reject" onclick="rejectUser('${id}')">REJEITAR</button>
+                    </div>
+                `;
+                container.appendChild(userCard);
+            }
+        }
+
+        function approveUser(id) {
+            const pendingUsers = JSON.parse(localStorage.getItem('arcsPendingUsers'));
+            const users = JSON.parse(localStorage.getItem('arcsUsers'));
+
+            const user = pendingUsers[id];
+            users[id] = {
+                ...user,
+                isAdmin: false,
+                approvedAt: new Date().toISOString()
+            };
+
+            delete pendingUsers[id];
+
+            localStorage.setItem('arcsUsers', JSON.stringify(users));
+            localStorage.setItem('arcsPendingUsers', JSON.stringify(pendingUsers));
+
+            playSound('greencode.wav');
+            loadPendingUsers();
+        }
+
+        function rejectUser(id) {
+            const pendingUsers = JSON.parse(localStorage.getItem('arcsPendingUsers'));
+            delete pendingUsers[id];
+            localStorage.setItem('arcsPendingUsers', JSON.stringify(pendingUsers));
+            playSound('redcode.wav');
+            loadPendingUsers();
+        }
+
+        document.querySelectorAll('.sprite-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedSprite = this.dataset.sprite;
+            });
+        });
+
+        function sendBroadcast() {
+            const message = document.getElementById('broadcastMessage').value.trim();
+            
+            if (!message) {
+                alert('Digite uma mensagem');
+                return;
+            }
+
+            playSound('newmessage.wav');
+
+            const notif = document.getElementById('broadcastNotif');
+            const icon = document.getElementById('broadcastIcon');
+            const text = document.getElementById('broadcastText');
+
+            icon.textContent = document.querySelector(`.sprite-option[data-sprite="${selectedSprite}"]`).textContent;
+            text.textContent = message;
+
+            notif.classList.add('show');
+
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 8000);
+
+            document.getElementById('broadcastMessage').value = '';
+        }
+
+        function logout() {
+            playSound('poweroff.wav');
+            setTimeout(() => {
+                currentUser = null;
+                document.getElementById('mainInterface').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('loginId').value = '';
+            }, 500);
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString('pt-BR');
+        }
+
+        initializeSystem();
+    </script>
 </body>
 </html>
