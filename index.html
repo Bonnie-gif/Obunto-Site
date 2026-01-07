@@ -35,15 +35,19 @@
         </div>
 
         <div class="loading-right">
-            <div class="plugin-icons">
-                <div class="icon-box">⚙</div>
-                <div class="icon-box">✈</div>
-                <div class="icon-box">🎮</div>
-                <div class="icon-box">⊕</div>
-                <div class="icon-box">語</div>
-                <div class="icon-box">☺</div>
+            <div class="login-panel">
+                <div class="login-header">OPERATOR ACCESS</div>
+                <div class="login-body">
+                    <label class="login-label">ENTER OPERATOR ID:</label>
+                    <input type="text" id="operator-id" class="login-input" maxlength="20">
+                    <div class="login-status" id="login-status"></div>
+                    <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                    <div class="login-info-text">
+                        NEW OPERATOR?<br>
+                        ENTER YOUR ID TO REQUEST ACCESS
+                    </div>
+                </div>
             </div>
-            <div class="plugin-label">PLUG IN FILES</div>
         </div>
 
         <div class="data-swallow-container">
@@ -217,6 +221,14 @@
             document.getElementById(id).classList.add('active');
         }
 
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('login-status');
+            status.textContent = message;
+            status.className = 'login-status show';
+            if (isError) status.classList.add('error');
+            setTimeout(() => status.classList.remove('show'), 3000);
+        }
+
         function startLoading() {
             playSound('sfx-loading');
             let progress = 0;
@@ -228,17 +240,18 @@
                     progress = 100;
                     bar.style.width = '100%';
                     clearInterval(interval);
-                    setTimeout(showLoginPrompt, 500);
                 } else {
                     bar.style.width = progress + '%';
                 }
             }, 200);
         }
 
-        async function showLoginPrompt() {
-            const userId = prompt('ENTER OPERATOR ID:');
+        async function handleLogin() {
+            const userId = document.getElementById('operator-id').value.trim();
+            
             if (!userId) {
-                showLoginPrompt();
+                playSound('sfx-error');
+                showStatus('PLEASE ENTER AN OPERATOR ID', true);
                 return;
             }
             
@@ -264,19 +277,21 @@
                     }
                     
                     playSound('sfx-sent');
-                    alert('ACCOUNT REQUEST SENT - AWAITING ADMIN APPROVAL');
-                    showLoginPrompt();
+                    showStatus('REQUEST SENT - AWAITING APPROVAL');
+                    document.getElementById('operator-id').value = '';
                 } else {
                     playSound('sfx-denied');
-                    alert('ACCESS DENIED - AWAITING APPROVAL');
-                    showLoginPrompt();
+                    showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
                 }
             } catch (e) {
                 playSound('sfx-error');
-                alert('SYSTEM ERROR');
-                showLoginPrompt();
+                showStatus('SYSTEM ERROR', true);
             }
         }
+
+        document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
 
         function openAdmin() {
             document.getElementById('admin-panel').classList.remove('hidden');
