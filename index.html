@@ -4,25 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
-    <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
-    <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
-    <audio id="sfx-error" src="assets/audio/uh_oh.wav"></audio>
-    <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
-    <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
-    <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
+    <audio id="sfx-poweron" src="audio/poweron.wav"></audio>
+    <audio id="sfx-loading" src="audio/loading1.wav"></audio>
+    <audio id="sfx-newmessage" src="audio/newmessage.wav"></audio>
+    <audio id="sfx-error" src="audio/uh_oh.wav"></audio>
+    <audio id="sfx-denied" src="audio/requestdenied.wav"></audio>
+    <audio id="sfx-sent" src="audio/requestsent.wav"></audio>
+    <audio id="sfx-blue" src="audio/bluecode.wav"></audio>
 
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
             <div class="upeo-section">
-                <svg class="upeo-logo" viewBox="0 0 200 200">
-                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
-                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
-                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
-                </svg>
+                <img src="logos/logo.png" class="upeo-logo" alt="UPEO Logo">
                 <div class="upeo-text">UPEO</div>
             </div>
             
@@ -76,29 +72,36 @@
             <div class="browser-dots">
                 <span></span><span></span><span></span>
             </div>
-            <div class="url-bar">Pi-Air.com - by Pierre Nelwan ++++++++++++++++++++</div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++</div>
         </div>
 
         <div class="loading-indicator">
-            <span class="loading-icon">🎵</span>
-            <span>Loading music</span>
+            <span class="loading-icon">⚡</span>
+            <span>System initialized</span>
         </div>
 
         <div class="main-window">
             <div class="menu-bar">
                 <div class="menu-button">MENU</div>
-                <div class="menu-tabs">
-                    <div class="tab active">CONTACT</div>
-                    <div class="tab">WHO</div>
-                    <div class="tab">ORIGINS</div>
-                    <div class="tab">WORK</div>
-                    <div class="tab">STUFF</div>
-                    <div class="tab">INSPIRATION</div>
+                <div class="menu-tabs" id="admin-tabs">
+                    <div class="tab active">BROADCAST</div>
+                    <div class="tab">MONITORING</div>
+                    <div class="tab">ALARMS</div>
+                    <div class="tab">TICKETS</div>
+                    <div class="tab">RADIO</div>
+                    <div class="tab">CREDENTIALS</div>
+                </div>
+                <div class="menu-tabs hidden" id="personnel-tabs">
+                    <div class="tab active">PROFILE</div>
+                    <div class="tab">WORKSTATION</div>
+                    <div class="tab">RADIO</div>
+                    <div class="tab">HELP REQUEST</div>
+                    <div class="tab">SUGGESTIONS</div>
                 </div>
             </div>
 
             <div class="banner-section">
-                <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                <img src="logos/header.png" class="banner-img" onerror="this.style.display='none'">
                 <div class="mascot-placeholder"></div>
             </div>
 
@@ -112,14 +115,14 @@
 
                 <div class="grid-cell news-cell">
                     <div class="sticker yellow">STAY, STAY, READ THE REPORT !!</div>
-                    <div class="cell-header">LATEST NEWS</div>
+                    <div class="cell-header">SYSTEM STATUS</div>
                     <div class="news-box">
                         <div class="date-badge">
-                            <div class="date-icon">P</div>
-                            <div class="date-text">SEP 2005</div>
+                            <div class="date-icon">⚡</div>
+                            <div class="date-text">ONLINE</div>
                         </div>
                         <div class="news-text">
-                            THE CURSE IS LIFTED !!! THE WRITING IS OVER !!! I FINALLY FINISHED THIS ARTICLE !!! ETSA
+                            ALL SYSTEMS OPERATIONAL -- ARCS VERSION 3.2.2 RUNNING STABLE -- NO CRITICAL ALERTS
                         </div>
                         <div class="scroll-bar"></div>
                     </div>
@@ -138,23 +141,23 @@
                 </div>
 
                 <div class="grid-cell release-cell">
-                    <div class="sticker yellow">CHECK THE LATEST RELEASES HERE</div>
-                    <div class="cell-header">LATEST RELEASE</div>
+                    <div class="sticker yellow">CHECK THE LATEST ACTIVITY HERE</div>
+                    <div class="cell-header">RECENT ACTIVITY</div>
                     <div class="release-box">
-                        <div class="release-icon">🎨</div>
+                        <div class="release-icon">📊</div>
                         <div class="release-content">
-                            <div class="release-title">INTERPRETATIONZZ</div>
-                            <div class="release-desc">MUSIC & DANCE SHOW INSPIRED BY THE GOLDEN AGE OF AFRO-AMERICAN CULTURE -- JAZZ ME UP IT</div>
+                            <div class="release-title">SYSTEM LOGS</div>
+                            <div class="release-desc">MONITORING ACTIVE OPERATIONS AND PERSONNEL ACTIVITY ACROSS ALL DEPARTMENTS</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid-cell featured-cell">
-                    <div class="sticker yellow">BE SURE TO TAKE A LOOK, IT IS NEW !!!</div>
-                    <div class="cell-header">FEATURED SITE</div>
+                    <div class="sticker yellow">ATTENTION REQUIRED</div>
+                    <div class="cell-header">NOTIFICATIONS</div>
                     <div class="featured-box">
-                        <div class="featured-title">GARY SYMOR</div>
-                        <div class="featured-desc">NO SITE FEATURE YET -- SO JUST CHECK SOME OF MY WORK UNTIL I HAVE FOUND A SUITABLE SITE TO JOIN</div>
+                        <div class="featured-title">NO ALERTS</div>
+                        <div class="featured-desc">ALL SYSTEMS OPERATING WITHIN NORMAL PARAMETERS -- CHECK BACK FOR UPDATES</div>
                     </div>
                 </div>
             </div>
@@ -198,252 +201,12 @@
 
     <div id="broadcast-notification" class="notification hidden">
         <div class="notification-content">
-            <div class="notification-sprite" id="notif-sprite">🎭</div>
+            <img id="notif-sprite" class="notification-sprite" src="" alt="sprite">
             <div class="notification-text" id="notif-text"></div>
         </div>
         <div class="notification-footer">- BROADCAST FROM OPERATOR OBUNTO</div>
     </div>
 
-    <script>
-        let currentUser = null;
-        const ADMIN_ID = '118107921024376';
-        
-        const storage = {
-            async get(key, shared = false) {
-                if (window.storage && typeof window.storage.get === 'function') {
-                    return await window.storage.get(key, shared);
-                }
-                const value = localStorage.getItem(key);
-                return value ? { key, value, shared } : null;
-            },
-            async set(key, value, shared = false) {
-                if (window.storage && typeof window.storage.set === 'function') {
-                    return await window.storage.set(key, value, shared);
-                }
-                localStorage.setItem(key, value);
-                return { key, value, shared };
-            }
-        };
-
-        function playSound(id) {
-            const audio = document.getElementById(id);
-            if (audio) {
-                audio.currentTime = 0;
-                audio.play().catch(e => {});
-            }
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function showStatus(message, isError = false) {
-            const status = document.getElementById('login-status');
-            status.textContent = message;
-            status.className = 'login-status show';
-            if (isError) status.classList.add('error');
-            setTimeout(() => status.classList.remove('show'), 3000);
-        }
-
-        function startLoading() {
-            playSound('sfx-loading');
-            let progress = 0;
-            const bar = document.getElementById('loading-progress');
-            
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress >= 100) {
-                    progress = 100;
-                    bar.style.width = '100%';
-                    clearInterval(interval);
-                    setTimeout(() => {
-                        document.getElementById('login-panel').classList.remove('hidden');
-                    }, 500);
-                } else {
-                    bar.style.width = progress + '%';
-                }
-            }, 200);
-        }
-
-        async function handleLogin() {
-            const userId = document.getElementById('operator-id').value.trim();
-            
-            if (!userId) {
-                playSound('sfx-error');
-                showStatus('PLEASE ENTER AN OPERATOR ID', true);
-                return;
-            }
-            
-            try {
-                await init();
-                
-                const usersData = await storage.get('arcs_users');
-                const users = usersData ? JSON.parse(usersData.value) : {};
-                
-                if (users[userId] && users[userId].approved) {
-                    currentUser = users[userId];
-                    playSound('sfx-poweron');
-                    showScreen('main-screen');
-                    
-                    if (userId === ADMIN_ID) {
-                        document.getElementById('admin-toggle').classList.remove('hidden');
-                    }
-                } else if (!users[userId]) {
-                    const pendingData = await storage.get('arcs_pending');
-                    const pending = pendingData ? JSON.parse(pendingData.value) : [];
-                    
-                    if (!pending.includes(userId)) {
-                        pending.push(userId);
-                        await storage.set('arcs_pending', JSON.stringify(pending));
-                    }
-                    
-                    playSound('sfx-sent');
-                    showStatus('REQUEST SENT - AWAITING APPROVAL');
-                    document.getElementById('operator-id').value = '';
-                } else {
-                    playSound('sfx-denied');
-                    showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
-                }
-            } catch (e) {
-                console.error('Login error:', e);
-                playSound('sfx-error');
-                showStatus('SYSTEM ERROR - TRY AGAIN', true);
-            }
-        }
-
-        document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
-
-        function openAdmin() {
-            document.getElementById('admin-panel').classList.remove('hidden');
-            loadPending();
-        }
-
-        function closeAdmin() {
-            document.getElementById('admin-panel').classList.add('hidden');
-        }
-
-        async function loadPending() {
-            try {
-                const data = await storage.get('arcs_pending');
-                const pending = data ? JSON.parse(data.value) : [];
-                const list = document.getElementById('pending-list');
-                list.innerHTML = '';
-                
-                if (pending.length === 0) {
-                    list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO PENDING REQUESTS</div>';
-                    return;
-                }
-                
-                pending.forEach(id => {
-                    const item = document.createElement('div');
-                    item.className = 'pending-item';
-                    item.innerHTML = `
-                        <span>${id}</span>
-                        <button onclick="approve('${id}')">APPROVE</button>
-                        <button onclick="deny('${id}')">DENY</button>
-                    `;
-                    list.appendChild(item);
-                });
-            } catch (e) {
-                console.error('Load pending error:', e);
-            }
-        }
-
-        async function approve(id) {
-            const users = await storage.get('arcs_users');
-            const data = users ? JSON.parse(users.value) : {};
-            data[id] = { id, approved: true };
-            await storage.set('arcs_users', JSON.stringify(data));
-            
-            const pending = await storage.get('arcs_pending');
-            const pend = pending ? JSON.parse(pending.value) : [];
-            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
-            
-            playSound('sfx-blue');
-            loadPending();
-        }
-
-        async function deny(id) {
-            const pending = await storage.get('arcs_pending');
-            const pend = pending ? JSON.parse(pending.value) : [];
-            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
-            
-            playSound('sfx-denied');
-            loadPending();
-        }
-
-        document.getElementById('send-broadcast')?.addEventListener('click', async () => {
-            const text = document.getElementById('broadcast-text').value.trim();
-            const sprite = document.getElementById('sprite-select').value;
-            
-            if (!text) return;
-            
-            const broadcast = { text, sprite, timestamp: Date.now() };
-            await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
-            
-            playSound('sfx-sent');
-            showBroadcast(broadcast);
-            document.getElementById('broadcast-text').value = '';
-        });
-
-        function showBroadcast(data) {
-            const sprites = {
-                normal: '🎭', happy: '😊', sad: '😢', annoyed: '😤',
-                bug: '🐛', dizzy: '😵', hollow: '😶', panic: '😱',
-                sleeping: '😴', smug: '😏', stare: '👀', suspicious: '🤨', werror: '⚠️'
-            };
-            
-            document.getElementById('notif-sprite').textContent = sprites[data.sprite] || '🎭';
-            document.getElementById('notif-text').textContent = data.text;
-            document.getElementById('broadcast-notification').classList.remove('hidden');
-            
-            playSound('sfx-newmessage');
-            setTimeout(() => {
-                document.getElementById('broadcast-notification').classList.add('hidden');
-            }, 8000);
-        }
-
-        async function checkBroadcasts() {
-            try {
-                const data = await storage.get('arcs_broadcast', true);
-                if (data) {
-                    const broadcast = JSON.parse(data.value);
-                    const lastSeen = localStorage.getItem('arcs_last_broadcast');
-                    
-                    if (!lastSeen || broadcast.timestamp > parseInt(lastSeen)) {
-                        showBroadcast(broadcast);
-                        localStorage.setItem('arcs_last_broadcast', broadcast.timestamp.toString());
-                    }
-                }
-            } catch (e) {
-                console.error('Check broadcasts error:', e);
-            }
-        }
-
-        async function init() {
-            try {
-                const users = await storage.get('arcs_users');
-                if (!users) {
-                    await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
-                }
-                
-                const pending = await storage.get('arcs_pending');
-                if (!pending) {
-                    await storage.set('arcs_pending', JSON.stringify([]));
-                }
-            } catch (e) {
-                console.error('Init error:', e);
-            }
-        }
-
-        window.addEventListener('load', async () => {
-            await init();
-            setTimeout(startLoading, 1000);
-            setInterval(checkBroadcasts, 5000);
-        });
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>

@@ -55,8 +55,7 @@ body {
 
 .upeo-logo {
   width: 140px;
-  height: 140px;
-  fill: #fdfdf5;
+  height: auto;
   animation: pulse 2s infinite ease-in-out;
 }
 
@@ -129,12 +128,11 @@ body {
 
 .login-label {
   display: block;
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   margin-bottom: 10px;
   letter-spacing: 1px;
   font-family: 'VT323', monospace;
-  font-size: 16px;
 }
 
 .login-input {
@@ -392,6 +390,10 @@ body {
 .menu-tabs {
   display: flex;
   gap: 4px;
+}
+
+.menu-tabs.hidden {
+  display: none;
 }
 
 .tab {
@@ -764,7 +766,6 @@ body {
 }
 
 .admin-section h3 {
-  font-size: 15px;
   font-weight: bold;
   margin-bottom: 12px;
   letter-spacing: 1px;
@@ -893,16 +894,14 @@ body {
 }
 
 .notification-sprite {
-  font-size: 90px;
   width: 110px;
   height: 110px;
   border: 4px solid #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: #f0f0f0;
   flex-shrink: 0;
   border-radius: 10px;
+  object-fit: contain;
+  image-rendering: pixelated;
 }
 
 .notification-text {
