@@ -4,7 +4,840 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Courier+Prime:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  font-family: 'Courier Prime', 'VT323', monospace;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+  color: #1a1a1a;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.screen.active {
+  display: flex;
+}
+
+#loading-screen {
+  background: #9b8b6f;
+  flex-direction: row;
+}
+
+.loading-left {
+  flex: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 40px;
+}
+
+.upeo-section {
+  position: absolute;
+  top: 20%;
+  left: 15%;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.upeo-logo {
+  width: 140px;
+  height: 140px;
+  fill: #fdfdf5;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.upeo-text {
+  font-family: 'VT323', monospace;
+  font-size: 72px;
+  letter-spacing: 12px;
+  font-weight: bold;
+  color: #fdfdf5;
+}
+
+.loading-info {
+  position: absolute;
+  top: 42%;
+  left: 15%;
+  color: #fdfdf5;
+  font-family: 'Courier Prime', monospace;
+  font-size: 16px;
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+.loading-right {
+  flex: 1;
+  background: #fdfdf5;
+  border-left: 4px solid #555;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 20px;
+}
+
+.plugin-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  border: 3px solid #000;
+  padding: 25px 15px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.icon-box {
+  width: 60px;
+  height: 60px;
+  border: 3px solid #000;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.plugin-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 14px;
+  letter-spacing: 8px;
+  margin-top: 25px;
+  font-weight: bold;
+  font-family: 'VT323', monospace;
+}
+
+.data-swallow-container {
+  position: absolute;
+  bottom: 8%;
+  right: 28%;
+  width: 420px;
+}
+
+.swallow-box {
+  background: #000;
+  border: 5px solid #000;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.4);
+}
+
+.swallow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.swallow-brand {
+  background: #7dd3c0;
+  color: #000;
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  font-weight: bold;
+  padding: 10px 25px;
+  border-radius: 8px;
+}
+
+.swallow-disk {
+  background: #000;
+  border: 3px solid #fff;
+  padding: 12px;
+  color: #fff;
+  font-size: 11px;
+  line-height: 1.4;
+  position: relative;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.disk-text {
+  font-family: 'Courier Prime', monospace;
+  flex: 1;
+}
+
+.disk-icon {
+  font-size: 28px;
+}
+
+.loading-bar {
+  width: 100%;
+  height: 12px;
+  background: #333;
+  border: 2px solid #666;
+  margin-bottom: 15px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #7dd3c0;
+  width: 0%;
+  transition: width 0.3s linear;
+}
+
+.swallow-footer {
+  font-size: 13px;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+#main-screen {
+  background: #c5c5c5;
+  flex-direction: column;
+}
+
+.top-decoration {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 15px;
+  background: #e0e0e0;
+  border-bottom: 2px solid #999;
+}
+
+.browser-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.browser-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #999;
+}
+
+.browser-dots span:nth-child(1) { background: #ff5f56; }
+.browser-dots span:nth-child(2) { background: #ffbd2e; }
+.browser-dots span:nth-child(3) { background: #27c93f; }
+
+.url-bar {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  color: #666;
+}
+
+.loading-indicator {
+  background: #333;
+  color: #fff;
+  padding: 5px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+}
+
+.loading-icon {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.main-window {
+  flex: 1;
+  margin: 15px;
+  border: 5px solid #000;
+  border-radius: 15px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-bar {
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 8px 15px;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  gap: 8px;
+}
+
+.menu-button {
+  background: #fff;
+  color: #000;
+  padding: 8px 22px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  border-radius: 8px 8px 0 0;
+}
+
+.menu-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.tab {
+  background: #555;
+  color: #ccc;
+  padding: 8px 18px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  border-radius: 8px 8px 0 0;
+  transition: background 0.2s;
+}
+
+.tab:hover {
+  background: #666;
+}
+
+.tab.active {
+  background: #ffd700;
+  color: #000;
+  font-weight: bold;
+}
+
+.banner-section {
+  height: 200px;
+  background: #f0f0f0;
+  border-bottom: 5px solid #000;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+}
+
+.banner-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.mascot-placeholder {
+  position: absolute;
+  left: 60px;
+  bottom: 20px;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, #ff69b4 40%, transparent 41%);
+  border-radius: 50%;
+}
+
+.content-grid {
+  flex: 1;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1.5fr;
+  grid-template-rows: auto auto;
+  gap: 18px;
+  background: #e8e8e8;
+  overflow-y: auto;
+}
+
+.grid-cell {
+  background: #d8d8d8;
+  border: 3px solid #999;
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  box-shadow: inset 2px 2px 5px rgba(255,255,255,0.8), inset -2px -2px 5px rgba(0,0,0,0.1);
+  min-height: 140px;
+}
+
+.empty-cell {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.x-mark {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.x-mark .line {
+  position: absolute;
+  width: 120%;
+  height: 3px;
+  background: #bbb;
+  top: 50%;
+  left: -10%;
+}
+
+.x-mark .line:nth-child(1) {
+  transform: rotate(30deg);
+}
+
+.x-mark .line:nth-child(2) {
+  transform: rotate(-30deg);
+}
+
+.sticker {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  z-index: 10;
+}
+
+.sticker.yellow {
+  background: #ffd700;
+  color: #000;
+  padding: 8px 16px;
+  font-size: 10px;
+  font-weight: bold;
+  border-radius: 20px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.3);
+  line-height: 1.3;
+  letter-spacing: 0.5px;
+}
+
+.news-cell .sticker {
+  left: 20%;
+  transform: rotate(-3deg);
+}
+
+.release-cell .sticker {
+  right: 30px;
+  left: auto;
+  transform: rotate(2deg);
+}
+
+.featured-cell .sticker {
+  right: 30px;
+  left: auto;
+  transform: rotate(-2deg);
+}
+
+.cell-header {
+  font-size: 11px;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.news-box,
+.updates-box,
+.release-box,
+.featured-box {
+  background: #fff;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.news-box {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.date-icon {
+  font-size: 42px;
+  font-weight: bold;
+  color: #d14f85;
+}
+
+.date-text {
+  font-size: 11px;
+  color: #d14f85;
+  font-weight: bold;
+}
+
+.news-text {
+  flex: 1;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: bold;
+}
+
+.scroll-bar {
+  width: 4px;
+  height: 60px;
+  background: #ddd;
+  border-radius: 2px;
+}
+
+.updates-box {
+  min-height: 100px;
+}
+
+.updates-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: #d14f85;
+  margin-bottom: 10px;
+}
+
+.updates-text {
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.release-cell {
+  grid-column: 1 / 3;
+}
+
+.release-box {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.release-icon {
+  font-size: 52px;
+  background: #000;
+  padding: 18px;
+  border-radius: 10px;
+}
+
+.release-content {
+  flex: 1;
+}
+
+.release-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.release-desc {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.featured-cell {
+  grid-column: 3;
+}
+
+.featured-box {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.featured-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.featured-desc {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.admin-fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 65px;
+  height: 65px;
+  background: #fff;
+  border: 4px solid #000;
+  border-radius: 50%;
+  font-size: 36px;
+  cursor: pointer;
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: transform 0.2s;
+}
+
+.admin-fab:hover {
+  transform: scale(1.1);
+}
+
+.admin-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  max-height: 80vh;
+  background: #e6e6e6;
+  border: 5px solid #000;
+  border-radius: 15px;
+  box-shadow: 12px 12px 0 rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: none;
+}
+
+.admin-window:not(.hidden) {
+  display: block;
+  animation: bounceIn 0.5s;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.window-titlebar {
+  background: #000;
+  color: #fff;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 3px;
+}
+
+.close-btn {
+  background: #666;
+  border: 2px solid #fff;
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  border-radius: 4px;
+}
+
+.close-btn:hover {
+  background: #888;
+}
+
+.window-body {
+  padding: 25px;
+  max-height: calc(80vh - 65px);
+  overflow-y: auto;
+}
+
+.admin-section {
+  margin-bottom: 25px;
+}
+
+.admin-section h3 {
+  font-size: 15px;
+  font-weight: bold;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+}
+
+#pending-list {
+  background: #fff;
+  border: 3px solid #999;
+  padding: 15px;
+  min-height: 100px;
+  max-height: 180px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border-radius: 8px;
+}
+
+.pending-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f5f5f5;
+  border: 2px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+.pending-item span {
+  font-family: 'Courier Prime', monospace;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.pending-item button {
+  padding: 6px 18px;
+  border: 3px solid #000;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.pending-item button:first-of-type {
+  background: #4CAF50;
+  color: #fff;
+}
+
+.pending-item button:last-of-type {
+  background: #f44336;
+  color: #fff;
+}
+
+#sprite-select {
+  width: 100%;
+  padding: 12px;
+  border: 3px solid #000;
+  background: #fff;
+  font-family: 'Courier Prime', monospace;
+  font-size: 14px;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+#broadcast-text {
+  width: 100%;
+  height: 100px;
+  padding: 12px;
+  border: 3px solid #000;
+  background: #fff;
+  font-family: 'Courier Prime', monospace;
+  font-size: 14px;
+  resize: vertical;
+  margin-bottom: 15px;
+  border-radius: 6px;
+}
+
+#send-broadcast {
+  width: 100%;
+  padding: 15px;
+  border: 3px solid #000;
+  background: #7dd3c0;
+  color: #000;
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 3px;
+  border-radius: 8px;
+}
+
+#send-broadcast:hover {
+  background: #fff;
+}
+
+.notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 6px solid #000;
+  border-radius: 15px;
+  padding: 30px;
+  min-width: 450px;
+  max-width: 650px;
+  box-shadow: 15px 15px 0 rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: none;
+}
+
+.notification:not(.hidden) {
+  display: block;
+  animation: bounceIn 0.5s;
+}
+
+.notification-content {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.notification-sprite {
+  font-size: 90px;
+  width: 110px;
+  height: 110px;
+  border: 4px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.notification-text {
+  flex: 1;
+  font-size: 17px;
+  line-height: 1.6;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.notification-footer {
+  text-align: right;
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  letter-spacing: 3px;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none !important;
+}
+
+audio {
+  display: none;
+}
+    </style>
 </head>
 <body>
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
@@ -200,9 +1033,7 @@
         <div class="notification-footer">- BROADCAST FROM OPERATOR OBUNTO</div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
         let currentUser = null;
         const ADMIN_ID = '118107921024376';
 
@@ -237,35 +1068,47 @@
             }, 200);
         }
 
-        function showLoginPrompt() {
+        async function showLoginPrompt() {
             const userId = prompt('ENTER OPERATOR ID:');
             if (!userId) {
                 showLoginPrompt();
                 return;
             }
             
-            fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    currentUser = data.userData;
+            try {
+                const usersData = await window.storage.get('arcs_users');
+                const users = usersData ? JSON.parse(usersData.value) : {};
+                
+                if (users[userId] && users[userId].approved) {
+                    currentUser = users[userId];
                     playSound('sfx-poweron');
                     showScreen('main-screen');
-                    socket.emit('register_user', userId);
                     
                     if (userId === ADMIN_ID) {
                         document.getElementById('admin-toggle').classList.remove('hidden');
                     }
+                } else if (!users[userId]) {
+                    const pendingData = await window.storage.get('arcs_pending');
+                    const pending = pendingData ? JSON.parse(pendingData.value) : [];
+                    
+                    if (!pending.includes(userId)) {
+                        pending.push(userId);
+                        await window.storage.set('arcs_pending', JSON.stringify(pending));
+                    }
+                    
+                    playSound('sfx-sent');
+                    alert('ACCOUNT REQUEST SENT - AWAITING ADMIN APPROVAL');
+                    showLoginPrompt();
                 } else {
                     playSound('sfx-denied');
-                    alert('ACCESS DENIED');
+                    alert('ACCESS DENIED - AWAITING APPROVAL');
                     showLoginPrompt();
                 }
-            });
+            } catch (e) {
+                playSound('sfx-error');
+                alert('SYSTEM ERROR');
+                showLoginPrompt();
+            }
         }
 
         function openAdmin() {
@@ -283,6 +1126,11 @@
                 const pending = data ? JSON.parse(data.value) : [];
                 const list = document.getElementById('pending-list');
                 list.innerHTML = '';
+                
+                if (pending.length === 0) {
+                    list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO PENDING REQUESTS</div>';
+                    return;
+                }
                 
                 pending.forEach(id => {
                     const item = document.createElement('div');
@@ -329,7 +1177,7 @@
             const broadcast = { text, sprite, timestamp: Date.now() };
             await window.storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
             
-            socket.emit('admin_broadcast_message', { message: text, mood: sprite });
+            playSound('sfx-sent');
             showBroadcast(broadcast);
             document.getElementById('broadcast-text').value = '';
         });
@@ -351,9 +1199,20 @@
             }, 8000);
         }
 
-        socket.on('receive_broadcast_message', data => {
-            showBroadcast({ text: data.message, sprite: data.mood });
-        });
+        async function checkBroadcasts() {
+            try {
+                const data = await window.storage.get('arcs_broadcast', true);
+                if (data) {
+                    const broadcast = JSON.parse(data.value);
+                    const lastSeen = localStorage.getItem('arcs_last_broadcast');
+                    
+                    if (!lastSeen || broadcast.timestamp > parseInt(lastSeen)) {
+                        showBroadcast(broadcast);
+                        localStorage.setItem('arcs_last_broadcast', broadcast.timestamp.toString());
+                    }
+                }
+            } catch (e) {}
+        }
 
         async function init() {
             try {
@@ -372,6 +1231,7 @@
         window.addEventListener('load', async () => {
             await init();
             setTimeout(startLoading, 1000);
+            setInterval(checkBroadcasts, 5000);
         });
     </script>
 </body>
