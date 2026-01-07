@@ -1,27 +1,29 @@
 :root {
-  --bg-main: #c3c3c3;
-  --bg-light: #e6e6e6;
-  --bg-dark: #888888;
-  --ink: #111111;
-  --ink-dim: #555555;
-  --paper: #ffffff;
-  --paper-dark: #dddddd;
-  --border-light: #ffffff;
-  --border-dim: #a0a0a0;
-  --border-dark: #404040;
-  --border-black: #000000;
-  --accent: #000000;
-  --selection: #000000;
-  --alert-color: #000000;
-  --button: #ffffff;
-  --button-active: #aaaaaa;
-  --font-main: 'Chicago', 'Geneva', 'Espy Sans', sans-serif;
+  /* Paleta Newton OS / Tech Professional */
+  --bg-desktop: #757575;     /* Fundo da tela (Desktop) */
+  --bg-panel: #d4d4d4;       /* Painéis e janelas */
+  --bg-light: #e8e8e8;       /* Áreas de destaque */
+  --bg-dark: #a0a0a0;        /* Elementos inativos/fundo escuro */
+  
+  --ink: #101010;            /* Texto principal */
+  --ink-dim: #505050;        /* Texto secundário */
+  --paper: #ffffff;          /* Fundo de inputs e áreas de texto */
+  
+  --border-outer: #000000;   /* Borda externa forte */
+  --border-light: #ffffff;   /* Bevel claro (luz) */
+  --border-shadow: #404040;  /* Bevel escuro (sombra) */
+  
+  --accent-color: #000000;   /* Cor de destaque (monocromático) */
+  --selection-bg: #000000;
+  --selection-text: #ffffff;
+  
+  --font-main: 'Chicago', 'Geneva', 'Segoe UI', sans-serif;
   --font-mono: 'Monaco', 'Courier New', monospace;
-  --scanline-color: rgba(0, 0, 0, 0.05);
-  --bevel-light: inset 2px 2px 0 #ffffff, inset -2px -2px 0 #404040;
-  --bevel-btn: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #000000, 2px 2px 0 #000000;
-  --bevel-btn-active: inset 2px 2px 0 #404040, inset -1px -1px 0 #ffffff;
-  --bevel-well: inset 2px 2px 0 #404040, inset -2px -2px 0 #ffffff;
+  
+  /* Sombras de interface (Bevels rígidos) */
+  --bevel-out: inset 1px 1px 0 var(--border-light), inset -1px -1px 0 var(--border-shadow), 1px 1px 0 #000;
+  --bevel-in: inset 1px 1px 0 var(--border-shadow), inset -1px -1px 0 var(--border-light);
+  --shadow-window: 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 * {
@@ -36,34 +38,35 @@
 html, body {
   width: 100%;
   height: 100%;
-  background-color: var(--bg-main);
-  background-image: 
-    linear-gradient(45deg, #bbb 25%, transparent 25%, transparent 75%, #bbb 75%, #bbb),
-    linear-gradient(45deg, #bbb 25%, transparent 25%, transparent 75%, #bbb 75%, #bbb);
-  background-size: 4px 4px;
-  background-position: 0 0, 2px 2px;
+  background-color: var(--bg-desktop);
+  /* Padrão pontilhado sutil para o fundo (Grid Tech) */
+  background-image: radial-gradient(var(--ink-dim) 1px, transparent 1px);
+  background-size: 20px 20px;
   font-family: var(--font-main);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--ink);
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 ::selection {
-  background: var(--selection);
-  color: var(--paper);
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 .hidden { display: none !important; }
 .active { display: flex !important; }
 
-body.alarm-red { --bg-main: #a00000; --ink: #330000; --alert-color: #ff0000; }
-body.alarm-green { --bg-main: #00a000; --ink: #003300; --alert-color: #00ff00; }
-body.alarm-blue { --bg-main: #0000a0; --ink: #000033; --alert-color: #0000ff; }
+/* Modos de Alerta (Mantendo o estilo tech, sem ser chocante) */
+body.alarm-red { --bg-desktop: #502020; --accent-color: #800000; }
+body.alarm-green { --bg-desktop: #204020; --accent-color: #004000; }
 
 .crt-overlay {
   position: fixed;
   inset: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%);
   background-size: 100% 4px;
   pointer-events: none;
   z-index: 9999;

@@ -1,12 +1,12 @@
 .obunto-overlay {
   position: fixed;
-  bottom: 80px;
-  right: 20px;
+  bottom: 90px;
+  right: 30px;
   z-index: 9000;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  pointer-events: none;
+  pointer-events: none; /* Permite clicar através da área vazia */
 }
 
 .obunto-container {
@@ -17,100 +17,101 @@
 }
 
 .speech-bubble {
-  background: #fff;
-  border: 2px solid #000;
-  padding: 12px;
-  margin-bottom: 16px;
-  max-width: 300px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  background: var(--paper);
+  border: 2px solid var(--border-outer);
+  padding: 14px;
+  margin-bottom: 20px;
+  max-width: 320px;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
   font-family: var(--font-main);
   font-size: 12px;
   position: relative;
+  line-height: 1.4;
 }
 
+/* Seta do balão */
 .speech-bubble:after {
   content: '';
   position: absolute;
-  bottom: -10px;
-  right: 24px;
-  border-width: 10px 10px 0;
+  bottom: -12px;
+  right: 40px;
+  border-width: 12px 12px 0;
   border-style: solid;
-  border-color: #000 transparent;
-  display: block;
-  width: 0;
+  border-color: var(--border-outer) transparent;
 }
 
 .speech-bubble:before {
   content: '';
   position: absolute;
-  bottom: -6px;
-  right: 27px;
-  border-width: 7px 7px 0;
+  bottom: -8px;
+  right: 43px;
+  border-width: 9px 9px 0;
   border-style: solid;
-  border-color: #fff transparent;
-  display: block;
-  width: 0;
+  border-color: var(--paper) transparent;
   z-index: 1;
 }
 
 .obunto-avatar {
-  width: 96px;
-  height: 96px;
-  border: 2px solid #000;
-  background: #fff;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--border-outer);
+  background: var(--bg-panel);
   padding: 4px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
   image-rendering: pixelated;
 }
 
 .admin-grid-layout {
   display: grid;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
   background: var(--bg-light);
-  padding: 8px;
-  border: 1px solid var(--border-black);
+  padding: 10px;
+  border: 1px solid var(--border-outer);
 }
 
 .admin-group {
-  border: 1px solid var(--border-dim);
-  padding: 8px;
+  border: 1px solid var(--border-shadow);
+  padding: 10px;
   position: relative;
-  margin-top: 8px;
+  margin-top: 10px;
+  background: var(--paper);
 }
 
 .group-label {
   position: absolute;
   top: -8px;
-  left: 8px;
-  background: var(--bg-light);
-  padding: 0 4px;
+  left: 10px;
+  background: var(--paper);
+  padding: 0 6px;
   font-size: 9px;
   font-weight: bold;
   text-transform: uppercase;
-  color: var(--ink-dim);
+  color: var(--ink);
+  border: 1px solid var(--border-shadow);
 }
 
 .mood-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
 .mood-icon {
   width: 100%;
   aspect-ratio: 1;
-  border: 1px solid var(--border-dark);
-  background: var(--paper);
+  border: 1px solid var(--border-dim);
+  background: var(--bg-light);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  transition: all 0.1s;
 }
 
 .mood-icon:hover {
-  background: var(--bg-dark);
-  color: #fff;
+  background: #fff;
+  border-color: #000;
 }
 
 .mood-icon.active {
@@ -121,38 +122,40 @@
 
 .spy-container {
   background: #000;
-  color: #0f0;
+  color: #00ff00; /* Verde terminal clássico */
   font-family: var(--font-mono);
-  padding: 8px;
-  height: 150px;
+  padding: 10px;
+  height: 160px;
   overflow-y: auto;
-  border: 4px inset #444;
-  font-size: 10px;
-  line-height: 1.2;
+  border: 2px solid var(--border-outer);
+  font-size: 11px;
+  line-height: 1.3;
+  box-shadow: inset 0 0 10px rgba(0,255,0,0.2);
 }
 
 .alarm-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .btn-alarm {
-  height: 32px;
+  flex: 1;
+  height: 36px;
   font-weight: bold;
   font-size: 10px;
   border: 2px solid #000;
   cursor: pointer;
-  box-shadow: var(--bevel-btn);
+  box-shadow: var(--bevel-out);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-alarm:active {
-  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.5);
-  transform: translateY(1px);
-}
-
-.btn-green { background: #0f0; }
-.btn-red { background: #f00; color: #fff; }
-.btn-blue { background: #00f; color: #fff; }
-.btn-gamma { background: #ff0; }
-.btn-epsilon { background: #f0f; color: #fff; }
+/* Cores de Alarme (Controladas) */
+.btn-green { background: #4caf50; color: #fff; }
+.btn-red { background: #f44336; color: #fff; }
+.btn-blue { background: #2196f3; color: #fff; }
+.btn-gamma { background: #ffeb3b; color: #000; }
+.btn-epsilon { background: #9c27b0; color: #fff; }

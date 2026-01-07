@@ -1,10 +1,12 @@
 .screen {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
 }
 
 #desktop-screen {
@@ -14,148 +16,155 @@
   flex-direction: row;
   overflow: hidden;
   position: relative;
+  background: var(--bg-desktop);
 }
 
 .sidebar {
-  width: 280px;
-  background: var(--bg-main);
-  border-right: 2px solid var(--border-black);
+  width: 260px;
+  background: var(--bg-panel);
+  border-right: 2px solid var(--border-outer);
   display: flex;
   flex-direction: column;
-  padding: 10px;
-  gap: 16px;
-  box-shadow: inset -2px 0 0 var(--border-light);
+  padding: 14px;
+  gap: 18px;
   z-index: 20;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: var(--bg-light);
-  border: 1px solid var(--border-black);
-  box-shadow: var(--bevel-light);
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border-outer);
+  margin-bottom: 4px;
 }
 
 .brand-icon {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border-outer);
+  background: var(--paper);
   image-rendering: pixelated;
-  border: 1px solid var(--ink);
+  padding: 2px;
 }
 
 .brand-title {
-  font-size: 18px;
-  font-weight: bold;
-  letter-spacing: -1px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
 }
 
 .section-block {
-  border: 1px solid var(--border-black);
-  padding: 12px;
   background: var(--bg-light);
-  box-shadow: var(--bevel-light);
-  position: relative;
-  margin-top: 10px;
+  border: 1px solid var(--border-outer);
+  padding: 12px;
+  box-shadow: var(--bevel-in);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .section-title {
-  position: absolute;
-  top: -10px;
-  left: 8px;
-  background: var(--bg-main);
-  padding: 0 6px;
   font-size: 10px;
   font-weight: bold;
   text-transform: uppercase;
-  border: 1px solid var(--border-black);
+  margin-bottom: 4px;
+  color: var(--ink-dim);
+  border-bottom: 1px dotted var(--ink-dim);
 }
 
 .session-line {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 11px;
   font-family: var(--font-mono);
+  font-size: 11px;
 }
 
 .energy-bar-container {
-  height: 18px;
-  background: var(--ink);
-  border: 1px solid var(--border-light);
+  height: 14px;
+  background: var(--paper);
+  border: 1px solid var(--border-outer);
   padding: 2px;
+  margin-top: 4px;
 }
 
 .energy-fill {
   height: 100%;
   background: repeating-linear-gradient(
     45deg,
-    #444,
-    #444 4px,
-    #888 4px,
-    #888 8px
+    var(--ink),
+    var(--ink) 4px,
+    transparent 4px,
+    transparent 8px
   );
   width: 100%;
-  border: 1px solid var(--border-light);
 }
 
 .workspace {
   flex: 1;
   position: relative;
-  background: var(--bg-dark);
-  box-shadow: inset 4px 4px 10px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  padding-bottom: 60px;
+  padding: 0;
 }
 
 .topbar {
-  height: 32px;
-  background: var(--bg-main);
-  border-bottom: 2px solid var(--border-black);
+  height: 36px;
+  background: var(--bg-panel);
+  border-bottom: 2px solid var(--border-outer);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 12px;
-  box-shadow: inset 0 -2px 0 var(--border-light);
+  padding: 0 16px;
+  font-weight: bold;
 }
 
+/* Dock Centralizada e Estilizada */
 .dock-newton {
-  position: fixed;
-  bottom: 12px;
+  position: absolute;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-light);
-  border: 2px solid var(--border-black);
-  border-radius: 6px;
-  padding: 6px;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-outer);
+  border-radius: 4px;
+  padding: 8px 12px;
   display: flex;
-  gap: 8px;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+  gap: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
   z-index: 5000;
 }
 
 .dock-btn {
   width: 48px;
   height: 48px;
-  background: var(--paper);
-  border: 1px solid var(--border-black);
-  border-radius: 4px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-outer);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--bevel-btn);
-  transition: margin-bottom 0.2s;
+  box-shadow: var(--bevel-out);
+  transition: transform 0.1s;
 }
 
 .dock-btn:hover {
-  margin-bottom: 8px;
+  transform: translateY(-2px);
+  background: #fff;
+}
+
+.dock-btn:active {
+  transform: translateY(1px);
+  box-shadow: var(--bevel-in);
 }
 
 .dock-btn img {
   width: 32px;
   height: 32px;
   image-rendering: pixelated;
+  opacity: 0.8;
 }
+
+.dock-btn:hover img { opacity: 1; }
