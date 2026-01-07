@@ -1,231 +1,108 @@
-button { 
-  font-family: var(--font-main); 
-  cursor: pointer; 
-  user-select: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.btn-newton {
-  width: 100%; 
-  padding: 11px 16px; 
-  background: var(--button);
-  border: none;
-  box-shadow: 
-    3px 3px 0 rgba(0, 0, 0, 0.35),
-    inset 3px 3px 0 rgba(255, 255, 255, 0.85),
-    inset 4px 4px 0 rgba(255, 255, 255, 0.5),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.35),
-    inset -4px -4px 0 rgba(0, 0, 0, 0.2);
-  color: var(--ink); 
-  font-weight: bold; 
+button {
+  font-family: var(--font-main);
   font-size: 12px;
-  text-align: center;
-  position: relative;
-  transition: all 0.08s ease;
+  text-transform: uppercase;
   letter-spacing: 0.5px;
+  color: var(--ink);
+  background: var(--button);
+  border: 1px solid var(--border-black);
+  box-shadow: var(--bevel-btn);
+  padding: 6px 12px;
+  outline: none;
+  border-radius: 3px;
+  transition: transform 0.05s;
 }
 
-.btn-newton:hover { 
-  background: var(--button-hover);
-  box-shadow: 
-    3px 3px 0 rgba(0, 0, 0, 0.4),
-    inset 3px 3px 0 rgba(255, 255, 255, 0.9),
-    inset 4px 4px 0 rgba(255, 255, 255, 0.6),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.4),
-    inset -4px -4px 0 rgba(0, 0, 0, 0.25);
-}
-
-.btn-newton:active { 
+button:active {
   background: var(--button-active);
-  box-shadow: 
-    1px 1px 0 rgba(0, 0, 0, 0.25),
-    inset -3px -3px 0 rgba(255, 255, 255, 0.6),
-    inset -4px -4px 0 rgba(255, 255, 255, 0.3),
-    inset 3px 3px 0 rgba(0, 0, 0, 0.5),
-    inset 4px 4px 0 rgba(0, 0, 0, 0.25);
-  transform: translate(2px, 2px);
+  box-shadow: var(--bevel-btn-active);
+  transform: translateY(2px);
 }
 
-.btn-newton:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+button:disabled {
+  background: var(--bg-light);
+  color: var(--ink-dim);
+  box-shadow: none;
+  border-color: var(--ink-dim);
+  transform: none;
+}
+
+.btn-newton, .btn-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-action img {
+  width: 16px;
+  height: 16px;
+  filter: grayscale(100%) contrast(150%);
+}
+
+input, textarea {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--border-dark);
+  box-shadow: var(--bevel-well);
+  padding: 8px;
+  outline: none;
+  border-radius: 0;
+}
+
+input:focus, textarea:focus {
+  background: #ffffff;
+  color: #000;
+  border: 1px solid #000;
+}
+
+input::placeholder {
   color: var(--ink-dim);
 }
 
-.btn-action {
-  width: 100%; 
-  padding: 11px 16px; 
-  background: var(--button);
-  border: none;
-  box-shadow: 
-    3px 3px 0 rgba(0, 0, 0, 0.35),
-    inset 3px 3px 0 rgba(255, 255, 255, 0.85),
-    inset 4px 4px 0 rgba(255, 255, 255, 0.5),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.35),
-    inset -4px -4px 0 rgba(0, 0, 0, 0.2);
-  display: flex; 
-  align-items: center; 
-  gap: 14px; 
-  font-size: 12px; 
-  font-weight: bold;
-  color: var(--ink);
-  cursor: pointer;
-  transition: all 0.08s ease;
-  letter-spacing: 0.5px;
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+  background: url('data:image/svg+xml;utf8,<svg width="4" height="4" viewBox="0 0 4 4" xmlns="http://www.w3.org/2000/svg"><rect width="1" height="1" fill="%23aaa"/></svg>');
 }
 
-.btn-action img { 
-  width: 20px; 
-  height: 20px;
-  image-rendering: pixelated;
-  filter: contrast(1.15) drop-shadow(1px 1px 0 rgba(255, 255, 255, 0.3));
+::-webkit-scrollbar-thumb {
+  background: var(--bg-light);
+  border: 1px solid var(--border-black);
+  box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #555;
 }
 
-.btn-action:hover {
-  background: var(--button-hover);
-}
-
-.btn-action:active { 
-  background: var(--button-active);
-  box-shadow: 
-    1px 1px 0 rgba(0, 0, 0, 0.25),
-    inset -3px -3px 0 rgba(255, 255, 255, 0.6),
-    inset 3px 3px 0 rgba(0, 0, 0, 0.5),
-    inset 4px 4px 0 rgba(0, 0, 0, 0.25);
-  transform: translate(2px, 2px);
-}
-
-input, textarea { 
-  font-family: var(--font-mono); 
-  outline: none;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.input-newton {
-  width: 100%; 
-  padding: 9px 12px; 
-  background: var(--paper);
-  border: none;
-  box-shadow: 
-    inset 3px 3px 0 rgba(0, 0, 0, 0.55),
-    inset 4px 4px 0 rgba(0, 0, 0, 0.3),
-    inset -2px -2px 0 rgba(255, 255, 255, 0.65),
-    inset -3px -3px 0 rgba(255, 255, 255, 0.35);
-  font-family: var(--font-mono); 
-  font-size: 12px; 
-  color: var(--ink); 
-  margin-bottom: 12px;
-  transition: background 0.15s ease;
-}
-
-.input-newton:focus { 
-  background: #ffffff;
-  box-shadow: 
-    inset 3px 3px 0 rgba(0, 0, 0, 0.65),
-    inset 4px 4px 0 rgba(0, 0, 0, 0.35),
-    inset -2px -2px 0 rgba(255, 255, 255, 0.75),
-    0 0 0 3px #000000;
-}
-
-.input-newton::placeholder { 
-  color: var(--ink-dim); 
-  font-style: italic; 
-  opacity: 0.6;
-}
-
-::-webkit-scrollbar { 
-  width: 20px; 
-  height: 20px; 
-  background: var(--bg-main);
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-dark);
-  box-shadow: 
-    inset 3px 3px 0 rgba(0, 0, 0, 0.35),
-    inset -2px -2px 0 rgba(255, 255, 255, 0.25);
-}
-
-::-webkit-scrollbar-thumb { 
-  background: var(--button);
-  border: 2px solid var(--border-dark);
-  box-shadow: 
-    inset 3px 3px 0 rgba(255, 255, 255, 0.75),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.45);
-  min-height: 45px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--button-hover);
-  box-shadow: 
-    inset 3px 3px 0 rgba(255, 255, 255, 0.85),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.5);
-}
-
-::-webkit-scrollbar-thumb:active {
-  background: var(--button-active);
-  box-shadow: 
-    inset -3px -3px 0 rgba(255, 255, 255, 0.6),
-    inset 3px 3px 0 rgba(0, 0, 0, 0.55);
-}
-
-::-webkit-scrollbar-button { 
-  background: var(--button);
-  height: 20px; 
-  width: 20px;
-  border: 2px solid var(--border-dark);
-  box-shadow: 
-    inset 3px 3px 0 rgba(255, 255, 255, 0.75),
-    inset -3px -3px 0 rgba(0, 0, 0, 0.45);
-}
-
-::-webkit-scrollbar-button:hover {
-  background: var(--button-hover);
-}
-
-::-webkit-scrollbar-button:active {
-  box-shadow: 
-    inset -3px -3px 0 rgba(255, 255, 255, 0.6),
-    inset 3px 3px 0 rgba(0, 0, 0, 0.55);
+::-webkit-scrollbar-button {
+  background: var(--bg-light);
+  border: 1px solid var(--border-black);
+  height: 16px;
+  width: 16px;
+  box-shadow: inset 1px 1px 0 #fff;
+  display: block;
 }
 
 ::-webkit-scrollbar-button:vertical:decrement {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 7 L6 12 L14 12 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='8' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 0l4 8H0z' fill='%23000'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
 }
 
 ::-webkit-scrollbar-button:vertical:increment {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 13 L6 8 L14 8 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='8' height='8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0l4 8 4-8z' fill='%23000'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
 }
 
-::-webkit-scrollbar-button:horizontal:decrement {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M7 10 L12 6 L12 14 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-::-webkit-scrollbar-button:horizontal:increment {
-  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M13 10 L8 6 L8 14 Z" fill="%23000" stroke="%23000" stroke-width="0.5"/></svg>');
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.status-text { 
-  text-align: center; 
-  min-height: 26px; 
-  margin: 12px 0; 
-  color: var(--ink); 
-  font-family: var(--font-mono); 
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 0.6px;
-  padding: 5px 10px;
+.status-text {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-align: center;
+  border: 1px solid var(--border-dark);
   background: var(--bg-light);
-  border-top: 2px solid rgba(255, 255, 255, 0.6);
-  border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  margin: 8px 0;
+  box-shadow: var(--bevel-well);
 }
