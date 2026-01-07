@@ -35,7 +35,7 @@
         </div>
 
         <div class="loading-right">
-            <div class="login-panel">
+            <div class="login-panel hidden" id="login-panel">
                 <div class="login-header">OPERATOR ACCESS</div>
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
@@ -240,6 +240,9 @@
                     progress = 100;
                     bar.style.width = '100%';
                     clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('login-panel').classList.remove('hidden');
+                    }, 500);
                 } else {
                     bar.style.width = progress + '%';
                 }
@@ -256,6 +259,8 @@
             }
             
             try {
+                await init();
+                
                 const usersData = await window.storage.get('arcs_users');
                 const users = usersData ? JSON.parse(usersData.value) : {};
                 
@@ -284,8 +289,9 @@
                     showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
                 }
             } catch (e) {
+                console.error(e);
                 playSound('sfx-error');
-                showStatus('SYSTEM ERROR', true);
+                showStatus('SYSTEM ERROR - TRY AGAIN', true);
             }
         }
 
