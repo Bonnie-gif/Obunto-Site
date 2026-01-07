@@ -4,29 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
-    <link rel="stylesheet" href="css/notification.css">
-    <link rel="stylesheet" href="css/broadcast.css">
-    <link rel="stylesheet" href="css/monitoring.css">
-    <link rel="stylesheet" href="css/alarms.css">
-    <link rel="stylesheet" href="css/tickets.css">
-    <link rel="stylesheet" href="css/radio.css">
-    <link rel="stylesheet" href="css/credentials.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <audio id="sfx-poweron" src="audio/poweron.wav"></audio>
-    <audio id="sfx-loading" src="audio/loading1.wav"></audio>
-    <audio id="sfx-newmessage" src="audio/newmessage.wav"></audio>
-    <audio id="sfx-error" src="audio/uh_oh.wav"></audio>
-    <audio id="sfx-denied" src="audio/requestdenied.wav"></audio>
-    <audio id="sfx-sent" src="audio/requestsent.wav"></audio>
-    <audio id="sfx-blue" src="audio/bluecode.wav"></audio>
+    <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
+    <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
+    <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
+    <audio id="sfx-error" src="assets/audio/uh_oh.wav"></audio>
+    <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
+    <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
+    <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
 
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
             <div class="upeo-section">
-                <img src="logos/logo.png" class="upeo-logo" alt="UPEO">
+                <svg class="upeo-logo" viewBox="0 0 200 200">
+                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
+                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
+                </svg>
                 <div class="upeo-text">UPEO</div>
             </div>
             
@@ -43,7 +39,7 @@
                 <div class="login-header">OPERATOR ACCESS</div>
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
-                    <input type="text" id="operator-id" class="login-input" maxlength="20" autocomplete="off">
+                    <input type="text" id="operator-id" class="login-input" maxlength="20">
                     <div class="login-status" id="login-status"></div>
                     <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
@@ -91,7 +87,6 @@
         <div class="main-window">
             <div class="menu-bar">
                 <div class="menu-button" onclick="goToHome()">MENU</div>
-                
                 <div class="menu-tabs hidden" id="admin-tabs">
                     <div class="tab" data-target="adm-broadcast">BROADCAST</div>
                     <div class="tab" data-target="adm-monitoring">MONITORING</div>
@@ -100,7 +95,6 @@
                     <div class="tab" data-target="adm-radio">RADIO</div>
                     <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
                 </div>
-
                 <div class="menu-tabs hidden" id="personnel-tabs">
                     <div class="tab" data-target="usr-profile">PROFILE</div>
                     <div class="tab" data-target="usr-workstation">WORKSTATION</div>
@@ -112,157 +106,151 @@
 
             <div id="view-home" class="tab-content active">
                 <div class="banner-section">
-                    <img src="logos/header.png" class="banner-img" onerror="this.style.display='none'">
+                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
                     <div class="mascot-placeholder"></div>
                 </div>
-                <div class="content-grid home-grid">
-                     <div class="grid-cell news-cell">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
                         <div class="cell-header">WELCOME</div>
-                        <div class="news-box"><div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div></div>
+                        <div class="news-box">
+                            <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="content-grid">
-                
-                <div id="adm-broadcast" class="tab-content">
-                     <div class="grid-layout">
-                        <div class="grid-cell empty-cell">
-                            <div class="x-mark"><div class="line"></div><div class="line"></div></div>
+            <div id="adm-broadcast" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
+                    </div>
+                    <div class="grid-cell news-cell">
+                        <div class="sticker yellow">BROADCAST SYSTEM</div>
+                        <div class="cell-header">GLOBAL MESSAGE</div>
+                        <div class="news-box">
+                            <label>SELECT EMOTION:</label>
+                            <select id="sprite-select">
+                                <option value="normal">Normal</option>
+                                <option value="happy">Happy</option>
+                                <option value="sad">Sad</option>
+                                <option value="annoyed">Annoyed</option>
+                                <option value="bug">Bug</option>
+                                <option value="dizzy">Dizzy</option>
+                                <option value="hollow">Hollow</option>
+                                <option value="panic">Panic</option>
+                                <option value="sleeping">Sleeping</option>
+                                <option value="smug">Smug</option>
+                                <option value="stare">Stare</option>
+                                <option value="suspicious">Suspicious</option>
+                                <option value="werror">W.Error</option>
+                            </select>
+                            <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
+                            <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
                         </div>
-                        <div class="grid-cell news-cell">
-                            <div class="sticker yellow">BROADCAST SYSTEM</div>
-                            <div class="cell-header">GLOBAL MESSAGE</div>
-                            <div class="news-box">
-                                <label>SELECT EMOTION:</label>
-                                <select id="sprite-select">
-                                    <option value="normal">Normal</option>
-                                    <option value="happy">Happy</option>
-                                    <option value="sad">Sad</option>
-                                    <option value="annoyed">Annoyed</option>
-                                    <option value="bug">Bug</option>
-                                    <option value="dizzy">Dizzy</option>
-                                    <option value="hollow">Hollow</option>
-                                    <option value="panic">Panic</option>
-                                    <option value="sleeping">Sleeping</option>
-                                    <option value="Smug">Smug</option>
-                                    <option value="stare">Stare</option>
-                                    <option value="suspicious">Suspicious</option>
-                                    <option value="werror">W.Error</option>
-                                </select>
-                                <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
-                                <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
-                            </div>
+                    </div>
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">STATUS</div>
+                        <div class="updates-box">
+                            <div class="updates-title">READY</div>
+                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
                         </div>
-                        <div class="grid-cell updates-cell">
-                            <div class="cell-header">STATUS</div>
-                            <div class="updates-box">
-                                <div class="updates-title">READY</div>
-                                <div class="updates-text">SYSTEM READY FOR INPUT.</div>
-                            </div>
-                        </div>
-                     </div>
+                    </div>
                 </div>
+            </div>
 
-                <div id="adm-monitoring" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell news-cell">
-                            <div class="cell-header">ACTIVE LOGS</div>
-                            <div class="news-box"><div class="news-text"></div></div>
-                        </div>
+            <div id="adm-monitoring" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">ACTIVE LOGS</div>
+                        <div class="news-box"><div class="news-text"></div></div>
                     </div>
                 </div>
+            </div>
 
-                <div id="adm-alarms" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell featured-cell">
-                            <div class="sticker yellow">ALERTS</div>
-                            <div class="featured-box">
-                                <div class="featured-title">NO ACTIVE ALARMS</div>
-                            </div>
+            <div id="adm-alarms" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">ALERTS</div>
+                        <div class="featured-box">
+                            <div class="featured-title">NO ACTIVE ALARMS</div>
                         </div>
                     </div>
                 </div>
-                
-                <div id="adm-tickets" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell release-cell">
-                            <div class="cell-header">PENDING APPROVALS</div>
-                            <div id="pending-list-container" class="news-box">
-                                <div id="pending-list"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
 
-                <div id="adm-radio" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell updates-cell">
-                            <div class="cell-header">RADIO FREQUENCY</div>
-                            <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
-                        </div>
+            <div id="adm-tickets" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
                     </div>
                 </div>
+            </div>
 
-                <div id="adm-credentials" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell news-cell">
-                            <div class="cell-header">ADMIN ID</div>
-                            <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
-                        </div>
+            <div id="adm-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO FREQUENCY</div>
+                        <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
                     </div>
                 </div>
+            </div>
 
-                <div id="usr-profile" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell news-cell">
-                            <div class="cell-header">USER PROFILE</div>
-                            <div class="news-box"><div class="news-text" style="padding:15px; font-weight:bold;">WELCOME OPERATOR. STATUS: ACTIVE.</div></div>
-                        </div>
+            <div id="adm-credentials" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">ADMIN ID</div>
+                        <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
                     </div>
                 </div>
-                
-                <div id="usr-workstation" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell release-cell">
-                            <div class="cell-header">ASSIGNMENTS</div>
-                            <div class="release-box" style="padding:15px; background:#fff; border:2px solid #ddd; border-radius:8px;">
-                                <div class="release-desc">NO ACTIVE ASSIGNMENTS. CHECK BACK LATER.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
 
-                <div id="usr-radio" class="tab-content">
-                    <div class="grid-layout">
-                         <div class="grid-cell updates-cell">
-                            <div class="cell-header">RADIO</div>
-                            <div class="updates-box" style="padding:15px; background:#fff; border:2px solid #ddd; border-radius:8px;">
-                                <div class="updates-text">LISTENING...</div>
-                            </div>
+            <div id="usr-profile" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">USER PROFILE</div>
+                        <div class="news-box"><div class="news-text">WELCOME OPERATOR. STATUS: ACTIVE.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-workstation" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">ASSIGNMENTS</div>
+                        <div class="release-box">
+                            <div class="release-desc">NO ACTIVE ASSIGNMENTS. CHECK BACK LATER.</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="usr-help" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell featured-cell">
-                            <div class="sticker yellow">SUPPORT</div>
-                            <div class="featured-box" style="padding:15px; background:#fff; border:2px solid #ddd; border-radius:8px;">
-                                <div class="featured-desc">ADMINISTRATOR OBUNTO IS OFFLINE.</div>
-                            </div>
+            <div id="usr-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO</div>
+                        <div class="updates-box"><div class="updates-text">LISTENING...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-help" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">SUPPORT</div>
+                        <div class="featured-box">
+                            <div class="featured-desc">ADMINISTRATOR OBUNTO IS OFFLINE.</div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div id="usr-suggestions" class="tab-content">
-                    <div class="grid-layout">
-                        <div class="grid-cell empty-cell">
-                            <div class="x-mark"><div class="line"></div><div class="line"></div></div>
-                        </div>
+            <div id="usr-suggestions" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -293,6 +281,285 @@
         </div>
     </div>
 
-    <script src="js/script.js"></script>
+    <script>
+        let currentUser = null;
+        const ADMIN_ID = '118107921024376';
+        let lastBroadcastTime = 0;
+
+        const storage = {
+            async get(key, shared = false) {
+                if (window.storage && typeof window.storage.get === 'function') {
+                    return await window.storage.get(key, shared);
+                }
+                const value = localStorage.getItem(key);
+                return value ? { key, value, shared } : null;
+            },
+            async set(key, value, shared = false) {
+                if (window.storage && typeof window.storage.set === 'function') {
+                    return await window.storage.set(key, value, shared);
+                }
+                localStorage.setItem(key, value);
+                return { key, value, shared };
+            }
+        };
+
+        function playSound(id) {
+            const audio = document.getElementById(id);
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => {});
+            }
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function showStatus(message, isError = false) {
+            const status = document.getElementById('login-status');
+            status.textContent = message;
+            status.className = 'login-status show';
+            if (isError) status.classList.add('error');
+            setTimeout(() => status.classList.remove('show'), 3000);
+        }
+
+        function startLoading() {
+            playSound('sfx-loading');
+            let progress = 0;
+            const bar = document.getElementById('loading-progress');
+            
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    bar.style.width = '100%';
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('login-panel').classList.remove('hidden');
+                    }, 500);
+                } else {
+                    bar.style.width = progress + '%';
+                }
+            }, 200);
+        }
+
+        async function handleLogin() {
+            const userId = document.getElementById('operator-id').value.trim();
+            
+            if (!userId) {
+                playSound('sfx-error');
+                showStatus('PLEASE ENTER AN OPERATOR ID', true);
+                return;
+            }
+            
+            try {
+                await init();
+                
+                const usersData = await storage.get('arcs_users');
+                const users = usersData ? JSON.parse(usersData.value) : {};
+                
+                if (users[userId] && users[userId].approved) {
+                    currentUser = users[userId];
+                    playSound('sfx-poweron');
+                    showScreen('main-screen');
+                    
+                    if (userId === ADMIN_ID) {
+                        document.getElementById('admin-toggle').classList.remove('hidden');
+                        document.getElementById('admin-tabs').classList.remove('hidden');
+                        document.getElementById('personnel-tabs').classList.add('hidden');
+                        loadPending('pending-list');
+                    } else {
+                        document.getElementById('admin-tabs').classList.add('hidden');
+                        document.getElementById('personnel-tabs').classList.remove('hidden');
+                    }
+                    
+                    goToHome();
+                    
+                } else if (!users[userId]) {
+                    const pendingData = await storage.get('arcs_pending');
+                    const pending = pendingData ? JSON.parse(pendingData.value) : [];
+                    
+                    if (!pending.includes(userId)) {
+                        pending.push(userId);
+                        await storage.set('arcs_pending', JSON.stringify(pending));
+                    }
+                    
+                    playSound('sfx-sent');
+                    showStatus('REQUEST SENT - AWAITING APPROVAL');
+                    document.getElementById('operator-id').value = '';
+                } else {
+                    playSound('sfx-denied');
+                    showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
+                }
+            } catch (e) {
+                console.error('Login error:', e);
+                playSound('sfx-error');
+                showStatus('SYSTEM ERROR - TRY AGAIN', true);
+            }
+        }
+
+        document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        function openAdmin() {
+            document.getElementById('admin-panel').classList.remove('hidden');
+            loadPending('pending-list-modal');
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        function goToHome() {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('view-home').classList.add('active');
+        }
+
+        async function loadPending(elementId) {
+            try {
+                const data = await storage.get('arcs_pending');
+                const pending = data ? JSON.parse(data.value) : [];
+                const list = document.getElementById(elementId);
+                if (!list) return;
+
+                list.innerHTML = '';
+                
+                if (pending.length === 0) {
+                    list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO PENDING REQUESTS</div>';
+                    return;
+                }
+                
+                pending.forEach(id => {
+                    const item = document.createElement('div');
+                    item.className = 'pending-item';
+                    item.innerHTML = `
+                        <span>${id}</span>
+                        <div class="actions">
+                            <button onclick="approve('${id}')">APPROVE</button>
+                            <button onclick="deny('${id}')">DENY</button>
+                        </div>
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (e) {
+                console.error('Load pending error:', e);
+            }
+        }
+
+        async function approve(id) {
+            const users = await storage.get('arcs_users');
+            const data = users ? JSON.parse(users.value) : {};
+            data[id] = { id, approved: true };
+            await storage.set('arcs_users', JSON.stringify(data));
+            
+            const pending = await storage.get('arcs_pending');
+            const pend = pending ? JSON.parse(pending.value) : [];
+            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+            
+            playSound('sfx-blue');
+            loadPending('pending-list');
+            loadPending('pending-list-modal');
+        }
+
+        async function deny(id) {
+            const pending = await storage.get('arcs_pending');
+            const pend = pending ? JSON.parse(pending.value) : [];
+            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+            
+            playSound('sfx-denied');
+            loadPending('pending-list');
+            loadPending('pending-list-modal');
+        }
+
+        async function sendBroadcast() {
+            const text = document.getElementById('broadcast-text').value.trim();
+            const sprite = document.getElementById('sprite-select').value;
+            
+            if (!text) return;
+            
+            const broadcast = { text, sprite, timestamp: Date.now() };
+            await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
+            
+            playSound('sfx-sent');
+            document.getElementById('broadcast-text').value = '';
+            showBroadcast(broadcast);
+        }
+
+        function showBroadcast(data) {
+            const spriteImg = document.getElementById('notif-sprite');
+            spriteImg.src = `assets/sprites/${data.sprite}.png`;
+            spriteImg.onerror = () => {
+                spriteImg.src = 'assets/sprites/normal.png';
+            };
+            
+            document.getElementById('notif-text').textContent = data.text;
+            document.getElementById('broadcast-notification').classList.remove('hidden');
+            
+            playSound('sfx-newmessage');
+            
+            setTimeout(() => {
+                document.getElementById('broadcast-notification').classList.add('hidden');
+            }, 8000);
+        }
+
+        async function checkBroadcasts() {
+            if (!currentUser) return;
+
+            try {
+                const data = await storage.get('arcs_broadcast', true);
+                if (data) {
+                    const broadcast = JSON.parse(data.value);
+                    
+                    if (broadcast.timestamp > lastBroadcastTime) {
+                        lastBroadcastTime = broadcast.timestamp;
+                        showBroadcast(broadcast);
+                    }
+                }
+            } catch (e) {
+                console.error('Check broadcasts error:', e);
+            }
+        }
+
+        function switchTab(targetId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+        }
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                const parentId = tab.parentElement.id;
+                document.querySelectorAll(`#${parentId} .tab`).forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                const target = tab.getAttribute('data-target');
+                switchTab(target);
+            });
+        });
+
+        async function init() {
+            try {
+                const users = await storage.get('arcs_users');
+                if (!users) {
+                    await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
+                }
+                
+                const pending = await storage.get('arcs_pending');
+                if (!pending) {
+                    await storage.set('arcs_pending', JSON.stringify([]));
+                }
+            } catch (e) {
+                console.error('Init error:', e);
+            }
+        }
+
+        window.addEventListener('load', async () => {
+            await init();
+            setTimeout(startLoading, 1000);
+            setInterval(checkBroadcasts, 2000);
+        });
+    </script>
 </body>
 </html>
