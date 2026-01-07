@@ -207,6 +207,23 @@
     <script>
         let currentUser = null;
         const ADMIN_ID = '118107921024376';
+        
+        const storage = {
+            async get(key, shared = false) {
+                if (window.storage && typeof window.storage.get === 'function') {
+                    return await window.storage.get(key, shared);
+                }
+                const value = localStorage.getItem(key);
+                return value ? { key, value, shared } : null;
+            },
+            async set(key, value, shared = false) {
+                if (window.storage && typeof window.storage.set === 'function') {
+                    return await window.storage.set(key, value, shared);
+                }
+                localStorage.setItem(key, value);
+                return { key, value, shared };
+            }
+        };
 
         function playSound(id) {
             const audio = document.getElementById(id);
@@ -261,7 +278,7 @@
             try {
                 await init();
                 
-                const usersData = await window.storage.get('arcs_users');
+                const usersData = await storage.get('arcs_users');
                 const users = usersData ? JSON.parse(usersData.value) : {};
                 
                 if (users[userId] && users[userId].approved) {
@@ -273,12 +290,12 @@
                         document.getElementById('admin-toggle').classList.remove('hidden');
                     }
                 } else if (!users[userId]) {
-                    const pendingData = await window.storage.get('arcs_pending');
+                    const pendingData = await storage.get('arcs_pending');
                     const pending = pendingData ? JSON.parse(pendingData.value) : [];
                     
                     if (!pending.includes(userId)) {
                         pending.push(userId);
-                        await window.storage.set('arcs_pending', JSON.stringify(pending));
+                        await storage.set('arcs_pending', JSON.stringify(pending));
                     }
                     
                     playSound('sfx-sent');
@@ -289,7 +306,7 @@
                     showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
                 }
             } catch (e) {
-                console.error(e);
+                console.error('Login error:', e);
                 playSound('sfx-error');
                 showStatus('SYSTEM ERROR - TRY AGAIN', true);
             }
@@ -310,7 +327,7 @@
 
         async function loadPending() {
             try {
-                const data = await window.storage.get('arcs_pending');
+                const data = await storage.get('arcs_pending');
                 const pending = data ? JSON.parse(data.value) : [];
                 const list = document.getElementById('pending-list');
                 list.innerHTML = '';
@@ -330,27 +347,29 @@
                     `;
                     list.appendChild(item);
                 });
-            } catch (e) {}
+            } catch (e) {
+                console.error('Load pending error:', e);
+            }
         }
 
         async function approve(id) {
-            const users = await window.storage.get('arcs_users');
+            const users = await storage.get('arcs_users');
             const data = users ? JSON.parse(users.value) : {};
             data[id] = { id, approved: true };
-            await window.storage.set('arcs_users', JSON.stringify(data));
+            await storage.set('arcs_users', JSON.stringify(data));
             
-            const pending = await window.storage.get('arcs_pending');
+            const pending = await storage.get('arcs_pending');
             const pend = pending ? JSON.parse(pending.value) : [];
-            await window.storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
             
             playSound('sfx-blue');
             loadPending();
         }
 
         async function deny(id) {
-            const pending = await window.storage.get('arcs_pending');
+            const pending = await storage.get('arcs_pending');
             const pend = pending ? JSON.parse(pending.value) : [];
-            await window.storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+            await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
             
             playSound('sfx-denied');
             loadPending();
@@ -363,7 +382,7 @@
             if (!text) return;
             
             const broadcast = { text, sprite, timestamp: Date.now() };
-            await window.storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
+            await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
             
             playSound('sfx-sent');
             showBroadcast(broadcast);
@@ -389,7 +408,7 @@
 
         async function checkBroadcasts() {
             try {
-                const data = await window.storage.get('arcs_broadcast', true);
+                const data = await storage.get('arcs_broadcast', true);
                 if (data) {
                     const broadcast = JSON.parse(data.value);
                     const lastSeen = localStorage.getItem('arcs_last_broadcast');
@@ -399,21 +418,25 @@
                         localStorage.setItem('arcs_last_broadcast', broadcast.timestamp.toString());
                     }
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error('Check broadcasts error:', e);
+            }
         }
 
         async function init() {
             try {
-                const users = await window.storage.get('arcs_users');
+                const users = await storage.get('arcs_users');
                 if (!users) {
-                    await window.storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
+                    await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
                 }
                 
-                const pending = await window.storage.get('arcs_pending');
+                const pending = await storage.get('arcs_pending');
                 if (!pending) {
-                    await window.storage.set('arcs_pending', JSON.stringify([]));
+                    await storage.set('arcs_pending', JSON.stringify([]));
                 }
-            } catch (e) {}
+            } catch (e) {
+                console.error('Init error:', e);
+            }
         }
 
         window.addEventListener('load', async () => {
