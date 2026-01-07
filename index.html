@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/notification.css">
     <link rel="stylesheet" href="css/broadcast.css">
     <link rel="stylesheet" href="css/monitoring.css">
     <link rel="stylesheet" href="css/alarms.css">
@@ -27,7 +29,6 @@
                 <img src="logos/logo.png" class="upeo-logo" alt="UPEO">
                 <div class="upeo-text">UPEO</div>
             </div>
-            
             <div class="loading-info">
                 RESTARTING OS VER.3.2.2<br>
                 UPEO ID confirmed<br>
@@ -35,7 +36,6 @@
                 is for registered use only.
             </div>
         </div>
-
         <div class="loading-right">
             <div class="login-panel hidden" id="login-panel">
                 <div class="login-header">OPERATOR ACCESS</div>
@@ -51,7 +51,6 @@
                 </div>
             </div>
         </div>
-
         <div class="data-swallow-container">
             <div class="swallow-box">
                 <div class="swallow-header">
@@ -88,10 +87,10 @@
 
         <div class="main-window">
             <div class="menu-bar">
-                <div class="menu-button">MENU</div>
+                <div class="menu-button" onclick="goToHome()">MENU</div>
                 
                 <div class="menu-tabs hidden" id="admin-tabs">
-                    <div class="tab active" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
                     <div class="tab" data-target="adm-monitoring">MONITORING</div>
                     <div class="tab" data-target="adm-alarms">ALARMS</div>
                     <div class="tab" data-target="adm-tickets">TICKETS</div>
@@ -100,7 +99,7 @@
                 </div>
 
                 <div class="menu-tabs hidden" id="personnel-tabs">
-                    <div class="tab active" data-target="usr-profile">PROFILE</div>
+                    <div class="tab" data-target="usr-profile">PROFILE</div>
                     <div class="tab" data-target="usr-workstation">WORKSTATION</div>
                     <div class="tab" data-target="usr-radio">RADIO</div>
                     <div class="tab" data-target="usr-help">HELP REQUEST</div>
@@ -108,14 +107,22 @@
                 </div>
             </div>
 
-            <div class="banner-section">
-                <img src="logos/header.png" class="banner-img" onerror="this.style.display='none'">
-                <div class="mascot-placeholder"></div>
+            <div id="view-home" class="tab-content active">
+                <div class="banner-section">
+                    <img src="logos/header.png" class="banner-img" onerror="this.style.display='none'">
+                    <div class="mascot-placeholder"></div>
+                </div>
+                <div class="content-grid home-grid">
+                     <div class="grid-cell news-cell">
+                        <div class="cell-header">WELCOME</div>
+                        <div class="news-box"><div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div></div>
+                    </div>
+                </div>
             </div>
 
             <div class="content-grid">
                 
-                <div id="adm-broadcast" class="tab-content active">
+                <div id="adm-broadcast" class="tab-content">
                      <div class="grid-layout">
                         <div class="grid-cell empty-cell">
                             <div class="x-mark"><div class="line"></div><div class="line"></div></div>
@@ -273,11 +280,14 @@
     <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
 
     <div id="broadcast-notification" class="notification hidden">
-        <div class="notification-content">
-            <img id="notif-sprite" class="notification-sprite" src="" alt="sprite">
+        <div class="bubble">
             <div class="notification-text" id="notif-text"></div>
+            <div class="bubble-arrow"></div>
         </div>
-        <div class="notification-footer">- BROADCAST FROM OPERATOR OBUNTO</div>
+        <div class="mascot-container">
+            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
+            <div class="mascot-name">OBUNTO ADMIN</div>
+        </div>
     </div>
 
     <script src="js/script.js"></script>
