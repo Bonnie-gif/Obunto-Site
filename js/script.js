@@ -190,11 +190,22 @@ async function deny(id) {
     loadPending('pending-list-modal');
 }
 
+document.querySelectorAll('.sprite-option').forEach(option => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        document.getElementById('sprite-select').value = option.dataset.sprite;
+    });
+});
+
 async function sendBroadcast() {
     const text = document.getElementById('broadcast-text').value.trim();
     const sprite = document.getElementById('sprite-select').value;
     
-    if (!text) return;
+    if (!text) {
+        playSound('sfx-error');
+        return;
+    }
     
     const broadcast = { text, sprite, timestamp: Date.now() };
     await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
