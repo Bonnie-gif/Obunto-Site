@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCS - Newton OS v3.2.2</title>
+    <title>ARCS - Newton OS</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/notification.css">
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="css/credentials.css">
     <link rel="stylesheet" href="css/chat.css">
 </head>
-<body>
+<body class="alarm-green">
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
     <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
     <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
@@ -23,654 +23,432 @@
     <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
+    <audio id="sfx-alarm" src="assets/audio/alarm.wav"></audio>
 
-    <!-- CRT Scanline Overlay -->
-    <div class="crt-overlay"></div>
-
-    <!-- Loading Screen -->
     <div id="loading-screen" class="screen active">
-        <div class="loading-left">
-            <div class="upeo-section">
-                <svg class="upeo-logo" viewBox="0 0 200 200">
-                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
-                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
-                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
-                </svg>
-                <div class="upeo-text">UPEO</div>
+        <div class="loading-container">
+            <div class="loading-header">
+                <div class="arcs-logo">ARCS</div>
+                <div class="arcs-subtitle">Advanced Research & Containment System</div>
             </div>
-            
             <div class="loading-info">
-                <span class="typing-text">RESTARTING OS VER.3.2.2</span><br>
-                <span class="typing-text" style="animation-delay: 0.5s">UPEO ID confirmed</span><br>
-                <span class="typing-text" style="animation-delay: 1s">DATA SWALLOW</span><br>
-                <span class="typing-text" style="animation-delay: 1.5s">is for registered use only.</span>
+                <div class="info-line">RESTARTING OS VER.3.2.2</div>
+                <div class="info-line">ARCS ID confirmed</div>
+                <div class="info-line">DATA SWALLOW</div>
+                <div class="info-line">is for registered use only.</div>
             </div>
-
-            <div class="system-stats">
-                <div class="stat-item">
-                    <span class="stat-label">MEM</span>
-                    <div class="stat-bar"><div class="stat-fill" style="width: 67%"></div></div>
-                    <span class="stat-value">67%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">CPU</span>
-                    <div class="stat-bar"><div class="stat-fill" style="width: 42%"></div></div>
-                    <span class="stat-value">42%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">NET</span>
-                    <div class="stat-bar"><div class="stat-fill active" style="width: 89%"></div></div>
-                    <span class="stat-value">ONLINE</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="loading-right">
-            <div class="login-panel hidden" id="login-panel">
-                <div class="login-header">
-                    <div class="login-icon">⬡</div>
-                    OPERATOR ACCESS
-                </div>
-                <div class="login-body">
-                    <label class="login-label">ENTER OPERATOR ID:</label>
-                    <input type="text" id="operator-id" class="login-input" maxlength="20" autocomplete="off">
-                    <div class="login-status" id="login-status"></div>
-                    <button class="login-btn" onclick="handleLogin()">
-                        <span class="btn-text">LOGIN</span>
-                        <span class="btn-icon">→</span>
-                    </button>
-                    <div class="login-divider">
-                        <span>OR</span>
+            <div class="loading-box">
+                <div class="loading-box-header">DATA SWALLOW</div>
+                <div class="loading-box-content">
+                    <div class="disk-info">
+                        <span>DATA SWALLOW 40</span>
+                        <span>ARCS VER.3.2</span>
+                        <span>SYSTEM STARTUP</span>
                     </div>
-                    <div class="login-info-text">
-                        NEW OPERATOR?<br>
-                        <span class="highlight">ENTER YOUR ID TO REQUEST ACCESS</span>
-                    </div>
-                </div>
-                <div class="login-footer">
-                    <span class="blink">●</span> SECURE CONNECTION
-                </div>
-            </div>
-        </div>
-
-        <div class="data-swallow-container">
-            <div class="swallow-box">
-                <div class="swallow-header">
-                    <div class="swallow-brand">DATA SWALLOW</div>
-                    <div class="swallow-disk">
-                        <div class="disk-text">
-                            DATA SWALLOW 40<br>
-                            UPEO VER.3.2<br>
-                            SYSTEM STARTUP
+                    <div class="loading-bar-container">
+                        <div class="loading-bar">
+                            <div class="loading-bar-fill" id="loading-progress"></div>
                         </div>
-                        <div class="disk-icon">⊕</div>
+                        <div class="loading-text">Loading...</div>
                     </div>
                 </div>
-                <div class="loading-bar">
-                    <div class="bar-fill" id="loading-progress"></div>
-                    <div class="bar-glow"></div>
-                </div>
-                <div class="swallow-footer">
-                    <span class="jp-text">DATA SWALLOW 40 を起動中です。</span>
-                    <span class="loading-dots">...</span>
+            </div>
+            <div class="login-panel hidden" id="login-panel">
+                <div class="newton-window">
+                    <div class="window-header">
+                        <img src="assets/button-close-17x.png" class="header-btn" alt="">
+                        <span>OPERATOR ACCESS</span>
+                    </div>
+                    <div class="window-content">
+                        <label class="input-label">ENTER OPERATOR ID:</label>
+                        <input type="text" id="operator-id" class="newton-input" maxlength="20" autocomplete="off">
+                        <div class="login-status" id="login-status"></div>
+                        <button class="newton-button" onclick="handleLogin()">LOGIN</button>
+                        <div class="login-note">NEW OPERATOR? ENTER YOUR ID TO REQUEST ACCESS</div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="corner-decoration top-left"></div>
-        <div class="corner-decoration top-right"></div>
-        <div class="corner-decoration bottom-left"></div>
-        <div class="corner-decoration bottom-right"></div>
     </div>
 
-    <!-- Main Screen -->
     <div id="main-screen" class="screen">
-        <div class="top-decoration">
-            <div class="browser-dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-            </div>
-            <div class="url-bar">
-                <span class="url-icon">◈</span>
-                ARCS - Advanced Research & Containment System
-                <span class="url-status">ENCRYPTED</span>
-            </div>
-            <div class="user-info" id="user-info">
-                <span class="user-icon">◉</span>
-                <span id="current-user-name">GUEST</span>
-            </div>
-        </div>
-
-        <div class="loading-indicator">
-            <span class="loading-icon">⚡</span>
-            <span>System initialized</span>
-            <span class="system-time" id="system-time">00:00:00</span>
-        </div>
-
-        <div class="main-window">
-            <div class="menu-bar">
-                <div class="menu-button" onclick="goToHome()">
-                    <span class="menu-icon">◈</span>
-                    MENU
+        <div class="newton-desktop">
+            <div class="desktop-header">
+                <div class="header-left">
+                    <img src="assets/icon-small-newton-17x12.png" alt="">
+                    <span class="system-title">ARCS</span>
                 </div>
-                <div class="menu-tabs hidden" id="admin-tabs">
-                    <div class="tab" data-target="adm-broadcast">
-                        <span class="tab-icon">📡</span>
-                        BROADCAST
+                <div class="header-center">
+                    <span id="system-time">00:00:00</span>
+                </div>
+                <div class="header-right">
+                    <img src="assets/icon-small-owner-info-12x14.png" alt="">
+                    <span id="current-user-name">GUEST</span>
+                </div>
+            </div>
+            <div class="desktop-menubar">
+                <div class="menu-item" onclick="goToHome()">
+                    <img src="assets/icon-large-hamburger-28x19.png" alt="">
+                    <span>Menu</span>
+                </div>
+                <div class="menu-tabs" id="admin-tabs">
+                    <div class="menu-tab" data-target="adm-broadcast">
+                        <img src="assets/icon-small-beam-1x13.png" alt="">
+                        <span>Broadcast</span>
                     </div>
-                    <div class="tab" data-target="adm-monitoring">
-                        <span class="tab-icon">📊</span>
-                        MONITORING
+                    <div class="menu-tab" data-target="adm-monitoring">
+                        <img src="assets/icon-small-look-10x1.png" alt="">
+                        <span>Monitoring</span>
                     </div>
-                    <div class="tab" data-target="adm-alarms">
-                        <span class="tab-icon">🚨</span>
-                        ALARMS
+                    <div class="menu-tab" data-target="adm-alarms">
+                        <img src="assets/icon-small-alarm-17x10.png" alt="">
+                        <span>Alarms</span>
                     </div>
-                    <div class="tab" data-target="adm-tickets">
-                        <span class="tab-icon">🎫</span>
-                        TICKETS
+                    <div class="menu-tab" data-target="adm-tickets">
+                        <img src="assets/icon-small-task-14x11.png" alt="">
+                        <span>Tickets</span>
                     </div>
-                    <div class="tab" data-target="adm-radio">
-                        <span class="tab-icon">📻</span>
-                        RADIO
+                    <div class="menu-tab" data-target="adm-radio">
+                        <img src="assets/icon-small-speaker-11x11.png" alt="">
+                        <span>Radio</span>
                     </div>
-                    <div class="tab" data-target="adm-credentials">
-                        <span class="tab-icon">🔑</span>
-                        CREDENTIALS
+                    <div class="menu-tab" data-target="adm-credentials">
+                        <img src="assets/icon-small-person-16x15.png" alt="">
+                        <span>Credentials</span>
                     </div>
                 </div>
                 <div class="menu-tabs hidden" id="personnel-tabs">
-                    <div class="tab" data-target="usr-profile">
-                        <span class="tab-icon">👤</span>
-                        PROFILE
+                    <div class="menu-tab" data-target="usr-profile">
+                        <img src="assets/icon-small-person-9x12.png" alt="">
+                        <span>Profile</span>
                     </div>
-                    <div class="tab" data-target="usr-workstation">
-                        <span class="tab-icon">💼</span>
-                        WORKSTATION
+                    <div class="menu-tab" data-target="usr-workstation">
+                        <img src="assets/icon-small-folder-15x11.png" alt="">
+                        <span>Workstation</span>
                     </div>
-                    <div class="tab" data-target="usr-radio">
-                        <span class="tab-icon">📻</span>
-                        RADIO
+                    <div class="menu-tab" data-target="usr-radio">
+                        <img src="assets/icon-small-speaker-11x11.png" alt="">
+                        <span>Radio</span>
                     </div>
-                    <div class="tab" data-target="usr-help">
-                        <span class="tab-icon">🆘</span>
-                        HELP REQUEST
-                    </div>
-                    <div class="tab" data-target="usr-suggestions">
-                        <span class="tab-icon">💡</span>
-                        SUGGESTIONS
+                    <div class="menu-tab" data-target="usr-help">
+                        <img src="assets/icon-large-help-highlighted-30x23.png" alt="">
+                        <span>Help</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Home View -->
-            <div id="view-home" class="tab-content active">
-                <div class="banner-section">
-                    <div class="banner-bg"></div>
-                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
-                    <div class="banner-text">
-                        <h1>NEWTON OS</h1>
-                        <p>ARCS Control Interface v3.2.2</p>
-                    </div>
-                </div>
-                <div class="content-grid home-grid">
-                    <div class="grid-cell news-cell welcome-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">◈</span>
-                            WELCOME
+            <div class="desktop-content">
+                <div id="view-home" class="tab-content active">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-large-notes-1x22.png" class="header-icon" alt="">
+                            <span>Welcome</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="news-box">
-                            <div class="news-text">
-                                WELCOME TO ARCS V3.2.2.<br><br>
-                                SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.<br><br>
-                                <span class="highlight">STATUS: ALL SYSTEMS NOMINAL</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid-cell status-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">◉</span>
-                            SYSTEM STATUS
-                        </div>
-                        <div class="status-indicators">
-                            <div class="indicator online">
-                                <span class="indicator-dot"></span>
-                                NETWORK
-                            </div>
-                            <div class="indicator online">
-                                <span class="indicator-dot"></span>
-                                DATABASE
-                            </div>
-                            <div class="indicator online">
-                                <span class="indicator-dot"></span>
-                                SECURITY
+                        <div class="window-content">
+                            <div class="welcome-text">
+                                <p>WELCOME TO ARCS V3.2.2</p>
+                                <p>SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</p>
+                                <p>STATUS: ALL SYSTEMS NOMINAL</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Admin: Broadcast -->
-            <div id="adm-broadcast" class="tab-content">
-                <div class="content-grid broadcast-grid">
-                    <div class="grid-cell broadcast-main-cell">
-                        <div class="sticker yellow">BROADCAST SYSTEM</div>
-                        <div class="cell-header">
-                            <span class="header-icon">📡</span>
-                            GLOBAL MESSAGE
+                <div id="adm-broadcast" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-beam-1x13.png" class="header-icon" alt="">
+                            <span>Broadcast System</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="broadcast-box">
-                            <label class="broadcast-label">SELECT EMOTION:</label>
-                            <div class="sprite-selector" id="sprite-selector">
-                                <div class="sprite-option active" data-sprite="normal">
-                                    <img src="assets/sprites/normal.png" alt="Normal" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😐</text></svg>'">
-                                    <span>Normal</span>
+                        <div class="window-content broadcast-content">
+                            <div class="broadcast-section">
+                                <label class="section-label">SELECT EMOTION:</label>
+                                <div class="sprite-grid" id="sprite-selector">
+                                    <div class="sprite-item active" data-sprite="normal"><img src="assets/sprites/normal.png" alt="Normal"><span>Normal</span></div>
+                                    <div class="sprite-item" data-sprite="happy"><img src="assets/sprites/happy.png" alt="Happy"><span>Happy</span></div>
+                                    <div class="sprite-item" data-sprite="sad"><img src="assets/sprites/sad.png" alt="Sad"><span>Sad</span></div>
+                                    <div class="sprite-item" data-sprite="annoyed"><img src="assets/sprites/annoyed.png" alt="Annoyed"><span>Annoyed</span></div>
+                                    <div class="sprite-item" data-sprite="bug"><img src="assets/sprites/bug.png" alt="Bug"><span>Bug</span></div>
+                                    <div class="sprite-item" data-sprite="dizzy"><img src="assets/sprites/dizzy.png" alt="Dizzy"><span>Dizzy</span></div>
+                                    <div class="sprite-item" data-sprite="hollow"><img src="assets/sprites/hollow.png" alt="Hollow"><span>Hollow</span></div>
+                                    <div class="sprite-item" data-sprite="panic"><img src="assets/sprites/panic.png" alt="Panic"><span>Panic</span></div>
+                                    <div class="sprite-item" data-sprite="sleeping"><img src="assets/sprites/sleeping.png" alt="Sleeping"><span>Sleeping</span></div>
+                                    <div class="sprite-item" data-sprite="smug"><img src="assets/sprites/smug.png" alt="Smug"><span>Smug</span></div>
+                                    <div class="sprite-item" data-sprite="stare"><img src="assets/sprites/stare.png" alt="Stare"><span>Stare</span></div>
+                                    <div class="sprite-item" data-sprite="suspicious"><img src="assets/sprites/suspicious.png" alt="Suspicious"><span>Suspicious</span></div>
+                                    <div class="sprite-item" data-sprite="werror"><img src="assets/sprites/werror.png" alt="W.Error"><span>W.Error</span></div>
                                 </div>
-                                <div class="sprite-option" data-sprite="happy">
-                                    <img src="assets/sprites/happy.png" alt="Happy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😊</text></svg>'">
-                                    <span>Happy</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="sad">
-                                    <img src="assets/sprites/sad.png" alt="Sad" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😢</text></svg>'">
-                                    <span>Sad</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="annoyed">
-                                    <img src="assets/sprites/annoyed.png" alt="Annoyed" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😤</text></svg>'">
-                                    <span>Annoyed</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="bug">
-                                    <img src="assets/sprites/bug.png" alt="Bug" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>🐛</text></svg>'">
-                                    <span>Bug</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="dizzy">
-                                    <img src="assets/sprites/dizzy.png" alt="Dizzy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😵</text></svg>'">
-                                    <span>Dizzy</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="hollow">
-                                    <img src="assets/sprites/hollow.png" alt="Hollow" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>👻</text></svg>'">
-                                    <span>Hollow</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="panic">
-                                    <img src="assets/sprites/panic.png" alt="Panic" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😱</text></svg>'">
-                                    <span>Panic</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="sleeping">
-                                    <img src="assets/sprites/sleeping.png" alt="Sleeping" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😴</text></svg>'">
-                                    <span>Sleeping</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="smug">
-                                    <img src="assets/sprites/smug.png" alt="Smug" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>😏</text></svg>'">
-                                    <span>Smug</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="stare">
-                                    <img src="assets/sprites/stare.png" alt="Stare" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>👁️</text></svg>'">
-                                    <span>Stare</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="suspicious">
-                                    <img src="assets/sprites/suspicious.png" alt="Suspicious" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>🤨</text></svg>'">
-                                    <span>Suspicious</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="werror">
-                                    <img src="assets/sprites/werror.png" alt="W.Error" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 50 50%22><rect fill=%22%23333%22 width=%2250%22 height=%2250%22/><text x=%2225%22 y=%2230%22 text-anchor=%22middle%22 fill=%22%23fff%22 font-size=%2210%22>⚠️</text></svg>'">
-                                    <span>W.Error</span>
-                                </div>
+                                <input type="hidden" id="sprite-select" value="normal">
                             </div>
-                            <input type="hidden" id="sprite-select" value="normal">
-                            <textarea id="broadcast-text" placeholder="TYPE YOUR MESSAGE HERE..."></textarea>
-                            <button id="send-broadcast" onclick="sendBroadcast()">
-                                <span class="btn-icon">📡</span>
+                            <div class="broadcast-section">
+                                <label class="section-label">MESSAGE:</label>
+                                <textarea id="broadcast-text" class="newton-textarea" placeholder="Type message..."></textarea>
+                            </div>
+                            <button class="newton-button" onclick="sendBroadcast()">
+                                <img src="assets/button-send-to-28x17.png" alt="">
                                 TRANSMIT
                             </button>
                         </div>
                     </div>
-                    <div class="grid-cell broadcast-status-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">◉</span>
-                            STATUS
+                </div>
+                <div id="adm-monitoring" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-look-10x1.png" class="header-icon" alt="">
+                            <span>Personnel Monitoring</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="status-box">
-                            <div class="status-indicator ready">
-                                <span class="status-dot"></span>
-                                READY
-                            </div>
-                            <div class="status-text">SYSTEM READY FOR INPUT.</div>
-                            <div class="broadcast-history">
-                                <div class="history-header">RECENT BROADCASTS</div>
-                                <div id="broadcast-history-list"></div>
+                        <div class="window-content monitoring-content">
+                            <div class="monitoring-list" id="personnel-list"></div>
+                            <div class="monitoring-editor hidden" id="personnel-editor">
+                                <div class="editor-header">Edit Personnel</div>
+                                <div class="editor-form">
+                                    <input type="hidden" id="editor-id">
+                                    <div class="form-row">
+                                        <label>Photo:</label>
+                                        <div class="photo-upload">
+                                            <img id="editor-photo" src="assets/icon-small-person-16x15.png" alt="">
+                                            <input type="file" id="photo-input" accept="image/*" hidden onchange="handlePhotoUpload(event)">
+                                            <button class="newton-button-small" onclick="document.getElementById('photo-input').click()">Change</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <label>Name:</label>
+                                        <input type="text" id="editor-name" class="newton-input">
+                                    </div>
+                                    <div class="form-row">
+                                        <label>Level:</label>
+                                        <select id="editor-level" class="newton-select">
+                                            <option value="1">Level 1 - Trainee</option>
+                                            <option value="2">Level 2 - Operator</option>
+                                            <option value="3">Level 3 - Senior</option>
+                                            <option value="4">Level 4 - Supervisor</option>
+                                            <option value="5">Level 5 - Admin</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-row">
+                                        <label>Department:</label>
+                                        <select id="editor-dept" class="newton-select">
+                                            <option value="operations">Operations</option>
+                                            <option value="research">Research</option>
+                                            <option value="containment">Containment</option>
+                                            <option value="security">Security</option>
+                                            <option value="administration">Administration</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-actions">
+                                        <button class="newton-button" onclick="savePersonnel()">Save</button>
+                                        <button class="newton-button" onclick="closeEditor()">Cancel</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Admin: Monitoring -->
-            <div id="adm-monitoring" class="tab-content">
-                <div class="content-grid monitoring-grid">
-                    <div class="grid-cell monitoring-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">📊</span>
-                            ACTIVE LOGS
+                <div id="adm-alarms" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-alarm-17x10.png" class="header-icon" alt="">
+                            <span>Alarm Control</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="terminal-box">
-                            <div class="terminal-content" id="monitoring-logs">
-                                <div class="log-line">> SYSTEM MONITORING INITIATED...</div>
-                                <div class="log-line">> CHECKING DATA SWALLOW INTEGRITY...</div>
-                                <div class="log-line">> UPEO CONNECTION: STABLE</div>
-                                <div class="log-line success">> STATUS: ✓ GREEN</div>
-                                <div class="log-line">> ALL SYSTEMS OPERATIONAL</div>
+                        <div class="window-content alarms-content">
+                            <div class="alarm-status-display">
+                                <span>CURRENT STATUS:</span>
+                                <span id="current-alarm-status">GREEN</span>
                             </div>
-                            <div class="terminal-cursor">_</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin: Alarms -->
-            <div id="adm-alarms" class="tab-content">
-                <div class="content-grid alarms-grid">
-                    <div class="grid-cell alarms-cell">
-                        <div class="sticker red">ALERTS</div>
-                        <div class="alarms-box">
-                            <div class="alarm-status" id="alarm-status">
-                                <div class="alarm-icon">🔔</div>
-                                <div class="alarm-text">NO ACTIVE ALARMS</div>
+                            <div class="alarm-buttons">
+                                <button class="alarm-btn green" onclick="setAlarm('green')"><span class="alarm-indicator"></span>GREEN</button>
+                                <button class="alarm-btn blue" onclick="setAlarm('blue')"><span class="alarm-indicator"></span>BLUE</button>
+                                <button class="alarm-btn red" onclick="setAlarm('red')"><span class="alarm-indicator"></span>RED</button>
+                                <button class="alarm-btn gamma" onclick="setAlarm('gamma')"><span class="alarm-indicator"></span>GAMMA</button>
+                                <button class="alarm-btn epsilon" onclick="setAlarm('epsilon')"><span class="alarm-indicator"></span>EPSILON</button>
+                                <button class="alarm-btn poweroff" onclick="setAlarm('poweroff')"><span class="alarm-indicator"></span>POWER OFF</button>
                             </div>
-                            <div class="alarm-list" id="alarm-list"></div>
+                            <div class="alarm-log">
+                                <div class="log-header">Alarm Log</div>
+                                <div class="log-content" id="alarm-log"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Admin: Tickets -->
-            <div id="adm-tickets" class="tab-content">
-                <div class="content-grid tickets-grid">
-                    <div class="grid-cell tickets-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">🎫</span>
-                            PENDING APPROVALS
+                <div id="adm-tickets" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-task-14x11.png" class="header-icon" alt="">
+                            <span>Tickets</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="tickets-box">
-                            <div id="pending-list"></div>
-                        </div>
-                    </div>
-                    <div class="grid-cell active-chats-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">💬</span>
-                            ACTIVE SUPPORT CHATS
-                        </div>
-                        <div class="active-chats-box">
-                            <div id="active-chats-list"></div>
+                        <div class="window-content tickets-content">
+                            <div class="tickets-section">
+                                <div class="section-title">Pending Approvals</div>
+                                <div class="tickets-list" id="pending-list"></div>
+                            </div>
+                            <div class="tickets-section">
+                                <div class="section-title">Support Requests</div>
+                                <div class="tickets-list" id="active-chats-list"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Admin: Radio -->
-            <div id="adm-radio" class="tab-content">
-                <div class="content-grid radio-grid">
-                    <div class="grid-cell radio-main-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">📻</span>
-                            GLOBAL RADIO
+                <div id="adm-radio" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-speaker-11x11.png" class="header-icon" alt="">
+                            <span>Global Radio</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="radio-box">
+                        <div class="window-content radio-content">
                             <div class="radio-display">
-                                <div class="frequency-display">
-                                    <span class="freq-label">FREQ</span>
-                                    <span class="freq-value">99.4</span>
-                                    <span class="freq-unit">MHz</span>
-                                </div>
-                                <div class="signal-indicator">
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                </div>
+                                <span class="freq-label">FREQ:</span>
+                                <span class="freq-value">99.4 MHz</span>
+                                <span class="online-count" id="online-count">0 online</span>
                             </div>
                             <div class="radio-messages" id="radio-messages"></div>
-                            <div class="radio-input-area">
-                                <input type="text" id="radio-input" placeholder="Type message..." maxlength="200">
-                                <button onclick="sendRadioMessage()" class="radio-send-btn">
-                                    <span>SEND</span>
-                                </button>
+                            <div class="radio-input">
+                                <input type="text" id="radio-input" class="newton-input" placeholder="Type message...">
+                                <button class="newton-button" onclick="sendRadioMessage()">Send</button>
                             </div>
                         </div>
                     </div>
-                    <div class="grid-cell radio-users-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">👥</span>
-                            ONLINE USERS
-                        </div>
-                        <div class="online-users-box">
-                            <div id="online-users-list"></div>
-                        </div>
-                    </div>
                 </div>
-            </div>
-
-            <!-- Admin: Credentials -->
-            <div id="adm-credentials" class="tab-content">
-                <div class="content-grid credentials-grid">
-                    <div class="grid-cell credentials-cell">
-                        <div class="cell-header gold">
-                            <span class="header-icon">🔑</span>
-                            ADMIN ID
+                <div id="adm-credentials" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-person-16x15.png" class="header-icon" alt="">
+                            <span>Credentials</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="credentials-box">
-                            <div class="credential-card">
-                                <div class="card-header">⭐ ACCESS CARD: GOLD</div>
-                                <div class="card-body">
-                                    <div class="card-field">
-                                        <span class="field-label">NAME</span>
-                                        <span class="field-value">OBUNTO</span>
-                                    </div>
-                                    <div class="card-field">
-                                        <span class="field-label">ID</span>
-                                        <span class="field-value">118107921024376</span>
-                                    </div>
-                                    <div class="card-field">
-                                        <span class="field-label">CLEARANCE</span>
-                                        <span class="field-value gold">LEVEL 5</span>
-                                    </div>
-                                </div>
+                        <div class="window-content credentials-content">
+                            <div class="credential-card admin-card">
+                                <div class="card-badge">ADMIN</div>
+                                <div class="card-name">OBUNTO</div>
+                                <div class="card-id">118107921024376</div>
+                                <div class="card-level">Level 5</div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="grid-cell all-users-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">👥</span>
-                            ALL OPERATORS
-                        </div>
-                        <div class="all-users-box">
-                            <div id="all-users-list"></div>
+                            <div class="users-list" id="all-users-list"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- User: Profile -->
-            <div id="usr-profile" class="tab-content">
-                <div class="content-grid profile-grid">
-                    <div class="grid-cell profile-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">👤</span>
-                            USER PROFILE
+                <div id="usr-profile" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-person-9x12.png" class="header-icon" alt="">
+                            <span>Profile</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="profile-box">
+                        <div class="window-content profile-content">
                             <div class="profile-card">
-                                <div class="profile-avatar">◉</div>
+                                <img id="profile-photo" src="assets/icon-small-person-16x15.png" class="profile-photo" alt="">
                                 <div class="profile-info">
                                     <div class="profile-name" id="profile-name">OPERATOR</div>
                                     <div class="profile-id" id="profile-id">ID: --------</div>
-                                    <div class="profile-status">STATUS: ACTIVE</div>
+                                    <div class="profile-dept" id="profile-dept">Department: ---</div>
+                                    <div class="profile-level" id="profile-level">Level: ---</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- User: Workstation -->
-            <div id="usr-workstation" class="tab-content">
-                <div class="content-grid workstation-grid">
-                    <div class="grid-cell workstation-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">💼</span>
-                            ASSIGNMENTS
+                <div id="usr-workstation" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-folder-15x11.png" class="header-icon" alt="">
+                            <span>Workstation</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="workstation-box">
-                            <div class="no-assignments">
-                                <div class="empty-icon">📋</div>
-                                <div class="empty-text">NO ACTIVE ASSIGNMENTS</div>
-                                <div class="empty-subtext">Check back later for new tasks.</div>
+                        <div class="window-content">
+                            <div class="empty-state">
+                                <img src="assets/icon-large-notes-1x22.png" alt="">
+                                <p>NO ACTIVE ASSIGNMENTS</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- User: Radio -->
-            <div id="usr-radio" class="tab-content">
-                <div class="content-grid radio-grid">
-                    <div class="grid-cell radio-main-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">📻</span>
-                            GLOBAL RADIO
+                <div id="usr-radio" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-small-speaker-11x11.png" class="header-icon" alt="">
+                            <span>Global Radio</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="radio-box">
+                        <div class="window-content radio-content">
                             <div class="radio-display">
-                                <div class="frequency-display">
-                                    <span class="freq-label">FREQ</span>
-                                    <span class="freq-value">99.4</span>
-                                    <span class="freq-unit">MHz</span>
-                                </div>
-                                <div class="signal-indicator">
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                    <span class="signal-bar"></span>
-                                </div>
+                                <span class="freq-label">FREQ:</span>
+                                <span class="freq-value">99.4 MHz</span>
+                                <span class="online-count" id="usr-online-count">0 online</span>
                             </div>
                             <div class="radio-messages" id="usr-radio-messages"></div>
-                            <div class="radio-input-area">
-                                <input type="text" id="usr-radio-input" placeholder="Type message..." maxlength="200">
-                                <button onclick="sendRadioMessage(true)" class="radio-send-btn">
-                                    <span>SEND</span>
-                                </button>
+                            <div class="radio-input">
+                                <input type="text" id="usr-radio-input" class="newton-input" placeholder="Type message...">
+                                <button class="newton-button" onclick="sendRadioMessage(true)">Send</button>
                             </div>
-                        </div>
-                    </div>
-                    <div class="grid-cell radio-users-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">👥</span>
-                            ONLINE USERS
-                        </div>
-                        <div class="online-users-box">
-                            <div id="usr-online-users-list"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- User: Help Request -->
-            <div id="usr-help" class="tab-content">
-                <div class="content-grid help-grid">
-                    <div class="grid-cell help-cell">
-                        <div class="sticker yellow">SUPPORT</div>
-                        <div class="cell-header">
-                            <span class="header-icon">🆘</span>
-                            REQUEST HELP
+                <div id="usr-help" class="tab-content">
+                    <div class="newton-window full">
+                        <div class="window-header">
+                            <img src="assets/icon-large-help-highlighted-30x23.png" class="header-icon" alt="">
+                            <span>Help Request</span>
+                            <img src="assets/button-close-17x.png" class="header-close" alt="">
                         </div>
-                        <div class="help-box">
-                            <div class="help-status" id="help-status">
-                                <div class="help-icon">💬</div>
-                                <div class="help-text">Need assistance? Request a support chat with Administrator.</div>
+                        <div class="window-content help-content">
+                            <div class="help-form" id="help-form">
+                                <p>Need assistance? Request support from Administrator.</p>
+                                <textarea id="help-reason" class="newton-textarea" placeholder="Describe your issue..."></textarea>
+                                <button class="newton-button" onclick="requestHelp()" id="help-request-btn">Request Support</button>
                             </div>
-                            <textarea id="help-reason" placeholder="Describe your issue..."></textarea>
-                            <button onclick="requestHelp()" class="help-btn" id="help-request-btn">
-                                <span class="btn-icon">📨</span>
-                                REQUEST SUPPORT
-                            </button>
                             <div class="help-pending hidden" id="help-pending">
-                                <div class="pending-icon">⏳</div>
-                                <div class="pending-text">Waiting for administrator approval...</div>
+                                <p>Waiting for administrator approval...</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <!-- User: Suggestions -->
-            <div id="usr-suggestions" class="tab-content">
-                <div class="content-grid suggestions-grid">
-                    <div class="grid-cell suggestions-cell">
-                        <div class="cell-header">
-                            <span class="header-icon">💡</span>
-                            SUGGESTIONS
-                        </div>
-                        <div class="suggestions-box">
-                            <textarea id="suggestion-text" placeholder="Share your ideas and suggestions..."></textarea>
-                            <button onclick="sendSuggestion()" class="suggestion-btn">
-                                <span class="btn-icon">💡</span>
-                                SUBMIT SUGGESTION
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <div id="broadcast-notification" class="broadcast-popup hidden">
+        <div class="broadcast-container">
+            <div class="broadcast-bubble">
+                <div class="bubble-content" id="notif-text"></div>
+            </div>
+            <div class="broadcast-mascot">
+                <img id="notif-sprite" src="assets/sprites/normal.png" alt="Obunto">
+                <div class="mascot-label">OBUNTO</div>
             </div>
         </div>
     </div>
 
-    <!-- Admin Panel Modal -->
-    <div id="admin-panel" class="admin-window hidden">
-        <div class="window-titlebar">
-            <span>⚙ ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">×</div>
-        </div>
-        <div class="window-body">
-            <div class="admin-section">
-                <h3>PENDING ACCOUNTS</h3>
-                <div id="pending-list-modal"></div>
+    <div id="chat-window" class="newton-window chat-window hidden">
+        <div class="window-header">
+            <img src="assets/icon-small-beam-card-20x10.png" class="header-icon" alt="">
+            <span class="chat-title">Support Chat</span>
+            <div class="chat-controls">
+                <button class="control-btn" onclick="setChatStatus('wait')" title="Wait">
+                    <img src="assets/icon-small-mode-8x10.png" alt="">
+                </button>
+                <button class="control-btn" onclick="endChat()" title="Close">
+                    <img src="assets/button-close-17x.png" alt="">
+                </button>
             </div>
         </div>
-    </div>
-
-    <!-- Admin FAB -->
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
-
-    <!-- Broadcast Notification -->
-    <div id="broadcast-notification" class="notification hidden">
-        <div class="bubble">
-            <div class="notification-text" id="notif-text"></div>
-            <div class="bubble-arrow"></div>
-        </div>
-        <div class="mascot-container">
-            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
-            <div class="mascot-name">OBUNTO</div>
-        </div>
-    </div>
-
-    <!-- Chat Window -->
-    <div id="chat-window" class="chat-window hidden">
-        <div class="chat-titlebar">
-            <span class="chat-title">💬 SUPPORT CHAT</span>
-            <div class="chat-actions">
-                <button class="chat-action-btn wait-btn" onclick="setChatStatus('wait')" title="Set to Wait">⏸ WAIT</button>
-                <button class="chat-action-btn leave-btn" onclick="endChat()" title="End Chat">✕ LEAVE</button>
-            </div>
-        </div>
-        <div class="chat-body">
+        <div class="window-content chat-content">
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
                 <input type="file" id="chat-image-input" accept="image/*" hidden onchange="handleImageUpload(event)">
-                <button class="chat-attach-btn" onclick="document.getElementById('chat-image-input').click()">📎</button>
-                <input type="text" id="chat-input" placeholder="Type a message...">
-                <button class="chat-send-btn" onclick="sendChatMessage()">➤</button>
+                <button class="newton-button-small" onclick="document.getElementById('chat-image-input').click()">
+                    <img src="assets/icon-small-sketch-15x8.png" alt="">
+                </button>
+                <input type="text" id="chat-input" class="newton-input" placeholder="Type message...">
+                <button class="newton-button-small" onclick="sendChatMessage()">Send</button>
             </div>
         </div>
+    </div>
+
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">
+        <img src="assets/icon-large-preferences-19x19.png" alt="">
     </div>
 
     <script src="js/script.js"></script>
