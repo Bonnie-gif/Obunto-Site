@@ -1,6 +1,6 @@
 let currentUser = null;
 const ADMIN_ID = '118107921024376';
-let lastBroadcastTime = Date.now();
+let lastBroadcastTime = 0;
 
 const storage = {
     async get(key, shared = false) {
@@ -131,7 +131,6 @@ function closeAdmin() {
 function goToHome() {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
     document.getElementById('view-home').classList.add('active');
 }
 
@@ -139,8 +138,7 @@ async function loadPending(elementId) {
     try {
         const data = await storage.get('arcs_pending');
         const pending = data ? JSON.parse(data.value) : [];
-        
-        const list = document.getElementById(elementId) || document.getElementById('pending-list-modal');
+        const list = document.getElementById(elementId);
         if (!list) return;
 
         list.innerHTML = '';
@@ -203,13 +201,15 @@ async function sendBroadcast() {
     
     playSound('sfx-sent');
     document.getElementById('broadcast-text').value = '';
-    
     showBroadcast(broadcast);
 }
 
 function showBroadcast(data) {
     const spriteImg = document.getElementById('notif-sprite');
-    spriteImg.src = `sprites/${data.sprite}.png`;
+    spriteImg.src = `assets/sprites/${data.sprite}.png`;
+    spriteImg.onerror = () => {
+        spriteImg.src = 'assets/sprites/normal.png';
+    };
     
     document.getElementById('notif-text').textContent = data.text;
     document.getElementById('broadcast-notification').classList.remove('hidden');
