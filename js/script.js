@@ -1,6 +1,5 @@
 let currentUser = null;
 const ADMIN_ID = '118107921024376';
-let lastBroadcastTime = 0;
 
 const storage = {
     async get(key, shared = false) {
@@ -207,12 +206,10 @@ async function sendBroadcast() {
         return;
     }
     
-    const broadcast = { text, sprite, timestamp: Date.now() };
-    await storage.set('arcs_broadcast', JSON.stringify(broadcast), true);
-    
     playSound('sfx-sent');
     document.getElementById('broadcast-text').value = '';
-    showBroadcast(broadcast);
+    
+    showBroadcast({ text, sprite });
 }
 
 function showBroadcast(data) {
@@ -230,24 +227,6 @@ function showBroadcast(data) {
     setTimeout(() => {
         document.getElementById('broadcast-notification').classList.add('hidden');
     }, 8000);
-}
-
-async function checkBroadcasts() {
-    if (!currentUser) return;
-
-    try {
-        const data = await storage.get('arcs_broadcast', true);
-        if (data) {
-            const broadcast = JSON.parse(data.value);
-            
-            if (broadcast.timestamp > lastBroadcastTime) {
-                lastBroadcastTime = broadcast.timestamp;
-                showBroadcast(broadcast);
-            }
-        }
-    } catch (e) {
-        console.error('Check broadcasts error:', e);
-    }
 }
 
 function switchTab(targetId) {
@@ -285,5 +264,4 @@ async function init() {
 window.addEventListener('load', async () => {
     await init();
     setTimeout(startLoading, 1000);
-    setInterval(checkBroadcasts, 2000);
 });
