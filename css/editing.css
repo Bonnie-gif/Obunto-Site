@@ -3,68 +3,100 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    background: var(--color-bg-primary, #E0D8C0);
+    background: linear-gradient(135deg, var(--color-bg-primary, #E0D8C0) 0%, var(--color-bg-secondary, #C0B0A0) 100%);
+    animation: fadeIn 0.5s ease;
 }
 
 .editing-toolbar {
-    padding: 16px 20px;
-    background: var(--color-bg-secondary, #C0B0A0);
-    border-bottom: 3px solid var(--color-border, #808080);
+    padding: var(--spacing-lg, 24px) var(--spacing-xl, 32px);
+    background: linear-gradient(135deg, var(--color-bg-secondary, #C0B0A0) 0%, var(--color-accent, #A0A080) 100%);
+    border-bottom: 4px solid var(--color-border, #808080);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .toolbar-title {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 24px;
-    font-weight: 700;
+    font-size: var(--font-size-huge, 42px);
+    font-weight: 900;
     color: var(--color-text-primary, #000);
-    letter-spacing: 2px;
+    letter-spacing: 4px;
     text-transform: uppercase;
+    text-shadow: 3px 3px 0 rgba(255,255,255,0.2);
 }
 
 .toolbar-actions {
     display: flex;
-    gap: 10px;
+    gap: var(--spacing-md, 16px);
 }
 
 .toolbar-btn {
-    padding: 10px 20px;
-    border: 2px solid var(--color-border, #808080);
-    background: var(--color-bg-primary, #E0D8C0);
+    padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
+    border: 3px solid var(--color-border, #808080);
+    border-radius: var(--border-radius-md, 8px);
+    background: linear-gradient(135deg, var(--color-bg-primary, #E0D8C0) 0%, var(--color-bg-secondary, #C0B0A0) 100%);
     color: var(--color-text-primary, #000);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--font-size-md, 13px);
+    font-weight: 700;
     cursor: pointer;
     letter-spacing: 1px;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+.toolbar-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
 }
 
 .toolbar-btn:hover {
-    background: var(--color-warning, #D4C5A9);
-    transform: scale(1.05);
+    background: linear-gradient(135deg, var(--color-warning, #D4C5A9), var(--color-accent, #A0A080) 100%);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-color: var(--color-text-primary, #000);
+}
+
+.toolbar-btn:active::before {
+    width: 200px;
+    height: 200px;
 }
 
 .toolbar-btn.primary {
-    background: var(--color-accent, #A0A080);
-    border-width: 3px;
+    background: linear-gradient(135deg, var(--color-success, #90A080) 0%, var(--color-accent, #A0A080) 100%);
+    border-width: 4px;
+    font-size: var(--font-size-lg, 16px);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
 }
 
 .toolbar-btn.primary:hover {
-    background: var(--color-success, #90A080);
+    background: linear-gradient(135deg, var(--color-accent, #A0A080), var(--color-gold, #FFD700) 100%);
+    box-shadow: 0 10px 24px rgba(144, 160, 128, 0.3);
 }
 
 .editing-canvas {
     flex: 1;
-    background: var(--color-bg-primary, #E0D8C0);
+    background: linear-gradient(135deg, var(--color-bg-primary, #E0D8C0) 0%, var(--color-warning, #D4C5A9) 100%);
     position: relative;
-    overflow: hidden;
-    border: 2px dashed var(--color-border, #808080);
-    margin: 20px;
+    overflow: auto;
+    border: 4px dashed var(--color-border, #808080);
+    border-radius: var(--border-radius-lg, 12px);
+    margin: var(--spacing-xl, 32px);
+    padding: var(--spacing-xl, 32px);
+    box-shadow: inset 0 4px 20px rgba(0,0,0,0.05);
 }
 
 .canvas-hint {
@@ -73,92 +105,97 @@
     left: 50%;
     transform: translate(-50%, -50%);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 18px;
-    color: rgba(0, 0, 0, 0.3);
-    letter-spacing: 1px;
+    font-size: var(--font-size-xl, 20px);
+    color: rgba(0, 0, 0, 0.25);
+    letter-spacing: 2px;
     text-align: center;
     pointer-events: none;
+    text-transform: uppercase;
+    font-weight: 700;
+    animation: pulse 3s ease-in-out infinite;
 }
 
-.canvas-element {
-    position: absolute;
-    background: var(--color-bg-secondary, #C0B0A0);
-    border: 3px solid var(--color-border, #808080);
-    padding: 16px;
+.tab-preview-item {
+    background: linear-gradient(135deg, var(--color-bg-secondary, #C0B0A0) 0%, var(--color-accent, #A0A080) 100%);
+    border: 4px solid var(--color-border, #808080);
+    border-radius: var(--border-radius-lg, 12px);
+    padding: var(--spacing-lg, 24px);
+    margin-bottom: var(--spacing-lg, 24px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
+    animation: slideInRight 0.4s ease;
     cursor: move;
-    transition: box-shadow 0.2s ease;
-    min-width: 150px;
-    max-width: 500px;
 }
 
-.canvas-element:hover {
+.tab-preview-item:hover {
+    transform: translateX(8px) translateY(-4px);
     border-color: var(--color-text-primary, #000);
-    box-shadow: 
-        inset 0 0 0 1px var(--color-text-primary, #000),
-        4px 4px 0 rgba(0, 0, 0, 0.2);
-}
-
-.element-content {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 13px;
-    color: var(--color-text-primary, #000);
-    line-height: 1.6;
-    word-wrap: break-word;
-    margin-bottom: 10px;
-    white-space: pre-wrap;
-}
-
-.element-image {
-    max-width: 100%;
-    max-height: 300px;
-    display: block;
-    margin-bottom: 10px;
-    border: 2px solid var(--color-border, #808080);
-}
-
-.element-tab-preview {
-    padding: 12px;
-    background: var(--color-accent, #A0A080);
-    border: 2px solid var(--color-text-primary, #000);
-    text-align: center;
-    margin-bottom: 10px;
+    box-shadow: 8px 8px 0 rgba(0,0,0,0.2);
 }
 
 .tab-preview-name {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--font-size-xl, 20px);
+    font-weight: 900;
     color: var(--color-text-primary, #000);
-    letter-spacing: 1px;
+    letter-spacing: 2px;
     text-transform: uppercase;
+    margin-bottom: var(--spacing-md, 16px);
+    text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
 }
 
-.element-controls {
+.tab-preview-actions {
     display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-    padding-top: 8px;
-    border-top: 2px dotted rgba(128, 128, 128, 0.4);
+    gap: var(--spacing-md, 16px);
+    padding-top: var(--spacing-md, 16px);
+    border-top: 3px dashed rgba(128, 128, 128, 0.3);
 }
 
-.element-controls button {
-    width: 28px;
-    height: 28px;
-    border: 2px solid var(--color-border, #808080);
+.tab-preview-actions button {
+    padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
+    border: 3px solid var(--color-border, #808080);
+    border-radius: var(--border-radius-sm, 4px);
     background: var(--color-error, #C0A090);
     color: var(--color-text-primary, #000);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 14px;
+    font-size: var(--font-size-sm, 11px);
     font-weight: 700;
     cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.element-controls button:hover {
+.tab-preview-actions button:hover {
     background: var(--color-text-primary, #000);
     color: var(--color-bg-primary, #E0D8C0);
-    transform: scale(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.25;
+    }
+    50% { 
+        transform: translate(-50%, -50%) scale(1.05);
+        opacity: 0.35;
+    }
 }
