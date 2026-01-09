@@ -46,11 +46,22 @@
 
 .alarm-item {
     background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
-    padding: 12px;
-    margin-bottom: 8px;
+    border: 3px solid var(--color-border, #808080);
+    padding: 16px;
+    margin-bottom: 12px;
     animation: slideInRight 0.3s ease;
     transition: all 0.2s ease;
+    position: relative;
+}
+
+.alarm-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: var(--alarm-color, #808080);
 }
 
 .alarm-item:hover {
@@ -58,26 +69,72 @@
     border-color: var(--color-text-secondary, #4A4A4A);
 }
 
+.alarm-item.green {
+    --alarm-color: #90A080;
+}
+
+.alarm-item.blue {
+    --alarm-color: #8090A0;
+}
+
+.alarm-item.red {
+    --alarm-color: #C08070;
+}
+
+.alarm-item.gamma {
+    --alarm-color: #D4A060;
+}
+
+.alarm-item.epsilon {
+    --alarm-color: #2A2A2A;
+}
+
+.alarm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
 .alarm-type {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 16px;
+    font-size: 18px;
     color: var(--color-text-primary, #000);
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.alarm-badge {
+    padding: 4px 12px;
+    border: 2px solid #000;
+    background: var(--alarm-color, #808080);
+    color: #000;
+    font-family: var(--font-primary, 'Roboto Mono', monospace);
+    font-size: 11px;
+    font-weight: 700;
     letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .alarm-details {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--color-text-secondary, #4A4A4A);
-    margin-bottom: 8px;
-    line-height: 1.5;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    padding-left: 12px;
+}
+
+.alarm-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 2px dotted rgba(128, 128, 128, 0.4);
 }
 
 .alarm-item button {
-    padding: 6px 14px;
+    padding: 8px 16px;
     border: 2px solid var(--color-border, #808080);
     background: var(--color-bg-secondary, #C0B0A0);
     color: var(--color-text-primary, #000);
@@ -88,6 +145,8 @@
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .alarm-item button::before {
@@ -111,4 +170,153 @@
 .alarm-item button:hover {
     background: var(--color-bg-primary, #E0D8C0);
     transform: scale(1.05);
+}
+
+body.theme-green {
+    --color-bg-primary: #E0D8C0;
+    --color-bg-secondary: #C0B0A0;
+    --color-accent: #A0A080;
+}
+
+body.theme-blue {
+    --color-bg-primary: #D4C8B8;
+    --color-bg-secondary: #B8A898;
+    --color-accent: #8090A0;
+}
+
+body.theme-blue #main-screen {
+    filter: hue-rotate(15deg) saturate(0.9);
+}
+
+body.theme-red {
+    --color-bg-primary: #D8C8C0;
+    --color-bg-secondary: #C0A898;
+    --color-accent: #A08880;
+}
+
+body.theme-red #main-screen {
+    filter: sepia(0.3) hue-rotate(-10deg) saturate(1.1);
+}
+
+body.theme-gamma {
+    --color-bg-primary: #E0D0A8;
+    --color-bg-secondary: #C8B088;
+    --color-accent: #D4A060;
+}
+
+body.theme-gamma #main-screen {
+    filter: sepia(0.4) saturate(1.3) hue-rotate(-20deg);
+}
+
+body.theme-gamma #usr-radio,
+body.theme-gamma #adm-credentials {
+    pointer-events: none;
+    opacity: 0.3;
+    position: relative;
+}
+
+body.theme-gamma #usr-radio::after,
+body.theme-gamma #adm-credentials::after {
+    content: 'RESTRICTED ACCESS';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    font-weight: 700;
+    color: #000;
+    background: rgba(212, 160, 96, 0.9);
+    padding: 20px 40px;
+    border: 4px solid #000;
+    letter-spacing: 2px;
+    z-index: 1000;
+}
+
+body.theme-epsilon {
+    --color-bg-primary: #2A2420;
+    --color-bg-secondary: #1A1410;
+    --color-accent: #3A3430;
+    --color-text-primary: #D0C8C0;
+    --color-border: #4A4440;
+}
+
+body.theme-epsilon #main-screen {
+    filter: contrast(1.2) brightness(0.9);
+    position: relative;
+}
+
+body.theme-epsilon #main-screen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.8) 2%, transparent 3%),
+        linear-gradient(0deg, transparent 0%, rgba(0,0,0,0.8) 2%, transparent 3%);
+    background-size: 100px 100px, 100px 100px;
+    pointer-events: none;
+    animation: glitchScan 0.1s infinite;
+    z-index: 9999;
+}
+
+body.theme-epsilon .glitch-block {
+    position: fixed;
+    background: #000;
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    animation: glitchAppear 4s infinite;
+}
+
+body.theme-epsilon .glitch-block:nth-child(1) {
+    width: 80px;
+    height: 60px;
+    top: 10%;
+    right: 5%;
+    animation-delay: 0.5s;
+}
+
+body.theme-epsilon .glitch-block:nth-child(2) {
+    width: 120px;
+    height: 90px;
+    bottom: 15%;
+    left: 8%;
+    animation-delay: 1.2s;
+}
+
+body.theme-epsilon .glitch-block:nth-child(3) {
+    width: 60px;
+    height: 40px;
+    top: 50%;
+    left: 20%;
+    animation-delay: 2s;
+}
+
+body.theme-epsilon .glitch-block:nth-child(4) {
+    width: 100px;
+    height: 70px;
+    bottom: 30%;
+    right: 15%;
+    animation-delay: 2.8s;
+}
+
+body.theme-epsilon .glitch-block:nth-child(5) {
+    width: 140px;
+    height: 50px;
+    top: 25%;
+    left: 40%;
+    animation-delay: 3.5s;
+}
+
+@keyframes glitchScan {
+    0% { opacity: 0.05; }
+    50% { opacity: 0.15; }
+    100% { opacity: 0.05; }
+}
+
+@keyframes glitchAppear {
+    0%, 95%, 100% { opacity: 0; }
+    96%, 98% { opacity: 1; }
 }

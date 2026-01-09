@@ -4,10 +4,10 @@
     right: 20px;
     z-index: 9999;
     background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
-    padding: 12px;
-    max-width: 420px;
-    min-width: 380px;
+    border: 4px solid #000;
+    padding: 16px;
+    max-width: 460px;
+    min-width: 420px;
     animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -29,84 +29,85 @@
 .notification::before {
     content: '';
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    border: 1px solid var(--color-border, #808080);
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    border: 2px solid #000;
     pointer-events: none;
 }
 
 .mascot-container {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 10px;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 12px;
 }
 
 .notification-sprite {
-    width: 70px;
-    height: 70px;
-    object-fit: contain;
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
     image-rendering: pixelated;
-    background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
-    padding: 6px;
+    background: #000;
+    border: 4px solid #000;
+    padding: 0;
     flex-shrink: 0;
 }
 
 .mascot-label {
     flex: 1;
     min-width: 0;
+    padding-top: 8px;
 }
 
 .mascot-label::before {
     content: 'OBUNTO';
     display: block;
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 28px;
+    font-size: 36px;
     font-weight: 700;
     color: #000;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     line-height: 1;
-    margin-bottom: 3px;
+    margin-bottom: 6px;
 }
 
 .mascot-label::after {
     content: 'SYSTEM ADMIN';
     display: block;
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 9px;
+    font-size: 11px;
     color: #4A4A4A;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     font-weight: 600;
     text-transform: uppercase;
 }
 
 .bubble {
     background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
-    padding: 10px 12px;
+    border: 3px solid #000;
+    padding: 14px 16px;
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
     color: #000;
     position: relative;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
 .notification-text {
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
 }
 
 .bubble::before {
     content: '> MESSAGE:';
     display: block;
-    font-size: 8px;
+    font-size: 10px;
     color: #808080;
-    margin-bottom: 6px;
-    border-bottom: 1px dotted #C0B0A0;
-    padding-bottom: 4px;
-    letter-spacing: 1px;
+    margin-bottom: 8px;
+    border-bottom: 2px dotted #C0B0A0;
+    padding-bottom: 6px;
+    letter-spacing: 1.5px;
     font-weight: 600;
 }
