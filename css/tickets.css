@@ -5,21 +5,15 @@
 }
 
 .ticket-item {
-    background: #000;
-    border: 3px solid #00ff00;
+    background: #E0D8C0;
+    border: 2px solid #808080;
     padding: 15px;
     margin-bottom: 10px;
-    box-shadow: 
-        inset 0 0 20px rgba(0, 255, 0, 0.1),
-        0 0 15px rgba(0, 255, 0, 0.3);
     transition: all 0.2s;
 }
 
 .ticket-item:hover {
-    border-color: #ffff00;
-    box-shadow: 
-        inset 0 0 30px rgba(255, 255, 0, 0.2),
-        0 0 25px rgba(255, 255, 0, 0.5);
+    border-color: #000;
 }
 
 .ticket-header {
@@ -28,59 +22,54 @@
     align-items: center;
     margin-bottom: 10px;
     padding-bottom: 8px;
-    border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.3);
 }
 
 .ticket-header span:first-child {
-    font-family: 'VT323', monospace;
+    font-family: sans-serif;
     font-size: 18px;
-    color: #ffff00;
+    color: #000;
     font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
 }
 
 .ticket-status {
     padding: 4px 12px;
-    border: 2px solid #00ff00;
-    background: #000;
-    color: #00ff00;
-    font-family: 'VT323', monospace;
+    border: 2px solid #808080;
+    background: #E0D8C0;
+    color: #000;
+    font-family: sans-serif;
     font-size: 14px;
     font-weight: bold;
     text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
 }
 
 .ticket-status.open {
-    border-color: #ffff00;
-    color: #ffff00;
-    text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
+    border-color: #000;
+    color: #000;
 }
 
 .ticket-status.responded {
-    border-color: #00ffff;
-    color: #00ffff;
-    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+    border-color: #000;
+    color: #000;
 }
 
 .ticket-status.closed {
-    border-color: #666;
-    color: #666;
+    border-color: #808080;
+    color: #808080;
 }
 
 .ticket-subject {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: sans-serif;
     font-size: 14px;
-    color: #00ff00;
+    color: #000;
     font-weight: bold;
     margin-bottom: 8px;
-    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
 }
 
 .ticket-desc {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: sans-serif;
     font-size: 12px;
-    color: #00ff00;
+    color: #000;
     line-height: 1.6;
     margin-bottom: 10px;
     opacity: 0.8;
@@ -90,15 +79,15 @@
     display: flex;
     gap: 8px;
     padding-top: 10px;
-    border-top: 2px solid rgba(0, 255, 0, 0.3);
+    border-top: 2px solid rgba(0, 0, 0, 0.3);
 }
 
 .ticket-actions button {
     padding: 8px 16px;
-    border: 3px solid #00ff00;
-    background: #00ff00;
+    border: 2px solid #808080;
+    background: #C0B0A0;
     color: #000;
-    font-family: 'VT323', monospace;
+    font-family: sans-serif;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -106,19 +95,17 @@
 }
 
 .ticket-actions button:hover {
-    background: #000;
-    color: #00ff00;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    background: #E0D8C0;
+    color: #000;
 }
 
 .create-ticket-btn {
     width: 100%;
     padding: 15px;
-    border: 4px solid #00ff00;
-    background: #00ff00;
+    border: 2px solid #808080;
+    background: #C0B0A0;
     color: #000;
-    font-family: 'VT323', monospace;
+    font-family: sans-serif;
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
@@ -128,12 +115,8 @@
 }
 
 .create-ticket-btn:hover {
-    background: #000;
-    color: #00ff00;
-    box-shadow: 
-        inset 0 0 20px rgba(0, 255, 0, 0.2),
-        0 0 30px rgba(0, 255, 0, 0.8);
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    background: #E0D8C0;
+    color: #000;
 }
 
 #pending-list {
@@ -142,24 +125,20 @@
 }
 
 .pending-item {
-    background: #000;
-    border: 3px solid #ffff00;
+    background: #E0D8C0;
+    border: 2px solid #808080;
     padding: 12px;
     margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 
-        inset 0 0 20px rgba(255, 255, 0, 0.1),
-        0 0 15px rgba(255, 255, 0, 0.5);
 }
 
 .pending-item span {
-    font-family: 'Share Tech Mono', monospace;
+    font-family: sans-serif;
     font-size: 14px;
-    color: #ffff00;
+    color: #000;
     font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 255, 0, 0.8);
 }
 
 .pending-item .actions {
@@ -169,8 +148,8 @@
 
 .pending-item button {
     padding: 8px 16px;
-    border: 3px solid;
-    font-family: 'VT323', monospace;
+    border: 2px solid;
+    font-family: sans-serif;
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
@@ -178,27 +157,23 @@
 }
 
 .pending-item button:first-of-type {
-    border-color: #00ff00;
-    background: #00ff00;
+    border-color: #808080;
+    background: #C0B0A0;
     color: #000;
 }
 
 .pending-item button:first-of-type:hover {
-    background: #000;
-    color: #00ff00;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+    background: #E0D8C0;
+    color: #000;
 }
 
 .pending-item button:last-of-type {
-    border-color: #ff0000;
-    background: #ff0000;
-    color: #fff;
+    border-color: #808080;
+    background: #C0B0A0;
+    color: #000;
 }
 
 .pending-item button:last-of-type:hover {
-    background: #000;
-    color: #ff0000;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
-    text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    background: #E0D8C0;
+    color: #000;
 }
