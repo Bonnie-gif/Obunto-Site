@@ -1,12 +1,22 @@
 let currentUser = null;
-let socket = null;
 const ADMIN_ID = '118107921024376';
-let currentRadioChannel = '99.4';
-let monitoringInterval = null;
-let monitoringLogs = [];
-let authToken = null;
 
-const sprites = ['normal', 'happy', 'sad', 'annoyed', 'bug', 'dizzy', 'hollow', 'panic', 'sleeping', 'smug', 'stare', 'suspicious', 'werror'];
+const storage = {
+    async get(key, shared = false) {
+        if (window.storage && typeof window.storage.get === 'function') {
+            return await window.storage.get(key, shared);
+        }
+        const value = localStorage.getItem(key);
+        return value ? { key, value, shared } : null;
+    },
+    async set(key, value, shared = false) {
+        if (window.storage && typeof window.storage.set === 'function') {
+            return await window.storage.set(key, value, shared);
+        }
+        localStorage.setItem(key, value);
+        return { key, value, shared };
+    }
+};
 
 function playSound(id) {
     const audio = document.getElementById(id);
@@ -23,21 +33,10 @@ function showScreen(id) {
 
 function showStatus(message, isError = false) {
     const status = document.getElementById('login-status');
-    if (!status) return;
     status.textContent = message;
     status.className = 'login-status show';
     if (isError) status.classList.add('error');
     setTimeout(() => status.classList.remove('show'), 3000);
-}
-
-function showGlobalError(message) {
-    const errorDiv = document.getElementById('error-notification');
-    const errorContent = document.getElementById('error-content');
-    if (!errorDiv || !errorContent) return;
-    errorContent.textContent = message;
-    errorDiv.classList.remove('hidden');
-    playSound('sfx-error');
-    setTimeout(() => errorDiv.classList.add('hidden'), 5000);
 }
 
 function startLoading() {
@@ -60,16 +59,8 @@ function startLoading() {
     }, 200);
 }
 
-function getDeviceInfo() {
-    return {
-        userAgent: navigator.userAgent,
-        platform: navigator.platform
-    };
-}
-
 async function handleLogin() {
     const userId = document.getElementById('operator-id').value.trim();
-    const password = document.getElementById('operator-password').value;
     
     if (!userId) {
         playSound('sfx-error');
@@ -78,72 +69,44 @@ async function handleLogin() {
     }
     
     try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                userId, 
-                password,
-                deviceInfo: getDeviceInfo()
-            })
-        });
+        await init();
         
-        const data = await response.json();
+        const usersData = await storage.get('arcs_users');
+        const users = usersData ? JSON.parse(usersData.value) : {};
         
-        if (!response.ok) {
-            if (response.status === 404) {
-                const createResponse = await fetch('/api/create-account', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId })
-                });
-                
-                const createData = await createResponse.json();
-                
-                if (createResponse.ok) {
-                    playSound('sfx-sent');
-                    showStatus('REQUEST SENT - AWAITING APPROVAL');
-                    document.getElementById('operator-id').value = '';
-                    document.getElementById('operator-password').value = '';
-                } else {
-                    playSound('sfx-denied');
-                    showStatus(createData.message, true);
-                }
-                return;
+        if (users[userId] && users[userId].approved) {
+            currentUser = users[userId];
+            playSound('sfx-poweron');
+            showScreen('main-screen');
+            
+            if (userId === ADMIN_ID) {
+                document.getElementById('admin-toggle').classList.remove('hidden');
+                document.getElementById('admin-tabs').classList.remove('hidden');
+                document.getElementById('personnel-tabs').classList.add('hidden');
+                loadPending('pending-list');
+            } else {
+                document.getElementById('admin-tabs').classList.add('hidden');
+                document.getElementById('personnel-tabs').classList.remove('hidden');
             }
             
-            playSound('sfx-denied');
-            showStatus(data.message, true);
-            return;
-        }
-        
-        currentUser = data.userData;
-        authToken = data.token;
-        playSound('sfx-poweron');
-        showScreen('main-screen');
-        
-        initSocket();
-        initSpriteSelector();
-        
-        if (currentUser.isAdmin) {
-            setupAdminTabs();
-            loadPending();
-            loadActiveUsers();
-            loadBannedUsers();
-            loadTickets();
-            loadAlarms();
-            initializeMonitoring();
-            startAutoMonitoring();
+            goToHome();
+            
+        } else if (!users[userId]) {
+            const pendingData = await storage.get('arcs_pending');
+            const pending = pendingData ? JSON.parse(pendingData.value) : [];
+            
+            if (!pending.includes(userId)) {
+                pending.push(userId);
+                await storage.set('arcs_pending', JSON.stringify(pending));
+            }
+            
+            playSound('sfx-sent');
+            showStatus('REQUEST SENT - AWAITING APPROVAL');
+            document.getElementById('operator-id').value = '';
         } else {
-            setupUserTabs();
-            loadMyTickets();
+            playSound('sfx-denied');
+            showStatus('ACCESS DENIED - AWAITING APPROVAL', true);
         }
-        
-        updateUserDisplay();
-        goToHome();
-        loadBroadcastHistory();
-        joinRadioChannel();
-        
     } catch (e) {
         console.error('Login error:', e);
         playSound('sfx-error');
@@ -151,236 +114,17 @@ async function handleLogin() {
     }
 }
 
-function setupAdminTabs() {
-    const adminTabs = document.getElementById('admin-tabs');
-    if (!adminTabs) return;
-    
-    adminTabs.innerHTML = '';
-    adminTabs.classList.remove('hidden');
-    document.getElementById('personnel-tabs').classList.add('hidden');
-    
-    const tabs = [
-        { id: 'adm-broadcast', label: 'BROADCAST' },
-        { id: 'adm-monitoring', label: 'MONITORING' },
-        { id: 'adm-alarms', label: 'ALARMS' },
-        { id: 'adm-tickets', label: 'TICKETS' },
-        { id: 'adm-radio', label: 'RADIO' },
-        { id: 'adm-credentials', label: 'CREDENTIALS' },
-        { id: 'adm-users', label: 'USERS' },
-        { id: 'adm-analytics', label: 'ANALYTICS' }
-    ];
-    
-    tabs.forEach(tab => {
-        const tabEl = document.createElement('div');
-        tabEl.className = 'tab';
-        tabEl.setAttribute('data-target', tab.id);
-        tabEl.textContent = tab.label;
-        tabEl.onclick = function() {
-            switchTab(tab.id);
-        };
-        adminTabs.appendChild(tabEl);
-    });
+document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleLogin();
+});
+
+function openAdmin() {
+    document.getElementById('admin-panel').classList.remove('hidden');
+    loadPending('pending-list-modal');
 }
 
-function setupUserTabs() {
-    const userTabs = document.getElementById('personnel-tabs');
-    if (!userTabs) return;
-    
-    userTabs.innerHTML = '';
-    userTabs.classList.remove('hidden');
-    document.getElementById('admin-tabs').classList.add('hidden');
-    
-    const tabs = [
-        { id: 'usr-profile', label: 'PROFILE' },
-        { id: 'usr-workstation', label: 'WORKSTATION' },
-        { id: 'usr-radio', label: 'RADIO' },
-        { id: 'usr-help', label: 'HELP REQUEST' }
-    ];
-    
-    tabs.forEach(tab => {
-        const tabEl = document.createElement('div');
-        tabEl.className = 'tab';
-        tabEl.setAttribute('data-target', tab.id);
-        tabEl.textContent = tab.label;
-        tabEl.onclick = function() {
-            switchTab(tab.id);
-        };
-        userTabs.appendChild(tabEl);
-    });
-}
-
-function initSpriteSelector() {
-    const selector = document.getElementById('sprite-selector');
-    if (!selector) return;
-    
-    selector.innerHTML = '';
-    sprites.forEach(sprite => {
-        const option = document.createElement('div');
-        option.className = 'sprite-option';
-        if (sprite === 'normal') option.classList.add('active');
-        option.setAttribute('data-sprite', sprite);
-        option.innerHTML = `
-            <img src="assets/sprites/${sprite}.png" alt="${sprite}">
-            <span>${sprite}</span>
-        `;
-        option.onclick = function() {
-            document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('active'));
-            option.classList.add('active');
-            document.getElementById('sprite-select').value = sprite;
-        };
-        selector.appendChild(option);
-    });
-}
-
-function updateUserDisplay() {
-    const userName = document.getElementById('current-user-name');
-    if (userName && currentUser) {
-        userName.textContent = currentUser.name.toUpperCase();
-    }
-}
-
-async function handleLogout() {
-    if (!currentUser) return;
-    
-    try {
-        await fetch('/api/logout', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ userId: currentUser.id })
-        });
-        
-        if (socket) socket.disconnect();
-        if (monitoringInterval) clearInterval(monitoringInterval);
-        
-        currentUser = null;
-        authToken = null;
-        showScreen('loading-screen');
-        document.getElementById('operator-id').value = '';
-        document.getElementById('operator-password').value = '';
-        
-        setTimeout(() => {
-            document.getElementById('login-panel').classList.remove('hidden');
-        }, 500);
-        
-    } catch (e) {
-        console.error('Logout error:', e);
-    }
-}
-
-function initSocket() {
-    if (typeof io === 'undefined') {
-        console.error('Socket.io not loaded');
-        return;
-    }
-    
-    socket = io();
-    
-    socket.on('connect', () => {
-        console.log('Socket connected');
-        if (currentUser) {
-            socket.emit('register', currentUser.id);
-        }
-    });
-    
-    socket.on('broadcast', (data) => {
-        showBroadcast(data);
-    });
-    
-    socket.on('chat_message', (message) => {
-        if (message.receiverId === currentUser.id || message.senderId === currentUser.id) {
-            renderChatMessage(message);
-        }
-    });
-    
-    socket.on('user_online', (data) => {
-        logMonitoring(`USER ONLINE: ${data.name}`);
-        if (currentUser && currentUser.isAdmin) {
-            loadActiveUsers();
-        }
-    });
-    
-    socket.on('user_offline', (userId) => {
-        logMonitoring(`USER OFFLINE: ${userId}`);
-        if (currentUser && currentUser.isAdmin) {
-            loadActiveUsers();
-        }
-    });
-    
-    socket.on('ticket_created', (ticket) => {
-        logMonitoring(`NEW TICKET: ${ticket.subject}`);
-        if (currentUser && currentUser.isAdmin) {
-            loadTickets();
-        }
-    });
-    
-    socket.on('ticket_updated', (ticket) => {
-        logMonitoring(`TICKET UPDATED: ${ticket.id}`);
-        loadTickets();
-        loadMyTickets();
-    });
-    
-    socket.on('alarm_triggered', (alarm) => {
-        playSound('sfx-error');
-        showGlobalError(`ALARM: ${alarm.details}`);
-        logMonitoring(`ALARM TRIGGERED: ${alarm.type}`);
-        loadAlarms();
-    });
-    
-    socket.on('alarm_dismissed', (alarmId) => {
-        logMonitoring(`ALARM DISMISSED: ${alarmId}`);
-        loadAlarms();
-    });
-    
-    socket.on('radio_message', (message) => {
-        renderRadioMessage(message);
-    });
-    
-    socket.on('radio_cleared', (frequency) => {
-        if (!frequency || frequency === currentRadioChannel) {
-            document.getElementById('radio-messages').innerHTML = '';
-            logMonitoring(`RADIO CLEARED: ${frequency || 'ALL'}`);
-        }
-    });
-    
-    socket.on('pending_update', (pending) => {
-        if (currentUser && currentUser.isAdmin) {
-            loadPending();
-        }
-    });
-    
-    socket.on('user_banned', (data) => {
-        logMonitoring(`USER BANNED: ${data.userId}`);
-        if (currentUser.id === data.userId) {
-            showGlobalError('YOU HAVE BEEN BANNED: ' + data.reason);
-            setTimeout(() => handleLogout(), 3000);
-        }
-        if (currentUser && currentUser.isAdmin) {
-            loadBannedUsers();
-            loadActiveUsers();
-        }
-    });
-    
-    socket.on('user_unbanned', (userId) => {
-        logMonitoring(`USER UNBANNED: ${userId}`);
-        if (currentUser && currentUser.isAdmin) {
-            loadBannedUsers();
-        }
-    });
-    
-    socket.on('profile_updated', (data) => {
-        logMonitoring(`PROFILE UPDATED: ${data.userId}`);
-        if (currentUser.id === data.userId) {
-            Object.assign(currentUser, data.updates);
-            updateUserDisplay();
-        }
-    });
-    
-    socket.on('error', (error) => {
-        showGlobalError(error.message);
-    });
+function closeAdmin() {
+    document.getElementById('admin-panel').classList.add('hidden');
 }
 
 function goToHome() {
@@ -389,116 +133,21 @@ function goToHome() {
     document.getElementById('view-home').classList.add('active');
 }
 
-function switchTab(targetId) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-    const targetTab = document.querySelector(`[data-target="${targetId}"]`);
-    if (targetTab) targetTab.classList.add('active');
-    
-    const content = document.getElementById(targetId);
-    if (content) content.classList.add('active');
-    
-    if (targetId === 'adm-monitoring') updateMonitoring();
-    else if (targetId === 'adm-tickets') loadTickets();
-    else if (targetId === 'adm-alarms') loadAlarms();
-    else if (targetId === 'adm-users') {
-        loadActiveUsers();
-        loadPending();
-        loadBannedUsers();
-    }
-    else if (targetId === 'adm-analytics') loadAnalytics();
-    else if (targetId === 'usr-workstation') loadMyTickets();
-    else if (targetId === 'usr-profile') loadProfile();
-    
-    logMonitoring(`TAB ACCESSED: ${targetId}`);
-}
-
-function initializeMonitoring() {
-    monitoringLogs = [
-        '> SYSTEM MONITORING INITIALIZED',
-        '> DATA SWALLOW STATUS: OK',
-        '> ARCS CONNECTION: STABLE',
-        '> STATUS: GREEN',
-        '> ALL SYSTEMS OPERATIONAL'
-    ];
-    updateMonitoringDisplay();
-    updateSystemStats();
-}
-
-function logMonitoring(message) {
-    const timestamp = new Date().toLocaleTimeString();
-    monitoringLogs.push(`[${timestamp}] ${message}`);
-    if (monitoringLogs.length > 100) {
-        monitoringLogs.shift();
-    }
-    updateMonitoringDisplay();
-}
-
-async function updateMonitoring() {
-    const target = document.getElementById('mon-target')?.value || 'all';
-    logMonitoring(`MONITORING REFRESH: ${target.toUpperCase()}`);
-    updateMonitoringDisplay();
-    await updateSystemStats();
-}
-
-function updateMonitoringDisplay() {
-    const logsElement = document.getElementById('monitoring-logs');
-    if (logsElement) {
-        logsElement.textContent = monitoringLogs.join('\n');
-        logsElement.scrollTop = logsElement.scrollHeight;
-    }
-}
-
-async function updateSystemStats() {
+async function loadPending(elementId) {
     try {
-        const response = await fetch('/api/system-status', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            const statsDiv = document.getElementById('system-stats');
-            if (statsDiv) {
-                statsDiv.innerHTML = `
-                    USERS: ${data.stats.onlineUsers}/${data.stats.totalUsers} | 
-                    PENDING: ${data.stats.pendingApprovals} | 
-                    TICKETS: ${data.stats.activeTickets} | 
-                    ALARMS: ${data.stats.activeAlarms}
-                `;
-            }
-        }
-    } catch (e) {
-        console.error('Stats error:', e);
-    }
-}
-
-function startAutoMonitoring() {
-    monitoringInterval = setInterval(() => {
-        if (currentUser && currentUser.isAdmin) {
-            updateSystemStats();
-        }
-    }, 30000);
-}
-
-async function loadPending() {
-    try {
-        const response = await fetch('/api/pending', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('pending-list');
+        const data = await storage.get('arcs_pending');
+        const pending = data ? JSON.parse(data.value) : [];
+        const list = document.getElementById(elementId);
         if (!list) return;
-        
+
         list.innerHTML = '';
         
-        if (data.pending.length === 0) {
+        if (pending.length === 0) {
             list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO PENDING REQUESTS</div>';
             return;
         }
         
-        data.pending.forEach(id => {
+        pending.forEach(id => {
             const item = document.createElement('div');
             item.className = 'pending-item';
             item.innerHTML = `
@@ -516,53 +165,37 @@ async function loadPending() {
 }
 
 async function approve(id) {
-    try {
-        const response = await fetch('/api/approve', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ userId: id, adminId: ADMIN_ID })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            playSound('sfx-blue');
-            showStatus(`USER APPROVED: ${id}`);
-            logMonitoring(`USER APPROVED: ${id} | TEMP PASSWORD: ${data.tempPassword}`);
-            loadPending();
-            loadActiveUsers();
-        } else {
-            showGlobalError(data.message);
-        }
-    } catch (e) {
-        console.error('Approve error:', e);
-        showGlobalError('Failed to approve user');
-    }
+    const users = await storage.get('arcs_users');
+    const data = users ? JSON.parse(users.value) : {};
+    data[id] = { id, approved: true };
+    await storage.set('arcs_users', JSON.stringify(data));
+    
+    const pending = await storage.get('arcs_pending');
+    const pend = pending ? JSON.parse(pending.value) : [];
+    await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+    
+    playSound('sfx-blue');
+    loadPending('pending-list');
+    loadPending('pending-list-modal');
 }
 
 async function deny(id) {
-    try {
-        const response = await fetch('/api/deny', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ userId: id, adminId: ADMIN_ID })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-denied');
-            logMonitoring(`USER DENIED: ${id}`);
-            loadPending();
-        }
-    } catch (e) {
-        console.error('Deny error:', e);
-    }
+    const pending = await storage.get('arcs_pending');
+    const pend = pending ? JSON.parse(pending.value) : [];
+    await storage.set('arcs_pending', JSON.stringify(pend.filter(p => p !== id)));
+    
+    playSound('sfx-denied');
+    loadPending('pending-list');
+    loadPending('pending-list-modal');
 }
+
+document.querySelectorAll('.sprite-option').forEach(option => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        document.getElementById('sprite-select').value = option.dataset.sprite;
+    });
+});
 
 async function sendBroadcast() {
     const text = document.getElementById('broadcast-text').value.trim();
@@ -570,37 +203,13 @@ async function sendBroadcast() {
     
     if (!text) {
         playSound('sfx-error');
-        showGlobalError('Please enter a message');
         return;
     }
     
-    try {
-        const response = await fetch('/api/broadcast', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ 
-                message: text, 
-                sprite, 
-                adminId: currentUser.id 
-            })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-sent');
-            document.getElementById('broadcast-text').value = '';
-            logMonitoring(`BROADCAST SENT: ${text.substring(0, 30)}...`);
-            loadBroadcastHistory();
-        } else {
-            const data = await response.json();
-            showGlobalError(data.message);
-        }
-    } catch (e) {
-        console.error('Broadcast error:', e);
-        showGlobalError('Failed to send broadcast');
-    }
+    playSound('sfx-sent');
+    document.getElementById('broadcast-text').value = '';
+    
+    showBroadcast({ text, sprite });
 }
 
 function showBroadcast(data) {
@@ -610,7 +219,7 @@ function showBroadcast(data) {
         spriteImg.src = 'assets/sprites/normal.png';
     };
     
-    document.getElementById('notif-text').textContent = data.message;
+    document.getElementById('notif-text').textContent = data.text;
     document.getElementById('broadcast-notification').classList.remove('hidden');
     
     playSound('sfx-newmessage');
@@ -620,807 +229,223 @@ function showBroadcast(data) {
     }, 8000);
 }
 
-async function loadBroadcastHistory() {
-    try {
-        const response = await fetch('/api/broadcasts', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const historyDiv = document.getElementById('broadcast-history');
-        if (!historyDiv) return;
-        
-        historyDiv.innerHTML = '';
-        
-        if (data.broadcasts.length === 0) {
-            historyDiv.innerHTML = '<div style="padding:10px;color:#666;">NO BROADCASTS</div>';
-            return;
-        }
-        
-        data.broadcasts.reverse().forEach(b => {
-            const time = new Date(b.timestamp).toLocaleTimeString();
-            const div = document.createElement('div');
-            div.style.padding = '5px';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.fontSize = '10px';
-            div.innerHTML = `<strong>${time}:</strong> ${b.message}`;
-            historyDiv.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load history error:', e);
-    }
+function switchTab(targetId) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(targetId).classList.add('active');
 }
 
-function joinRadioChannel() {
-    const channel = document.getElementById('radio-channel').value;
-    currentRadioChannel = channel;
-    
-    if (socket) {
-        socket.emit('join_radio', channel);
-        logMonitoring(`JOINED RADIO CHANNEL: ${channel}`);
-    }
-    
-    const freqDisplay = document.getElementById('radio-freq-display');
-    const currentChannel = document.getElementById('current-channel');
-    if (freqDisplay) freqDisplay.textContent = `CHANNEL ${channel}`;
-    if (currentChannel) currentChannel.textContent = channel;
-    
-    loadRadioMessages();
-}
-
-async function loadRadioMessages() {
-    try {
-        const response = await fetch(`/api/radio/messages?frequency=${currentRadioChannel}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const parentId = tab.parentElement.id;
+        document.querySelectorAll(`#${parentId} .tab`).forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
         
-        const messagesDiv = document.getElementById('radio-messages');
-        if (!messagesDiv) return;
-        
-        messagesDiv.innerHTML = '';
-        
-        if (data.messages && data.messages.length > 0) {
-            data.messages.forEach(msg => renderRadioMessage(msg));
-        }
-    } catch (e) {
-        console.error('Load radio messages error:', e);
-    }
-}
-
-function sendRadioMessage() {
-    const input = document.getElementById('radio-input');
-    const message = input?.value.trim();
-    
-    if (!message || !socket) return;
-    
-    socket.emit('radio_message', {
-        frequency: currentRadioChannel,
-        message,
-        userId: currentUser.id
+        const target = tab.getAttribute('data-target');
+        switchTab(target);
     });
-    
-    input.value = '';
-    logMonitoring(`RADIO MESSAGE SENT ON ${currentRadioChannel}`);
-}
+});
 
-function renderRadioMessage(message) {
-    const messagesDiv = document.getElementById('radio-messages');
-    if (!messagesDiv) return;
-    
-    const div = document.createElement('div');
-    div.className = 'radio-message';
-    
-    const time = new Date(message.timestamp).toLocaleTimeString();
-    div.innerHTML = `
-        <span class="radio-message-time">[${time}]</span>
-        <span class="radio-message-user">${message.userName}:</span>
-        <span class="radio-message-text">${message.message}</span>
-    `;
-    
-    messagesDiv.appendChild(div);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-async function clearRadioChannel() {
-    if (!currentUser || !currentUser.isAdmin) return;
-    
+async function init() {
     try {
-        const response = await fetch('/api/radio/clear', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ 
-                frequency: currentRadioChannel,
-                adminId: ADMIN_ID 
-            })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-blue');
-            logMonitoring(`RADIO CHANNEL ${currentRadioChannel} CLEARED`);
-        }
-    } catch (e) {
-        console.error('Clear radio error:', e);
-    }
-}
-
-async function loadActiveUsers() {
-    try {
-        const response = await fetch(`/api/users?adminId=${ADMIN_ID}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('active-users-list');
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        data.users.forEach(user => {
-            const div = document.createElement('div');
-            div.className = 'user-item';
-            div.innerHTML = `
-                <div class="user-info">
-                    <span class="user-name">${user.name}</span>
-                    <span class="user-status ${user.isOnline ? 'online' : 'offline'}">
-                        ${user.isOnline ? 'ONLINE' : 'OFFLINE'}
-                    </span>
-                </div>
-                <div class="user-id">${user.id}</div>
-                ${user.id !== ADMIN_ID && !user.isBanned ? `<button onclick="openBanModal('${user.id}')">BAN</button>` : ''}
-            `;
-            list.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load users error:', e);
-    }
-}
-
-async function loadBannedUsers() {
-    try {
-        const response = await fetch(`/api/banned-users?adminId=${ADMIN_ID}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('banned-list');
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        if (!data.banned || data.banned.length === 0) {
-            list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO BANNED USERS</div>';
-            return;
+        const users = await storage.get('arcs_users');
+        if (!users) {
+            await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
         }
         
-        data.banned.forEach(ban => {
-            const div = document.createElement('div');
-            div.className = 'banned-item';
-            div.innerHTML = `
-                <span>${ban.userId}</span>
-                <span>${ban.reason}</span>
-                <button onclick="unbanUser('${ban.userId}')">UNBAN</button>
-            `;
-            list.appendChild(div);
-        });
+        const pending = await storage.get('arcs_pending');
+        if (!pending) {
+            await storage.set('arcs_pending', JSON.stringify([]));
+        }
     } catch (e) {
-        console.error('Load banned error:', e);
+        console.error('Init error:', e);
     }
 }
 
-function openBanModal(userId) {
-    document.getElementById('ban-user-id').value = userId;
-    document.getElementById('ban-modal').classList.remove('hidden');
+function setAlarmTheme(theme) {
+    document.body.className = '';
+    if (theme !== 'green') {
+        document.body.classList.add(`theme-${theme}`);
+    }
+    localStorage.setItem('alarm-theme', theme);
+    playSound('sfx-blue');
 }
 
-function closeBanModal() {
-    document.getElementById('ban-modal').classList.add('hidden');
-    document.getElementById('ban-reason').value = '';
-    document.getElementById('ban-duration').value = '0';
+let customTabs = [];
+let activeTabId = null;
+
+function loadCustomTabs() {
+    const saved = localStorage.getItem('arcs-custom-tabs');
+    if (saved) {
+        customTabs = JSON.parse(saved);
+        renderCustomTabsList();
+    }
 }
 
-async function confirmBan() {
-    const userId = document.getElementById('ban-user-id').value;
-    const reason = document.getElementById('ban-reason').value.trim();
-    const duration = parseInt(document.getElementById('ban-duration').value) * 3600000;
+function renderCustomTabsList() {
+    const list = document.getElementById('custom-tabs-list');
+    if (!list) return;
     
-    if (!reason) {
-        showGlobalError('Please enter a reason');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ban-user', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ 
-                userId, 
-                reason,
-                duration: duration || null,
-                adminId: ADMIN_ID 
-            })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-denied');
-            closeBanModal();
-            loadBannedUsers();
-            loadActiveUsers();
-        } else {
-            const data = await response.json();
-            showGlobalError(data.message);
-        }
-    } catch (e) {
-        console.error('Ban error:', e);
-    }
-}
-
-async function unbanUser(userId) {
-    try {
-        const response = await fetch('/api/unban-user', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ userId, adminId: ADMIN_ID })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-blue');
-            loadBannedUsers();
-            loadActiveUsers();
-        }
-    } catch (e) {
-        console.error('Unban error:', e);
-    }
-}
-
-async function loadTickets() {
-    try {
-        const response = await fetch('/api/tickets', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('tickets-list');
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        if (data.tickets.length === 0) {
-            list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO TICKETS</div>';
-            return;
-        }
-        
-        data.tickets.forEach(ticket => {
-            const div = document.createElement('div');
-            div.className = 'ticket-item';
-            div.innerHTML = `
-                <div class="ticket-header">
-                    <span>${ticket.id}</span>
-                    <span class="ticket-status ${ticket.status}">${ticket.status}</span>
-                </div>
-                <div class="ticket-subject">${ticket.subject}</div>
-                <div class="ticket-desc">${ticket.description}</div>
-                ${currentUser.isAdmin ? `
-                    <div class="ticket-actions">
-                        <button onclick="closeTicket('${ticket.id}')">CLOSE</button>
-                    </div>
-                ` : ''}
-            `;
-            list.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load tickets error:', e);
-    }
-}
-
-async function loadMyTickets() {
-    try {
-        const response = await fetch(`/api/tickets?userId=${currentUser.id}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('my-tickets');
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        if (data.tickets.length === 0) {
-            list.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO TICKETS</div>';
-            return;
-        }
-        
-        data.tickets.forEach(ticket => {
-            const div = document.createElement('div');
-            div.className = 'ticket-item';
-            div.innerHTML = `
-                <div class="ticket-header">
-                    <span>${ticket.id}</span>
-                    <span class="ticket-status ${ticket.status}">${ticket.status}</span>
-                </div>
-                <div class="ticket-subject">${ticket.subject}</div>
-                <div class="ticket-desc">${ticket.description}</div>
-            `;
-            list.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load my tickets error:', e);
-    }
-}
-
-function openTicketForm() {
-    document.getElementById('ticket-form-modal').classList.remove('hidden');
-}
-
-function closeTicketForm() {
-    document.getElementById('ticket-form-modal').classList.add('hidden');
-    document.getElementById('ticket-subject').value = '';
-    document.getElementById('ticket-description').value = '';
-}
-
-async function submitTicket() {
-    const subject = document.getElementById('ticket-subject').value.trim();
-    const description = document.getElementById('ticket-description').value.trim();
-    
-    if (!subject || !description) {
-        showGlobalError('Please fill all fields');
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/ticket', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-                userId: currentUser.id,
-                subject,
-                description
-            })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-sent');
-            closeTicketForm();
-            logMonitoring(`TICKET CREATED: ${subject}`);
-            loadMyTickets();
-        } else {
-            const data = await response.json();
-            showGlobalError(data.message);
-        }
-    } catch (e) {
-        console.error('Ticket error:', e);
-        showGlobalError('Failed to create ticket');
-    }
-}
-
-async function closeTicket(ticketId) {
-    try {
-        const response = await fetch('/api/ticket/close', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-                ticketId,
-                adminId: currentUser.id
-            })
-        });
-        
-        if (response.ok) {
-            playSound('sfx-blue');
-            logMonitoring(`TICKET CLOSED: ${ticketId}`);
-            loadTickets();
-        }
-    } catch (e) {
-        console.error('Close ticket error:', e);
-    }
-}
-
-async function loadAlarms() {
-    try {
-        const response = await fetch('/api/alarms', {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const container = document.getElementById('alarms-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        if (data.alarms.length === 0) {
-            container.innerHTML = '<div class="featured-box"><div class="featured-title">NO ACTIVE ALARMS</div></div>';
-            return;
-        }
-        
-        data.alarms.forEach(alarm => {
-            const div = document.createElement('div');
-            div.className = 'alarm-item';
-            div.innerHTML = `
-                <div class="alarm-type">${alarm.type}</div>
-                <div class="alarm-details">${alarm.details}</div>
-                ${currentUser.isAdmin ? `
-                    <button onclick="dismissAlarm('${alarm.id}')">DISMISS</button>
-                ` : ''}
-            `;
-            container.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load alarms error:', e);
-    }
-}
-
-async function dismissAlarm(alarmId) {
-    try {
-        const response = await fetch('/api/alarm/dismiss', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({
-                alarmId,
-                adminId: currentUser.id
-            })
-        });
-        
-        if (response.ok) {
-            loadAlarms();
-        }
-    } catch (e) {
-        console.error('Dismiss alarm error:', e);
-    }
-}
-
-async function loadAnalytics() {
-    try {
-        const response = await fetch(`/api/all-analytics?adminId=${ADMIN_ID}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const container = document.getElementById('analytics-container');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        if (!data.analytics || data.analytics.length === 0) {
-            container.innerHTML = '<div style="padding:10px;text-align:center;color:#666;">NO ANALYTICS DATA</div>';
-            return;
-        }
-        
-        data.analytics.forEach(user => {
-            const div = document.createElement('div');
-            div.className = 'analytics-item';
-            div.innerHTML = `
-                <div class="analytics-user">${user.userName} (${user.userId})</div>
-                <div class="analytics-stats">
-                    <span>Logins: ${user.logins}</span>
-                    <span>Messages: ${user.messagesSent}</span>
-                    <span>Broadcasts: ${user.broadcastsSent}</span>
-                    <span>Tickets: ${user.ticketsCreated}</span>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load analytics error:', e);
-    }
-}
-
-function loadProfile() {
-    const profileDiv = document.getElementById('profile-content');
-    if (!profileDiv || !currentUser) return;
-    
-    profileDiv.innerHTML = `
-        <div class="profile-field">
-            <label>NAME:</label>
-            <span>${currentUser.name}</span>
-        </div>
-        <div class="profile-field">
-            <label>ID:</label>
-            <span>${currentUser.id}</span>
-        </div>
-        <div class="profile-field">
-            <label>ROLE:</label>
-            <span>${currentUser.isAdmin ? 'ADMINISTRATOR' : 'OPERATOR'}</span>
-        </div>
-    `;
-}
-
-function switchCredTab(tab) {
-    document.querySelectorAll('.cred-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.cred-content').forEach(c => c.classList.remove('active'));
-    
-    event.target.classList.add('active');
-    document.getElementById(`cred-${tab}`).classList.add('active');
-    
-    if (tab === 'users') {
-        loadUserCredentials();
-    }
-}
-
-async function loadUserCredentials() {
-    try {
-        const response = await fetch(`/api/users?adminId=${ADMIN_ID}`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        const data = await response.json();
-        
-        const list = document.getElementById('users-credentials-list');
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        data.users.filter(u => u.id !== ADMIN_ID).forEach(user => {
-            const div = document.createElement('div');
-            div.className = 'cred-user-item';
-            div.innerHTML = `
-                <div class="cred-user-name">${user.name}</div>
-                <div class="cred-user-id">${user.id}</div>
-                <div class="cred-user-avatar">
-                    <img src="${user.avatar}" style="width:40px;height:40px;image-rendering:pixelated;">
-                </div>
-            `;
-            list.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load credentials error:', e);
-    }
-}
-
-function openChat() {
-    const chatWindow = document.getElementById('chat-window');
-    if (chatWindow) {
-        chatWindow.classList.remove('hidden');
-        loadChatHistory();
-    }
-}
-
-function closeChat() {
-    const chatWindow = document.getElementById('chat-window');
-    if (chatWindow) {
-        chatWindow.classList.add('hidden');
-    }
-}
-
-function minimizeChat() {
-    closeChat();
-}
-
-function loadChatHistory() {
-    if (!socket || !currentUser) return;
-    
-    socket.emit('request_chat_history', {
-        userId: currentUser.id,
-        otherId: ADMIN_ID
-    });
-    
-    socket.once('chat_history', (history) => {
-        const messagesDiv = document.getElementById('chat-messages');
-        if (messagesDiv) {
-            messagesDiv.innerHTML = '';
-            history.forEach(msg => renderChatMessage(msg));
-        }
+    list.innerHTML = '';
+    customTabs.forEach(tab => {
+        const item = document.createElement('div');
+        item.className = `tab-item ${activeTabId === tab.id ? 'active' : ''}`;
+        item.innerHTML = `
+            <span>${tab.name}</span>
+            <div class="tab-item-actions">
+                <div class="tab-action-btn" onclick="editCustomTab('${tab.id}')">✎</div>
+                <div class="tab-action-btn" onclick="deleteCustomTab('${tab.id}')">×</div>
+            </div>
+        `;
+        item.onclick = (e) => {
+            if (!e.target.classList.contains('tab-action-btn')) {
+                editCustomTab(tab.id);
+            }
+        };
+        list.appendChild(item);
     });
 }
 
-function renderChatMessage(message) {
-    const messagesDiv = document.getElementById('chat-messages');
-    if (!messagesDiv) return;
+function createNewCustomTab() {
+    const newTab = {
+        id: Date.now().toString(),
+        name: 'New Tab',
+        material: 'paper',
+        content: '',
+        image: null
+    };
+    customTabs.push(newTab);
+    renderCustomTabsList();
+    editCustomTab(newTab.id);
+}
+
+function editCustomTab(tabId) {
+    activeTabId = tabId;
+    const tab = customTabs.find(t => t.id === tabId);
+    if (!tab) return;
     
-    const isSent = message.senderId === currentUser.id;
-    const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${isSent ? 'sent' : 'received'}`;
-    
-    let content = `<div class="chat-msg-content">${message.message}</div>`;
-    
-    if (message.attachment) {
-        content += `<img src="${message.attachment}" class="chat-msg-image" onclick="openImageModal('${message.attachment}')">`;
-    }
-    
-    const time = new Date(message.timestamp).toLocaleTimeString();
-    content += `
-        <div class="chat-msg-meta">
-            <span>${isSent ? 'YOU' : 'OBUNTO'}</span>
-            <span>${time}</span>
+    const editor = document.getElementById('tab-editor');
+    editor.innerHTML = `
+        <div class="editor-section">
+            <div class="editor-section-title">Tab Settings</div>
+            <div class="editor-field">
+                <label class="editor-label">Tab Name</label>
+                <input type="text" class="editor-input" value="${tab.name}" onchange="updateTabField('${tabId}', 'name', this.value)">
+            </div>
+        </div>
+        
+        <div class="editor-section">
+            <div class="editor-section-title">Background Material</div>
+            <div class="material-selector">
+                <div class="material-option ${tab.material === 'paper' ? 'active' : ''}" onclick="updateTabField('${tabId}', 'material', 'paper')">PAPER</div>
+                <div class="material-option ${tab.material === 'metal' ? 'active' : ''}" onclick="updateTabField('${tabId}', 'material', 'metal')">METAL</div>
+                <div class="material-option ${tab.material === 'wood' ? 'active' : ''}" onclick="updateTabField('${tabId}', 'material', 'wood')">WOOD</div>
+                <div class="material-option ${tab.material === 'screen' ? 'active' : ''}" onclick="updateTabField('${tabId}', 'material', 'screen')">SCREEN</div>
+            </div>
+        </div>
+        
+        <div class="editor-section">
+            <div class="editor-section-title">Content</div>
+            <div class="editor-field">
+                <label class="editor-label">Text Content</label>
+                <textarea class="editor-textarea" onchange="updateTabField('${tabId}', 'content', this.value)">${tab.content}</textarea>
+            </div>
+        </div>
+        
+        <div class="editor-section">
+            <div class="editor-section-title">Image</div>
+            <div class="image-upload-zone ${tab.image ? 'has-image' : ''}" onclick="uploadTabImage('${tabId}')">
+                ${tab.image ? `<img src="${tab.image}" class="uploaded-image-preview"><div class="image-remove-btn" onclick="event.stopPropagation(); removeTabImage('${tabId}')">×</div>` : 'CLICK TO UPLOAD IMAGE'}
+            </div>
+        </div>
+        
+        <div class="editor-preview">
+            <div class="preview-label">Preview</div>
+            <div class="preview-content" style="background: ${getMaterialStyle(tab.material)}">
+                ${tab.image ? `<img src="${tab.image}" style="max-width:100%; margin-bottom:16px;">` : ''}
+                ${tab.content}
+            </div>
         </div>
     `;
     
-    msgDiv.innerHTML = content;
-    messagesDiv.appendChild(msgDiv);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    renderCustomTabsList();
 }
 
-async function sendChatMessage() {
-    const input = document.getElementById('chat-input');
-    const text = input?.value.trim();
-    
-    if (!text || !socket || !currentUser) return;
-    
-    socket.emit('chat_message', {
-        senderId: currentUser.id,
-        receiverId: ADMIN_ID,
-        message: text
-    });
-    
-    input.value = '';
-    logMonitoring(`CHAT MESSAGE SENT TO OBUNTO`);
-}
-
-async function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    try {
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${authToken}` },
-            body: formData
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && socket) {
-            socket.emit('chat_message', {
-                senderId: currentUser.id,
-                receiverId: ADMIN_ID,
-                message: '[Image]',
-                attachment: data.url
-            });
-            logMonitoring('IMAGE SENT IN CHAT');
+function updateTabField(tabId, field, value) {
+    const tab = customTabs.find(t => t.id === tabId);
+    if (tab) {
+        tab[field] = value;
+        if (field === 'name') {
+            renderCustomTabsList();
         } else {
-            showGlobalError('Failed to upload image');
+            editCustomTab(tabId);
         }
-    } catch (e) {
-        console.error('Upload error:', e);
-        showGlobalError('Upload failed');
-    }
-    
-    event.target.value = '';
-}
-
-function openImageModal(src) {
-    const modal = document.getElementById('image-modal');
-    const img = document.getElementById('modal-image');
-    if (modal && img) {
-        img.src = src;
-        modal.classList.remove('hidden');
     }
 }
 
-function closeImageModal() {
-    const modal = document.getElementById('image-modal');
-    if (modal) {
-        modal.classList.add('hidden');
+function deleteCustomTab(tabId) {
+    if (confirm('Delete this tab?')) {
+        customTabs = customTabs.filter(t => t.id !== tabId);
+        renderCustomTabsList();
+        document.getElementById('tab-editor').innerHTML = `
+            <div class="empty-editor-state">
+                <div class="empty-editor-icon">📝</div>
+                <div class="empty-editor-text">SELECT A TAB OR CREATE A NEW ONE</div>
+            </div>
+        `;
     }
 }
 
-document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('operator-password').focus();
-    }
-});
+function getMaterialStyle(material) {
+    const styles = {
+        paper: '#F5F0E8',
+        metal: '#C0C8D0',
+        wood: '#D4B896',
+        screen: '#E8F0E8'
+    };
+    return styles[material] || '#E0D8C0';
+}
 
-document.getElementById('operator-password')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-});
+function saveCustomTabs() {
+    localStorage.setItem('arcs-custom-tabs', JSON.stringify(customTabs));
+    playSound('sfx-sent');
+    alert('TABS SAVED');
+}
 
-document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendChatMessage();
-});
+function publishCustomTabs() {
+    saveCustomTabs();
+    playSound('sfx-blue');
+    alert('TABS PUBLISHED TO MENU');
+}
 
-document.getElementById('radio-input')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') sendRadioMessage();
-});
+function uploadTabImage(tabId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                updateTabField(tabId, 'image', event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    input.click();
+}
+
+function removeTabImage(tabId) {
+    updateTabField(tabId, 'image', null);
+}
 
 window.addEventListener('load', async () => {
+    await init();
+    loadCustomTabs();
+    
+    const savedTheme = localStorage.getItem('alarm-theme') || 'green';
+    if (savedTheme !== 'green') {
+        setAlarmTheme(savedTheme);
+    }
+    
     setTimeout(startLoading, 1000);
-});
-
-function openRegisterModal() {
-    document.getElementById('register-modal').classList.remove('hidden');
-    document.getElementById('register-id').focus();
-}
-
-function closeRegisterModal() {
-    document.getElementById('register-modal').classList.add('hidden');
-    document.getElementById('register-id').value = '';
-    document.getElementById('register-password').value = '';
-    document.getElementById('register-password-confirm').value = '';
-    const statusDiv = document.getElementById('register-status');
-    if (statusDiv) {
-        statusDiv.textContent = '';
-        statusDiv.className = 'register-status';
-    }
-}
-
-function showRegisterStatus(message, isError = false) {
-    const status = document.getElementById('register-status');
-    if (!status) return;
-    status.textContent = message;
-    status.className = 'register-status show';
-    if (isError) status.classList.add('error');
-    else status.classList.add('success');
-}
-
-async function handleRegister() {
-    const userId = document.getElementById('register-id').value.trim();
-    const password = document.getElementById('register-password').value;
-    const passwordConfirm = document.getElementById('register-password-confirm').value;
-    
-    if (!userId || userId.length < 5) {
-        playSound('sfx-error');
-        showRegisterStatus('OPERATOR ID MUST BE AT LEAST 5 CHARACTERS', true);
-        return;
-    }
-    
-    if (!password || password.length < 4) {
-        playSound('sfx-error');
-        showRegisterStatus('PASSWORD MUST BE AT LEAST 4 CHARACTERS', true);
-        return;
-    }
-    
-    if (password !== passwordConfirm) {
-        playSound('sfx-error');
-        showRegisterStatus('PASSWORDS DO NOT MATCH', true);
-        return;
-    }
-    
-    try {
-        const response = await fetch('/api/create-account', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, password })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-            playSound('sfx-sent');
-            showRegisterStatus('REQUEST SENT! AWAITING ADMIN APPROVAL.', false);
-            setTimeout(() => {
-                closeRegisterModal();
-            }, 3000);
-        } else {
-            playSound('sfx-denied');
-            showRegisterStatus(data.message, true);
-        }
-    } catch (e) {
-        console.error('Register error:', e);
-        playSound('sfx-error');
-        showRegisterStatus('SYSTEM ERROR - TRY AGAIN', true);
-    }
-}
-
-document.getElementById('register-id')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('register-password').focus();
-    }
-});
-
-document.getElementById('register-password')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('register-password-confirm').focus();
-    }
-});
-
-document.getElementById('register-password-confirm')?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleRegister();
 });

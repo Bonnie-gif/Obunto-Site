@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
+    <link rel="icon" href="assets/icon-small-duplicate-18x14.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/menu.css">
     <link rel="stylesheet" href="css/notification.css">
@@ -24,20 +25,26 @@
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
 
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
-            <div class="arcs-section">
-                <svg class="arcs-logo" viewBox="0 0 200 200">
+            <div class="upeo-section">
+                <svg class="upeo-logo" viewBox="0 0 200 200">
                     <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
                     <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
                     <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
                 </svg>
-                <div class="arcs-text">ARCS</div>
+                <div class="upeo-text">UPEO</div>
             </div>
             
             <div class="loading-info">
                 RESTARTING OS VER.3.2.2<br>
-                ARCS ID confirmed<br>
+                UPEO ID confirmed<br>
                 DATA SWALLOW<br>
                 is for registered use only.
             </div>
@@ -49,15 +56,11 @@
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
                     <input type="text" id="operator-id" class="login-input" maxlength="20">
-                    <label class="login-label">ENTER PASSWORD:</label>
-                    <input type="password" id="operator-password" class="login-input" maxlength="50">
                     <div class="login-status" id="login-status"></div>
                     <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
-                        <a href="#" onclick="openRegisterModal(); return false;" class="register-link">
-                            NEW OPERATOR?<br>
-                            CLICK HERE TO REQUEST ACCESS
-                        </a>
+                        NEW OPERATOR?<br>
+                        ENTER YOUR ID TO REQUEST ACCESS
                     </div>
                 </div>
             </div>
@@ -70,39 +73,16 @@
                     <div class="swallow-disk">
                         <div class="disk-text">
                             DATA SWALLOW 40<br>
-                            ARCS VER.3.2<br>
+                            UPEO VER.3.2<br>
                             SYSTEM STARTUP
                         </div>
-                        <div class="disk-icon">CD</div>
+                        <div class="disk-icon">⊕</div>
                     </div>
                 </div>
                 <div class="loading-bar">
                     <div class="bar-fill" id="loading-progress"></div>
                 </div>
                 <div class="swallow-footer">DATA SWALLOW 40 を起動中です。</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="register-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>NEW OPERATOR REGISTRATION</span>
-                <button class="modal-close" onclick="closeRegisterModal()">X</button>
-            </div>
-            <div class="modal-body">
-                <div class="register-instructions">
-                    CREATE YOUR OPERATOR CREDENTIALS.<br>
-                    YOUR REQUEST WILL BE SENT TO ADMINISTRATOR OBUNTO FOR APPROVAL.
-                </div>
-                <label>CHOOSE YOUR OPERATOR ID:</label>
-                <input type="text" id="register-id" class="form-input" placeholder="MINIMUM 5 CHARACTERS" maxlength="20">
-                <label>CHOOSE YOUR PASSWORD:</label>
-                <input type="password" id="register-password" class="form-input" placeholder="MINIMUM 4 CHARACTERS" maxlength="50">
-                <label>CONFIRM PASSWORD:</label>
-                <input type="password" id="register-password-confirm" class="form-input" maxlength="50">
-                <div class="register-status" id="register-status"></div>
-                <button class="form-submit-btn" onclick="handleRegister()">REQUEST ACCESS</button>
             </div>
         </div>
     </div>
@@ -116,32 +96,39 @@
         </div>
 
         <div class="loading-indicator">
-            <span class="loading-icon">*</span>
+            <span class="loading-icon">⚡</span>
             <span>System initialized</span>
         </div>
 
         <div class="main-window">
             <div class="menu-bar">
                 <div class="menu-button" onclick="goToHome()">MENU</div>
-                <div class="menu-tabs hidden" id="admin-tabs"></div>
-                <div class="menu-tabs hidden" id="personnel-tabs"></div>
-                <div class="menu-user-info" id="menu-user-info">
-                    <span id="current-user-name">GUEST</span>
-                    <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
+                <div class="menu-tabs hidden" id="admin-tabs">
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-editing">EDITING</div>
+                    <div class="tab" data-target="adm-alarms">ALARMS</div>
+                    <div class="tab" data-target="adm-tickets">TICKETS</div>
+                    <div class="tab" data-target="adm-radio">RADIO</div>
+                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                </div>
+                <div class="menu-tabs hidden" id="personnel-tabs">
+                    <div class="tab" data-target="usr-profile">PROFILE</div>
+                    <div class="tab" data-target="usr-workstation">WORKSTATION</div>
+                    <div class="tab" data-target="usr-radio">RADIO</div>
+                    <div class="tab" data-target="usr-help">HELP REQUEST</div>
+                    <div class="tab" data-target="usr-suggestions">SUGGESTIONS</div>
                 </div>
             </div>
 
             <div id="view-home" class="tab-content active">
-                <div class="home-layout">
-                    <div class="banner-section">
-                        <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
-                    </div>
-                    <div class="welcome-section">
-                        <div class="grid-cell news-cell">
-                            <div class="cell-header">WELCOME</div>
-                            <div class="news-box">
-                                <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
-                            </div>
+                <div class="banner-section">
+                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                </div>
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">WELCOME</div>
+                        <div class="news-box">
+                            <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
                         </div>
                     </div>
                 </div>
@@ -157,49 +144,159 @@
                         <div class="cell-header">GLOBAL MESSAGE</div>
                         <div class="news-box">
                             <label>SELECT EMOTION:</label>
-                            <div class="sprite-selector" id="sprite-selector"></div>
+                            <div class="sprite-selector" id="sprite-selector">
+                                <div class="sprite-option active" data-sprite="normal">
+                                    <img src="assets/sprites/normal.png" alt="Normal">
+                                    <span>Normal</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="happy">
+                                    <img src="assets/sprites/happy.png" alt="Happy">
+                                    <span>Happy</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="sad">
+                                    <img src="assets/sprites/sad.png" alt="Sad">
+                                    <span>Sad</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="annoyed">
+                                    <img src="assets/sprites/annoyed.png" alt="Annoyed">
+                                    <span>Annoyed</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="bug">
+                                    <img src="assets/sprites/bug.png" alt="Bug">
+                                    <span>Bug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="dizzy">
+                                    <img src="assets/sprites/dizzy.png" alt="Dizzy">
+                                    <span>Dizzy</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="hollow">
+                                    <img src="assets/sprites/hollow.png" alt="Hollow">
+                                    <span>Hollow</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="panic">
+                                    <img src="assets/sprites/panic.png" alt="Panic">
+                                    <span>Panic</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="sleeping">
+                                    <img src="assets/sprites/sleeping.png" alt="Sleeping">
+                                    <span>Sleeping</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="smug">
+                                    <img src="assets/sprites/smug.png" alt="Smug">
+                                    <span>Smug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="stare">
+                                    <img src="assets/sprites/stare.png" alt="Stare">
+                                    <span>Stare</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="suspicious">
+                                    <img src="assets/sprites/suspicious.png" alt="Suspicious">
+                                    <span>Suspicious</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="werror">
+                                    <img src="assets/sprites/werror.png" alt="W.Error">
+                                    <span>W.Error</span>
+                                </div>
+                            </div>
                             <input type="hidden" id="sprite-select" value="normal">
                             <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
                             <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
                         </div>
                     </div>
                     <div class="grid-cell updates-cell">
-                        <div class="cell-header">BROADCAST HISTORY</div>
-                        <div class="updates-box" id="broadcast-history"></div>
+                        <div class="cell-header">STATUS</div>
+                        <div class="updates-box">
+                            <div class="updates-title">READY</div>
+                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="adm-monitoring" class="tab-content">
-                <div class="monitoring-header">
-                    <div class="monitoring-controls">
-                        <button class="mon-btn" onclick="updateMonitoring()">REFRESH</button>
-                        <select id="mon-target" class="mon-select">
-                            <option value="all">ALL TABS</option>
-                            <option value="broadcast">BROADCAST</option>
-                            <option value="alarms">ALARMS</option>
-                            <option value="tickets">TICKETS</option>
-                            <option value="radio">RADIO</option>
-                        </select>
-                        <div class="system-stats" id="system-stats"></div>
+            <div id="adm-editing" class="tab-content">
+                <div class="editing-header">
+                    <div class="editing-title">Content Editor</div>
+                    <div class="editing-actions">
+                        <button class="edit-btn" onclick="saveCustomTabs()">SAVE</button>
+                        <button class="edit-btn primary" onclick="publishCustomTabs()">PUBLISH</button>
                     </div>
                 </div>
-                <div class="content-grid">
-                    <div class="grid-cell news-cell monitoring-full">
-                        <div class="cell-header">ACTIVE LOGS</div>
-                        <div class="news-box">
-                            <div class="news-text" id="monitoring-logs"></div>
+                <div class="editing-body">
+                    <div class="tabs-sidebar">
+                        <div class="sidebar-header">CUSTOM TABS</div>
+                        <div class="tabs-list" id="custom-tabs-list"></div>
+                        <button class="add-tab-btn" onclick="createNewCustomTab()">+ NEW TAB</button>
+                    </div>
+                    <div class="tab-editor" id="tab-editor">
+                        <div class="empty-editor-state">
+                            <div class="empty-editor-icon">📝</div>
+                            <div class="empty-editor-text">
+                                CREATE A NEW TAB TO START EDITING<br>
+                                CUSTOMIZE CONTENT, MATERIALS, AND IMAGES
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div id="adm-alarms" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell featured-cell alarm-list">
-                        <div class="sticker yellow">ALERTS</div>
-                        <div class="cell-header">ACTIVE ALARMS</div>
-                        <div id="alarms-container"></div>
+                <div class="alarms-fullwidth">
+                    <div class="cell-header">SYSTEM ALARM LEVELS</div>
+                    <div id="alarms-container">
+                        <div class="alarm-item green">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Green Alert</div>
+                                <div class="alarm-badge">Normal</div>
+                            </div>
+                            <div class="alarm-details">All systems operational. Standard interface active.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('green')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item blue">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Blue Alert</div>
+                                <div class="alarm-badge">Earthy</div>
+                            </div>
+                            <div class="alarm-details">Interface shifted to earthy blue tones. Visual adjustments applied.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('blue')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item red">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Red Alert</div>
+                                <div class="alarm-badge">Warning</div>
+                            </div>
+                            <div class="alarm-details">System running in red-tinted earthy mode. Heightened awareness required.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('red')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item gamma">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Gamma Protocol</div>
+                                <div class="alarm-badge">Restricted</div>
+                            </div>
+                            <div class="alarm-details">Orange/Yellow theme active. Radio and Credentials RESTRICTED for personnel access.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('gamma')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item epsilon">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Epsilon Corruption</div>
+                                <div class="alarm-badge">Critical</div>
+                            </div>
+                            <div class="alarm-details">CRITICAL: System corruption detected. Visual glitches, dead pixels, and instability present.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('epsilon')">ACTIVATE</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -207,8 +304,8 @@
             <div id="adm-tickets" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell release-cell">
-                        <div class="cell-header">SUPPORT TICKETS</div>
-                        <div id="tickets-list"></div>
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
                     </div>
                 </div>
             </div>
@@ -217,104 +314,16 @@
                 <div class="content-grid">
                     <div class="grid-cell updates-cell">
                         <div class="cell-header">RADIO FREQUENCY</div>
-                        <div class="radio-controls">
-                            <div class="radio-header">
-                                <div class="radio-frequency" id="radio-freq-display">CHANNEL 99.4</div>
-                                <button class="radio-clear-btn" onclick="clearRadioChannel()">CLEAR CHANNEL</button>
-                            </div>
-                            <label>SELECT CHANNEL:</label>
-                            <select id="radio-channel" onchange="joinRadioChannel()">
-                                <option value="99.4">CHANNEL 99.4 - GENERAL</option>
-                                <option value="88.8">CHANNEL 88.8 - SECURE</option>
-                                <option value="77.7">CHANNEL 77.7 - EMERGENCY</option>
-                            </select>
-                            <div class="radio-status">
-                                <div class="radio-status-indicator"></div>
-                                <span>CONNECTED TO CHANNEL <span id="current-channel">99.4</span></span>
-                            </div>
-                            <div class="radio-messages" id="radio-messages"></div>
-                            <div class="radio-input-area">
-                                <input type="text" id="radio-input" placeholder="BROADCAST MESSAGE...">
-                                <button onclick="sendRadioMessage()">TRANSMIT</button>
-                            </div>
-                        </div>
+                        <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
                     </div>
                 </div>
             </div>
 
             <div id="adm-credentials" class="tab-content">
-                <div class="credentials-tabs">
-                    <div class="cred-tab active" onclick="switchCredTab('obunto')">OBUNTO</div>
-                    <div class="cred-tab" onclick="switchCredTab('users')">USER MANAGEMENT</div>
-                </div>
-                <div id="cred-obunto" class="cred-content active">
-                    <div class="content-grid">
-                        <div class="grid-cell credentials-cell">
-                            <div class="cell-header">ADMIN CREDENTIALS</div>
-                            <div class="credentials-ticket">
-                                <div class="ticket-holes-left"></div>
-                                <div class="ticket-content">
-                                    <div class="ticket-header">ARCS SYSTEM</div>
-                                    <div class="ticket-title">ADMINISTRATOR</div>
-                                    <div class="ticket-divider"></div>
-                                    <div class="ticket-info">
-                                        <div class="ticket-row">
-                                            <span class="ticket-label">NAME:</span>
-                                            <span class="ticket-value">OBUNTO</span>
-                                        </div>
-                                        <div class="ticket-row">
-                                            <span class="ticket-label">ID:</span>
-                                            <span class="ticket-value">118107921024376</span>
-                                        </div>
-                                        <div class="ticket-row">
-                                            <span class="ticket-label">LEVEL:</span>
-                                            <span class="ticket-value">FULL ACCESS</span>
-                                        </div>
-                                        <div class="ticket-row">
-                                            <span class="ticket-label">STATUS:</span>
-                                            <span class="ticket-value">ACTIVE</span>
-                                        </div>
-                                    </div>
-                                    <div class="ticket-barcode">||||||||||||||||||||</div>
-                                    <div class="ticket-footer">AUTHORIZED PERSONNEL ONLY</div>
-                                </div>
-                                <div class="ticket-holes-right"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="cred-users" class="cred-content">
-                    <div class="content-grid">
-                        <div class="grid-cell users-management">
-                            <div class="cell-header">MANAGE USER CREDENTIALS</div>
-                            <div id="users-credentials-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adm-users" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell release-cell">
-                        <div class="cell-header">ACTIVE USERS</div>
-                        <div id="active-users-list"></div>
-                    </div>
-                    <div class="grid-cell release-cell">
-                        <div class="cell-header">PENDING APPROVALS</div>
-                        <div id="pending-list"></div>
-                    </div>
-                    <div class="grid-cell release-cell">
-                        <div class="cell-header">BANNED USERS</div>
-                        <div id="banned-list"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adm-analytics" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell news-cell">
-                        <div class="cell-header">SYSTEM ANALYTICS</div>
-                        <div class="analytics-container" id="analytics-container"></div>
+                        <div class="cell-header">ADMIN ID</div>
+                        <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
                     </div>
                 </div>
             </div>
@@ -323,7 +332,7 @@
                 <div class="content-grid">
                     <div class="grid-cell news-cell">
                         <div class="cell-header">USER PROFILE</div>
-                        <div class="profile-content" id="profile-content"></div>
+                        <div class="news-box"><div class="news-text">WELCOME OPERATOR. STATUS: ACTIVE.</div></div>
                     </div>
                 </div>
             </div>
@@ -331,9 +340,10 @@
             <div id="usr-workstation" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell release-cell">
-                        <div class="cell-header">MY TICKETS</div>
-                        <div id="my-tickets"></div>
-                        <button class="create-ticket-btn" onclick="openTicketForm()">CREATE NEW TICKET</button>
+                        <div class="cell-header">ASSIGNMENTS</div>
+                        <div class="release-box">
+                            <div class="release-desc">NO ACTIVE ASSIGNMENTS. CHECK BACK LATER.</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -342,7 +352,7 @@
                 <div class="content-grid">
                     <div class="grid-cell updates-cell">
                         <div class="cell-header">RADIO</div>
-                        <div class="updates-box"><div class="updates-text">LISTENING TO CHANNEL 99.4...</div></div>
+                        <div class="updates-box"><div class="updates-text">LISTENING...</div></div>
                     </div>
                 </div>
             </div>
@@ -352,102 +362,47 @@
                     <div class="grid-cell featured-cell">
                         <div class="sticker yellow">SUPPORT</div>
                         <div class="featured-box">
-                            <div class="featured-desc">
-                                CONTACT ADMINISTRATOR OBUNTO<br>
-                                <button class="chat-open-btn" onclick="openChat()">OPEN CHAT</button>
-                            </div>
+                            <div class="featured-desc">ADMINISTRATOR OBUNTO IS OFFLINE.</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-suggestions" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="admin-panel" class="admin-window hidden">
+        <div class="window-titlebar">
+            <span>ADMIN - OBUNTO</span>
+            <div class="close-btn" onclick="closeAdmin()">×</div>
+        </div>
+        <div class="window-body">
+            <div class="admin-section">
+                <h3>PENDING ACCOUNTS</h3>
+                <div id="pending-list-modal"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
+
     <div id="broadcast-notification" class="notification hidden">
+        <div class="mascot-container">
+            <img id="notif-sprite" class="notification-sprite" src="assets/sprites/normal.png" alt="Obunto">
+            <div class="mascot-label"></div>
+        </div>
         <div class="bubble">
             <div class="notification-text" id="notif-text"></div>
         </div>
-        <div class="mascot-container">
-            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
-            <div class="mascot-label">OBUNTO</div>
-        </div>
     </div>
 
-    <div id="chat-window" class="chat-window hidden">
-        <div class="chat-titlebar">
-            <div class="chat-title">
-                <span class="chat-icon">@</span>
-                <span>OBUNTO</span>
-            </div>
-            <div class="chat-controls">
-                <button class="chat-control-btn" onclick="minimizeChat()">_</button>
-                <button class="chat-control-btn" onclick="closeChat()">X</button>
-            </div>
-        </div>
-        <div class="chat-body">
-            <div class="chat-user-info">
-                <div class="chat-user-details">
-                    <div class="chat-username">OBUNTO</div>
-                    <div class="chat-status-text">ADMINISTRATOR</div>
-                </div>
-                <div class="chat-avatar">
-                    <img src="assets/sprites/normal.png" id="chat-avatar-img">
-                </div>
-            </div>
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <label class="file-upload-btn">
-                    <input type="file" id="chat-file-input" accept="image/*" onchange="handleFileUpload(event)" style="display:none">
-                    <span>+</span>
-                </label>
-                <input type="text" class="chat-input" id="chat-input" placeholder="TYPE MESSAGE...">
-                <button class="chat-send-btn" onclick="sendChatMessage()">SEND</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ticket-form-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>CREATE SUPPORT TICKET</span>
-                <button class="modal-close" onclick="closeTicketForm()">X</button>
-            </div>
-            <div class="modal-body">
-                <label>SUBJECT:</label>
-                <input type="text" id="ticket-subject" class="form-input">
-                <label>DESCRIPTION:</label>
-                <textarea id="ticket-description" class="form-textarea"></textarea>
-                <button class="form-submit-btn" onclick="submitTicket()">SUBMIT</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ban-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>BAN USER</span>
-                <button class="modal-close" onclick="closeBanModal()">X</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="ban-user-id">
-                <label>REASON:</label>
-                <textarea id="ban-reason" class="form-textarea" placeholder="Enter reason for ban..."></textarea>
-                <label>DURATION (hours, 0 = permanent):</label>
-                <input type="number" id="ban-duration" class="form-input" value="0" min="0">
-                <button class="form-submit-btn" onclick="confirmBan()">BAN USER</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="image-modal" class="image-modal hidden" onclick="closeImageModal()">
-        <img id="modal-image" src="" alt="Image">
-    </div>
-
-    <div id="error-notification" class="error-notification hidden">
-        <div class="error-content" id="error-content"></div>
-    </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>

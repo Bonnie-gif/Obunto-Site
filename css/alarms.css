@@ -1,57 +1,34 @@
-#adm-alarms .featured-box {
-    background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-    min-height: 140px;
+.alarms-fullwidth {
+    padding: 20px;
+    width: 100%;
 }
 
-#adm-alarms .featured-title {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 26px;
-    color: var(--color-text-secondary, #4A4A4A);
-    z-index: 2;
+.alarms-fullwidth .cell-header {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary, #000);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--color-border, #808080);
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-weight: 600;
 }
 
-#adm-alarms .featured-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-        45deg,
-        rgba(0, 0, 0, 0.02),
-        rgba(0, 0, 0, 0.02) 15px,
-        rgba(0, 0, 0, 0.05) 15px,
-        rgba(0, 0, 0, 0.05) 30px
-    );
-    z-index: 1;
-}
-
-#adm-alarms .sticker.yellow {
-    background: var(--color-bg-secondary, #C0B0A0);
-    color: var(--color-text-primary, #000);
-    border: 2px solid var(--color-border, #808080);
+#alarms-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
 }
 
 .alarm-item {
     background: var(--color-bg-primary, #E0D8C0);
     border: 3px solid var(--color-border, #808080);
-    padding: 16px;
-    margin-bottom: 12px;
-    animation: slideInRight 0.3s ease;
-    transition: all 0.2s ease;
+    padding: 20px;
     position: relative;
+    transition: all 0.2s ease;
+    animation: slideInRight 0.3s ease;
 }
 
 .alarm-item::before {
@@ -60,13 +37,13 @@
     left: 0;
     top: 0;
     bottom: 0;
-    width: 8px;
+    width: 10px;
     background: var(--alarm-color, #808080);
 }
 
 .alarm-item:hover {
     transform: translateX(4px);
-    border-color: var(--color-text-secondary, #4A4A4A);
+    border-color: var(--color-text-primary, #000);
 }
 
 .alarm-item.green {
@@ -93,12 +70,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .alarm-type {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 18px;
+    font-size: 20px;
     color: var(--color-text-primary, #000);
     font-weight: 700;
     text-transform: uppercase;
@@ -106,40 +83,40 @@
 }
 
 .alarm-badge {
-    padding: 4px 12px;
+    padding: 6px 16px;
     border: 2px solid #000;
     background: var(--alarm-color, #808080);
     color: #000;
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .alarm-details {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 12px;
+    font-size: 13px;
     color: var(--color-text-secondary, #4A4A4A);
-    margin-bottom: 12px;
-    line-height: 1.6;
-    padding-left: 12px;
+    margin-bottom: 16px;
+    line-height: 1.7;
+    padding-left: 14px;
 }
 
 .alarm-actions {
     display: flex;
-    gap: 8px;
-    padding-top: 10px;
+    gap: 10px;
+    padding-top: 12px;
     border-top: 2px dotted rgba(128, 128, 128, 0.4);
 }
 
 .alarm-item button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     border: 2px solid var(--color-border, #808080);
     background: var(--color-bg-secondary, #C0B0A0);
     color: var(--color-text-primary, #000);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -319,4 +296,15 @@ body.theme-epsilon .glitch-block:nth-child(5) {
 @keyframes glitchAppear {
     0%, 95%, 100% { opacity: 0; }
     96%, 98% { opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { 
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    to { 
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
