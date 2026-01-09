@@ -74,19 +74,27 @@ async function handleLogin() {
         const usersData = await storage.get('arcs_users');
         const users = usersData ? JSON.parse(usersData.value) : {};
         
-        if (users[userId] && users[userId].approved) {
+        if (users[userId] && users[userId].approved && users[userId].status !== 'banned') {
             currentUser = users[userId];
             playSound('sfx-poweron');
             showScreen('main-screen');
             
             if (userId === ADMIN_ID) {
                 document.getElementById('admin-toggle').classList.remove('hidden');
+                document.getElementById('admin-tabs').classList.remove('hidden');
                 loadPending('pending-list');
+                loadActiveUsers();
+                loadBannedUsers();
+                loadAnalytics();
+                loadRadioMessages();
                 loadPublishedTabs();
             }
             
             goToHome();
             
+        } else if (users[userId] && users[userId].status === 'banned') {
+            playSound('sfx-denied');
+            showStatus('ACCESS DENIED - ACCOUNT BANNED', true);
         } else if (!users[userId]) {
             const pendingData = await storage.get('arcs_pending');
             const pending = pendingData ? JSON.parse(pendingData.value) : [];
@@ -163,7 +171,13 @@ async function loadPending(elementId) {
 async function approve(id) {
     const users = await storage.get('arcs_users');
     const data = users ? JSON.parse(users.value) : {};
-    data[id] = { id, approved: true };
+    data[id] = { 
+        id, 
+        approved: true,
+        status: 'active',
+        name: `Operator_${id.slice(-4)}`,
+        createdAt: Date.now()
+    };
     await storage.set('arcs_users', JSON.stringify(data));
     
     const pending = await storage.get('arcs_pending');
@@ -173,6 +187,8 @@ async function approve(id) {
     playSound('sfx-blue');
     loadPending('pending-list');
     loadPending('pending-list-modal');
+    loadActiveUsers();
+    loadAnalytics();
 }
 
 async function deny(id) {
@@ -205,7 +221,13 @@ async function sendBroadcast() {
     playSound('sfx-sent');
     document.getElementById('broadcast-text').value = '';
     
+    const broadcastData = await storage.get('arcs_broadcasts');
+    const broadcasts = broadcastData ? JSON.parse(broadcastData.value) : [];
+    broadcasts.push({ text, sprite, timestamp: Date.now() });
+    await storage.set('arcs_broadcasts', JSON.stringify(broadcasts));
+    
     showBroadcast({ text, sprite });
+    loadAnalytics();
 }
 
 function showBroadcast(data) {
@@ -247,7 +269,15 @@ async function init() {
     try {
         const users = await storage.get('arcs_users');
         if (!users) {
-            await storage.set('arcs_users', JSON.stringify({ [ADMIN_ID]: { id: ADMIN_ID, approved: true } }));
+            await storage.set('arcs_users', JSON.stringify({ 
+                [ADMIN_ID]: { 
+                    id: ADMIN_ID, 
+                    approved: true,
+                    status: 'active',
+                    name: 'OBUNTO',
+                    createdAt: Date.now()
+                } 
+            }));
         }
         
         const pending = await storage.get('arcs_pending');
@@ -268,285 +298,112 @@ function setAlarmTheme(theme) {
     playSound('sfx-blue');
 }
 
-let editorElements = [];
-let currentElement = null;
-let dragElement = null;
-let dragOffsetX = 0;
-let dragOffsetY = 0;
-let welcomeData = {
-    title: 'WELCOME',
-    text: 'WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.'
-};
-
-function editWelcome() {
-    const modal = document.getElementById('element-editor-modal');
-    const typeSelect = document.getElementById('element-type');
-    const textOptions = document.getElementById('text-options');
-    const imageOptions = document.getElementById('image-options');
-    const tabOptions = document.getElementById('tab-options');
+function editWelcomeHome() {
+    const title = document.getElementById('home-welcome-title').textContent;
+    const text = document.getElementById('home-welcome-text').textContent;
     
-    typeSelect.value = 'text';
-    textOptions.classList.remove('hidden');
-    imageOptions.classList.add('hidden');
-    tabOptions.classList.add('hidden');
+    document.getElementById('welcome-title-input').value = title;
+    document.getElementById('welcome-text-input').value = text;
     
-    document.getElementById('element-text').value = `${welcomeData.title}\n\n${welcomeData.text}`;
-    
-    currentElement = { type: 'welcome' };
-    modal.classList.remove('hidden');
+    document.getElementById('edit-welcome-modal').classList.remove('hidden');
 }
 
-function addNewElement() {
-    currentElement = { 
-        id: Date.now().toString(),
-        type: 'text',
-        x: 50,
-        y: 50,
-        content: '',
-        image: null,
-        tabName: '',
-        tabContent: ''
-    };
-    
-    const modal = document.getElementById('element-editor-modal');
-    modal.classList.remove('hidden');
-    
-    updateElementType();
+function closeWelcomeModal() {
+    document.getElementById('edit-welcome-modal').classList.add('hidden');
 }
 
-function updateElementType() {
-    const type = document.getElementById('element-type').value;
-    const textOptions = document.getElementById('text-options');
-    const imageOptions = document.getElementById('image-options');
-    const tabOptions = document.getElementById('tab-options');
+async function saveWelcomeChanges() {
+    const title = document.getElementById('welcome-title-input').value;
+    const text = document.getElementById('welcome-text-input').value;
     
-    textOptions.classList.add('hidden');
-    imageOptions.classList.add('hidden');
-    tabOptions.classList.add('hidden');
+    document.getElementById('home-welcome-title').textContent = title;
+    document.getElementById('home-welcome-text').textContent = text;
     
-    if (type === 'text') {
-        textOptions.classList.remove('hidden');
-    } else if (type === 'image') {
-        imageOptions.classList.remove('hidden');
-    } else if (type === 'tab') {
-        tabOptions.classList.remove('hidden');
-    }
-}
-
-function uploadElementImage() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const preview = document.getElementById('image-preview');
-                preview.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 200px;">`;
-                if (currentElement) {
-                    currentElement.image = event.target.result;
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-    input.click();
-}
-
-function saveElement() {
-    if (!currentElement) return;
+    await storage.set('arcs_welcome', JSON.stringify({ title, text }));
     
-    if (currentElement.type === 'welcome') {
-        const text = document.getElementById('element-text').value;
-        const lines = text.split('\n').filter(l => l.trim());
-        welcomeData.title = lines[0] || 'WELCOME';
-        welcomeData.text = lines.slice(1).join(' ') || 'No message';
-        
-        document.querySelector('.welcome-title').textContent = welcomeData.title;
-        document.querySelector('.welcome-text').textContent = welcomeData.text;
-        
-        localStorage.setItem('arcs-welcome', JSON.stringify(welcomeData));
-        
-    } else {
-        const type = document.getElementById('element-type').value;
-        currentElement.type = type;
-        
-        if (type === 'text') {
-            currentElement.content = document.getElementById('element-text').value;
-        } else if (type === 'tab') {
-            currentElement.tabName = document.getElementById('tab-name').value;
-            currentElement.tabContent = document.getElementById('tab-content').value;
-        }
-        
-        const existing = editorElements.find(e => e.id === currentElement.id);
-        if (existing) {
-            Object.assign(existing, currentElement);
-        } else {
-            editorElements.push(currentElement);
-        }
-        
-        renderCanvas();
-        localStorage.setItem('arcs-editor-elements', JSON.stringify(editorElements));
-    }
-    
-    closeElementEditor();
+    closeWelcomeModal();
     playSound('sfx-sent');
 }
 
-function closeElementEditor() {
-    document.getElementById('element-editor-modal').classList.add('hidden');
-    currentElement = null;
+function addNewTab() {
+    document.getElementById('new-tab-modal').classList.remove('hidden');
 }
 
-function renderCanvas() {
-    const canvas = document.getElementById('editing-canvas');
-    const hint = canvas.querySelector('.canvas-hint');
-    if (hint && editorElements.length > 0) {
-        hint.remove();
-    }
-    
-    editorElements.forEach(elem => {
-        let existing = canvas.querySelector(`[data-elem-id="${elem.id}"]`);
-        if (!existing) {
-            existing = document.createElement('div');
-            existing.className = 'canvas-element';
-            existing.setAttribute('data-elem-id', elem.id);
-            existing.style.left = elem.x + 'px';
-            existing.style.top = elem.y + 'px';
-            
-            existing.addEventListener('mousedown', startDrag);
-            existing.addEventListener('dblclick', () => editElement(elem.id));
-            
-            canvas.appendChild(existing);
-        }
-        
-        if (elem.type === 'text') {
-            existing.innerHTML = `
-                <div class="element-content">${elem.content}</div>
-                <div class="element-controls">
-                    <button onclick="deleteElement('${elem.id}')">X</button>
-                </div>
-            `;
-        } else if (elem.type === 'image') {
-            existing.innerHTML = `
-                <img src="${elem.image}" class="element-image">
-                <div class="element-controls">
-                    <button onclick="deleteElement('${elem.id}')">X</button>
-                </div>
-            `;
-        } else if (elem.type === 'tab') {
-            existing.innerHTML = `
-                <div class="element-tab-preview">
-                    <div class="tab-preview-name">TAB: ${elem.tabName}</div>
-                </div>
-                <div class="element-controls">
-                    <button onclick="deleteElement('${elem.id}')">X</button>
-                </div>
-            `;
-        }
-    });
+function closeNewTabModal() {
+    document.getElementById('new-tab-modal').classList.add('hidden');
+    document.getElementById('new-tab-name').value = '';
+    document.getElementById('new-tab-content').value = '';
 }
 
-function startDrag(e) {
-    if (e.target.tagName === 'BUTTON') return;
-    
-    dragElement = e.currentTarget;
-    const rect = dragElement.getBoundingClientRect();
-    const canvasRect = document.getElementById('editing-canvas').getBoundingClientRect();
-    
-    dragOffsetX = e.clientX - rect.left;
-    dragOffsetY = e.clientY - rect.top;
-    
-    document.addEventListener('mousemove', doDrag);
-    document.addEventListener('mouseup', stopDrag);
-    
-    dragElement.style.opacity = '0.7';
-}
+let customTabs = [];
 
-function doDrag(e) {
-    if (!dragElement) return;
+async function saveNewTab() {
+    const name = document.getElementById('new-tab-name').value.trim();
+    const content = document.getElementById('new-tab-content').value.trim();
     
-    const canvas = document.getElementById('editing-canvas');
-    const canvasRect = canvas.getBoundingClientRect();
-    
-    let x = e.clientX - canvasRect.left - dragOffsetX;
-    let y = e.clientY - canvasRect.top - dragOffsetY;
-    
-    x = Math.max(0, Math.min(x, canvasRect.width - dragElement.offsetWidth));
-    y = Math.max(0, Math.min(y, canvasRect.height - dragElement.offsetHeight));
-    
-    dragElement.style.left = x + 'px';
-    dragElement.style.top = y + 'px';
-    
-    const elemId = dragElement.getAttribute('data-elem-id');
-    const elem = editorElements.find(e => e.id === elemId);
-    if (elem) {
-        elem.x = x;
-        elem.y = y;
-    }
-}
-
-function stopDrag() {
-    if (dragElement) {
-        dragElement.style.opacity = '1';
-        localStorage.setItem('arcs-editor-elements', JSON.stringify(editorElements));
-    }
-    dragElement = null;
-    document.removeEventListener('mousemove', doDrag);
-    document.removeEventListener('mouseup', stopDrag);
-}
-
-function editElement(id) {
-    currentElement = editorElements.find(e => e.id === id);
-    if (!currentElement) return;
-    
-    const modal = document.getElementById('element-editor-modal');
-    document.getElementById('element-type').value = currentElement.type;
-    
-    updateElementType();
-    
-    if (currentElement.type === 'text') {
-        document.getElementById('element-text').value = currentElement.content;
-    } else if (currentElement.type === 'image') {
-        const preview = document.getElementById('image-preview');
-        preview.innerHTML = `<img src="${currentElement.image}" style="max-width: 100%; max-height: 200px;">`;
-    } else if (currentElement.type === 'tab') {
-        document.getElementById('tab-name').value = currentElement.tabName;
-        document.getElementById('tab-content').value = currentElement.tabContent;
-    }
-    
-    modal.classList.remove('hidden');
-}
-
-function deleteElement(id) {
-    if (confirm('Delete this element?')) {
-        editorElements = editorElements.filter(e => e.id !== id);
-        const elem = document.querySelector(`[data-elem-id="${id}"]`);
-        if (elem) elem.remove();
-        
-        localStorage.setItem('arcs-editor-elements', JSON.stringify(editorElements));
-        playSound('sfx-denied');
-    }
-}
-
-function publishChanges() {
-    const tabs = editorElements.filter(e => e.type === 'tab');
-    
-    if (tabs.length === 0) {
-        alert('NO TABS TO PUBLISH');
+    if (!name || !content) {
+        playSound('sfx-error');
         return;
     }
     
-    localStorage.setItem('arcs-published-tabs', JSON.stringify(tabs));
+    const tab = {
+        id: Date.now().toString(),
+        name,
+        content,
+        created: Date.now()
+    };
+    
+    customTabs.push(tab);
+    await storage.set('arcs_custom_tabs', JSON.stringify(customTabs));
+    
+    closeNewTabModal();
+    playSound('sfx-sent');
+    
+    renderCustomTabsInEditor();
+}
+
+function renderCustomTabsInEditor() {
+    const canvas = document.getElementById('editing-canvas');
+    canvas.innerHTML = '<div class="canvas-hint">TABS CREATED. CLICK PUBLISH TO ADD TO MENU.</div>';
+    
+    customTabs.forEach((tab, index) => {
+        const item = document.createElement('div');
+        item.className = 'tab-preview-item';
+        item.innerHTML = `
+            <div class="tab-preview-name">${tab.name}</div>
+            <div class="tab-preview-actions">
+                <button onclick="deleteCustomTab('${tab.id}')">DELETE</button>
+            </div>
+        `;
+        canvas.appendChild(item);
+    });
+}
+
+async function deleteCustomTab(id) {
+    if (!confirm('Delete this tab?')) return;
+    
+    customTabs = customTabs.filter(t => t.id !== id);
+    await storage.set('arcs_custom_tabs', JSON.stringify(customTabs));
+    
+    renderCustomTabsInEditor();
+    playSound('sfx-denied');
+}
+
+async function publishTabs() {
+    if (customTabs.length === 0) {
+        playSound('sfx-error');
+        return;
+    }
+    
+    await storage.set('arcs_published_tabs', JSON.stringify(customTabs));
     loadPublishedTabs();
     
     playSound('sfx-blue');
-    alert(`${tabs.length} TAB(S) PUBLISHED TO MENU`);
+    alert(`${customTabs.length} TAB(S) PUBLISHED TO MENU`);
 }
 
 function loadPublishedTabs() {
-    const saved = localStorage.getItem('arcs-published-tabs');
+    const saved = localStorage.getItem('arcs_published_tabs');
     if (!saved) return;
     
     const tabs = JSON.parse(saved);
@@ -556,7 +413,7 @@ function loadPublishedTabs() {
     tabs.forEach(tab => {
         const tabEl = document.createElement('div');
         tabEl.className = 'tab';
-        tabEl.textContent = tab.tabName;
+        tabEl.textContent = tab.name;
         tabEl.onclick = () => showCustomTab(tab);
         menuContainer.appendChild(tabEl);
     });
@@ -575,30 +432,257 @@ function showCustomTab(tab) {
     
     customContent.innerHTML = `
         <div class="custom-tab-content">
-            <div class="custom-tab-title">${tab.tabName}</div>
-            <div class="custom-tab-body">${tab.tabContent}</div>
+            <div class="custom-tab-title">${tab.name}</div>
+            <div class="custom-tab-body">${tab.content}</div>
         </div>
     `;
     
     customContent.classList.add('active');
 }
 
-function loadEditor() {
-    const saved = localStorage.getItem('arcs-editor-elements');
-    if (saved) {
-        editorElements = JSON.parse(saved);
-        renderCanvas();
+async function sendRadioMessage() {
+    const input = document.getElementById('radio-input');
+    const message = input.value.trim();
+    
+    if (!message) {
+        playSound('sfx-error');
+        return;
     }
     
-    const savedWelcome = localStorage.getItem('arcs-welcome');
-    if (savedWelcome) {
-        welcomeData = JSON.parse(savedWelcome);
-        const titleEl = document.querySelector('.welcome-title');
-        const textEl = document.querySelector('.welcome-text');
-        if (titleEl) titleEl.textContent = welcomeData.title;
-        if (textEl) textEl.textContent = welcomeData.text;
+    const radioData = await storage.get('arcs_radio_messages');
+    const messages = radioData ? JSON.parse(radioData.value) : [];
+    
+    messages.push({
+        user: currentUser ? currentUser.name : 'Unknown',
+        text: message,
+        timestamp: Date.now()
+    });
+    
+    await storage.set('arcs_radio_messages', JSON.stringify(messages));
+    
+    input.value = '';
+    loadRadioMessages();
+    playSound('sfx-sent');
+    loadAnalytics();
+}
+
+function loadRadioMessages() {
+    const saved = localStorage.getItem('arcs_radio_messages');
+    if (!saved) return;
+    
+    const messages = JSON.parse(saved);
+    const container = document.getElementById('radio-messages');
+    container.innerHTML = '';
+    
+    messages.forEach((msg, index) => {
+        const div = document.createElement('div');
+        div.className = 'radio-message';
+        const time = new Date(msg.timestamp).toLocaleTimeString();
+        div.innerHTML = `
+            <span class="radio-message-time">[${time}]</span>
+            <span class="radio-message-user">${msg.user}:</span>
+            <span class="radio-message-text">${msg.text}</span>
+            <button class="radio-delete-btn" onclick="deleteRadioMessage(${index})">X</button>
+        `;
+        container.appendChild(div);
+    });
+    
+    container.scrollTop = container.scrollHeight;
+}
+
+async function deleteRadioMessage(index) {
+    const radioData = await storage.get('arcs_radio_messages');
+    const messages = radioData ? JSON.parse(radioData.value) : [];
+    
+    messages.splice(index, 1);
+    await storage.set('arcs_radio_messages', JSON.stringify(messages));
+    
+    loadRadioMessages();
+    playSound('sfx-denied');
+}
+
+async function clearRadioMessages() {
+    if (!confirm('Clear all radio messages?')) return;
+    
+    await storage.set('arcs_radio_messages', JSON.stringify([]));
+    loadRadioMessages();
+    playSound('sfx-denied');
+}
+
+function showUsersSection(section) {
+    document.querySelectorAll('.users-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.users-section').forEach(s => s.classList.add('hidden'));
+    
+    if (section === 'active') {
+        document.querySelector('.users-tab:first-child').classList.add('active');
+        document.getElementById('users-active-section').classList.remove('hidden');
+    } else {
+        document.querySelector('.users-tab:last-child').classList.add('active');
+        document.getElementById('users-banned-section').classList.remove('hidden');
     }
 }
+
+async function loadActiveUsers() {
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    const container = document.getElementById('active-users-list');
+    container.innerHTML = '';
+    
+    Object.values(users).filter(u => u.status !== 'banned').forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        div.innerHTML = `
+            <div class="user-info">
+                <div class="user-name">${user.name || user.id}</div>
+                <div class="user-id">ID: ${user.id}</div>
+            </div>
+            <div class="user-actions">
+                <button onclick="editUser('${user.id}')">EDIT</button>
+                ${user.id !== ADMIN_ID ? `<button onclick="banUser('${user.id}')">BAN</button>` : ''}
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function loadBannedUsers() {
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    const container = document.getElementById('banned-users-list');
+    container.innerHTML = '';
+    
+    const banned = Object.values(users).filter(u => u.status === 'banned');
+    
+    if (banned.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:#666;">NO BANNED USERS</div>';
+        return;
+    }
+    
+    banned.forEach(user => {
+        const div = document.createElement('div');
+        div.className = 'banned-item';
+        div.innerHTML = `
+            <div class="user-info">
+                <div class="user-name">${user.name || user.id}</div>
+                <div class="user-id">ID: ${user.id}</div>
+            </div>
+            <div class="user-actions">
+                <button onclick="unbanUser('${user.id}')">UNBAN</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+let editingUserId = null;
+
+function editUser(userId) {
+    const usersData = localStorage.getItem('arcs_users');
+    const users = usersData ? JSON.parse(usersData) : {};
+    const user = users[userId];
+    
+    if (!user) return;
+    
+    editingUserId = userId;
+    document.getElementById('edit-user-id').value = userId;
+    document.getElementById('edit-user-name').value = user.name || userId;
+    document.getElementById('edit-user-status').value = user.status || 'active';
+    
+    document.getElementById('edit-user-modal').classList.remove('hidden');
+}
+
+function closeEditUserModal() {
+    document.getElementById('edit-user-modal').classList.add('hidden');
+    editingUserId = null;
+}
+
+async function saveUserChanges() {
+    if (!editingUserId) return;
+    
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    if (users[editingUserId]) {
+        users[editingUserId].name = document.getElementById('edit-user-name').value;
+        users[editingUserId].status = document.getElementById('edit-user-status').value;
+        
+        await storage.set('arcs_users', JSON.stringify(users));
+        
+        loadActiveUsers();
+        loadBannedUsers();
+        closeEditUserModal();
+        playSound('sfx-sent');
+    }
+}
+
+async function banUser(userId) {
+    if (!confirm('Ban this user?')) return;
+    
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    if (users[userId]) {
+        users[userId].status = 'banned';
+        await storage.set('arcs_users', JSON.stringify(users));
+        
+        loadActiveUsers();
+        loadBannedUsers();
+        playSound('sfx-denied');
+    }
+}
+
+async function unbanUser(userId) {
+    if (!confirm('Unban this user?')) return;
+    
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    if (users[userId]) {
+        users[userId].status = 'active';
+        await storage.set('arcs_users', JSON.stringify(users));
+        
+        loadActiveUsers();
+        loadBannedUsers();
+        playSound('sfx-blue');
+    }
+}
+
+async function loadAnalytics() {
+    const usersData = await storage.get('arcs_users');
+    const users = usersData ? JSON.parse(usersData.value) : {};
+    
+    const broadcastData = await storage.get('arcs_broadcasts');
+    const broadcasts = broadcastData ? JSON.parse(broadcastData.value) : [];
+    
+    const radioData = await storage.get('arcs_radio_messages');
+    const radioMsgs = radioData ? JSON.parse(radioData.value) : [];
+    
+    document.getElementById('analytics-total-users').textContent = Object.keys(users).length;
+    document.getElementById('analytics-active-sessions').textContent = Object.values(users).filter(u => u.status === 'active').length;
+    document.getElementById('analytics-broadcasts').textContent = broadcasts.length;
+    document.getElementById('analytics-radio-msgs').textContent = radioMsgs.length;
+}
+
+async function loadEditor() {
+    const saved = localStorage.getItem('arcs_custom_tabs');
+    if (saved) {
+        customTabs = JSON.parse(saved);
+        renderCustomTabsInEditor();
+    }
+    
+    const savedWelcome = localStorage.getItem('arcs_welcome');
+    if (savedWelcome) {
+        const welcome = JSON.parse(savedWelcome);
+        document.getElementById('home-welcome-title').textContent = welcome.title;
+        document.getElementById('home-welcome-text').textContent = welcome.text;
+    }
+}
+
+document.getElementById('radio-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendRadioMessage();
+});
 
 window.addEventListener('load', async () => {
     await init();

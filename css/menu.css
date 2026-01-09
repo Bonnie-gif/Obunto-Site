@@ -62,10 +62,6 @@
     display: none;
 }
 
-.menu-tabs.hidden {
-    display: none;
-}
-
 .tab {
     background: var(--color-bg-primary, #E0D8C0);
     color: var(--color-text-secondary, #4A4A4A);

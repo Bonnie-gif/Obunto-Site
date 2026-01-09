@@ -109,6 +109,8 @@
                     <div class="tab" data-target="adm-tickets">TICKETS</div>
                     <div class="tab" data-target="adm-radio">RADIO</div>
                     <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                    <div class="tab" data-target="adm-users">USERS</div>
+                    <div class="tab" data-target="adm-analytics">ANALYTICS</div>
                     <div id="custom-menu-tabs"></div>
                 </div>
             </div>
@@ -117,9 +119,9 @@
                 <div class="banner-section">
                     <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
                 </div>
-                <div class="home-welcome" id="home-welcome">
-                    <div class="welcome-title">WELCOME</div>
-                    <div class="welcome-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                <div class="home-welcome" id="home-welcome-section">
+                    <div class="welcome-title" id="home-welcome-title">WELCOME</div>
+                    <div class="welcome-text" id="home-welcome-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
                 </div>
             </div>
 
@@ -150,9 +152,41 @@
                                     <img src="assets/sprites/annoyed.png" alt="Annoyed">
                                     <span>Annoyed</span>
                                 </div>
+                                <div class="sprite-option" data-sprite="bug">
+                                    <img src="assets/sprites/bug.png" alt="Bug">
+                                    <span>Bug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="dizzy">
+                                    <img src="assets/sprites/dizzy.png" alt="Dizzy">
+                                    <span>Dizzy</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="hollow">
+                                    <img src="assets/sprites/hollow.png" alt="Hollow">
+                                    <span>Hollow</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="panic">
+                                    <img src="assets/sprites/panic.png" alt="Panic">
+                                    <span>Panic</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="sleeping">
+                                    <img src="assets/sprites/sleeping.png" alt="Sleeping">
+                                    <span>Sleeping</span>
+                                </div>
                                 <div class="sprite-option" data-sprite="smug">
                                     <img src="assets/sprites/smug.png" alt="Smug">
                                     <span>Smug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="stare">
+                                    <img src="assets/sprites/stare.png" alt="Stare">
+                                    <span>Stare</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="suspicious">
+                                    <img src="assets/sprites/suspicious.png" alt="Suspicious">
+                                    <span>Suspicious</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="werror">
+                                    <img src="assets/sprites/werror.png" alt="W.Error">
+                                    <span>W.Error</span>
                                 </div>
                             </div>
                             <input type="hidden" id="sprite-select" value="normal">
@@ -175,13 +209,13 @@
                     <div class="editing-toolbar">
                         <div class="toolbar-title">CONTENT EDITOR</div>
                         <div class="toolbar-actions">
-                            <button class="toolbar-btn" onclick="editWelcome()">EDIT WELCOME</button>
-                            <button class="toolbar-btn" onclick="addNewElement()">+ ADD ELEMENT</button>
-                            <button class="toolbar-btn primary" onclick="publishChanges()">PUBLISH</button>
+                            <button class="toolbar-btn" onclick="editWelcomeHome()">EDIT WELCOME</button>
+                            <button class="toolbar-btn" onclick="addNewTab()">+ NEW TAB</button>
+                            <button class="toolbar-btn primary" onclick="publishTabs()">PUBLISH</button>
                         </div>
                     </div>
                     <div class="editing-canvas" id="editing-canvas">
-                        <div class="canvas-hint">CLICK "ADD ELEMENT" TO START CREATING CONTENT</div>
+                        <div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>
                     </div>
                 </div>
             </div>
@@ -258,20 +292,96 @@
             </div>
 
             <div id="adm-radio" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell updates-cell">
-                        <div class="cell-header">RADIO FREQUENCY</div>
-                        <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
+                <div class="radio-fullwidth">
+                    <div class="cell-header">RADIO COMMUNICATIONS</div>
+                    <div class="radio-header">
+                        <div class="radio-frequency">FREQUENCY: 99.4 MHz</div>
+                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR ALL</button>
+                    </div>
+                    <div class="radio-status">
+                        <div class="radio-status-indicator"></div>
+                        <span>CHANNEL ACTIVE</span>
+                    </div>
+                    <div class="radio-messages" id="radio-messages">
+                    </div>
+                    <div class="radio-input-area">
+                        <input type="text" id="radio-input" placeholder="Type message...">
+                        <button onclick="sendRadioMessage()">SEND</button>
                     </div>
                 </div>
             </div>
 
             <div id="adm-credentials" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell news-cell">
-                        <div class="cell-header">ADMIN ID</div>
-                        <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
+                <div class="credentials-fullwidth">
+                    <div class="cell-header">ADMINISTRATOR CREDENTIALS</div>
+                    <div class="credentials-card">
+                        <div class="credentials-header">
+                            <div class="credentials-logo">ARCS</div>
+                            <div class="credentials-level">LEVEL: OMEGA</div>
+                        </div>
+                        <div class="credentials-body">
+                            <div class="credentials-field">
+                                <span class="field-label">NAME:</span>
+                                <span class="field-value">OBUNTO</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">ID:</span>
+                                <span class="field-value">118107921024376</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">CLEARANCE:</span>
+                                <span class="field-value">GOLD</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">DIVISION:</span>
+                                <span class="field-value">SYSTEM ADMINISTRATION</span>
+                            </div>
+                        </div>
+                        <div class="credentials-footer">
+                            AUTHORIZED ACCESS TO ALL FACILITIES
+                        </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="adm-users" class="tab-content">
+                <div class="users-fullwidth">
+                    <div class="cell-header">USER MANAGEMENT</div>
+                    <div class="users-tabs">
+                        <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE USERS</div>
+                        <div class="users-tab" onclick="showUsersSection('banned')">BANNED USERS</div>
+                    </div>
+                    <div id="users-active-section" class="users-section">
+                        <div id="active-users-list"></div>
+                    </div>
+                    <div id="users-banned-section" class="users-section hidden">
+                        <div id="banned-users-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-analytics" class="tab-content">
+                <div class="analytics-fullwidth">
+                    <div class="cell-header">SYSTEM ANALYTICS</div>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-label">TOTAL USERS</div>
+                            <div class="analytics-value" id="analytics-total-users">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">ACTIVE SESSIONS</div>
+                            <div class="analytics-value" id="analytics-active-sessions">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">BROADCASTS SENT</div>
+                            <div class="analytics-value" id="analytics-broadcasts">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">RADIO MESSAGES</div>
+                            <div class="analytics-value" id="analytics-radio-msgs">0</div>
+                        </div>
+                    </div>
+                    <div class="analytics-logs" id="analytics-logs"></div>
                 </div>
             </div>
         </div>
@@ -302,46 +412,69 @@
         </div>
     </div>
 
-    <div id="element-editor-modal" class="modal hidden">
+    <div id="edit-welcome-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
-                <span>EDIT ELEMENT</span>
-                <div class="modal-close" onclick="closeElementEditor()">X</div>
+                <span>EDIT WELCOME SCREEN</span>
+                <div class="modal-close" onclick="closeWelcomeModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
-                    <label class="editor-label">Element Type</label>
-                    <select id="element-type" class="editor-select" onchange="updateElementType()">
-                        <option value="text">Text</option>
-                        <option value="image">Image</option>
-                        <option value="tab">New Tab</option>
+                    <label class="editor-label">Title</label>
+                    <input type="text" id="welcome-title-input" class="editor-input" value="WELCOME">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">Message</label>
+                    <textarea id="welcome-text-input" class="editor-textarea">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</textarea>
+                </div>
+                <button class="form-submit-btn" onclick="saveWelcomeChanges()">SAVE CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="new-tab-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>CREATE NEW TAB</span>
+                <div class="modal-close" onclick="closeNewTabModal()">X</div>
+            </div>
+            <div class="modal-body">
+                <div class="editor-field">
+                    <label class="editor-label">Tab Name</label>
+                    <input type="text" id="new-tab-name" class="editor-input" placeholder="Enter tab name...">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">Tab Content</label>
+                    <textarea id="new-tab-content" class="editor-textarea" placeholder="Enter content..."></textarea>
+                </div>
+                <button class="form-submit-btn" onclick="saveNewTab()">CREATE TAB</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>EDIT USER</span>
+                <div class="modal-close" onclick="closeEditUserModal()">X</div>
+            </div>
+            <div class="modal-body">
+                <div class="editor-field">
+                    <label class="editor-label">User ID</label>
+                    <input type="text" id="edit-user-id" class="editor-input" readonly>
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">Display Name</label>
+                    <input type="text" id="edit-user-name" class="editor-input">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">Status</label>
+                    <select id="edit-user-status" class="editor-select">
+                        <option value="active">Active</option>
+                        <option value="banned">Banned</option>
                     </select>
                 </div>
-                <div id="text-options">
-                    <div class="editor-field">
-                        <label class="editor-label">Text Content</label>
-                        <textarea id="element-text" class="editor-textarea"></textarea>
-                    </div>
-                </div>
-                <div id="image-options" class="hidden">
-                    <div class="editor-field">
-                        <label class="editor-label">Image</label>
-                        <div class="image-upload-zone" onclick="uploadElementImage()">
-                            <div id="image-preview">CLICK TO UPLOAD</div>
-                        </div>
-                    </div>
-                </div>
-                <div id="tab-options" class="hidden">
-                    <div class="editor-field">
-                        <label class="editor-label">Tab Name</label>
-                        <input type="text" id="tab-name" class="editor-input">
-                    </div>
-                    <div class="editor-field">
-                        <label class="editor-label">Tab Content</label>
-                        <textarea id="tab-content" class="editor-textarea"></textarea>
-                    </div>
-                </div>
-                <button class="form-submit-btn" onclick="saveElement()">SAVE</button>
+                <button class="form-submit-btn" onclick="saveUserChanges()">SAVE CHANGES</button>
             </div>
         </div>
     </div>
