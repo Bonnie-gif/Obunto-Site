@@ -4,8 +4,12 @@ const { Server } = require('socket.io');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const Joi = require('joi');
 const multer = require('multer');
+const rateLimit = require('express-rate-limit');
+const CryptoJS = require('crypto-js');
+const winston = require('winston');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,6 +18,24 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const JWT_SECRET = process.env.JWT_SECRET || 'arcs_secret_key_v322_ultra_secure';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'arcs_encryption_key_v322';
+const PEPPER = process.env.PEPPER || 'arcs_pepper_2041';
+const SALT_ROUNDS = 12;
+
+const logger = winston.createLogger({
+    transports: [
+        new winston.transports.File({ filename: 'security.log' }),
+        new winston.transports.Console()
+    ]
+});
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: 'Too many login attempts, try again later'
+});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -44,25 +66,48 @@ let dataStore = {
     tickets: [],
     alarms: [],
     radioMessages: {},
-    onlineUsers: {}
+    onlineUsers: {},
+    bannedUsers: {},
+    userDevices: {},
+    userAnalytics: {}
 };
+
+function encryptData(data) {
+    return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+}
+
+function decryptData(encrypted) {
+    try {
+        const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
+        return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    } catch (e) {
+        return null;
+    }
+}
 
 function saveData() {
     try {
-        fs.writeFileSync(DATA_FILE, JSON.stringify(dataStore, null, 2));
+        fs.writeFileSync(DATA_FILE, encryptData(dataStore));
     } catch (e) {
-        console.error('Error saving data:', e);
+        logger.error('Error saving data:', e);
     }
 }
 
 function loadData() {
     if (fs.existsSync(DATA_FILE)) {
         try {
-            dataStore = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-            if (!dataStore.radioMessages) dataStore.radioMessages = {};
-            if (!dataStore.onlineUsers) dataStore.onlineUsers = {};
+            const encrypted = fs.readFileSync(DATA_FILE, 'utf8');
+            const decrypted = decryptData(encrypted);
+            if (decrypted) {
+                dataStore = decrypted;
+                if (!dataStore.radioMessages) dataStore.radioMessages = {};
+                if (!dataStore.onlineUsers) dataStore.onlineUsers = {};
+                if (!dataStore.bannedUsers) dataStore.bannedUsers = {};
+                if (!dataStore.userDevices) dataStore.userDevices = {};
+                if (!dataStore.userAnalytics) dataStore.userAnalytics = {};
+            }
         } catch (e) {
-            console.error('Error loading data:', e);
+            logger.error('Error loading data:', e);
         }
     }
 }
@@ -70,7 +115,7 @@ function loadData() {
 loadData();
 
 if (!dataStore.users[ADMIN_ID]) {
-    const hashedPassword = bcrypt.hashSync('admin123', 10);
+    const hashedPassword = bcrypt.hashSync('2041' + PEPPER + ADMIN_ID, SALT_ROUNDS);
     dataStore.users[ADMIN_ID] = {
         id: ADMIN_ID,
         name: 'Obunto',
@@ -86,10 +131,15 @@ if (!dataStore.users[ADMIN_ID]) {
 const schemas = {
     login: Joi.object({
         userId: Joi.string().min(5).max(20).required(),
-        password: Joi.string().min(3).max(50).allow('').optional()
+        password: Joi.string().min(3).max(50).allow('').optional(),
+        deviceInfo: Joi.object({
+            userAgent: Joi.string().optional(),
+            platform: Joi.string().optional()
+        }).optional()
     }),
     createAccount: Joi.object({
-        userId: Joi.string().min(5).max(20).required()
+        userId: Joi.string().min(5).max(20).required(),
+        password: Joi.string().min(4).max(50).required()
     }),
     broadcast: Joi.object({
         message: Joi.string().min(1).max(500).required(),
@@ -113,6 +163,12 @@ const schemas = {
             name: Joi.string().min(3).max(50).optional(),
             avatar: Joi.string().optional()
         }).required()
+    }),
+    banUser: Joi.object({
+        userId: Joi.string().required(),
+        reason: Joi.string().min(5).max(200).required(),
+        duration: Joi.number().optional(),
+        adminId: Joi.string().required()
     })
 };
 
@@ -125,29 +181,134 @@ function validateInput(data, schema) {
 }
 
 function errorHandler(err, req, res, next) {
-    console.error('Error:', err);
+    logger.error('Error:', err);
     res.status(err.status || 500).json({
         success: false,
         message: err.message || 'Internal server error'
     });
 }
 
-async function verifyUserCredentials(userId, password) {
-    const user = dataStore.users[userId];
-    if (!user || !user.password) return false;
-    return await bcrypt.compare(password, user.password);
+function generateToken(userId) {
+    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
 }
 
-app.post('/api/login', async (req, res, next) => {
+function authenticateToken(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'No token' });
+    
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ success: false, message: 'Invalid token' });
+        req.user = user;
+        next();
+    });
+}
+
+async function hashPassword(password, userId) {
+    return await bcrypt.hash(password + PEPPER + userId, SALT_ROUNDS);
+}
+
+async function verifyPassword(input, storedHash, userId) {
+    return await bcrypt.compare(input + PEPPER + userId, storedHash);
+}
+
+function checkIfBanned(userId) {
+    const ban = dataStore.bannedUsers[userId];
+    if (!ban || !ban.active) return null;
+    
+    if (ban.duration && Date.now() > ban.bannedAt + ban.duration) {
+        ban.active = false;
+        saveData();
+        return null;
+    }
+    
+    return ban;
+}
+
+function registerDevice(userId, deviceInfo) {
+    if (!dataStore.userDevices[userId]) {
+        dataStore.userDevices[userId] = [];
+    }
+    
+    const deviceId = deviceInfo.userAgent + deviceInfo.platform;
+    const existing = dataStore.userDevices[userId].find(d => d.id === deviceId);
+    
+    if (!existing) {
+        dataStore.userDevices[userId].push({
+            id: deviceId,
+            userAgent: deviceInfo.userAgent,
+            platform: deviceInfo.platform,
+            firstSeen: new Date().toISOString(),
+            lastSeen: new Date().toISOString()
+        });
+    } else {
+        existing.lastSeen = new Date().toISOString();
+    }
+    
+    saveData();
+}
+
+function trackActivity(userId, action) {
+    if (!dataStore.userAnalytics[userId]) {
+        dataStore.userAnalytics[userId] = {
+            logins: 0,
+            messagesSent: 0,
+            broadcastsSent: 0,
+            ticketsCreated: 0,
+            lastActivity: null,
+            activities: []
+        };
+    }
+    
+    const analytics = dataStore.userAnalytics[userId];
+    
+    switch(action) {
+        case 'login':
+            analytics.logins++;
+            break;
+        case 'message':
+            analytics.messagesSent++;
+            break;
+        case 'broadcast':
+            analytics.broadcastsSent++;
+            break;
+        case 'ticket':
+            analytics.ticketsCreated++;
+            break;
+    }
+    
+    analytics.lastActivity = new Date().toISOString();
+    analytics.activities.push({
+        action,
+        timestamp: new Date().toISOString()
+    });
+    
+    if (analytics.activities.length > 100) {
+        analytics.activities.shift();
+    }
+    
+    saveData();
+}
+
+app.post('/api/login', loginLimiter, async (req, res, next) => {
     try {
-        const { userId, password } = validateInput(req.body, schemas.login);
+        const { userId, password, deviceInfo } = validateInput(req.body, schemas.login);
+        
+        const ban = checkIfBanned(userId);
+        if (ban) {
+            logger.warn(`Banned user attempted login: ${userId}`);
+            return res.status(403).json({ 
+                success: false, 
+                message: `Account banned: ${ban.reason}` 
+            });
+        }
         
         const user = dataStore.users[userId];
         
         if (!user) {
+            logger.warn(`Failed login attempt for non-existent user: ${userId} from IP: ${req.ip}`);
             return res.status(404).json({ 
                 success: false, 
-                message: 'User not found' 
+                message: 'User not found. Click "NEW OPERATOR?" to request access.' 
             });
         }
         
@@ -159,14 +320,21 @@ app.post('/api/login', async (req, res, next) => {
         }
         
         if (user.password && password) {
-            const validPassword = await verifyUserCredentials(userId, password);
+            const validPassword = await verifyPassword(password, user.password, userId);
             if (!validPassword) {
+                logger.warn(`Failed password for userId: ${userId} from IP: ${req.ip}`);
                 return res.status(401).json({ 
                     success: false, 
                     message: 'Invalid password' 
                 });
             }
         }
+        
+        if (deviceInfo) {
+            registerDevice(userId, deviceInfo);
+        }
+        
+        trackActivity(userId, 'login');
         
         dataStore.onlineUsers[userId] = {
             userId,
@@ -175,10 +343,13 @@ app.post('/api/login', async (req, res, next) => {
         };
         saveData();
         
+        const token = generateToken(userId);
+        
         io.emit('user_online', { userId, name: user.name });
         
         res.json({
             success: true,
+            token,
             userData: {
                 id: user.id,
                 name: user.name,
@@ -191,36 +362,185 @@ app.post('/api/login', async (req, res, next) => {
     }
 });
 
-app.post('/api/create-account', (req, res, next) => {
+app.post('/api/create-account', loginLimiter, async (req, res, next) => {
     try {
-        const { userId } = validateInput(req.body, schemas.createAccount);
+        const { userId, password } = validateInput(req.body, schemas.createAccount);
         
         if (dataStore.users[userId]) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'User already exists' 
+                message: 'User ID already exists' 
             });
         }
         
-        if (dataStore.pendingUsers.includes(userId)) {
+        if (dataStore.pendingUsers.find(p => p.userId === userId)) {
             return res.status(400).json({ 
                 success: false, 
                 message: 'Already pending approval' 
             });
         }
         
-        dataStore.pendingUsers.push(userId);
+        const hashedPassword = await hashPassword(password, userId);
+        
+        dataStore.pendingUsers.push({
+            userId,
+            password: hashedPassword,
+            requestedAt: new Date().toISOString()
+        });
         saveData();
         
         io.emit('pending_update', dataStore.pendingUsers);
         
-        res.json({ success: true, message: 'Account request sent' });
+        logger.info(`New account request: ${userId}`);
+        
+        res.json({ 
+            success: true, 
+            message: 'Account request sent. Please wait for admin approval.' 
+        });
     } catch (error) {
         next(error);
     }
 });
 
-app.get('/api/users', (req, res) => {
+app.get('/api/pending', (req, res) => {
+    const pending = dataStore.pendingUsers.map(p => p.userId);
+    res.json({ pending });
+});
+
+app.post('/api/approve', authenticateToken, async (req, res, next) => {
+    try {
+        const { userId, adminId } = req.body;
+        
+        if (adminId !== ADMIN_ID) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Not authorized' 
+            });
+        }
+        
+        const pendingUser = dataStore.pendingUsers.find(p => p.userId === userId);
+        if (!pendingUser) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not in pending list' 
+            });
+        }
+        
+        dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== userId);
+        
+        dataStore.users[userId] = {
+            id: userId,
+            name: `Operator_${userId.slice(-4)}`,
+            password: pendingUser.password,
+            approved: true,
+            isAdmin: false,
+            avatar: 'assets/sprites/normal.png',
+            createdAt: new Date().toISOString()
+        };
+        saveData();
+        
+        io.emit('pending_update', dataStore.pendingUsers.map(p => p.userId));
+        io.emit('user_approved', { userId });
+        
+        logger.info(`User approved: ${userId}`);
+        
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/deny', authenticateToken, (req, res, next) => {
+    try {
+        const { userId, adminId } = req.body;
+        
+        if (adminId !== ADMIN_ID) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Not authorized' 
+            });
+        }
+        
+        dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== userId);
+        saveData();
+        
+        io.emit('pending_update', dataStore.pendingUsers.map(p => p.userId));
+        
+        logger.info(`User denied: ${userId}`);
+        
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/ban-user', authenticateToken, (req, res, next) => {
+    try {
+        const validData = validateInput(req.body, schemas.banUser);
+        
+        if (validData.adminId !== ADMIN_ID) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Not authorized' 
+            });
+        }
+        
+        if (validData.userId === ADMIN_ID) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Cannot ban admin' 
+            });
+        }
+        
+        dataStore.bannedUsers[validData.userId] = {
+            reason: validData.reason,
+            duration: validData.duration,
+            bannedAt: Date.now(),
+            bannedBy: ADMIN_ID,
+            active: true
+        };
+        
+        if (dataStore.onlineUsers[validData.userId]) {
+            delete dataStore.onlineUsers[validData.userId];
+        }
+        
+        saveData();
+        
+        io.emit('user_banned', { 
+            userId: validData.userId, 
+            reason: validData.reason 
+        });
+        
+        logger.info(`User banned: ${validData.userId} - Reason: ${validData.reason}`);
+        
+        res.json({ success: true });
+    } catch (error) {
+        next(error);
+    }
+});
+
+app.post('/api/unban-user', authenticateToken, (req, res) => {
+    const { userId, adminId } = req.body;
+    
+    if (adminId !== ADMIN_ID) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Not authorized' 
+        });
+    }
+    
+    if (dataStore.bannedUsers[userId]) {
+        dataStore.bannedUsers[userId].active = false;
+        saveData();
+        
+        io.emit('user_unbanned', userId);
+        logger.info(`User unbanned: ${userId}`);
+    }
+    
+    res.json({ success: true });
+});
+
+app.get('/api/banned-users', authenticateToken, (req, res) => {
     const { adminId } = req.query;
     
     if (adminId !== ADMIN_ID) {
@@ -230,92 +550,105 @@ app.get('/api/users', (req, res) => {
         });
     }
     
-    const activeUsers = Object.values(dataStore.users)
-        .filter(u => u.approved)
-        .map(u => ({
-            id: u.id,
-            name: u.name,
-            isAdmin: u.isAdmin,
-            avatar: u.avatar,
-            isOnline: !!dataStore.onlineUsers[u.id]
+    const banned = Object.entries(dataStore.bannedUsers)
+        .filter(([_, ban]) => ban.active)
+        .map(([userId, ban]) => ({
+            userId,
+            ...ban
         }));
     
-    res.json({ success: true, users: activeUsers });
+    res.json({ success: true, banned });
 });
 
-app.get('/api/pending', (req, res) => {
-    res.json({ pending: dataStore.pendingUsers });
-});
-
-app.post('/api/approve', (req, res, next) => {
-    try {
-        const { userId, adminId } = req.body;
-        
-        if (adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        const index = dataStore.pendingUsers.indexOf(userId);
-        if (index === -1) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not in pending list' 
-            });
-        }
-        
-        dataStore.pendingUsers.splice(index, 1);
-        const tempPassword = 'temp' + Math.random().toString(36).slice(2);
-        const hashedPassword = bcrypt.hashSync(tempPassword, 10);
-        
-        dataStore.users[userId] = {
-            id: userId,
-            name: `Operator_${userId.slice(-4)}`,
-            password: hashedPassword,
-            approved: true,
-            isAdmin: false,
-            avatar: 'assets/sprites/normal.png',
-            createdAt: new Date().toISOString()
-        };
-        saveData();
-        
-        io.emit('pending_update', dataStore.pendingUsers);
-        io.emit('user_approved', { userId, tempPassword });
-        
-        res.json({ success: true, tempPassword });
-    } catch (error) {
-        next(error);
+app.get('/api/user-analytics', authenticateToken, (req, res) => {
+    const { userId, adminId } = req.query;
+    
+    if (adminId !== ADMIN_ID && userId !== req.user.userId) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Unauthorized' 
+        });
     }
+    
+    const targetId = userId || req.user.userId;
+    const analytics = dataStore.userAnalytics[targetId] || {
+        logins: 0,
+        messagesSent: 0,
+        broadcastsSent: 0,
+        ticketsCreated: 0,
+        activities: []
+    };
+    
+    res.json({ success: true, analytics });
 });
 
-app.post('/api/deny', (req, res, next) => {
-    try {
-        const { userId, adminId } = req.body;
-        
-        if (adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        const index = dataStore.pendingUsers.indexOf(userId);
-        if (index !== -1) {
-            dataStore.pendingUsers.splice(index, 1);
-            saveData();
-            
-            io.emit('pending_update', dataStore.pendingUsers);
-        }
-        
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
+app.get('/api/all-analytics', authenticateToken, (req, res) => {
+    const { adminId } = req.query;
+    
+    if (adminId !== ADMIN_ID) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Unauthorized' 
+        });
     }
+    
+    const allAnalytics = Object.entries(dataStore.userAnalytics).map(([userId, data]) => ({
+        userId,
+        userName: dataStore.users[userId]?.name || 'Unknown',
+        ...data
+    }));
+    
+    res.json({ success: true, analytics: allAnalytics });
 });
 
-app.post('/api/broadcast', (req, res, next) => {
+app.get('/api/user-devices', authenticateToken, (req, res) => {
+    const { userId, adminId } = req.query;
+    
+    if (adminId !== ADMIN_ID && userId !== req.user.userId) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Unauthorized' 
+        });
+    }
+    
+    const targetId = userId || req.user.userId;
+    const devices = dataStore.userDevices[targetId] || [];
+    
+    res.json({ success: true, devices });
+});
+
+app.post('/api/radio/clear', authenticateToken, (req, res) => {
+    const { frequency, adminId } = req.body;
+    
+    if (adminId !== ADMIN_ID) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Not authorized' 
+        });
+    }
+    
+    if (frequency) {
+        dataStore.radioMessages[frequency] = [];
+    } else {
+        dataStore.radioMessages = {};
+    }
+    
+    saveData();
+    
+    io.emit('radio_cleared', frequency);
+    
+    res.json({ success: true });
+});
+
+app.get('/api/radio/messages', (req, res) => {
+    const { frequency } = req.query;
+    
+    const messages = dataStore.radioMessages[frequency] || [];
+    
+    res.json({ success: true, messages });
+});
+
+app.post('/api/broadcast', authenticateToken, (req, res, next) => {
     try {
         const validData = validateInput(req.body, schemas.broadcast);
         
@@ -336,6 +669,8 @@ app.post('/api/broadcast', (req, res, next) => {
         if (dataStore.broadcasts.length > 50) {
             dataStore.broadcasts.shift();
         }
+        
+        trackActivity(ADMIN_ID, 'broadcast');
         saveData();
         
         io.emit('broadcast', broadcast);
@@ -350,7 +685,7 @@ app.get('/api/broadcasts', (req, res) => {
     res.json({ broadcasts: dataStore.broadcasts.slice(-10) });
 });
 
-app.post('/api/ticket', (req, res, next) => {
+app.post('/api/ticket', authenticateToken, (req, res, next) => {
     try {
         const validData = validateInput(req.body, schemas.ticket);
         
@@ -365,6 +700,7 @@ app.post('/api/ticket', (req, res, next) => {
         };
         
         dataStore.tickets.push(ticket);
+        trackActivity(validData.userId, 'ticket');
         saveData();
         
         io.emit('ticket_created', ticket);
@@ -375,7 +711,7 @@ app.post('/api/ticket', (req, res, next) => {
     }
 });
 
-app.get('/api/tickets', (req, res) => {
+app.get('/api/tickets', authenticateToken, (req, res) => {
     const { userId } = req.query;
     
     let tickets = dataStore.tickets;
@@ -386,7 +722,7 @@ app.get('/api/tickets', (req, res) => {
     res.json({ success: true, tickets });
 });
 
-app.post('/api/ticket/respond', (req, res) => {
+app.post('/api/ticket/respond', authenticateToken, (req, res) => {
     const { ticketId, response, adminId } = req.body;
     
     if (adminId !== ADMIN_ID) {
@@ -417,7 +753,7 @@ app.post('/api/ticket/respond', (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/ticket/close', (req, res) => {
+app.post('/api/ticket/close', authenticateToken, (req, res) => {
     const { ticketId, adminId } = req.body;
     
     if (adminId !== ADMIN_ID) {
@@ -443,7 +779,7 @@ app.post('/api/ticket/close', (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/alarm', (req, res) => {
+app.post('/api/alarm', authenticateToken, (req, res) => {
     const { type, details, adminId } = req.body;
     
     if (adminId !== ADMIN_ID) {
@@ -474,7 +810,7 @@ app.get('/api/alarms', (req, res) => {
     res.json({ success: true, alarms: activeAlarms });
 });
 
-app.post('/api/alarm/dismiss', (req, res) => {
+app.post('/api/alarm/dismiss', authenticateToken, (req, res) => {
     const { alarmId, adminId } = req.body;
     
     if (adminId !== ADMIN_ID) {
@@ -494,7 +830,7 @@ app.post('/api/alarm/dismiss', (req, res) => {
     res.json({ success: true });
 });
 
-app.post('/api/update-profile', (req, res, next) => {
+app.post('/api/update-profile', authenticateToken, (req, res, next) => {
     try {
         const validData = validateInput(req.body, schemas.updateProfile);
         const { userId, updates } = validData;
@@ -544,6 +880,30 @@ app.post('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
+app.get('/api/users', authenticateToken, (req, res) => {
+    const { adminId } = req.query;
+    
+    if (adminId !== ADMIN_ID) {
+        return res.status(403).json({ 
+            success: false, 
+            message: 'Unauthorized' 
+        });
+    }
+    
+    const activeUsers = Object.values(dataStore.users)
+        .filter(u => u.approved)
+        .map(u => ({
+            id: u.id,
+            name: u.name,
+            isAdmin: u.isAdmin,
+            avatar: u.avatar,
+            isOnline: !!dataStore.onlineUsers[u.id],
+            isBanned: dataStore.bannedUsers[u.id]?.active || false
+        }));
+    
+    res.json({ success: true, users: activeUsers });
+});
+
 app.get('/api/system-status', (req, res) => {
     const stats = {
         totalUsers: Object.keys(dataStore.users).length,
@@ -551,7 +911,8 @@ app.get('/api/system-status', (req, res) => {
         pendingApprovals: dataStore.pendingUsers.length,
         activeTickets: dataStore.tickets.filter(t => t.status === 'open').length,
         activeAlarms: dataStore.alarms.filter(a => a.active).length,
-        totalBroadcasts: dataStore.broadcasts.length
+        totalBroadcasts: dataStore.broadcasts.length,
+        bannedUsers: Object.values(dataStore.bannedUsers).filter(b => b.active).length
     };
     
     res.json({ success: true, stats });
@@ -586,6 +947,8 @@ io.on('connection', (socket) => {
             if (dataStore.messages.length > 1000) {
                 dataStore.messages.shift();
             }
+            
+            trackActivity(validData.senderId, 'message');
             saveData();
             
             io.to(validData.receiverId).emit('chat_message', message);
@@ -615,7 +978,7 @@ io.on('connection', (socket) => {
         };
         
         dataStore.radioMessages[frequency].push(radioMsg);
-        if (dataStore.radioMessages[frequency].length > 50) {
+        if (dataStore.radioMessages[frequency].length > 100) {
             dataStore.radioMessages[frequency].shift();
         }
         saveData();
@@ -643,5 +1006,6 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`ARCS Server running on port ${PORT}`);
     console.log(`Admin ID: ${ADMIN_ID}`);
-    console.log(`Default Admin Password: admin123`);
+    console.log(`Default Admin Password: 2041`);
+    logger.info('ARCS Server started successfully');
 });

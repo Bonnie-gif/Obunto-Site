@@ -1333,3 +1333,94 @@ document.getElementById('radio-input')?.addEventListener('keypress', (e) => {
 window.addEventListener('load', async () => {
     setTimeout(startLoading, 1000);
 });
+
+function openRegisterModal() {
+    document.getElementById('register-modal').classList.remove('hidden');
+    document.getElementById('register-id').focus();
+}
+
+function closeRegisterModal() {
+    document.getElementById('register-modal').classList.add('hidden');
+    document.getElementById('register-id').value = '';
+    document.getElementById('register-password').value = '';
+    document.getElementById('register-password-confirm').value = '';
+    const statusDiv = document.getElementById('register-status');
+    if (statusDiv) {
+        statusDiv.textContent = '';
+        statusDiv.className = 'register-status';
+    }
+}
+
+function showRegisterStatus(message, isError = false) {
+    const status = document.getElementById('register-status');
+    if (!status) return;
+    status.textContent = message;
+    status.className = 'register-status show';
+    if (isError) status.classList.add('error');
+    else status.classList.add('success');
+}
+
+async function handleRegister() {
+    const userId = document.getElementById('register-id').value.trim();
+    const password = document.getElementById('register-password').value;
+    const passwordConfirm = document.getElementById('register-password-confirm').value;
+    
+    if (!userId || userId.length < 5) {
+        playSound('sfx-error');
+        showRegisterStatus('OPERATOR ID MUST BE AT LEAST 5 CHARACTERS', true);
+        return;
+    }
+    
+    if (!password || password.length < 4) {
+        playSound('sfx-error');
+        showRegisterStatus('PASSWORD MUST BE AT LEAST 4 CHARACTERS', true);
+        return;
+    }
+    
+    if (password !== passwordConfirm) {
+        playSound('sfx-error');
+        showRegisterStatus('PASSWORDS DO NOT MATCH', true);
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/create-account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, password })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            playSound('sfx-sent');
+            showRegisterStatus('REQUEST SENT! AWAITING ADMIN APPROVAL.', false);
+            setTimeout(() => {
+                closeRegisterModal();
+            }, 3000);
+        } else {
+            playSound('sfx-denied');
+            showRegisterStatus(data.message, true);
+        }
+    } catch (e) {
+        console.error('Register error:', e);
+        playSound('sfx-error');
+        showRegisterStatus('SYSTEM ERROR - TRY AGAIN', true);
+    }
+}
+
+document.getElementById('register-id')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('register-password').focus();
+    }
+});
+
+document.getElementById('register-password')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('register-password-confirm').focus();
+    }
+});
+
+document.getElementById('register-password-confirm')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleRegister();
+});

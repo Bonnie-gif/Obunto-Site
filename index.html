@@ -54,8 +54,10 @@
                     <div class="login-status" id="login-status"></div>
                     <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
-                        NEW OPERATOR?<br>
-                        ENTER YOUR ID TO REQUEST ACCESS
+                        <a href="#" onclick="openRegisterModal(); return false;" class="register-link">
+                            NEW OPERATOR?<br>
+                            CLICK HERE TO REQUEST ACCESS
+                        </a>
                     </div>
                 </div>
             </div>
@@ -78,6 +80,29 @@
                     <div class="bar-fill" id="loading-progress"></div>
                 </div>
                 <div class="swallow-footer">DATA SWALLOW 40 を起動中です。</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>NEW OPERATOR REGISTRATION</span>
+                <button class="modal-close" onclick="closeRegisterModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <div class="register-instructions">
+                    CREATE YOUR OPERATOR CREDENTIALS.<br>
+                    YOUR REQUEST WILL BE SENT TO ADMINISTRATOR OBUNTO FOR APPROVAL.
+                </div>
+                <label>CHOOSE YOUR OPERATOR ID:</label>
+                <input type="text" id="register-id" class="form-input" placeholder="MINIMUM 5 CHARACTERS" maxlength="20">
+                <label>CHOOSE YOUR PASSWORD:</label>
+                <input type="password" id="register-password" class="form-input" placeholder="MINIMUM 4 CHARACTERS" maxlength="50">
+                <label>CONFIRM PASSWORD:</label>
+                <input type="password" id="register-password-confirm" class="form-input" maxlength="50">
+                <div class="register-status" id="register-status"></div>
+                <button class="form-submit-btn" onclick="handleRegister()">REQUEST ACCESS</button>
             </div>
         </div>
     </div>

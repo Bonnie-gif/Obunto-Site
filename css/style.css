@@ -722,3 +722,61 @@ body {
 
 .hidden { display: none !important; }
 audio { display: none; }
+
+.register-link {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
+}
+
+.register-link:hover {
+    color: #7dd3c0;
+}
+
+.register-instructions {
+    background: #f5f5f5;
+    border: 2px solid #ccc;
+    padding: 12px;
+    margin-bottom: 15px;
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.register-status {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    border-radius: 6px;
+    display: none;
+}
+
+.register-status.show {
+    display: block;
+    animation: slideDown 0.3s;
+}
+
+.register-status.error {
+    background: #ff4444;
+    border-color: #ff4444;
+    color: #fff;
+}
+
+.register-status.success {
+    background: #7dd3c0;
+    border-color: #7dd3c0;
+    color: #000;
+}
+
+
+
+
+
+
+
+
