@@ -122,18 +122,219 @@
                 </div>
             </div>
 
-            <div id="adm-broadcast" class="tab-content"></div>
-            <div id="adm-monitoring" class="tab-content"></div>
-            <div id="adm-alarms" class="tab-content"></div>
-            <div id="adm-tickets" class="tab-content"></div>
-            <div id="adm-radio" class="tab-content"></div>
-            <div id="adm-credentials" class="tab-content"></div>
-            <div id="adm-users" class="tab-content"></div>
-            <div id="adm-analytics" class="tab-content"></div>
-            <div id="usr-profile" class="tab-content"></div>
-            <div id="usr-workstation" class="tab-content"></div>
-            <div id="usr-radio" class="tab-content"></div>
-            <div id="usr-help" class="tab-content"></div>
+            <div id="adm-broadcast" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
+                    </div>
+                    <div class="grid-cell news-cell">
+                        <div class="sticker yellow">BROADCAST SYSTEM</div>
+                        <div class="cell-header">GLOBAL MESSAGE</div>
+                        <div class="news-box">
+                            <label>SELECT EMOTION:</label>
+                            <div class="sprite-selector" id="sprite-selector"></div>
+                            <input type="hidden" id="sprite-select" value="normal">
+                            <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
+                            <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
+                        </div>
+                    </div>
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">BROADCAST HISTORY</div>
+                        <div class="updates-box" id="broadcast-history"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-monitoring" class="tab-content">
+                <div class="monitoring-header">
+                    <div class="monitoring-controls">
+                        <button class="mon-btn" onclick="updateMonitoring()">REFRESH</button>
+                        <select id="mon-target" class="mon-select">
+                            <option value="all">ALL TABS</option>
+                            <option value="broadcast">BROADCAST</option>
+                            <option value="alarms">ALARMS</option>
+                            <option value="tickets">TICKETS</option>
+                            <option value="radio">RADIO</option>
+                        </select>
+                        <div class="system-stats" id="system-stats"></div>
+                    </div>
+                </div>
+                <div class="content-grid">
+                    <div class="grid-cell news-cell monitoring-full">
+                        <div class="cell-header">ACTIVE LOGS</div>
+                        <div class="news-box">
+                            <div class="news-text" id="monitoring-logs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-alarms" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell alarm-list">
+                        <div class="sticker yellow">ALERTS</div>
+                        <div class="cell-header">ACTIVE ALARMS</div>
+                        <div id="alarms-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-tickets" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">SUPPORT TICKETS</div>
+                        <div id="tickets-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO FREQUENCY</div>
+                        <div class="radio-controls">
+                            <div class="radio-header">
+                                <div class="radio-frequency" id="radio-freq-display">CHANNEL 99.4</div>
+                                <button class="radio-clear-btn" onclick="clearRadioChannel()">CLEAR CHANNEL</button>
+                            </div>
+                            <label>SELECT CHANNEL:</label>
+                            <select id="radio-channel" onchange="joinRadioChannel()">
+                                <option value="99.4">CHANNEL 99.4 - GENERAL</option>
+                                <option value="88.8">CHANNEL 88.8 - SECURE</option>
+                                <option value="77.7">CHANNEL 77.7 - EMERGENCY</option>
+                            </select>
+                            <div class="radio-status">
+                                <div class="radio-status-indicator"></div>
+                                <span>CONNECTED TO CHANNEL <span id="current-channel">99.4</span></span>
+                            </div>
+                            <div class="radio-messages" id="radio-messages"></div>
+                            <div class="radio-input-area">
+                                <input type="text" id="radio-input" placeholder="BROADCAST MESSAGE...">
+                                <button onclick="sendRadioMessage()">TRANSMIT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-credentials" class="tab-content">
+                <div class="credentials-tabs">
+                    <div class="cred-tab active" onclick="switchCredTab('obunto')">OBUNTO</div>
+                    <div class="cred-tab" onclick="switchCredTab('users')">USER MANAGEMENT</div>
+                </div>
+                <div id="cred-obunto" class="cred-content active">
+                    <div class="content-grid">
+                        <div class="grid-cell credentials-cell">
+                            <div class="cell-header">ADMIN CREDENTIALS</div>
+                            <div class="credentials-ticket">
+                                <div class="ticket-holes-left"></div>
+                                <div class="ticket-content">
+                                    <div class="ticket-header">ARCS SYSTEM</div>
+                                    <div class="ticket-title">ADMINISTRATOR</div>
+                                    <div class="ticket-divider"></div>
+                                    <div class="ticket-info">
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">NAME:</span>
+                                            <span class="ticket-value">OBUNTO</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">ID:</span>
+                                            <span class="ticket-value">118107921024376</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">LEVEL:</span>
+                                            <span class="ticket-value">FULL ACCESS</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">STATUS:</span>
+                                            <span class="ticket-value">ACTIVE</span>
+                                        </div>
+                                    </div>
+                                    <div class="ticket-barcode">||||||||||||||||||||</div>
+                                    <div class="ticket-footer">AUTHORIZED PERSONNEL ONLY</div>
+                                </div>
+                                <div class="ticket-holes-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="cred-users" class="cred-content">
+                    <div class="content-grid">
+                        <div class="grid-cell users-management">
+                            <div class="cell-header">MANAGE USER CREDENTIALS</div>
+                            <div id="users-credentials-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-users" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">ACTIVE USERS</div>
+                        <div id="active-users-list"></div>
+                    </div>
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
+                    </div>
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">BANNED USERS</div>
+                        <div id="banned-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-analytics" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">SYSTEM ANALYTICS</div>
+                        <div class="analytics-container" id="analytics-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-profile" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">USER PROFILE</div>
+                        <div class="profile-content" id="profile-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-workstation" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">MY TICKETS</div>
+                        <div id="my-tickets"></div>
+                        <button class="create-ticket-btn" onclick="openTicketForm()">CREATE NEW TICKET</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO</div>
+                        <div class="updates-box"><div class="updates-text">LISTENING TO CHANNEL 99.4...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-help" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">SUPPORT</div>
+                        <div class="featured-box">
+                            <div class="featured-desc">
+                                CONTACT ADMINISTRATOR OBUNTO<br>
+                                <button class="chat-open-btn" onclick="openChat()">OPEN CHAT</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -147,12 +348,76 @@
         </div>
     </div>
 
-    <div id="chat-window" class="chat-window hidden"></div>
-    <div id="ticket-form-modal" class="modal hidden"></div>
-    <div id="ban-modal" class="modal hidden"></div>
+    <div id="chat-window" class="chat-window hidden">
+        <div class="chat-titlebar">
+            <div class="chat-title">
+                <span class="chat-icon">@</span>
+                <span>OBUNTO</span>
+            </div>
+            <div class="chat-controls">
+                <button class="chat-control-btn" onclick="minimizeChat()">_</button>
+                <button class="chat-control-btn" onclick="closeChat()">X</button>
+            </div>
+        </div>
+        <div class="chat-body">
+            <div class="chat-user-info">
+                <div class="chat-user-details">
+                    <div class="chat-username">OBUNTO</div>
+                    <div class="chat-status-text">ADMINISTRATOR</div>
+                </div>
+                <div class="chat-avatar">
+                    <img src="assets/sprites/normal.png" id="chat-avatar-img">
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <label class="file-upload-btn">
+                    <input type="file" id="chat-file-input" accept="image/*" onchange="handleFileUpload(event)" style="display:none">
+                    <span>+</span>
+                </label>
+                <input type="text" class="chat-input" id="chat-input" placeholder="TYPE MESSAGE...">
+                <button class="chat-send-btn" onclick="sendChatMessage()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticket-form-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>CREATE SUPPORT TICKET</span>
+                <button class="modal-close" onclick="closeTicketForm()">X</button>
+            </div>
+            <div class="modal-body">
+                <label>SUBJECT:</label>
+                <input type="text" id="ticket-subject" class="form-input">
+                <label>DESCRIPTION:</label>
+                <textarea id="ticket-description" class="form-textarea"></textarea>
+                <button class="form-submit-btn" onclick="submitTicket()">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ban-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>BAN USER</span>
+                <button class="modal-close" onclick="closeBanModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ban-user-id">
+                <label>REASON:</label>
+                <textarea id="ban-reason" class="form-textarea" placeholder="Enter reason for ban..."></textarea>
+                <label>DURATION (hours, 0 = permanent):</label>
+                <input type="number" id="ban-duration" class="form-input" value="0" min="0">
+                <button class="form-submit-btn" onclick="confirmBan()">BAN USER</button>
+            </div>
+        </div>
+    </div>
+
     <div id="image-modal" class="image-modal hidden" onclick="closeImageModal()">
         <img id="modal-image" src="" alt="Image">
     </div>
+
     <div id="error-notification" class="error-notification hidden">
         <div class="error-content" id="error-content"></div>
     </div>
