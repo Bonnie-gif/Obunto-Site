@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
-    <link rel="stylesheet" href="css/notification.css">
-    <link rel="stylesheet" href="css/broadcast.css">
-    <link rel="stylesheet" href="css/monitoring.css">
-    <link rel="stylesheet" href="css/alarms.css">
-    <link rel="stylesheet" href="css/tickets.css">
-    <link rel="stylesheet" href="css/radio.css">
-    <link rel="stylesheet" href="css/credentials.css">
-    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="menu.css">
+    <link rel="stylesheet" href="notification.css">
+    <link rel="stylesheet" href="broadcast.css">
+    <link rel="stylesheet" href="monitoring.css">
+    <link rel="stylesheet" href="alarms.css">
+    <link rel="stylesheet" href="tickets.css">
+    <link rel="stylesheet" href="radio.css">
+    <link rel="stylesheet" href="credentials.css">
+    <link rel="stylesheet" href="chat.css">
 </head>
 <body>
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
@@ -99,21 +99,8 @@
         <div class="main-window">
             <div class="menu-bar">
                 <div class="menu-button" onclick="goToHome()">MENU</div>
-                <div class="menu-tabs hidden" id="admin-tabs">
-                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
-                    <div class="tab" data-target="adm-monitoring">MONITORING</div>
-                    <div class="tab" data-target="adm-alarms">ALARMS</div>
-                    <div class="tab" data-target="adm-tickets">TICKETS</div>
-                    <div class="tab" data-target="adm-radio">RADIO</div>
-                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
-                    <div class="tab" data-target="adm-users">USERS</div>
-                </div>
-                <div class="menu-tabs hidden" id="personnel-tabs">
-                    <div class="tab" data-target="usr-profile">PROFILE</div>
-                    <div class="tab" data-target="usr-workstation">WORKSTATION</div>
-                    <div class="tab" data-target="usr-radio">RADIO</div>
-                    <div class="tab" data-target="usr-help">HELP REQUEST</div>
-                </div>
+                <div class="menu-tabs hidden" id="admin-tabs"></div>
+                <div class="menu-tabs hidden" id="personnel-tabs"></div>
                 <div class="menu-user-info" id="menu-user-info">
                     <span id="current-user-name">GUEST</span>
                     <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
@@ -260,12 +247,20 @@
                     <div class="grid-cell updates-cell">
                         <div class="cell-header">RADIO FREQUENCY</div>
                         <div class="radio-controls">
+                            <div class="radio-header">
+                                <div class="radio-frequency" id="radio-freq-display">CHANNEL 99.4</div>
+                                <button class="radio-clear-btn" onclick="clearRadioChannel()">CLEAR CHANNEL</button>
+                            </div>
                             <label>SELECT CHANNEL:</label>
                             <select id="radio-channel" onchange="joinRadioChannel()">
                                 <option value="99.4">CHANNEL 99.4 - GENERAL</option>
                                 <option value="88.8">CHANNEL 88.8 - SECURE</option>
                                 <option value="77.7">CHANNEL 77.7 - EMERGENCY</option>
                             </select>
+                            <div class="radio-status">
+                                <div class="radio-status-indicator"></div>
+                                <span>CONNECTED TO CHANNEL <span id="current-channel">99.4</span></span>
+                            </div>
                             <div class="radio-messages" id="radio-messages"></div>
                             <div class="radio-input-area">
                                 <input type="text" id="radio-input" placeholder="BROADCAST MESSAGE...">
@@ -337,6 +332,28 @@
                         <div class="cell-header">PENDING APPROVALS</div>
                         <div id="pending-list"></div>
                     </div>
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">BANNED USERS</div>
+                        <div id="banned-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-analytics" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">SYSTEM ANALYTICS</div>
+                        <div class="analytics-container" id="analytics-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-menu-config" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">MENU CONFIGURATION</div>
+                        <div class="menu-config-container" id="menu-config-container"></div>
+                    </div>
                 </div>
             </div>
 
@@ -384,15 +401,13 @@
         </div>
     </div>
 
-    <div id="admin-toggle" class="admin-fab hidden" onclick="toggleAdminPanel()">+</div>
-
     <div id="broadcast-notification" class="notification hidden">
-        <div class="mascot-container">
-            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
-            <div class="mascot-label">aa OBUNTO</div>
-        </div>
         <div class="bubble">
             <div class="notification-text" id="notif-text"></div>
+        </div>
+        <div class="mascot-container">
+            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
+            <div class="mascot-label">OBUNTO</div>
         </div>
     </div>
 
@@ -445,6 +460,23 @@
         </div>
     </div>
 
+    <div id="ban-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>BAN USER</span>
+                <button class="modal-close" onclick="closeBanModal()">X</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="ban-user-id">
+                <label>REASON:</label>
+                <textarea id="ban-reason" class="form-textarea" placeholder="Enter reason for ban..."></textarea>
+                <label>DURATION (hours, 0 = permanent):</label>
+                <input type="number" id="ban-duration" class="form-input" value="0" min="0">
+                <button class="form-submit-btn" onclick="confirmBan()">BAN USER</button>
+            </div>
+        </div>
+    </div>
+
     <div id="image-modal" class="image-modal hidden" onclick="closeImageModal()">
         <img id="modal-image" src="" alt="Image">
     </div>
@@ -454,6 +486,6 @@
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
