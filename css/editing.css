@@ -1,19 +1,22 @@
-#adm-editing {
+.editing-workspace {
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
+    background: var(--color-bg-primary, #E0D8C0);
 }
 
-.editing-header {
+.editing-toolbar {
     padding: 16px 20px;
-    background: var(--color-bg-primary, #E0D8C0);
+    background: var(--color-bg-secondary, #C0B0A0);
     border-bottom: 3px solid var(--color-border, #808080);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 
-.editing-title {
+.toolbar-title {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
     font-size: 24px;
     font-weight: 700;
@@ -22,15 +25,15 @@
     text-transform: uppercase;
 }
 
-.editing-actions {
+.toolbar-actions {
     display: flex;
     gap: 10px;
 }
 
-.edit-btn {
+.toolbar-btn {
     padding: 10px 20px;
     border: 2px solid var(--color-border, #808080);
-    background: var(--color-bg-secondary, #C0B0A0);
+    background: var(--color-bg-primary, #E0D8C0);
     color: var(--color-text-primary, #000);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
     font-size: 14px;
@@ -41,324 +44,121 @@
     text-transform: uppercase;
 }
 
-.edit-btn:hover {
-    background: var(--color-bg-primary, #E0D8C0);
+.toolbar-btn:hover {
+    background: var(--color-warning, #D4C5A9);
     transform: scale(1.05);
 }
 
-.edit-btn.primary {
+.toolbar-btn.primary {
     background: var(--color-accent, #A0A080);
     border-width: 3px;
 }
 
-.editing-body {
+.toolbar-btn.primary:hover {
+    background: var(--color-success, #90A080);
+}
+
+.editing-canvas {
     flex: 1;
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 0;
-    overflow: hidden;
-}
-
-.tabs-sidebar {
-    background: var(--color-bg-secondary, #C0B0A0);
-    border-right: 3px solid var(--color-border, #808080);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-}
-
-.sidebar-header {
-    padding: 16px;
-    background: var(--color-accent, #A0A080);
-    border-bottom: 2px solid var(--color-border, #808080);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--color-text-primary, #000);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.tabs-list {
-    flex: 1;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.tab-item {
-    padding: 14px 16px;
     background: var(--color-bg-primary, #E0D8C0);
-    border: 2px solid var(--color-border, #808080);
+    position: relative;
+    overflow: hidden;
+    border: 2px dashed var(--color-border, #808080);
+    margin: 20px;
+}
+
+.canvas-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-primary, 'Roboto Mono', monospace);
+    font-size: 18px;
+    color: rgba(0, 0, 0, 0.3);
+    letter-spacing: 1px;
+    text-align: center;
+    pointer-events: none;
+}
+
+.canvas-element {
+    position: absolute;
+    background: var(--color-bg-secondary, #C0B0A0);
+    border: 3px solid var(--color-border, #808080);
+    padding: 16px;
+    cursor: move;
+    transition: box-shadow 0.2s ease;
+    min-width: 150px;
+    max-width: 500px;
+}
+
+.canvas-element:hover {
+    border-color: var(--color-text-primary, #000);
+    box-shadow: 
+        inset 0 0 0 1px var(--color-text-primary, #000),
+        4px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.element-content {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
     font-size: 13px;
-    font-weight: 600;
     color: var(--color-text-primary, #000);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    letter-spacing: 0.5px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    margin-bottom: 10px;
+    white-space: pre-wrap;
 }
 
-.tab-item:hover {
-    transform: translateX(4px);
-    border-color: var(--color-text-primary, #000);
-}
-
-.tab-item.active {
-    background: var(--color-accent, #A0A080);
-    border-width: 3px;
-}
-
-.tab-item-actions {
-    display: flex;
-    gap: 6px;
-}
-
-.tab-action-btn {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--color-border, #808080);
-    background: var(--color-bg-secondary, #C0B0A0);
-    color: var(--color-text-primary, #000);
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    font-weight: bold;
-}
-
-.tab-action-btn:hover {
-    background: var(--color-error, #C0A090);
-    transform: scale(1.1);
-}
-
-.tab-editor {
-    background: var(--color-bg-primary, #E0D8C0);
-    padding: 24px;
-    overflow-y: auto;
-    display: none;
-}
-
-.tab-editor.active {
+.element-image {
+    max-width: 100%;
+    max-height: 300px;
     display: block;
-}
-
-.editor-section {
-    margin-bottom: 24px;
-    padding: 20px;
-    background: var(--color-bg-secondary, #C0B0A0);
+    margin-bottom: 10px;
     border: 2px solid var(--color-border, #808080);
 }
 
-.editor-section-title {
+.element-tab-preview {
+    padding: 12px;
+    background: var(--color-accent, #A0A080);
+    border: 2px solid var(--color-text-primary, #000);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.tab-preview-name {
     font-family: var(--font-primary, 'Roboto Mono', monospace);
     font-size: 16px;
     font-weight: 700;
     color: var(--color-text-primary, #000);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--color-border, #808080);
     letter-spacing: 1px;
     text-transform: uppercase;
 }
 
-.editor-field {
-    margin-bottom: 16px;
+.element-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 2px dotted rgba(128, 128, 128, 0.4);
 }
 
-.editor-label {
-    display: block;
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-primary, #000);
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.editor-input,
-.editor-textarea,
-.editor-select {
-    width: 100%;
-    padding: 10px 12px;
-    border: 2px solid var(--color-border, #808080);
-    background: var(--color-bg-primary, #E0D8C0);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 13px;
-    color: var(--color-text-primary, #000);
-    transition: all 0.2s ease;
-}
-
-.editor-input:focus,
-.editor-textarea:focus,
-.editor-select:focus {
-    outline: none;
-    border-color: var(--color-text-primary, #000);
-    transform: scale(1.01);
-}
-
-.editor-textarea {
-    min-height: 150px;
-    resize: vertical;
-    line-height: 1.6;
-}
-
-.material-selector {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 10px;
-    margin-top: 8px;
-}
-
-.material-option {
-    padding: 20px 12px;
-    border: 2px solid var(--color-border, #808080);
-    background: var(--color-bg-primary, #E0D8C0);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 11px;
-    font-weight: 600;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    letter-spacing: 0.5px;
-}
-
-.material-option:hover {
-    border-color: var(--color-text-primary, #000);
-    transform: scale(1.05);
-}
-
-.material-option.active {
-    background: var(--color-accent, #A0A080);
-    border-width: 3px;
-}
-
-.image-upload-zone {
-    padding: 40px;
-    border: 3px dashed var(--color-border, #808080);
-    background: var(--color-bg-primary, #E0D8C0);
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 8px;
-}
-
-.image-upload-zone:hover {
-    border-color: var(--color-text-primary, #000);
-    background: var(--color-warning, #D4C5A9);
-}
-
-.image-upload-zone.has-image {
-    padding: 0;
-    border-style: solid;
-    position: relative;
-}
-
-.uploaded-image-preview {
-    max-width: 100%;
-    max-height: 300px;
-    display: block;
-    margin: 0 auto;
-}
-
-.image-remove-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
+.element-controls button {
+    width: 28px;
+    height: 28px;
     border: 2px solid var(--color-border, #808080);
     background: var(--color-error, #C0A090);
     color: var(--color-text-primary, #000);
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.image-remove-btn:hover {
-    transform: scale(1.1);
-}
-
-.editor-preview {
-    margin-top: 24px;
-    padding: 20px;
-    border: 3px solid var(--color-border, #808080);
-    background: var(--color-bg-primary, #E0D8C0);
-}
-
-.preview-label {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-primary, #000);
-    margin-bottom: 12px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-.preview-content {
-    padding: 16px;
-    background: var(--color-bg-secondary, #C0B0A0);
-    border: 2px solid var(--color-border, #808080);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--color-text-primary, #000);
-    min-height: 100px;
-}
-
-.add-tab-btn {
-    width: 100%;
-    padding: 14px;
-    border: 2px solid var(--color-border, #808080);
-    background: var(--color-success, #90A080);
-    color: var(--color-text-primary, #000);
     font-family: var(--font-primary, 'Roboto Mono', monospace);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-    margin-top: 12px;
-}
-
-.add-tab-btn:hover {
-    background: var(--color-bg-primary, #E0D8C0);
-    transform: scale(1.02);
-}
-
-.empty-editor-state {
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    padding: 60px;
-    text-align: center;
+    transition: all 0.2s ease;
 }
 
-.empty-editor-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    opacity: 0.3;
-}
-
-.empty-editor-text {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: 16px;
-    color: var(--color-text-secondary, #4A4A4A);
-    margin-bottom: 24px;
-    letter-spacing: 0.5px;
+.element-controls button:hover {
+    background: var(--color-text-primary, #000);
+    color: var(--color-bg-primary, #E0D8C0);
+    transform: scale(1.1);
 }
