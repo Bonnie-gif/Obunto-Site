@@ -1,122 +1,68 @@
-.alarm-display {
-    padding: 15px;
-    border: 2px solid #000;
-    margin-bottom: 15px;
-    text-align: center;
+#adm-alarms .featured-box {
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border: 5px solid #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    min-height: 150px;
+    box-shadow: 
+        inset 2px 2px 5px rgba(255,255,255,0.8),
+        inset -2px -2px 5px rgba(0,0,0,0.1),
+        4px 4px 0 rgba(0,0,0,0.3);
+    border-radius: 12px;
 }
 
-.alarm-code {
-    display: block;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 5px;
+#adm-alarms .featured-title {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: #666;
+    z-index: 2;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
-.alarm-desc {
-    font-size: 11px;
-    color: #606060;
+#adm-alarms .featured-box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(0, 0, 0, 0.03),
+        rgba(0, 0, 0, 0.03) 15px,
+        rgba(0, 0, 0, 0.06) 15px,
+        rgba(0, 0, 0, 0.06) 30px
+    );
+    z-index: 1;
 }
 
-body.alarm-green .alarm-display {
-    background: #c0e0c0;
-    border-color: #408040;
-}
-
-body.alarm-green .alarm-code {
-    color: #206020;
-}
-
-body.alarm-blue .alarm-display {
-    background: #c0d0e0;
-    border-color: #4060a0;
-}
-
-body.alarm-blue .alarm-code {
-    color: #204080;
-}
-
-body.alarm-red .alarm-display {
-    background: #e0c0c0;
-    border-color: #a04040;
-}
-
-body.alarm-red .alarm-code {
-    color: #802020;
-}
-
-body.alarm-gamma .alarm-display {
-    background: #d0e0c0;
-    border-color: #60a040;
-}
-
-body.alarm-gamma .alarm-code {
-    color: #406020;
-}
-
-body.alarm-epsilon .alarm-display {
-    background: #808080;
-    border-color: #404040;
-    animation: epsilonDisplay 0.2s infinite;
-}
-
-@keyframes epsilonDisplay {
-    0%, 100% { background: #808080; }
-    50% { background: #606060; }
-}
-
-body.alarm-epsilon .alarm-code {
+#adm-alarms .sticker.yellow {
+    background: linear-gradient(135deg, #ff4444 0%, #ff6666 100%);
     color: #fff;
-    animation: epsilonText 0.15s infinite;
+    border: 3px solid #000;
+    animation: alarmBlink 1.5s infinite;
+    box-shadow: 
+        0 0 10px rgba(255, 68, 68, 0.5),
+        3px 3px 0 rgba(0, 0, 0, 0.3);
 }
 
-@keyframes epsilonText {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+@keyframes alarmBlink {
+    0%, 100% { 
+        opacity: 1;
+        box-shadow: 
+            0 0 10px rgba(255, 68, 68, 0.5),
+            3px 3px 0 rgba(0, 0, 0, 0.3);
+    }
+    50% { 
+        opacity: 0.7;
+        box-shadow: 
+            0 0 20px rgba(255, 68, 68, 0.8),
+            3px 3px 0 rgba(0, 0, 0, 0.3);
+    }
 }
-
-body.alarm-poweroff .alarm-display {
-    background: #151515;
-    border-color: #303030;
-}
-
-body.alarm-poweroff .alarm-code {
-    color: #404040;
-}
-
-.alarm-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 15px;
-}
-
-.alarm-btn {
-    padding: 10px;
-    border: 2px solid #000;
-    font-family: inherit;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.alarm-btn.green { background: #80c080; }
-.alarm-btn.green:hover { background: #60a060; }
-.alarm-btn.blue { background: #8090c0; }
-.alarm-btn.blue:hover { background: #6070a0; }
-.alarm-btn.red { background: #c08080; }
-.alarm-btn.red:hover { background: #a06060; }
-.alarm-btn.gamma { background: #a0c080; }
-.alarm-btn.gamma:hover { background: #80a060; }
-.alarm-btn.epsilon { background: #808080; color: #fff; }
-.alarm-btn.epsilon:hover { background: #606060; }
-.alarm-btn.poweroff { background: #404040; color: #808080; }
-.alarm-btn.poweroff:hover { background: #303030; }
-
-.log-entry {
-    padding: 3px 0;
-    border-bottom: 1px solid #e0e0e0;
-    font-size: 10px;
-}
-
-.log-entry:last-child { border-bottom: none; }
-.log-time { color: #808080; margin-right: 8px; }

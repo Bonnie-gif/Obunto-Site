@@ -13,9 +13,8 @@
     <link rel="stylesheet" href="css/tickets.css">
     <link rel="stylesheet" href="css/radio.css">
     <link rel="stylesheet" href="css/credentials.css">
-    <link rel="stylesheet" href="css/chat.css">
 </head>
-<body class="alarm-green">
+<body>
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
     <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
     <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
@@ -23,432 +22,311 @@
     <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
-    <audio id="sfx-alarm" src="assets/audio/alarm.wav"></audio>
 
     <div id="loading-screen" class="screen active">
-        <div class="loading-container">
-            <div class="loading-header">
-                <div class="arcs-logo">ARCS</div>
-                <div class="arcs-subtitle">Advanced Research & Containment System</div>
+        <div class="loading-left">
+            <div class="upeo-section">
+                <svg class="upeo-logo" viewBox="0 0 200 200">
+                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
+                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
+                </svg>
+                <div class="upeo-text">UPEO</div>
             </div>
+            
             <div class="loading-info">
-                <div class="info-line">RESTARTING OS VER.3.2.2</div>
-                <div class="info-line">ARCS ID confirmed</div>
-                <div class="info-line">DATA SWALLOW</div>
-                <div class="info-line">is for registered use only.</div>
+                RESTARTING OS VER.3.2.2<br>
+                UPEO ID confirmed<br>
+                DATA SWALLOW<br>
+                is for registered use only.
             </div>
-            <div class="loading-box">
-                <div class="loading-box-header">DATA SWALLOW</div>
-                <div class="loading-box-content">
-                    <div class="disk-info">
-                        <span>DATA SWALLOW 40</span>
-                        <span>ARCS VER.3.2</span>
-                        <span>SYSTEM STARTUP</span>
-                    </div>
-                    <div class="loading-bar-container">
-                        <div class="loading-bar">
-                            <div class="loading-bar-fill" id="loading-progress"></div>
-                        </div>
-                        <div class="loading-text">Loading...</div>
-                    </div>
-                </div>
-            </div>
+        </div>
+
+        <div class="loading-right">
             <div class="login-panel hidden" id="login-panel">
-                <div class="newton-window">
-                    <div class="window-header">
-                        <img src="assets/button-close-17x.png" class="header-btn" alt="">
-                        <span>OPERATOR ACCESS</span>
-                    </div>
-                    <div class="window-content">
-                        <label class="input-label">ENTER OPERATOR ID:</label>
-                        <input type="text" id="operator-id" class="newton-input" maxlength="20" autocomplete="off">
-                        <div class="login-status" id="login-status"></div>
-                        <button class="newton-button" onclick="handleLogin()">LOGIN</button>
-                        <div class="login-note">NEW OPERATOR? ENTER YOUR ID TO REQUEST ACCESS</div>
+                <div class="login-header">OPERATOR ACCESS</div>
+                <div class="login-body">
+                    <label class="login-label">ENTER OPERATOR ID:</label>
+                    <input type="text" id="operator-id" class="login-input" maxlength="20">
+                    <div class="login-status" id="login-status"></div>
+                    <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                    <div class="login-info-text">
+                        NEW OPERATOR?<br>
+                        ENTER YOUR ID TO REQUEST ACCESS
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="data-swallow-container">
+            <div class="swallow-box">
+                <div class="swallow-header">
+                    <div class="swallow-brand">DATA SWALLOW</div>
+                    <div class="swallow-disk">
+                        <div class="disk-text">
+                            DATA SWALLOW 40<br>
+                            UPEO VER.3.2<br>
+                            SYSTEM STARTUP
+                        </div>
+                        <div class="disk-icon">⊕</div>
+                    </div>
+                </div>
+                <div class="loading-bar">
+                    <div class="bar-fill" id="loading-progress"></div>
+                </div>
+                <div class="swallow-footer">DATA SWALLOW 40 を起動中です。</div>
             </div>
         </div>
     </div>
 
     <div id="main-screen" class="screen">
-        <div class="newton-desktop">
-            <div class="desktop-header">
-                <div class="header-left">
-                    <img src="assets/icon-small-newton-17x12.png" alt="">
-                    <span class="system-title">ARCS</span>
-                </div>
-                <div class="header-center">
-                    <span id="system-time">00:00:00</span>
-                </div>
-                <div class="header-right">
-                    <img src="assets/icon-small-owner-info-12x14.png" alt="">
-                    <span id="current-user-name">GUEST</span>
-                </div>
+        <div class="top-decoration">
+            <div class="browser-dots">
+                <span></span><span></span><span></span>
             </div>
-            <div class="desktop-menubar">
-                <div class="menu-item" onclick="goToHome()">
-                    <img src="assets/icon-large-hamburger-28x19.png" alt="">
-                    <span>Menu</span>
-                </div>
-                <div class="menu-tabs" id="admin-tabs">
-                    <div class="menu-tab" data-target="adm-broadcast">
-                        <img src="assets/icon-small-beam-1x13.png" alt="">
-                        <span>Broadcast</span>
-                    </div>
-                    <div class="menu-tab" data-target="adm-monitoring">
-                        <img src="assets/icon-small-look-10x1.png" alt="">
-                        <span>Monitoring</span>
-                    </div>
-                    <div class="menu-tab" data-target="adm-alarms">
-                        <img src="assets/icon-small-alarm-17x10.png" alt="">
-                        <span>Alarms</span>
-                    </div>
-                    <div class="menu-tab" data-target="adm-tickets">
-                        <img src="assets/icon-small-task-14x11.png" alt="">
-                        <span>Tickets</span>
-                    </div>
-                    <div class="menu-tab" data-target="adm-radio">
-                        <img src="assets/icon-small-speaker-11x11.png" alt="">
-                        <span>Radio</span>
-                    </div>
-                    <div class="menu-tab" data-target="adm-credentials">
-                        <img src="assets/icon-small-person-16x15.png" alt="">
-                        <span>Credentials</span>
-                    </div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++</div>
+        </div>
+
+        <div class="loading-indicator">
+            <span class="loading-icon">⚡</span>
+            <span>System initialized</span>
+        </div>
+
+        <div class="main-window">
+            <div class="menu-bar">
+                <div class="menu-button" onclick="goToHome()">MENU</div>
+                <div class="menu-tabs hidden" id="admin-tabs">
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-monitoring">MONITORING</div>
+                    <div class="tab" data-target="adm-alarms">ALARMS</div>
+                    <div class="tab" data-target="adm-tickets">TICKETS</div>
+                    <div class="tab" data-target="adm-radio">RADIO</div>
+                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
                 </div>
                 <div class="menu-tabs hidden" id="personnel-tabs">
-                    <div class="menu-tab" data-target="usr-profile">
-                        <img src="assets/icon-small-person-9x12.png" alt="">
-                        <span>Profile</span>
-                    </div>
-                    <div class="menu-tab" data-target="usr-workstation">
-                        <img src="assets/icon-small-folder-15x11.png" alt="">
-                        <span>Workstation</span>
-                    </div>
-                    <div class="menu-tab" data-target="usr-radio">
-                        <img src="assets/icon-small-speaker-11x11.png" alt="">
-                        <span>Radio</span>
-                    </div>
-                    <div class="menu-tab" data-target="usr-help">
-                        <img src="assets/icon-large-help-highlighted-30x23.png" alt="">
-                        <span>Help</span>
+                    <div class="tab" data-target="usr-profile">PROFILE</div>
+                    <div class="tab" data-target="usr-workstation">WORKSTATION</div>
+                    <div class="tab" data-target="usr-radio">RADIO</div>
+                    <div class="tab" data-target="usr-help">HELP REQUEST</div>
+                    <div class="tab" data-target="usr-suggestions">SUGGESTIONS</div>
+                </div>
+            </div>
+
+            <div id="view-home" class="tab-content active">
+                <div class="banner-section">
+                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                    <div class="mascot-placeholder"></div>
+                </div>
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">WELCOME</div>
+                        <div class="news-box">
+                            <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="desktop-content">
-                <div id="view-home" class="tab-content active">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-large-notes-1x22.png" class="header-icon" alt="">
-                            <span>Welcome</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content">
-                            <div class="welcome-text">
-                                <p>WELCOME TO ARCS V3.2.2</p>
-                                <p>SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</p>
-                                <p>STATUS: ALL SYSTEMS NOMINAL</p>
-                            </div>
-                        </div>
+
+            <div id="adm-broadcast" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
                     </div>
-                </div>
-                <div id="adm-broadcast" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-beam-1x13.png" class="header-icon" alt="">
-                            <span>Broadcast System</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content broadcast-content">
-                            <div class="broadcast-section">
-                                <label class="section-label">SELECT EMOTION:</label>
-                                <div class="sprite-grid" id="sprite-selector">
-                                    <div class="sprite-item active" data-sprite="normal"><img src="assets/sprites/normal.png" alt="Normal"><span>Normal</span></div>
-                                    <div class="sprite-item" data-sprite="happy"><img src="assets/sprites/happy.png" alt="Happy"><span>Happy</span></div>
-                                    <div class="sprite-item" data-sprite="sad"><img src="assets/sprites/sad.png" alt="Sad"><span>Sad</span></div>
-                                    <div class="sprite-item" data-sprite="annoyed"><img src="assets/sprites/annoyed.png" alt="Annoyed"><span>Annoyed</span></div>
-                                    <div class="sprite-item" data-sprite="bug"><img src="assets/sprites/bug.png" alt="Bug"><span>Bug</span></div>
-                                    <div class="sprite-item" data-sprite="dizzy"><img src="assets/sprites/dizzy.png" alt="Dizzy"><span>Dizzy</span></div>
-                                    <div class="sprite-item" data-sprite="hollow"><img src="assets/sprites/hollow.png" alt="Hollow"><span>Hollow</span></div>
-                                    <div class="sprite-item" data-sprite="panic"><img src="assets/sprites/panic.png" alt="Panic"><span>Panic</span></div>
-                                    <div class="sprite-item" data-sprite="sleeping"><img src="assets/sprites/sleeping.png" alt="Sleeping"><span>Sleeping</span></div>
-                                    <div class="sprite-item" data-sprite="smug"><img src="assets/sprites/smug.png" alt="Smug"><span>Smug</span></div>
-                                    <div class="sprite-item" data-sprite="stare"><img src="assets/sprites/stare.png" alt="Stare"><span>Stare</span></div>
-                                    <div class="sprite-item" data-sprite="suspicious"><img src="assets/sprites/suspicious.png" alt="Suspicious"><span>Suspicious</span></div>
-                                    <div class="sprite-item" data-sprite="werror"><img src="assets/sprites/werror.png" alt="W.Error"><span>W.Error</span></div>
+                    <div class="grid-cell news-cell">
+                        <div class="sticker yellow">BROADCAST SYSTEM</div>
+                        <div class="cell-header">GLOBAL MESSAGE</div>
+                        <div class="news-box">
+                            <label>SELECT EMOTION:</label>
+                            <div class="sprite-selector" id="sprite-selector">
+                                <div class="sprite-option active" data-sprite="normal">
+                                    <img src="assets/sprites/normal.png" alt="Normal">
+                                    <span>Normal</span>
                                 </div>
-                                <input type="hidden" id="sprite-select" value="normal">
-                            </div>
-                            <div class="broadcast-section">
-                                <label class="section-label">MESSAGE:</label>
-                                <textarea id="broadcast-text" class="newton-textarea" placeholder="Type message..."></textarea>
-                            </div>
-                            <button class="newton-button" onclick="sendBroadcast()">
-                                <img src="assets/button-send-to-28x17.png" alt="">
-                                TRANSMIT
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div id="adm-monitoring" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-look-10x1.png" class="header-icon" alt="">
-                            <span>Personnel Monitoring</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content monitoring-content">
-                            <div class="monitoring-list" id="personnel-list"></div>
-                            <div class="monitoring-editor hidden" id="personnel-editor">
-                                <div class="editor-header">Edit Personnel</div>
-                                <div class="editor-form">
-                                    <input type="hidden" id="editor-id">
-                                    <div class="form-row">
-                                        <label>Photo:</label>
-                                        <div class="photo-upload">
-                                            <img id="editor-photo" src="assets/icon-small-person-16x15.png" alt="">
-                                            <input type="file" id="photo-input" accept="image/*" hidden onchange="handlePhotoUpload(event)">
-                                            <button class="newton-button-small" onclick="document.getElementById('photo-input').click()">Change</button>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <label>Name:</label>
-                                        <input type="text" id="editor-name" class="newton-input">
-                                    </div>
-                                    <div class="form-row">
-                                        <label>Level:</label>
-                                        <select id="editor-level" class="newton-select">
-                                            <option value="1">Level 1 - Trainee</option>
-                                            <option value="2">Level 2 - Operator</option>
-                                            <option value="3">Level 3 - Senior</option>
-                                            <option value="4">Level 4 - Supervisor</option>
-                                            <option value="5">Level 5 - Admin</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-row">
-                                        <label>Department:</label>
-                                        <select id="editor-dept" class="newton-select">
-                                            <option value="operations">Operations</option>
-                                            <option value="research">Research</option>
-                                            <option value="containment">Containment</option>
-                                            <option value="security">Security</option>
-                                            <option value="administration">Administration</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-actions">
-                                        <button class="newton-button" onclick="savePersonnel()">Save</button>
-                                        <button class="newton-button" onclick="closeEditor()">Cancel</button>
-                                    </div>
+                                <div class="sprite-option" data-sprite="happy">
+                                    <img src="assets/sprites/happy.png" alt="Happy">
+                                    <span>Happy</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="sad">
+                                    <img src="assets/sprites/sad.png" alt="Sad">
+                                    <span>Sad</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="annoyed">
+                                    <img src="assets/sprites/annoyed.png" alt="Annoyed">
+                                    <span>Annoyed</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="bug">
+                                    <img src="assets/sprites/bug.png" alt="Bug">
+                                    <span>Bug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="dizzy">
+                                    <img src="assets/sprites/dizzy.png" alt="Dizzy">
+                                    <span>Dizzy</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="hollow">
+                                    <img src="assets/sprites/hollow.png" alt="Hollow">
+                                    <span>Hollow</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="panic">
+                                    <img src="assets/sprites/panic.png" alt="Panic">
+                                    <span>Panic</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="sleeping">
+                                    <img src="assets/sprites/sleeping.png" alt="Sleeping">
+                                    <span>Sleeping</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="smug">
+                                    <img src="assets/sprites/smug.png" alt="Smug">
+                                    <span>Smug</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="stare">
+                                    <img src="assets/sprites/stare.png" alt="Stare">
+                                    <span>Stare</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="suspicious">
+                                    <img src="assets/sprites/suspicious.png" alt="Suspicious">
+                                    <span>Suspicious</span>
+                                </div>
+                                <div class="sprite-option" data-sprite="werror">
+                                    <img src="assets/sprites/werror.png" alt="W.Error">
+                                    <span>W.Error</span>
                                 </div>
                             </div>
+                            <input type="hidden" id="sprite-select" value="normal">
+                            <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
+                            <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
+                        </div>
+                    </div>
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">STATUS</div>
+                        <div class="updates-box">
+                            <div class="updates-title">READY</div>
+                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
                         </div>
                     </div>
                 </div>
-                <div id="adm-alarms" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-alarm-17x10.png" class="header-icon" alt="">
-                            <span>Alarm Control</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content alarms-content">
-                            <div class="alarm-status-display">
-                                <span>CURRENT STATUS:</span>
-                                <span id="current-alarm-status">GREEN</span>
-                            </div>
-                            <div class="alarm-buttons">
-                                <button class="alarm-btn green" onclick="setAlarm('green')"><span class="alarm-indicator"></span>GREEN</button>
-                                <button class="alarm-btn blue" onclick="setAlarm('blue')"><span class="alarm-indicator"></span>BLUE</button>
-                                <button class="alarm-btn red" onclick="setAlarm('red')"><span class="alarm-indicator"></span>RED</button>
-                                <button class="alarm-btn gamma" onclick="setAlarm('gamma')"><span class="alarm-indicator"></span>GAMMA</button>
-                                <button class="alarm-btn epsilon" onclick="setAlarm('epsilon')"><span class="alarm-indicator"></span>EPSILON</button>
-                                <button class="alarm-btn poweroff" onclick="setAlarm('poweroff')"><span class="alarm-indicator"></span>POWER OFF</button>
-                            </div>
-                            <div class="alarm-log">
-                                <div class="log-header">Alarm Log</div>
-                                <div class="log-content" id="alarm-log"></div>
-                            </div>
+            </div>
+
+            <div id="adm-monitoring" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">ACTIVE LOGS</div>
+                        <div class="news-box"><div class="news-text"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-alarms" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">ALERTS</div>
+                        <div class="featured-box">
+                            <div class="featured-title">NO ACTIVE ALARMS</div>
                         </div>
                     </div>
                 </div>
-                <div id="adm-tickets" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-task-14x11.png" class="header-icon" alt="">
-                            <span>Tickets</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content tickets-content">
-                            <div class="tickets-section">
-                                <div class="section-title">Pending Approvals</div>
-                                <div class="tickets-list" id="pending-list"></div>
-                            </div>
-                            <div class="tickets-section">
-                                <div class="section-title">Support Requests</div>
-                                <div class="tickets-list" id="active-chats-list"></div>
-                            </div>
+            </div>
+
+            <div id="adm-tickets" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO FREQUENCY</div>
+                        <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-credentials" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">ADMIN ID</div>
+                        <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-profile" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell news-cell">
+                        <div class="cell-header">USER PROFILE</div>
+                        <div class="news-box"><div class="news-text">WELCOME OPERATOR. STATUS: ACTIVE.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-workstation" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">ASSIGNMENTS</div>
+                        <div class="release-box">
+                            <div class="release-desc">NO ACTIVE ASSIGNMENTS. CHECK BACK LATER.</div>
                         </div>
                     </div>
                 </div>
-                <div id="adm-radio" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-speaker-11x11.png" class="header-icon" alt="">
-                            <span>Global Radio</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content radio-content">
-                            <div class="radio-display">
-                                <span class="freq-label">FREQ:</span>
-                                <span class="freq-value">99.4 MHz</span>
-                                <span class="online-count" id="online-count">0 online</span>
-                            </div>
-                            <div class="radio-messages" id="radio-messages"></div>
-                            <div class="radio-input">
-                                <input type="text" id="radio-input" class="newton-input" placeholder="Type message...">
-                                <button class="newton-button" onclick="sendRadioMessage()">Send</button>
-                            </div>
+            </div>
+
+            <div id="usr-radio" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">RADIO</div>
+                        <div class="updates-box"><div class="updates-text">LISTENING...</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usr-help" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell featured-cell">
+                        <div class="sticker yellow">SUPPORT</div>
+                        <div class="featured-box">
+                            <div class="featured-desc">ADMINISTRATOR OBUNTO IS OFFLINE.</div>
                         </div>
                     </div>
                 </div>
-                <div id="adm-credentials" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-person-16x15.png" class="header-icon" alt="">
-                            <span>Credentials</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content credentials-content">
-                            <div class="credential-card admin-card">
-                                <div class="card-badge">ADMIN</div>
-                                <div class="card-name">OBUNTO</div>
-                                <div class="card-id">118107921024376</div>
-                                <div class="card-level">Level 5</div>
-                            </div>
-                            <div class="users-list" id="all-users-list"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="usr-profile" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-person-9x12.png" class="header-icon" alt="">
-                            <span>Profile</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content profile-content">
-                            <div class="profile-card">
-                                <img id="profile-photo" src="assets/icon-small-person-16x15.png" class="profile-photo" alt="">
-                                <div class="profile-info">
-                                    <div class="profile-name" id="profile-name">OPERATOR</div>
-                                    <div class="profile-id" id="profile-id">ID: --------</div>
-                                    <div class="profile-dept" id="profile-dept">Department: ---</div>
-                                    <div class="profile-level" id="profile-level">Level: ---</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="usr-workstation" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-folder-15x11.png" class="header-icon" alt="">
-                            <span>Workstation</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content">
-                            <div class="empty-state">
-                                <img src="assets/icon-large-notes-1x22.png" alt="">
-                                <p>NO ACTIVE ASSIGNMENTS</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="usr-radio" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-small-speaker-11x11.png" class="header-icon" alt="">
-                            <span>Global Radio</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content radio-content">
-                            <div class="radio-display">
-                                <span class="freq-label">FREQ:</span>
-                                <span class="freq-value">99.4 MHz</span>
-                                <span class="online-count" id="usr-online-count">0 online</span>
-                            </div>
-                            <div class="radio-messages" id="usr-radio-messages"></div>
-                            <div class="radio-input">
-                                <input type="text" id="usr-radio-input" class="newton-input" placeholder="Type message...">
-                                <button class="newton-button" onclick="sendRadioMessage(true)">Send</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="usr-help" class="tab-content">
-                    <div class="newton-window full">
-                        <div class="window-header">
-                            <img src="assets/icon-large-help-highlighted-30x23.png" class="header-icon" alt="">
-                            <span>Help Request</span>
-                            <img src="assets/button-close-17x.png" class="header-close" alt="">
-                        </div>
-                        <div class="window-content help-content">
-                            <div class="help-form" id="help-form">
-                                <p>Need assistance? Request support from Administrator.</p>
-                                <textarea id="help-reason" class="newton-textarea" placeholder="Describe your issue..."></textarea>
-                                <button class="newton-button" onclick="requestHelp()" id="help-request-btn">Request Support</button>
-                            </div>
-                            <div class="help-pending hidden" id="help-pending">
-                                <p>Waiting for administrator approval...</p>
-                            </div>
-                        </div>
+            </div>
+
+            <div id="usr-suggestions" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="broadcast-notification" class="broadcast-popup hidden">
-        <div class="broadcast-container">
-            <div class="broadcast-bubble">
-                <div class="bubble-content" id="notif-text"></div>
-            </div>
-            <div class="broadcast-mascot">
-                <img id="notif-sprite" src="assets/sprites/normal.png" alt="Obunto">
-                <div class="mascot-label">OBUNTO</div>
+    <div id="admin-panel" class="admin-window hidden">
+        <div class="window-titlebar">
+            <span>ADMIN - OBUNTO</span>
+            <div class="close-btn" onclick="closeAdmin()">×</div>
+        </div>
+        <div class="window-body">
+            <div class="admin-section">
+                <h3>PENDING ACCOUNTS</h3>
+                <div id="pending-list-modal"></div>
             </div>
         </div>
     </div>
 
-    <div id="chat-window" class="newton-window chat-window hidden">
-        <div class="window-header">
-            <img src="assets/icon-small-beam-card-20x10.png" class="header-icon" alt="">
-            <span class="chat-title">Support Chat</span>
-            <div class="chat-controls">
-                <button class="control-btn" onclick="setChatStatus('wait')" title="Wait">
-                    <img src="assets/icon-small-mode-8x10.png" alt="">
-                </button>
-                <button class="control-btn" onclick="endChat()" title="Close">
-                    <img src="assets/button-close-17x.png" alt="">
-                </button>
-            </div>
-        </div>
-        <div class="window-content chat-content">
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-area">
-                <input type="file" id="chat-image-input" accept="image/*" hidden onchange="handleImageUpload(event)">
-                <button class="newton-button-small" onclick="document.getElementById('chat-image-input').click()">
-                    <img src="assets/icon-small-sketch-15x8.png" alt="">
-                </button>
-                <input type="text" id="chat-input" class="newton-input" placeholder="Type message...">
-                <button class="newton-button-small" onclick="sendChatMessage()">Send</button>
-            </div>
-        </div>
-    </div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
 
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">
-        <img src="assets/icon-large-preferences-19x19.png" alt="">
+    <div id="broadcast-notification" class="notification hidden">
+        <div class="bubble">
+            <div class="notification-text" id="notif-text"></div>
+            <div class="bubble-arrow"></div>
+        </div>
+        <div class="mascot-container">
+            <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
+            <div class="mascot-name">OBUNTO</div>
+        </div>
     </div>
 
     <script src="js/script.js"></script>
