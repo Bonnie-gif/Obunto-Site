@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="css/tickets.css">
     <link rel="stylesheet" href="css/radio.css">
     <link rel="stylesheet" href="css/credentials.css">
+    <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
@@ -25,18 +26,18 @@
 
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
-            <div class="upeo-section">
-                <svg class="upeo-logo" viewBox="0 0 200 200">
+            <div class="arcs-section">
+                <svg class="arcs-logo" viewBox="0 0 200 200">
                     <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
                     <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
                     <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
                 </svg>
-                <div class="upeo-text">UPEO</div>
+                <div class="arcs-text">ARCS</div>
             </div>
             
             <div class="loading-info">
                 RESTARTING OS VER.3.2.2<br>
-                UPEO ID confirmed<br>
+                ARCS ID confirmed<br>
                 DATA SWALLOW<br>
                 is for registered use only.
             </div>
@@ -65,10 +66,10 @@
                     <div class="swallow-disk">
                         <div class="disk-text">
                             DATA SWALLOW 40<br>
-                            UPEO VER.3.2<br>
+                            ARCS VER.3.2<br>
                             SYSTEM STARTUP
                         </div>
-                        <div class="disk-icon">⊕</div>
+                        <div class="disk-icon">CD</div>
                     </div>
                 </div>
                 <div class="loading-bar">
@@ -88,7 +89,7 @@
         </div>
 
         <div class="loading-indicator">
-            <span class="loading-icon">⚡</span>
+            <span class="loading-icon">*</span>
             <span>System initialized</span>
         </div>
 
@@ -115,7 +116,6 @@
             <div id="view-home" class="tab-content active">
                 <div class="banner-section">
                     <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
-                    <div class="mascot-placeholder"></div>
                 </div>
                 <div class="content-grid">
                     <div class="grid-cell news-cell">
@@ -207,10 +207,24 @@
             </div>
 
             <div id="adm-monitoring" class="tab-content">
+                <div class="monitoring-header">
+                    <div class="monitoring-controls">
+                        <button class="mon-btn" onclick="updateMonitoring()">REFRESH</button>
+                        <select id="mon-target" class="mon-select">
+                            <option value="all">ALL TABS</option>
+                            <option value="broadcast">BROADCAST</option>
+                            <option value="alarms">ALARMS</option>
+                            <option value="tickets">TICKETS</option>
+                            <option value="radio">RADIO</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="content-grid">
-                    <div class="grid-cell news-cell">
+                    <div class="grid-cell news-cell monitoring-full">
                         <div class="cell-header">ACTIVE LOGS</div>
-                        <div class="news-box"><div class="news-text"></div></div>
+                        <div class="news-box">
+                            <div class="news-text" id="monitoring-logs"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -246,9 +260,37 @@
 
             <div id="adm-credentials" class="tab-content">
                 <div class="content-grid">
-                    <div class="grid-cell news-cell">
-                        <div class="cell-header">ADMIN ID</div>
-                        <div class="news-box"><div class="news-text">OBUNTO - 118107921024376</div></div>
+                    <div class="grid-cell credentials-cell">
+                        <div class="cell-header">ADMIN CREDENTIALS</div>
+                        <div class="credentials-ticket">
+                            <div class="ticket-holes-left"></div>
+                            <div class="ticket-content">
+                                <div class="ticket-header">ARCS SYSTEM</div>
+                                <div class="ticket-title">ADMINISTRATOR</div>
+                                <div class="ticket-divider"></div>
+                                <div class="ticket-info">
+                                    <div class="ticket-row">
+                                        <span class="ticket-label">NAME:</span>
+                                        <span class="ticket-value">OBUNTO</span>
+                                    </div>
+                                    <div class="ticket-row">
+                                        <span class="ticket-label">ID:</span>
+                                        <span class="ticket-value">118107921024376</span>
+                                    </div>
+                                    <div class="ticket-row">
+                                        <span class="ticket-label">LEVEL:</span>
+                                        <span class="ticket-value">FULL ACCESS</span>
+                                    </div>
+                                    <div class="ticket-row">
+                                        <span class="ticket-label">STATUS:</span>
+                                        <span class="ticket-value">ACTIVE</span>
+                                    </div>
+                                </div>
+                                <div class="ticket-barcode">||||||||||||||||||||</div>
+                                <div class="ticket-footer">AUTHORIZED PERSONNEL ONLY</div>
+                            </div>
+                            <div class="ticket-holes-right"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -306,7 +348,7 @@
     <div id="admin-panel" class="admin-window hidden">
         <div class="window-titlebar">
             <span>ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">×</div>
+            <div class="close-btn" onclick="closeAdmin()">X</div>
         </div>
         <div class="window-body">
             <div class="admin-section">
@@ -316,7 +358,7 @@
         </div>
     </div>
 
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">⚙</div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
     <div id="broadcast-notification" class="notification hidden">
         <div class="bubble">
@@ -326,6 +368,35 @@
         <div class="mascot-container">
             <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
             <div class="mascot-name">OBUNTO</div>
+        </div>
+    </div>
+
+    <div id="chat-window" class="chat-window hidden">
+        <div class="chat-titlebar">
+            <div class="chat-title">
+                <span class="chat-icon">@</span>
+                <span>OBUNTO</span>
+            </div>
+            <div class="chat-controls">
+                <button class="chat-control-btn" onclick="minimizeChat()">_</button>
+                <button class="chat-control-btn" onclick="closeChat()">X</button>
+            </div>
+        </div>
+        <div class="chat-body">
+            <div class="chat-user-info">
+                <div class="chat-avatar">
+                    <img src="assets/sprites/normal.png" id="chat-avatar-img">
+                </div>
+                <div class="chat-user-details">
+                    <div class="chat-username">OBUNTO</div>
+                    <div class="chat-status-text">ADMINISTRATOR</div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" class="chat-input" id="chat-input" placeholder="TYPE MESSAGE...">
+                <button class="chat-send-btn" onclick="sendChatMessage()">SEND</button>
+            </div>
         </div>
     </div>
 

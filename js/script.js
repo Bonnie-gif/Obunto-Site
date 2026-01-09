@@ -84,6 +84,7 @@ async function handleLogin() {
                 document.getElementById('admin-tabs').classList.remove('hidden');
                 document.getElementById('personnel-tabs').classList.add('hidden');
                 loadPending('pending-list');
+                initializeMonitoring();
             } else {
                 document.getElementById('admin-tabs').classList.add('hidden');
                 document.getElementById('personnel-tabs').classList.remove('hidden');
@@ -177,6 +178,7 @@ async function approve(id) {
     playSound('sfx-blue');
     loadPending('pending-list');
     loadPending('pending-list-modal');
+    logMonitoring(`USER APPROVED: ${id}`);
 }
 
 async function deny(id) {
@@ -187,6 +189,7 @@ async function deny(id) {
     playSound('sfx-denied');
     loadPending('pending-list');
     loadPending('pending-list-modal');
+    logMonitoring(`USER DENIED: ${id}`);
 }
 
 document.querySelectorAll('.sprite-option').forEach(option => {
@@ -210,6 +213,7 @@ async function sendBroadcast() {
     document.getElementById('broadcast-text').value = '';
     
     showBroadcast({ text, sprite });
+    logMonitoring(`BROADCAST SENT: ${text.substring(0, 30)}...`);
 }
 
 function showBroadcast(data) {
@@ -232,6 +236,10 @@ function showBroadcast(data) {
 function switchTab(targetId) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.getElementById(targetId).classList.add('active');
+    
+    if (targetId === 'adm-monitoring') {
+        updateMonitoring();
+    }
 }
 
 document.querySelectorAll('.tab').forEach(tab => {
@@ -242,7 +250,106 @@ document.querySelectorAll('.tab').forEach(tab => {
         
         const target = tab.getAttribute('data-target');
         switchTab(target);
+        logMonitoring(`TAB ACCESSED: ${target}`);
     });
+});
+
+let monitoringLogs = [];
+
+function initializeMonitoring() {
+    monitoringLogs = [
+        '> SYSTEM MONITORING INITIALIZED',
+        '> DATA SWALLOW STATUS: OK',
+        '> ARCS CONNECTION: STABLE',
+        '> STATUS: GREEN',
+        '> ALL SYSTEMS OPERATIONAL'
+    ];
+    updateMonitoringDisplay();
+}
+
+function logMonitoring(message) {
+    const timestamp = new Date().toLocaleTimeString();
+    monitoringLogs.push(`[${timestamp}] ${message}`);
+    if (monitoringLogs.length > 50) {
+        monitoringLogs.shift();
+    }
+    updateMonitoringDisplay();
+}
+
+function updateMonitoring() {
+    const target = document.getElementById('mon-target')?.value || 'all';
+    logMonitoring(`MONITORING REFRESH: ${target.toUpperCase()}`);
+    updateMonitoringDisplay();
+}
+
+function updateMonitoringDisplay() {
+    const logsElement = document.getElementById('monitoring-logs');
+    if (logsElement) {
+        logsElement.textContent = monitoringLogs.join('\n');
+        logsElement.scrollTop = logsElement.scrollHeight;
+    }
+}
+
+function openChat() {
+    const chatWindow = document.getElementById('chat-window');
+    if (chatWindow) {
+        chatWindow.classList.remove('hidden');
+    }
+}
+
+function closeChat() {
+    const chatWindow = document.getElementById('chat-window');
+    if (chatWindow) {
+        chatWindow.classList.add('hidden');
+    }
+}
+
+function minimizeChat() {
+    closeChat();
+}
+
+function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input?.value.trim();
+    
+    if (!text) return;
+    
+    const messagesDiv = document.getElementById('chat-messages');
+    if (messagesDiv) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-msg sent';
+        msgDiv.innerHTML = `
+            <div class="chat-msg-content">${text}</div>
+            <div class="chat-msg-meta">
+                <span>YOU</span>
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+        messagesDiv.appendChild(msgDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+    
+    input.value = '';
+    logMonitoring(`CHAT MESSAGE SENT TO OBUNTO`);
+    
+    setTimeout(() => {
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'chat-msg received';
+        responseDiv.innerHTML = `
+            <div class="chat-msg-content">Message received. How can I help you?</div>
+            <div class="chat-msg-meta">
+                <span>OBUNTO</span>
+                <span>${new Date().toLocaleTimeString()}</span>
+            </div>
+        `;
+        messagesDiv.appendChild(responseDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        playSound('sfx-newmessage');
+    }, 1000);
+}
+
+document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendChatMessage();
 });
 
 async function init() {

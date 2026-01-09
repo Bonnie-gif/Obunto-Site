@@ -44,7 +44,7 @@ body {
   padding: 40px;
 }
 
-.upeo-section {
+.arcs-section {
   position: absolute;
   top: 20%;
   left: 15%;
@@ -53,7 +53,7 @@ body {
   gap: 30px;
 }
 
-.upeo-logo {
+.arcs-logo {
   width: 140px;
   height: auto;
   fill: #fdfdf5;
@@ -65,7 +65,7 @@ body {
   50% { opacity: 0.7; }
 }
 
-.upeo-text {
+.arcs-text {
   font-family: 'VT323', monospace;
   font-size: 72px;
   letter-spacing: 12px;

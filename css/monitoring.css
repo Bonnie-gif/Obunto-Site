@@ -1,8 +1,60 @@
+.monitoring-header {
+    padding: 15px;
+    background: #c0c0c0;
+    border-bottom: 3px solid #000;
+}
+
+.monitoring-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.mon-btn {
+    padding: 8px 20px;
+    border: 3px solid #000;
+    background: #80ff80;
+    color: #000;
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+}
+
+.mon-btn:hover {
+    background: #99ff99;
+}
+
+.mon-btn:active {
+    box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
+}
+
+.mon-select {
+    padding: 8px 15px;
+    border: 2px solid #000;
+    background: #fff;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    box-shadow: inset 1px 1px 0 #e0e0e0;
+}
+
+.mon-select:focus {
+    outline: none;
+    background: #ffffd0;
+}
+
+.monitoring-full {
+    grid-column: 1 / -1;
+}
+
 #adm-monitoring .news-box {
     background: #000;
     border: 3px solid #0f0;
-    padding: 12px;
-    min-height: 130px;
+    padding: 15px;
+    min-height: 250px;
     display: flex;
     flex-direction: column;
 }
@@ -11,7 +63,7 @@
     font-family: 'Courier Prime', monospace;
     font-size: 11px;
     color: #0f0;
-    line-height: 1.5;
+    line-height: 1.6;
     text-shadow: 0 0 4px rgba(0, 255, 0, 0.5);
     white-space: pre-line;
     overflow-y: auto;
@@ -22,11 +74,6 @@
 @keyframes screenGlow {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.96; }
-}
-
-#adm-monitoring .news-text::before {
-    content: "> SYSTEM MONITORING...\A > DATA SWALLOW STATUS: OK\A > UPEO CONNECTION: STABLE\A > STATUS: GREEN\A > ALL SYSTEMS OPERATIONAL";
-    white-space: pre-wrap;
 }
 
 #adm-monitoring .cell-header {
