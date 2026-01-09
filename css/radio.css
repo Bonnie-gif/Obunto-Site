@@ -1,87 +1,205 @@
-#adm-radio .updates-box {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2b2b2b 100%);
-    border: 5px solid #ffd700;
-    color: #ffd700;
+.radio-controls {
+    background: #d0d0d0;
+    border: 3px solid #000;
+    padding: 15px;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+}
+
+.radio-controls label {
+    display: block;
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #000;
+    text-transform: uppercase;
+}
+
+#radio-channel {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #000;
+    background: #fff;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    margin-bottom: 15px;
+    box-shadow: inset 1px 1px 0 #808080;
+}
+
+.radio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #000;
+    color: #0f0;
+    border: 2px solid #0f0;
+}
+
+.radio-frequency {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+}
+
+.radio-clear-btn {
+    padding: 6px 12px;
+    border: 2px solid #0f0;
+    background: #000;
+    color: #0f0;
+    font-family: 'VT323', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.radio-clear-btn:hover {
+    background: #0f0;
+    color: #000;
+}
+
+.radio-messages {
+    background: #000;
+    border: 3px solid #0f0;
+    padding: 12px;
+    min-height: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 11px;
+    color: #0f0;
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
+}
+
+.radio-message {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+    line-height: 1.4;
+}
+
+.radio-message:last-child {
+    border-bottom: none;
+}
+
+.radio-message-time {
+    color: #0a0;
+    font-weight: bold;
+}
+
+.radio-message-user {
+    color: #0ff;
+    font-weight: bold;
+}
+
+.radio-message-text {
+    color: #0f0;
+    margin-left: 8px;
+}
+
+.radio-input-area {
+    display: flex;
+    gap: 8px;
+}
+
+#radio-input {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #000;
+    background: #fff;
+    font-family: 'Courier Prime', monospace;
+    font-size: 12px;
+    box-shadow: inset 1px 1px 0 #808080;
+}
+
+#radio-input:focus {
+    outline: none;
+    background: #ffffd0;
+    border-color: #0f0;
+}
+
+.radio-input-area button {
+    padding: 10px 20px;
+    border: 3px solid #000;
+    background: #0f0;
+    color: #000;
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+    transition: all 0.1s;
+}
+
+.radio-input-area button:hover {
+    background: #1f1;
+}
+
+.radio-input-area button:active {
+    box-shadow: inset 1px 1px 0 #808080;
+}
+
+.radio-status {
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    min-height: 120px;
-    box-shadow: 
-        inset 0 0 30px rgba(255, 215, 0, 0.2),
-        4px 4px 0 rgba(0,0,0,0.5);
-    border-radius: 10px;
+    gap: 8px;
+    font-family: 'VT323', monospace;
+    font-size: 12px;
+    color: #0f0;
+    padding: 6px;
+    background: #000;
+    border: 2px solid #0f0;
+    margin-bottom: 12px;
+}
+
+.radio-status-indicator {
+    width: 10px;
+    height: 10px;
+    background: #0f0;
+    border-radius: 50%;
+    animation: radioPulse 1.5s infinite;
+}
+
+@keyframes radioPulse {
+    0%, 100% { 
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+    }
+    50% { 
+        opacity: 0.3;
+        box-shadow: 0 0 4px rgba(0, 255, 0, 0.4);
+    }
+}
+
+#adm-radio .updates-box {
+    background: #d0d0d0;
+    border: 3px solid #000;
+    padding: 0;
+    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
 }
 
 #adm-radio .updates-text {
     font-family: 'VT323', monospace;
-    font-size: 32px;
-    z-index: 2;
-    text-shadow: 
-        0 0 10px rgba(255, 215, 0, 0.8),
-        0 0 20px rgba(255, 215, 0, 0.5);
-    letter-spacing: 3px;
-    animation: radioGlow 2s ease-in-out infinite;
-}
-
-@keyframes radioGlow {
-    0%, 100% { 
-        text-shadow: 
-            0 0 10px rgba(255, 215, 0, 0.8),
-            0 0 20px rgba(255, 215, 0, 0.5);
-    }
-    50% { 
-        text-shadow: 
-            0 0 15px rgba(255, 215, 0, 1),
-            0 0 30px rgba(255, 215, 0, 0.7);
-    }
-}
-
-#adm-radio .updates-box::before {
-    content: "ðŸ“»";
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 24px;
-    opacity: 0.3;
-}
-
-#adm-radio .updates-box::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    height: 5px;
-    width: 100%;
-    background: repeating-linear-gradient(
-        90deg,
-        #ffd700,
-        #ffd700 3px,
-        transparent 3px,
-        transparent 6px
-    );
-    animation: slide 8s linear infinite;
-}
-
-@keyframes slide {
-    from { background-position: 0 0; }
-    to { background-position: 100% 0; }
+    font-size: 14px;
+    color: #000;
+    padding: 15px;
 }
 
 #usr-radio .updates-box {
-    background: linear-gradient(to bottom, #f5f5f5 0%, #e0e0e0 100%);
-    border: 4px solid #000;
-    padding: 20px;
-    box-shadow: 
-        inset 2px 2px 4px rgba(255,255,255,0.8),
-        3px 3px 0 rgba(0,0,0,0.2);
+    background: #000;
+    border: 3px solid #0f0;
+    padding: 15px;
+    box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
 }
 
 #usr-radio .updates-text {
     font-family: 'Courier Prime', monospace;
-    font-size: 13px;
-    color: #666;
+    font-size: 12px;
+    color: #0f0;
     text-align: center;
     font-weight: bold;
 }

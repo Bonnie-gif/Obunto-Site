@@ -3,35 +3,38 @@
     color: #fff;
     display: flex;
     align-items: center;
-    padding: 10px 15px 0 15px;
+    padding: 12px 15px 0 15px;
     font-family: 'VT323', monospace;
-    font-size: 16px;
+    font-size: 18px;
     gap: 6px;
-    border-bottom: 3px solid #000;
+    border-bottom: 5px solid #000;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
 }
 
 .menu-button {
-    background: linear-gradient(to bottom, #d0d0d0 0%, #b0b0b0 100%);
+    background: linear-gradient(to bottom, #fff 0%, #f0f0f0 100%);
     color: #000;
-    padding: 10px 22px;
+    padding: 10px 25px;
     font-weight: bold;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
+    border-radius: 10px 10px 0 0;
     cursor: pointer;
-    border: 3px solid #000;
+    border: 4px solid #000;
     border-bottom: none;
-    border-radius: 8px 8px 0 0;
     transition: all 0.2s;
     z-index: 10;
-    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #808080;
+    box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.8),
+        inset 0 -2px 4px rgba(0,0,0,0.1);
 }
 
 .menu-button:hover {
-    background: linear-gradient(to bottom, #e0e0e0 0%, #c0c0c0 100%);
+    background: linear-gradient(to bottom, #fff 0%, #ffd700 100%);
     transform: translateY(-2px);
 }
 
 .menu-button:active {
-    box-shadow: inset 1px 1px 0 #808080, inset -1px -1px 0 #fff;
+    background: linear-gradient(to bottom, #f0f0f0 0%, #e0e0e0 100%);
     transform: translateY(0);
 }
 
@@ -40,7 +43,6 @@
     gap: 5px;
     overflow-x: auto;
     padding-bottom: 2px;
-    flex: 1;
 }
 
 .menu-tabs.hidden {
@@ -48,58 +50,68 @@
 }
 
 .tab {
-    background: linear-gradient(to bottom, #7dd3c0 0%, #5db3a0 100%);
-    color: #000;
-    padding: 10px 18px;
+    background: linear-gradient(to bottom, #555 0%, #444 100%);
+    color: #ccc;
+    padding: 10px 20px;
     cursor: pointer;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
+    border-radius: 10px 10px 0 0;
     transition: all 0.2s;
     border: 3px solid #000;
     border-bottom: none;
-    border-radius: 8px 8px 0 0;
     font-weight: bold;
-    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.4), inset -2px -2px 0 rgba(0,0,0,0.2);
-    position: relative;
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);
 }
 
 .tab:hover {
-    background: linear-gradient(to bottom, #8de3d0 0%, #6dc3b0 100%);
+    background: linear-gradient(to bottom, #777 0%, #666 100%);
+    color: #fff;
     transform: translateY(-2px);
 }
 
 .tab.active {
-    background: linear-gradient(to bottom, #ffff80 0%, #ffffb0 100%);
+    background: linear-gradient(to bottom, #ffd700 0%, #ffed4e 100%);
     color: #000;
     font-weight: bold;
     border-color: #000;
+    position: relative;
     top: 2px;
     z-index: 5;
-    box-shadow: inset 2px 2px 0 #fffff0, inset -2px -2px 0 rgba(0,0,0,0.2);
+    box-shadow: 
+        inset 0 2px 4px rgba(255,255,255,0.6),
+        0 -2px 8px rgba(255, 215, 0, 0.4);
 }
 
 .banner-section {
-    height: 100%;
-    width: 100%;
-    background: #e8e8e8;
-    border-bottom: 4px solid #000;
+    height: 220px;
+    background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+    border-bottom: 6px solid #000;
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #a0a0a0;
-    grid-column: 1 / -1;
-    min-height: 200px;
+    padding: 20px;
+    box-shadow: inset 0 -4px 8px rgba(0,0,0,0.1);
 }
 
 .banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(6px 6px 0 rgba(0,0,0,0.3));
+}
+
+.mascot-placeholder {
+    position: absolute;
+    left: 60px;
+    bottom: 20px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, #ff69b4 40%, transparent 41%);
+    border-radius: 50%;
 }
 
 .home-grid {
-    padding: 15px;
+    padding: 20px;
 }
