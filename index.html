@@ -23,6 +23,7 @@
     <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
+    <audio id="sfx-alarm" src="assets/audio/alarm.wav"></audio>
 
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
@@ -49,6 +50,8 @@
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
                     <input type="text" id="operator-id" class="login-input" maxlength="20">
+                    <label class="login-label">ENTER PASSWORD:</label>
+                    <input type="password" id="operator-password" class="login-input" maxlength="50">
                     <div class="login-status" id="login-status"></div>
                     <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
@@ -103,25 +106,31 @@
                     <div class="tab" data-target="adm-tickets">TICKETS</div>
                     <div class="tab" data-target="adm-radio">RADIO</div>
                     <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                    <div class="tab" data-target="adm-users">USERS</div>
                 </div>
                 <div class="menu-tabs hidden" id="personnel-tabs">
                     <div class="tab" data-target="usr-profile">PROFILE</div>
                     <div class="tab" data-target="usr-workstation">WORKSTATION</div>
                     <div class="tab" data-target="usr-radio">RADIO</div>
                     <div class="tab" data-target="usr-help">HELP REQUEST</div>
-                    <div class="tab" data-target="usr-suggestions">SUGGESTIONS</div>
+                </div>
+                <div class="menu-user-info" id="menu-user-info">
+                    <span id="current-user-name">GUEST</span>
+                    <button class="logout-btn" onclick="handleLogout()">LOGOUT</button>
                 </div>
             </div>
 
             <div id="view-home" class="tab-content active">
-                <div class="banner-section">
-                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
-                </div>
-                <div class="content-grid">
-                    <div class="grid-cell news-cell">
-                        <div class="cell-header">WELCOME</div>
-                        <div class="news-box">
-                            <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                <div class="home-layout">
+                    <div class="banner-section">
+                        <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                    </div>
+                    <div class="welcome-section">
+                        <div class="grid-cell news-cell">
+                            <div class="cell-header">WELCOME</div>
+                            <div class="news-box">
+                                <div class="news-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,11 +206,8 @@
                         </div>
                     </div>
                     <div class="grid-cell updates-cell">
-                        <div class="cell-header">STATUS</div>
-                        <div class="updates-box">
-                            <div class="updates-title">READY</div>
-                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
-                        </div>
+                        <div class="cell-header">BROADCAST HISTORY</div>
+                        <div class="updates-box" id="broadcast-history"></div>
                     </div>
                 </div>
             </div>
@@ -217,6 +223,7 @@
                             <option value="tickets">TICKETS</option>
                             <option value="radio">RADIO</option>
                         </select>
+                        <div class="system-stats" id="system-stats"></div>
                     </div>
                 </div>
                 <div class="content-grid">
@@ -231,11 +238,10 @@
 
             <div id="adm-alarms" class="tab-content">
                 <div class="content-grid">
-                    <div class="grid-cell featured-cell">
+                    <div class="grid-cell featured-cell alarm-list">
                         <div class="sticker yellow">ALERTS</div>
-                        <div class="featured-box">
-                            <div class="featured-title">NO ACTIVE ALARMS</div>
-                        </div>
+                        <div class="cell-header">ACTIVE ALARMS</div>
+                        <div id="alarms-container"></div>
                     </div>
                 </div>
             </div>
@@ -243,8 +249,8 @@
             <div id="adm-tickets" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell release-cell">
-                        <div class="cell-header">PENDING APPROVALS</div>
-                        <div id="pending-list"></div>
+                        <div class="cell-header">SUPPORT TICKETS</div>
+                        <div id="tickets-list"></div>
                     </div>
                 </div>
             </div>
@@ -253,44 +259,83 @@
                 <div class="content-grid">
                     <div class="grid-cell updates-cell">
                         <div class="cell-header">RADIO FREQUENCY</div>
-                        <div class="updates-box"><div class="updates-text">ENCRYPTED CHANNEL: 99.4</div></div>
+                        <div class="radio-controls">
+                            <label>SELECT CHANNEL:</label>
+                            <select id="radio-channel" onchange="joinRadioChannel()">
+                                <option value="99.4">CHANNEL 99.4 - GENERAL</option>
+                                <option value="88.8">CHANNEL 88.8 - SECURE</option>
+                                <option value="77.7">CHANNEL 77.7 - EMERGENCY</option>
+                            </select>
+                            <div class="radio-messages" id="radio-messages"></div>
+                            <div class="radio-input-area">
+                                <input type="text" id="radio-input" placeholder="BROADCAST MESSAGE...">
+                                <button onclick="sendRadioMessage()">TRANSMIT</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div id="adm-credentials" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell credentials-cell">
-                        <div class="cell-header">ADMIN CREDENTIALS</div>
-                        <div class="credentials-ticket">
-                            <div class="ticket-holes-left"></div>
-                            <div class="ticket-content">
-                                <div class="ticket-header">ARCS SYSTEM</div>
-                                <div class="ticket-title">ADMINISTRATOR</div>
-                                <div class="ticket-divider"></div>
-                                <div class="ticket-info">
-                                    <div class="ticket-row">
-                                        <span class="ticket-label">NAME:</span>
-                                        <span class="ticket-value">OBUNTO</span>
+                <div class="credentials-tabs">
+                    <div class="cred-tab active" onclick="switchCredTab('obunto')">OBUNTO</div>
+                    <div class="cred-tab" onclick="switchCredTab('users')">USER MANAGEMENT</div>
+                </div>
+                <div id="cred-obunto" class="cred-content active">
+                    <div class="content-grid">
+                        <div class="grid-cell credentials-cell">
+                            <div class="cell-header">ADMIN CREDENTIALS</div>
+                            <div class="credentials-ticket">
+                                <div class="ticket-holes-left"></div>
+                                <div class="ticket-content">
+                                    <div class="ticket-header">ARCS SYSTEM</div>
+                                    <div class="ticket-title">ADMINISTRATOR</div>
+                                    <div class="ticket-divider"></div>
+                                    <div class="ticket-info">
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">NAME:</span>
+                                            <span class="ticket-value">OBUNTO</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">ID:</span>
+                                            <span class="ticket-value">118107921024376</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">LEVEL:</span>
+                                            <span class="ticket-value">FULL ACCESS</span>
+                                        </div>
+                                        <div class="ticket-row">
+                                            <span class="ticket-label">STATUS:</span>
+                                            <span class="ticket-value">ACTIVE</span>
+                                        </div>
                                     </div>
-                                    <div class="ticket-row">
-                                        <span class="ticket-label">ID:</span>
-                                        <span class="ticket-value">118107921024376</span>
-                                    </div>
-                                    <div class="ticket-row">
-                                        <span class="ticket-label">LEVEL:</span>
-                                        <span class="ticket-value">FULL ACCESS</span>
-                                    </div>
-                                    <div class="ticket-row">
-                                        <span class="ticket-label">STATUS:</span>
-                                        <span class="ticket-value">ACTIVE</span>
-                                    </div>
+                                    <div class="ticket-barcode">||||||||||||||||||||</div>
+                                    <div class="ticket-footer">AUTHORIZED PERSONNEL ONLY</div>
                                 </div>
-                                <div class="ticket-barcode">||||||||||||||||||||</div>
-                                <div class="ticket-footer">AUTHORIZED PERSONNEL ONLY</div>
+                                <div class="ticket-holes-right"></div>
                             </div>
-                            <div class="ticket-holes-right"></div>
                         </div>
+                    </div>
+                </div>
+                <div id="cred-users" class="cred-content">
+                    <div class="content-grid">
+                        <div class="grid-cell users-management">
+                            <div class="cell-header">MANAGE USER CREDENTIALS</div>
+                            <div id="users-credentials-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-users" class="tab-content">
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">ACTIVE USERS</div>
+                        <div id="active-users-list"></div>
+                    </div>
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
                     </div>
                 </div>
             </div>
@@ -299,7 +344,7 @@
                 <div class="content-grid">
                     <div class="grid-cell news-cell">
                         <div class="cell-header">USER PROFILE</div>
-                        <div class="news-box"><div class="news-text">WELCOME OPERATOR. STATUS: ACTIVE.</div></div>
+                        <div class="profile-content" id="profile-content"></div>
                     </div>
                 </div>
             </div>
@@ -307,10 +352,9 @@
             <div id="usr-workstation" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell release-cell">
-                        <div class="cell-header">ASSIGNMENTS</div>
-                        <div class="release-box">
-                            <div class="release-desc">NO ACTIVE ASSIGNMENTS. CHECK BACK LATER.</div>
-                        </div>
+                        <div class="cell-header">MY TICKETS</div>
+                        <div id="my-tickets"></div>
+                        <button class="create-ticket-btn" onclick="openTicketForm()">CREATE NEW TICKET</button>
                     </div>
                 </div>
             </div>
@@ -319,7 +363,7 @@
                 <div class="content-grid">
                     <div class="grid-cell updates-cell">
                         <div class="cell-header">RADIO</div>
-                        <div class="updates-box"><div class="updates-text">LISTENING...</div></div>
+                        <div class="updates-box"><div class="updates-text">LISTENING TO CHANNEL 99.4...</div></div>
                     </div>
                 </div>
             </div>
@@ -329,45 +373,26 @@
                     <div class="grid-cell featured-cell">
                         <div class="sticker yellow">SUPPORT</div>
                         <div class="featured-box">
-                            <div class="featured-desc">ADMINISTRATOR OBUNTO IS OFFLINE.</div>
+                            <div class="featured-desc">
+                                CONTACT ADMINISTRATOR OBUNTO<br>
+                                <button class="chat-open-btn" onclick="openChat()">OPEN CHAT</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div id="usr-suggestions" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell empty-cell">
-                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
-    <div id="admin-panel" class="admin-window hidden">
-        <div class="window-titlebar">
-            <span>ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">X</div>
-        </div>
-        <div class="window-body">
-            <div class="admin-section">
-                <h3>PENDING ACCOUNTS</h3>
-                <div id="pending-list-modal"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="toggleAdminPanel()">+</div>
 
     <div id="broadcast-notification" class="notification hidden">
-        <div class="bubble">
-            <div class="notification-text" id="notif-text"></div>
-            <div class="bubble-arrow"></div>
-        </div>
         <div class="mascot-container">
             <img id="notif-sprite" class="notification-sprite" src="" alt="Obunto">
-            <div class="mascot-name">OBUNTO</div>
+            <div class="mascot-label">aa OBUNTO</div>
+        </div>
+        <div class="bubble">
+            <div class="notification-text" id="notif-text"></div>
         </div>
     </div>
 
@@ -384,22 +409,51 @@
         </div>
         <div class="chat-body">
             <div class="chat-user-info">
-                <div class="chat-avatar">
-                    <img src="assets/sprites/normal.png" id="chat-avatar-img">
-                </div>
                 <div class="chat-user-details">
                     <div class="chat-username">OBUNTO</div>
                     <div class="chat-status-text">ADMINISTRATOR</div>
                 </div>
+                <div class="chat-avatar">
+                    <img src="assets/sprites/normal.png" id="chat-avatar-img">
+                </div>
             </div>
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-area">
+                <label class="file-upload-btn">
+                    <input type="file" id="chat-file-input" accept="image/*" onchange="handleFileUpload(event)" style="display:none">
+                    <span>+</span>
+                </label>
                 <input type="text" class="chat-input" id="chat-input" placeholder="TYPE MESSAGE...">
                 <button class="chat-send-btn" onclick="sendChatMessage()">SEND</button>
             </div>
         </div>
     </div>
 
+    <div id="ticket-form-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>CREATE SUPPORT TICKET</span>
+                <button class="modal-close" onclick="closeTicketForm()">X</button>
+            </div>
+            <div class="modal-body">
+                <label>SUBJECT:</label>
+                <input type="text" id="ticket-subject" class="form-input">
+                <label>DESCRIPTION:</label>
+                <textarea id="ticket-description" class="form-textarea"></textarea>
+                <button class="form-submit-btn" onclick="submitTicket()">SUBMIT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="image-modal" class="image-modal hidden" onclick="closeImageModal()">
+        <img id="modal-image" src="" alt="Image">
+    </div>
+
+    <div id="error-notification" class="error-notification hidden">
+        <div class="error-content" id="error-content"></div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
