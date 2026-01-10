@@ -1,91 +1,39 @@
 .menu-bar {
-    background: linear-gradient(135deg, #000 0%, #1a1a1a 100%);
-    color: #FFF;
+    background: var(--nier-border, #1A1A1A);
+    color: var(--nier-card, #FFFFFF);
     display: flex;
     align-items: center;
-    padding: var(--spacing-md, 16px) var(--spacing-lg, 24px) 0 var(--spacing-lg, 24px);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-lg, 16px);
-    gap: var(--spacing-sm, 8px);
-    border-bottom: 5px solid #000;
-    box-shadow: 0 6px 0 rgba(0,0,0,0.3);
-    position: relative;
+    padding: 8px 16px 0 16px;
+    font-size: 13px;
+    gap: 6px;
+    border-bottom: 3px solid var(--nier-border, #1A1A1A);
     overflow-x: auto;
-    overflow-y: hidden;
-}
-
-.menu-bar::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255,255,255,0.1) 50%, 
-        transparent
-    );
 }
 
 .menu-button {
-    background: linear-gradient(135deg, #FFF 0%, #F0F0F0 100%);
-    color: #000;
-    padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
-    font-weight: 900;
-    letter-spacing: 3px;
-    border-radius: var(--border-radius-lg, 12px) var(--border-radius-lg, 12px) 0 0;
+    background: var(--nier-card, #FFFFFF);
+    color: var(--nier-text, #1A1A1A);
+    padding: 10px 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border-radius: 4px 4px 0 0;
     cursor: pointer;
-    border: 4px solid #000;
+    border: 2px solid var(--nier-border, #1A1A1A);
     border-bottom: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.2s;
     z-index: 10;
-    box-shadow: 
-        inset 0 4px 8px rgba(255,255,255,0.8),
-        inset 0 -2px 4px rgba(0,0,0,0.1);
     text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-}
-
-.menu-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 215, 0, 0.3), 
-        transparent
-    );
-    transition: left 0.5s ease;
-}
-
-.menu-button:hover::before {
-    left: 100%;
 }
 
 .menu-button:hover {
-    background: linear-gradient(135deg, #FFF 0%, var(--color-gold, #FFD700) 100%);
-    transform: translateY(-4px);
-    box-shadow: 
-        inset 0 4px 8px rgba(255,255,255,0.8),
-        0 4px 12px rgba(255, 215, 0, 0.4);
-}
-
-.menu-button:active {
-    background: linear-gradient(135deg, #F0F0F0 0%, #E0E0E0 100%);
-    transform: translateY(-2px);
+    opacity: 0.8;
 }
 
 .menu-tabs {
     display: flex;
-    gap: var(--spacing-sm, 8px);
+    gap: 6px;
     overflow-x: auto;
     padding-bottom: 2px;
-    flex: 1;
 }
 
 .menu-tabs.hidden {
@@ -93,141 +41,48 @@
 }
 
 .tab {
-    background: linear-gradient(135deg, #555 0%, #444 100%);
+    background: #555;
     color: #CCC;
-    padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
+    padding: 10px 20px;
     cursor: pointer;
-    letter-spacing: 2px;
-    border-radius: var(--border-radius-lg, 12px) var(--border-radius-lg, 12px) 0 0;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 4px solid #000;
+    letter-spacing: 1px;
+    border-radius: 4px 4px 0 0;
+    transition: opacity 0.2s;
+    border: 2px solid var(--nier-border, #1A1A1A);
     border-bottom: none;
-    font-weight: 700;
-    box-shadow: inset 0 2px 4px rgba(255,255,255,0.1);
+    font-weight: 600;
     text-transform: uppercase;
     white-space: nowrap;
-    position: relative;
-    overflow: hidden;
-}
-
-.tab::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255,255,255,0.1), 
-        transparent
-    );
-    transition: left 0.4s ease;
-}
-
-.tab:hover::before {
-    left: 100%;
 }
 
 .tab:hover {
-    background: linear-gradient(135deg, #777 0%, #666 100%);
-    color: #FFF;
-    transform: translateY(-4px);
-    box-shadow: 
-        inset 0 2px 4px rgba(255,255,255,0.2),
-        0 4px 8px rgba(0,0,0,0.2);
+    opacity: 0.8;
 }
 
 .tab.active {
-    background: linear-gradient(135deg, var(--color-gold, #FFD700) 0%, #FFED4E 100%);
-    color: #000;
-    font-weight: 900;
-    border-color: #000;
+    background: var(--nier-yellow, #FFD700);
+    color: var(--nier-border, #1A1A1A);
+    font-weight: 700;
+    border-color: var(--nier-border, #1A1A1A);
     position: relative;
-    top: 4px;
+    top: 2px;
     z-index: 5;
-    box-shadow: 
-        inset 0 4px 8px rgba(255,255,255,0.6),
-        inset 0 -2px 4px rgba(0,0,0,0.1),
-        0 -4px 16px rgba(255, 215, 0, 0.4);
-    animation: tabGlow 2s ease-in-out infinite;
-}
-
-@keyframes tabGlow {
-    0%, 100% { 
-        box-shadow: 
-            inset 0 4px 8px rgba(255,255,255,0.6),
-            inset 0 -2px 4px rgba(0,0,0,0.1),
-            0 -4px 16px rgba(255, 215, 0, 0.4);
-    }
-    50% { 
-        box-shadow: 
-            inset 0 4px 8px rgba(255,255,255,0.6),
-            inset 0 -2px 4px rgba(0,0,0,0.1),
-            0 -4px 24px rgba(255, 215, 0, 0.6);
-    }
-}
-
-.tab.active::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(135deg, var(--color-gold, #FFD700), #FFED4E);
 }
 
 #custom-menu-tabs {
     display: flex;
-    gap: var(--spacing-sm, 8px);
+    gap: 6px;
 }
 
 #custom-menu-tabs .tab {
-    background: linear-gradient(135deg, var(--color-info, #8090A0) 0%, #6080A0 100%);
-    animation: slideInDown 0.4s ease;
-}
-
-#custom-menu-tabs .tab:hover {
-    background: linear-gradient(135deg, #90A0B0, var(--color-info, #8090A0) 100%);
-}
-
-@keyframes slideInDown {
-    from { 
-        transform: translateY(-30px);
-        opacity: 0;
-    }
-    to { 
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.menu-bar::-webkit-scrollbar {
-    height: 6px;
-}
-
-.menu-bar::-webkit-scrollbar-track {
-    background: #1a1a1a;
-}
-
-.menu-bar::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #555, #777);
-    border-radius: 3px;
-}
-
-.menu-bar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(90deg, #777, #999);
+    background: var(--nier-blue, #90B8D0);
+    color: var(--nier-border, #1A1A1A);
 }
 
 @media (max-width: 768px) {
-    .menu-bar {
-        padding: var(--spacing-sm, 8px) var(--spacing-md, 16px) 0 var(--spacing-md, 16px);
-    }
-    
     .menu-button,
     .tab {
-        padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
-        font-size: var(--font-size-md, 13px);
+        padding: 8px 16px;
+        font-size: 11px;
     }
 }

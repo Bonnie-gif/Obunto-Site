@@ -1,268 +1,144 @@
 .alarms-fullwidth {
-    padding: var(--spacing-xl, 32px);
+    padding: 24px;
     width: 100%;
-    animation: fadeIn 0.5s ease;
 }
 
 .alarms-fullwidth .cell-header {
-    font-size: var(--font-size-xxl, 24px);
-    font-weight: 900;
-    color: var(--color-text-primary, #000);
-    margin-bottom: var(--spacing-xl, 32px);
-    padding-bottom: var(--spacing-md, 16px);
-    border-bottom: 4px solid var(--color-border, #808080);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--nier-text, #1A1A1A);
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--nier-border, #1A1A1A);
     text-transform: uppercase;
-    letter-spacing: 4px;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
-    position: relative;
-}
-
-.alarms-fullwidth .cell-header::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 60px;
-    height: 4px;
-    background: var(--color-text-primary, #000);
+    letter-spacing: 2px;
 }
 
 #alarms-container {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg, 24px);
-    max-height: calc(100vh - 250px);
+    gap: 16px;
+    max-height: calc(100vh - 220px);
     overflow-y: auto;
-    padding-right: var(--spacing-sm, 8px);
 }
 
 .alarm-item {
-    background: linear-gradient(135deg, var(--color-bg-primary, #E0D8C0) 0%, var(--color-bg-secondary, #C0B0A0) 100%);
-    border: 4px solid var(--color-border, #808080);
-    border-radius: var(--border-radius-lg, 12px);
-    padding: var(--spacing-xl, 32px);
-    position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInRight 0.4s ease;
-    overflow: hidden;
-}
-
-.alarm-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 12px;
-    background: var(--alarm-color, #808080);
-    box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    transition: width 0.3s ease;
-}
-
-.alarm-item::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255,255,255,0.03) 50%,
-        transparent 70%
-    );
-    animation: shimmer 4s infinite;
-    pointer-events: none;
+    background: var(--nier-card, #FFFFFF);
+    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 4px;
+    padding: 20px;
+    transition: opacity 0.2s;
 }
 
 .alarm-item:hover {
-    transform: translateX(8px) translateY(-4px);
-    border-color: var(--color-text-primary, #000);
-    box-shadow: 
-        8px 8px 0 rgba(0,0,0,0.1),
-        0 0 30px rgba(var(--alarm-color-rgb, 128, 128, 128), 0.2);
-}
-
-.alarm-item:hover::before {
-    width: 20px;
-}
-
-.alarm-item.green {
-    --alarm-color: #90A080;
-    --alarm-color-rgb: 144, 160, 128;
-}
-
-.alarm-item.blue {
-    --alarm-color: #8090A0;
-    --alarm-color-rgb: 128, 144, 160;
-}
-
-.alarm-item.red {
-    --alarm-color: #C08070;
-    --alarm-color-rgb: 192, 128, 112;
-}
-
-.alarm-item.gamma {
-    --alarm-color: #D4A060;
-    --alarm-color-rgb: 212, 160, 96;
-}
-
-.alarm-item.epsilon {
-    --alarm-color: #2A2A2A;
-    --alarm-color-rgb: 42, 42, 42;
+    opacity: 0.9;
 }
 
 .alarm-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-lg, 24px);
-    position: relative;
-    z-index: 2;
+    margin-bottom: 16px;
 }
 
 .alarm-type {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-xl, 20px);
-    color: var(--color-text-primary, #000);
-    font-weight: 900;
+    font-size: 16px;
+    color: var(--nier-text, #1A1A1A);
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 2px 2px 0 rgba(255,255,255,0.3);
+    letter-spacing: 1px;
 }
 
 .alarm-badge {
-    padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
-    border: 3px solid var(--color-text-primary, #000);
-    border-radius: var(--border-radius-md, 8px);
-    background: var(--alarm-color, #808080);
-    color: var(--color-text-primary, #000);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-sm, 11px);
-    font-weight: 900;
-    letter-spacing: 2px;
+    padding: 4px 16px;
+    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
 }
 
-.alarm-item:hover .alarm-badge {
-    transform: scale(1.1);
+.alarm-item.green .alarm-badge {
+    background: #90C890;
+    color: var(--nier-border, #1A1A1A);
+}
+
+.alarm-item.blue .alarm-badge {
+    background: #90B8D0;
+    color: var(--nier-border, #1A1A1A);
+}
+
+.alarm-item.red .alarm-badge {
+    background: #D89090;
+    color: var(--nier-border, #1A1A1A);
+}
+
+.alarm-item.gamma .alarm-badge {
+    background: #FFD700;
+    color: var(--nier-border, #1A1A1A);
+}
+
+.alarm-item.epsilon .alarm-badge {
+    background: #1A1A1A;
+    color: #FFFFFF;
 }
 
 .alarm-details {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-md, 13px);
-    color: var(--color-text-secondary, #4A4A4A);
-    margin-bottom: var(--spacing-lg, 24px);
-    line-height: 1.8;
-    padding-left: var(--spacing-lg, 24px);
-    border-left: 3px solid var(--alarm-color, #808080);
-    font-weight: 500;
-    position: relative;
-    z-index: 2;
+    font-size: 12px;
+    color: var(--nier-text-light, #666666);
+    margin-bottom: 16px;
+    line-height: 1.6;
+    padding-left: 12px;
+    border-left: 2px solid var(--nier-border, #1A1A1A);
+    font-weight: 400;
 }
 
 .alarm-actions {
     display: flex;
-    gap: var(--spacing-md, 16px);
-    padding-top: var(--spacing-lg, 24px);
-    border-top: 3px dashed rgba(128, 128, 128, 0.3);
-    position: relative;
-    z-index: 2;
+    gap: 12px;
 }
 
 .alarm-item button {
     flex: 1;
-    padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
-    border: 3px solid var(--color-border, #808080);
-    border-radius: var(--border-radius-md, 8px);
-    background: linear-gradient(135deg, var(--color-bg-secondary, #C0B0A0) 0%, var(--color-bg-tertiary, #A0A080) 100%);
-    color: var(--color-text-primary, #000);
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-lg, 16px);
-    font-weight: 900;
+    padding: 10px 20px;
+    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 4px;
+    background: var(--nier-bg-light, #FBF4E9);
+    color: var(--nier-text, #1A1A1A);
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
-}
-
-.alarm-item button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+    transition: opacity 0.2s;
 }
 
 .alarm-item button:hover {
-    background: linear-gradient(135deg, var(--alarm-color, #A0A080), var(--color-bg-primary, #E0D8C0));
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-    border-color: var(--color-text-primary, #000);
-}
-
-.alarm-item button:active::before {
-    width: 300px;
-    height: 300px;
+    opacity: 0.8;
 }
 
 body.theme-green {
-    --color-bg-primary: #E0D8C0;
-    --color-bg-secondary: #C0B0A0;
-    --color-accent: #A0A080;
-    transition: all 0.6s ease;
+    --nier-bg: #E8F0E8;
 }
 
 body.theme-blue {
-    --color-bg-primary: #D4C8B8;
-    --color-bg-secondary: #B8A898;
-    --color-accent: #8090A0;
-    transition: all 0.6s ease;
-}
-
-body.theme-blue #main-screen {
-    filter: hue-rotate(15deg) saturate(0.9);
-    transition: filter 0.6s ease;
+    --nier-bg: #E8F0F8;
 }
 
 body.theme-red {
-    --color-bg-primary: #D8C8C0;
-    --color-bg-secondary: #C0A898;
-    --color-accent: #A08880;
-    transition: all 0.6s ease;
-}
-
-body.theme-red #main-screen {
-    filter: sepia(0.3) hue-rotate(-10deg) saturate(1.1);
-    transition: filter 0.6s ease;
+    --nier-bg: #F8E8E8;
 }
 
 body.theme-gamma {
-    --color-bg-primary: #E0D0A8;
-    --color-bg-secondary: #C8B088;
-    --color-accent: #D4A060;
-    transition: all 0.6s ease;
-}
-
-body.theme-gamma #main-screen {
-    filter: sepia(0.4) saturate(1.3) hue-rotate(-20deg);
-    transition: filter 0.6s ease;
+    --nier-bg: #FFF8E0;
 }
 
 body.theme-gamma #adm-radio,
 body.theme-gamma #adm-credentials {
     pointer-events: none;
     position: relative;
+    opacity: 0.3;
 }
 
 body.theme-gamma #adm-radio::after,
@@ -272,64 +148,28 @@ body.theme-gamma #adm-credentials::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: var(--font-size-xxl, 24px);
-    font-weight: 900;
-    color: #000;
-    background: linear-gradient(135deg, rgba(212, 160, 96, 0.95), rgba(255, 200, 100, 0.95));
-    padding: var(--spacing-xl, 32px) var(--spacing-xxl, 48px);
-    border: 5px solid #000;
-    border-radius: var(--border-radius-lg, 12px);
-    letter-spacing: 3px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1A1A1A;
+    background: rgba(255, 215, 0, 0.95);
+    padding: 20px 32px;
+    border: 3px solid #1A1A1A;
+    border-radius: 4px;
+    letter-spacing: 2px;
     z-index: 1000;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-body.theme-gamma #adm-radio > *,
-body.theme-gamma #adm-credentials > * {
-    filter: blur(8px) brightness(0.5);
 }
 
 body.theme-epsilon {
-    --color-bg-primary: #2A2420;
-    --color-bg-secondary: #1A1410;
-    --color-accent: #3A3430;
-    --color-text-primary: #D0C8C0;
-    --color-text-secondary: #A0A080;
-    --color-border: #4A4440;
-    transition: all 0.6s ease;
+    --nier-bg: #2A2420;
+    --nier-bg-light: #3A3430;
+    --nier-card: #1A1410;
+    --nier-text: #D0C8C0;
+    --nier-text-light: #A0A080;
+    --nier-border: #4A4440;
 }
 
 body.theme-epsilon #main-screen {
-    filter: contrast(1.3) brightness(0.85);
-    transition: filter 0.6s ease;
-    animation: screenFlicker 0.1s infinite;
-}
-
-@keyframes screenFlicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.98; }
-}
-
-body.theme-epsilon #main-screen::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-        repeating-linear-gradient(
-            0deg,
-            transparent 0%,
-            rgba(0,0,0,0.3) 1px,
-            transparent 2px,
-            transparent 3px
-        );
-    pointer-events: none;
-    animation: glitchScan 0.15s steps(2) infinite;
-    z-index: 9999;
-    mix-blend-mode: multiply;
+    filter: contrast(1.1);
 }
 
 body.theme-epsilon .glitch-block {
@@ -339,7 +179,6 @@ body.theme-epsilon .glitch-block {
     z-index: 9998;
     opacity: 0;
     animation: glitchAppear 4s infinite;
-    box-shadow: 0 0 20px rgba(0,0,0,0.8);
 }
 
 body.theme-epsilon .glitch-block:nth-child(1) {
@@ -382,71 +221,13 @@ body.theme-epsilon .glitch-block:nth-child(5) {
     animation-delay: 3.7s;
 }
 
-@keyframes glitchScan {
-    0% { 
-        transform: translateY(0);
-        opacity: 0.05;
-    }
-    50% { 
-        opacity: 0.2;
-    }
-    100% { 
-        transform: translateY(2px);
-        opacity: 0.05;
-    }
-}
-
 @keyframes glitchAppear {
-    0%, 94%, 100% { 
-        opacity: 0;
-        transform: scale(1);
-    }
-    95%, 97% { 
-        opacity: 1;
-        transform: scale(1.05);
-    }
-    96% {
-        transform: scale(0.95);
-    }
-}
-
-@keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
-
-@keyframes slideInRight {
-    from { 
-        transform: translateX(40px);
-        opacity: 0;
-    }
-    to { 
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes pulse {
-    0%, 100% { 
-        transform: scale(1);
-        opacity: 1;
-    }
-    50% { 
-        transform: scale(1.05);
-        opacity: 0.9;
-    }
+    0%, 94%, 100% { opacity: 0; }
+    95%, 97% { opacity: 1; }
 }
 
 @media (max-width: 768px) {
-    .alarm-item {
-        padding: var(--spacing-lg, 24px);
-    }
-    
     .alarm-actions {
         flex-direction: column;
-    }
-    
-    .alarm-item button {
-        width: 100%;
     }
 }

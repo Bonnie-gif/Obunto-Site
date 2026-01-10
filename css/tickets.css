@@ -1,202 +1,78 @@
 .tickets-fullwidth {
-    padding: var(--spacing-xl, 32px);
+    padding: 24px;
     width: 100%;
-    animation: fadeIn 0.5s ease;
 }
 
 #adm-tickets #pending-list {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg, 24px);
-    max-height: 550px;
+    gap: 12px;
+    max-height: 500px;
     overflow-y: auto;
-    padding-right: var(--spacing-sm, 8px);
 }
 
 #adm-tickets .pending-item {
-    background: linear-gradient(135deg, #FFF 0%, #F8F8F8 100%);
-    border: 4px solid #000;
-    border-radius: var(--border-radius-lg, 12px);
-    padding: var(--spacing-xl, 32px);
+    background: var(--nier-card, #FFFFFF);
+    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 4px;
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 
-        6px 6px 0 rgba(0,0,0,0.15),
-        inset 2px 2px 4px rgba(255,255,255,0.8);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: slideInRight 0.4s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-#adm-tickets .pending-item::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 100%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 30%,
-        rgba(255, 215, 0, 0.03) 50%,
-        transparent 70%
-    );
-    animation: shimmer 4s infinite;
+    transition: opacity 0.2s;
 }
 
 #adm-tickets .pending-item:hover {
-    transform: translateX(8px) translateY(-4px);
-    box-shadow: 
-        10px 10px 0 rgba(0,0,0,0.2),
-        inset 2px 2px 4px rgba(255,255,255,0.8);
-    border-color: var(--color-gold, #FFD700);
+    opacity: 0.9;
 }
 
 #adm-tickets .pending-item span {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-weight: 900;
-    font-size: var(--font-size-lg, 16px);
-    color: #000;
-    background: linear-gradient(135deg, var(--color-gold, #FFD700), #FFC700);
-    padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
-    border-radius: var(--border-radius-md, 8px);
-    border: 3px solid #000;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--nier-text, #1A1A1A);
+    background: var(--nier-yellow, #FFD700);
+    padding: 6px 16px;
+    border-radius: 4px;
+    border: 2px solid var(--nier-border, #1A1A1A);
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
-    position: relative;
-    z-index: 2;
 }
 
 #adm-tickets .actions {
     display: flex;
-    gap: var(--spacing-md, 16px);
-    position: relative;
-    z-index: 2;
+    gap: 8px;
 }
 
 #adm-tickets button {
-    font-family: var(--font-primary, 'Roboto Mono', monospace);
-    font-size: var(--font-size-lg, 16px);
-    padding: var(--spacing-md, 16px) var(--spacing-xl, 32px);
-    border: 3px solid #000;
-    border-radius: var(--border-radius-md, 8px);
+    font-size: 12px;
+    padding: 8px 20px;
+    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 4px;
     cursor: pointer;
     text-transform: uppercase;
-    font-weight: 900;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    letter-spacing: 2px;
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.2);
-    position: relative;
-    overflow: hidden;
+    font-weight: 700;
+    transition: opacity 0.2s;
+    letter-spacing: 1px;
 }
 
-#adm-tickets button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
+#adm-tickets button:hover {
+    opacity: 0.8;
 }
 
 #adm-tickets button:first-child {
-    background: linear-gradient(135deg, #7dd3c0 0%, #5BC0A8 100%);
-    color: #000;
-}
-
-#adm-tickets button:first-child:hover {
-    background: linear-gradient(135deg, #90E0D0, #7dd3c0 100%);
-    transform: translateY(-4px);
-    box-shadow: 6px 8px 0 rgba(0,0,0,0.25);
+    background: var(--nier-turquoise, #7dd3c0);
+    color: var(--nier-border, #1A1A1A);
 }
 
 #adm-tickets button:last-child {
-    background: linear-gradient(135deg, #ffbd2e 0%, #FFA500 100%);
-    color: #000;
-}
-
-#adm-tickets button:last-child:hover {
-    background: linear-gradient(135deg, #FFD050, #ffbd2e 100%);
-    transform: translateY(-4px);
-    box-shadow: 6px 8px 0 rgba(0,0,0,0.25);
-}
-
-#adm-tickets button:active {
-    transform: translateY(-2px);
-    box-shadow: 3px 4px 0 rgba(0,0,0,0.2);
-}
-
-#adm-tickets button:active::before {
-    width: 300px;
-    height: 300px;
-}
-
-.ticket-status-badge {
-    display: inline-block;
-    padding: var(--spacing-xs, 4px) var(--spacing-md, 16px);
-    border: 2px solid #000;
-    border-radius: var(--border-radius-sm, 4px);
-    background: var(--color-warning, #D4C5A9);
-    color: #000;
-    font-size: var(--font-size-xs, 10px);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-left: var(--spacing-sm, 8px);
-    animation: pulse 2s ease-in-out infinite;
-}
-
-.ticket-priority-high {
-    background: linear-gradient(135deg, #FF6B6B, #FF4444);
-    color: #FFF;
-    animation: pulse 1s ease-in-out infinite;
-}
-
-.ticket-priority-medium {
-    background: linear-gradient(135deg, #FFD93D, #FFC700);
-}
-
-.ticket-priority-low {
-    background: linear-gradient(135deg, #6BCF7F, #4CAF50);
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; filter: blur(4px); }
-    to { opacity: 1; filter: blur(0); }
-}
-
-@keyframes slideInRight {
-    from { 
-        transform: translateX(40px);
-        opacity: 0;
-    }
-    to { 
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-@keyframes shimmer {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    background: var(--nier-orange, #E8B870);
+    color: var(--nier-border, #1A1A1A);
 }
 
 @media (max-width: 768px) {
     #adm-tickets .pending-item {
         flex-direction: column;
-        gap: var(--spacing-lg, 24px);
+        gap: 12px;
     }
     
     #adm-tickets .actions {
