@@ -3,20 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCS - Newton OS v3.2.2</title>
+    <title>ARCS - Newton OS</title>
     <link rel="icon" href="assets/icon-small-duplicate-18x14.png" type="image/png">
-    <link rel="stylesheet" href="css/ultra-style.css">
-    <link rel="stylesheet" href="css/ultra-animations.css">
-    <link rel="stylesheet" href="css/ultra-menu.css">
-    <link rel="stylesheet" href="css/ultra-notification.css">
-    <link rel="stylesheet" href="css/ultra-broadcast.css">
-    <link rel="stylesheet" href="css/ultra-editing.css">
-    <link rel="stylesheet" href="css/ultra-alarms.css">
-    <link rel="stylesheet" href="css/ultra-tickets.css">
-    <link rel="stylesheet" href="css/ultra-radio.css">
-    <link rel="stylesheet" href="css/ultra-credentials.css">
-    <link rel="stylesheet" href="css/ultra-users.css">
-    <link rel="stylesheet" href="css/ultra-analytics.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <link rel="stylesheet" href="css/editing.css">
+    <link rel="stylesheet" href="css/alarms.css">
+    <link rel="stylesheet" href="css/tickets.css">
+    <link rel="stylesheet" href="css/radio.css">
+    <link rel="stylesheet" href="css/credentials.css">
 </head>
 <body>
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
@@ -27,14 +24,11 @@
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
 
-    <div class="glitch-overlay"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
-
-    <div id="toast-container"></div>
 
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
@@ -48,32 +42,21 @@
             </div>
             
             <div class="loading-info">
-                <div class="loading-line">RESTARTING OS VER.3.2.2</div>
-                <div class="loading-line">UPEO ID confirmed</div>
-                <div class="loading-line">DATA SWALLOW</div>
-                <div class="loading-line">is for registered use only.</div>
+                RESTARTING OS VER.3.2.2<br>
+                UPEO ID confirmed<br>
+                DATA SWALLOW<br>
+                is for registered use only.
             </div>
         </div>
 
         <div class="loading-right">
             <div class="login-panel hidden" id="login-panel">
-                <div class="login-header">
-                    <div class="login-header-text">OPERATOR ACCESS</div>
-                    <div class="login-header-badge">SECURE</div>
-                </div>
+                <div class="login-header">OPERATOR ACCESS</div>
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="operator-id" class="login-input" maxlength="20" placeholder="Enter ID...">
-                        <div class="input-border"></div>
-                    </div>
+                    <input type="text" id="operator-id" class="login-input" maxlength="20">
                     <div class="login-status" id="login-status"></div>
-                    <button class="login-btn" onclick="handleLogin()">
-                        <span class="btn-text">LOGIN</span>
-                        <span class="btn-loading hidden">
-                            <span class="spinner"></span>
-                        </span>
-                    </button>
+                    <button class="login-btn" onclick="handleLogin()">LOGIN</button>
                     <div class="login-info-text">
                         NEW OPERATOR?<br>
                         ENTER YOUR ID TO REQUEST ACCESS
@@ -85,31 +68,20 @@
         <div class="data-swallow-container">
             <div class="swallow-box">
                 <div class="swallow-header">
-                    <div class="swallow-brand">
-                        <span class="brand-text">DATA SWALLOW</span>
-                        <span class="brand-version">v4.0</span>
-                    </div>
+                    <div class="swallow-brand">DATA SWALLOW</div>
                     <div class="swallow-disk">
                         <div class="disk-text">
                             DATA SWALLOW 40<br>
                             UPEO VER.3.2<br>
                             SYSTEM STARTUP
                         </div>
-                        <div class="disk-icon spinning">O+</div>
+                        <div class="disk-icon">O+</div>
                     </div>
                 </div>
                 <div class="loading-bar">
                     <div class="bar-fill" id="loading-progress"></div>
-                    <div class="bar-glow"></div>
                 </div>
-                <div class="swallow-footer">
-                    <span class="footer-text">DATA SWALLOW 40 starting...</span>
-                    <span class="footer-dots">
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
-                    </span>
-                </div>
+                <div class="swallow-footer">DATA SWALLOW 40 starting...</div>
             </div>
         </div>
     </div>
@@ -117,245 +89,116 @@
     <div id="main-screen" class="screen">
         <div class="top-decoration">
             <div class="browser-dots">
-                <span class="dot-red"></span>
-                <span class="dot-yellow"></span>
-                <span class="dot-green"></span>
+                <span></span><span></span><span></span>
             </div>
-            <div class="url-bar">
-                <span class="url-protocol">ARCS://</span>
-                <span class="url-path">Advanced Research & Containment System</span>
-                <span class="url-version">v3.2.2</span>
-            </div>
-            <div class="top-actions">
-                <button class="top-action-btn" onclick="toggleFullscreen()" title="Fullscreen">
-                    <span class="icon">[]</span>
-                </button>
-                <button class="top-action-btn" onclick="toggleHelp()" title="Help">
-                    <span class="icon">?</span>
-                </button>
-            </div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++</div>
         </div>
 
         <div class="loading-indicator">
-            <span class="loading-icon pulsing">*</span>
-            <span class="loading-text">System initialized</span>
-            <span class="loading-time" id="system-time"></span>
+            <span class="loading-icon">*</span>
+            <span>System initialized</span>
         </div>
 
         <div class="main-window">
             <div class="menu-bar">
-                <div class="menu-button" onclick="goToHome()">
-                    <span class="menu-icon">|||</span>
-                    <span class="menu-text">MENU</span>
-                </div>
+                <div class="menu-button" onclick="goToHome()">MENU</div>
                 <div class="menu-tabs" id="admin-tabs">
-                    <div class="tab" data-target="adm-broadcast">
-                        <span class="tab-icon">@</span>
-                        <span class="tab-text">BROADCAST</span>
-                    </div>
-                    <div class="tab" data-target="adm-editing">
-                        <span class="tab-icon">#</span>
-                        <span class="tab-text">EDITING</span>
-                    </div>
-                    <div class="tab" data-target="adm-alarms">
-                        <span class="tab-icon">!</span>
-                        <span class="tab-text">ALARMS</span>
-                    </div>
-                    <div class="tab" data-target="adm-tickets">
-                        <span class="tab-icon">[]</span>
-                        <span class="tab-text">TICKETS</span>
-                    </div>
-                    <div class="tab" data-target="adm-radio">
-                        <span class="tab-icon">~</span>
-                        <span class="tab-text">RADIO</span>
-                    </div>
-                    <div class="tab" data-target="adm-credentials">
-                        <span class="tab-icon">*</span>
-                        <span class="tab-text">CREDENTIALS</span>
-                    </div>
-                    <div class="tab" data-target="adm-users">
-                        <span class="tab-icon">+</span>
-                        <span class="tab-text">USERS</span>
-                    </div>
-                    <div class="tab" data-target="adm-analytics">
-                        <span class="tab-icon">%</span>
-                        <span class="tab-text">ANALYTICS</span>
-                    </div>
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-editing">EDITING</div>
+                    <div class="tab" data-target="adm-alarms">ALARMS</div>
+                    <div class="tab" data-target="adm-tickets">TICKETS</div>
+                    <div class="tab" data-target="adm-radio">RADIO</div>
+                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                    <div class="tab" data-target="adm-users">USERS</div>
+                    <div class="tab" data-target="adm-analytics">ANALYTICS</div>
                     <div id="custom-menu-tabs"></div>
                 </div>
             </div>
 
             <div id="view-home" class="tab-content active">
                 <div class="banner-section">
-                    <div class="banner-wrapper">
-                        <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
-                        <div class="banner-overlay"></div>
-                    </div>
+                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
                 </div>
-                <div class="home-welcome animated" id="home-welcome-section">
-                    <div class="welcome-header">
-                        <div class="welcome-title" id="home-welcome-title">WELCOME</div>
-                        <button class="welcome-edit-btn" onclick="editWelcomeHome()" title="Edit Welcome">
-                            <span class="icon">✎</span>
-                        </button>
-                    </div>
+                <div class="home-welcome" id="home-welcome-section">
+                    <div class="welcome-title" id="home-welcome-title">WELCOME</div>
                     <div class="welcome-text" id="home-welcome-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
-                    <div class="welcome-footer">
-                        <div class="welcome-stat">
-                            <span class="stat-label">SYSTEM STATUS:</span>
-                            <span class="stat-value online">ONLINE</span>
-                        </div>
-                        <div class="welcome-stat">
-                            <span class="stat-label">UPTIME:</span>
-                            <span class="stat-value" id="system-uptime">00:00:00</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="quick-actions">
-                    <div class="quick-action" onclick="switchTab('adm-broadcast')">
-                        <div class="action-icon">@</div>
-                        <div class="action-label">Broadcast</div>
-                    </div>
-                    <div class="quick-action" onclick="switchTab('adm-alarms')">
-                        <div class="action-icon">!</div>
-                        <div class="action-label">Alarms</div>
-                    </div>
-                    <div class="quick-action" onclick="switchTab('adm-radio')">
-                        <div class="action-icon">~</div>
-                        <div class="action-label">Radio</div>
-                    </div>
-                    <div class="quick-action" onclick="switchTab('adm-analytics')">
-                        <div class="action-icon">%</div>
-                        <div class="action-label">Analytics</div>
-                    </div>
                 </div>
             </div>
 
             <div id="adm-broadcast" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">@</span>
-                        BROADCAST SYSTEM
-                    </h2>
-                    <div class="content-actions">
-                        <button class="action-btn" onclick="viewBroadcastHistory()">
-                            <span class="icon">↻</span> HISTORY
-                        </button>
-                        <button class="action-btn" onclick="scheduleBroadcast()">
-                            <span class="icon">⏰</span> SCHEDULE
-                        </button>
+                <div class="content-grid">
+                    <div class="grid-cell empty-cell">
+                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
                     </div>
-                </div>
-                
-                <div class="broadcast-layout">
-                    <div class="broadcast-composer">
-                        <div class="composer-header">COMPOSE MESSAGE</div>
-                        <div class="sprite-section">
-                            <label class="section-label">SELECT EMOTION:</label>
+                    <div class="grid-cell news-cell">
+                        <div class="sticker yellow">BROADCAST SYSTEM</div>
+                        <div class="cell-header">GLOBAL MESSAGE</div>
+                        <div class="news-box">
+                            <label>SELECT EMOTION:</label>
                             <div class="sprite-selector" id="sprite-selector">
                                 <div class="sprite-option active" data-sprite="normal">
                                     <img src="assets/sprites/normal.png" alt="Normal">
-                                    <span class="sprite-label">Normal</span>
-                                    <div class="sprite-hover-preview"></div>
+                                    <span>Normal</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="happy">
                                     <img src="assets/sprites/happy.png" alt="Happy">
-                                    <span class="sprite-label">Happy</span>
+                                    <span>Happy</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="sad">
                                     <img src="assets/sprites/sad.png" alt="Sad">
-                                    <span class="sprite-label">Sad</span>
+                                    <span>Sad</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="annoyed">
                                     <img src="assets/sprites/annoyed.png" alt="Annoyed">
-                                    <span class="sprite-label">Annoyed</span>
+                                    <span>Annoyed</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="bug">
                                     <img src="assets/sprites/bug.png" alt="Bug">
-                                    <span class="sprite-label">Bug</span>
+                                    <span>Bug</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="dizzy">
                                     <img src="assets/sprites/dizzy.png" alt="Dizzy">
-                                    <span class="sprite-label">Dizzy</span>
+                                    <span>Dizzy</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="hollow">
                                     <img src="assets/sprites/hollow.png" alt="Hollow">
-                                    <span class="sprite-label">Hollow</span>
+                                    <span>Hollow</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="panic">
                                     <img src="assets/sprites/panic.png" alt="Panic">
-                                    <span class="sprite-label">Panic</span>
+                                    <span>Panic</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="sleeping">
                                     <img src="assets/sprites/sleeping.png" alt="Sleeping">
-                                    <span class="sprite-label">Sleeping</span>
+                                    <span>Sleeping</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="smug">
                                     <img src="assets/sprites/smug.png" alt="Smug">
-                                    <span class="sprite-label">Smug</span>
+                                    <span>Smug</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="stare">
                                     <img src="assets/sprites/stare.png" alt="Stare">
-                                    <span class="sprite-label">Stare</span>
+                                    <span>Stare</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="suspicious">
                                     <img src="assets/sprites/suspicious.png" alt="Suspicious">
-                                    <span class="sprite-label">Suspicious</span>
+                                    <span>Suspicious</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="werror">
                                     <img src="assets/sprites/werror.png" alt="W.Error">
-                                    <span class="sprite-label">W.Error</span>
+                                    <span>W.Error</span>
                                 </div>
                             </div>
                             <input type="hidden" id="sprite-select" value="normal">
-                        </div>
-                        
-                        <div class="message-section">
-                            <label class="section-label">
-                                MESSAGE TEXT:
-                                <span class="char-count" id="broadcast-char-count">0 / 500</span>
-                            </label>
-                            <textarea id="broadcast-text" class="broadcast-textarea" placeholder="TYPE MESSAGE..." maxlength="500"></textarea>
-                        </div>
-                        
-                        <div class="composer-actions">
-                            <button class="composer-btn preview" onclick="previewBroadcast()">
-                                <span class="icon">👁</span> PREVIEW
-                            </button>
-                            <button class="composer-btn send" onclick="sendBroadcast()">
-                                <span class="icon">→</span> TRANSMIT
-                            </button>
+                            <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
+                            <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
                         </div>
                     </div>
-                    
-                    <div class="broadcast-sidebar">
-                        <div class="sidebar-section">
-                            <div class="section-header">STATUS</div>
-                            <div class="status-indicator online">
-                                <span class="indicator-dot"></span>
-                                <span class="indicator-text">READY</span>
-                            </div>
-                            <div class="status-info">
-                                <div class="info-item">
-                                    <span class="info-label">SYSTEM:</span>
-                                    <span class="info-value">READY FOR INPUT</span>
-                                </div>
-                                <div class="info-item">
-                                    <span class="info-label">LAST BROADCAST:</span>
-                                    <span class="info-value" id="last-broadcast-time">NONE</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="sidebar-section">
-                            <div class="section-header">PREVIEW</div>
-                            <div class="broadcast-preview-box">
-                                <img id="preview-sprite" src="assets/sprites/normal.png" class="preview-sprite">
-                                <div class="preview-bubble">
-                                    <div class="preview-text" id="preview-text">Your message will appear here...</div>
-                                </div>
-                            </div>
+                    <div class="grid-cell updates-cell">
+                        <div class="cell-header">STATUS</div>
+                        <div class="updates-box">
+                            <div class="updates-title">READY</div>
+                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
                         </div>
                     </div>
                 </div>
@@ -364,187 +207,75 @@
             <div id="adm-editing" class="tab-content">
                 <div class="editing-workspace">
                     <div class="editing-toolbar">
-                        <div class="toolbar-left">
-                            <div class="toolbar-title">
-                                <span class="title-icon">#</span>
-                                CONTENT EDITOR
-                            </div>
-                        </div>
-                        <div class="toolbar-center">
-                            <div class="toolbar-info">
-                                <span class="info-item">
-                                    <span class="info-label">TABS:</span>
-                                    <span class="info-value" id="tab-count">0</span>
-                                </span>
-                                <span class="info-divider">|</span>
-                                <span class="info-item">
-                                    <span class="info-label">STATUS:</span>
-                                    <span class="info-value saved">SAVED</span>
-                                </span>
-                            </div>
-                        </div>
+                        <div class="toolbar-title">CONTENT EDITOR</div>
                         <div class="toolbar-actions">
-                            <button class="toolbar-btn" onclick="editWelcomeHome()">
-                                <span class="icon">✎</span> EDIT WELCOME
-                            </button>
-                            <button class="toolbar-btn" onclick="addNewTab()">
-                                <span class="icon">+</span> NEW TAB
-                            </button>
-                            <button class="toolbar-btn primary" onclick="publishTabs()">
-                                <span class="icon">↑</span> PUBLISH
-                            </button>
+                            <button class="toolbar-btn" onclick="editWelcomeHome()">EDIT WELCOME</button>
+                            <button class="toolbar-btn" onclick="addNewTab()">+ NEW TAB</button>
+                            <button class="toolbar-btn primary" onclick="publishTabs()">PUBLISH</button>
                         </div>
                     </div>
                     <div class="editing-canvas" id="editing-canvas">
-                        <div class="canvas-hint">
-                            <div class="hint-icon">#</div>
-                            <div class="hint-text">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>
-                            <div class="hint-subtext">Click buttons above to get started</div>
-                        </div>
+                        <div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>
                     </div>
                 </div>
             </div>
 
             <div id="adm-alarms" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">!</span>
-                        SYSTEM ALARM LEVELS
-                    </h2>
-                    <div class="content-actions">
-                        <div class="current-theme-badge" id="current-theme-badge">
-                            <span class="badge-label">ACTIVE:</span>
-                            <span class="badge-value">GREEN</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="alarms-container" id="alarms-container">
-                    <div class="alarm-item green" data-theme="green">
-                        <div class="alarm-status-bar"></div>
-                        <div class="alarm-content">
+                <div class="alarms-fullwidth">
+                    <div class="cell-header">SYSTEM ALARM LEVELS</div>
+                    <div id="alarms-container">
+                        <div class="alarm-item green">
                             <div class="alarm-header">
-                                <div class="alarm-left">
-                                    <div class="alarm-type">Green Alert</div>
-                                    <div class="alarm-badge normal">Normal</div>
-                                </div>
-                                <div class="alarm-right">
-                                    <div class="alarm-level">LEVEL 0</div>
-                                </div>
+                                <div class="alarm-type">Green Alert</div>
+                                <div class="alarm-badge">Normal</div>
                             </div>
-                            <div class="alarm-details">All systems operational. Standard interface active. No restrictions in place.</div>
-                            <div class="alarm-features">
-                                <span class="feature">✓ Full Access</span>
-                                <span class="feature">✓ Standard Colors</span>
-                                <span class="feature">✓ Normal Operation</span>
-                            </div>
+                            <div class="alarm-details">All systems operational. Standard interface active.</div>
                             <div class="alarm-actions">
-                                <button class="alarm-btn" onclick="setAlarmTheme('green')">
-                                    <span class="btn-icon">→</span> ACTIVATE
-                                </button>
+                                <button onclick="setAlarmTheme('green')">ACTIVATE</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="alarm-item blue" data-theme="blue">
-                        <div class="alarm-status-bar"></div>
-                        <div class="alarm-content">
+                        
+                        <div class="alarm-item blue">
                             <div class="alarm-header">
-                                <div class="alarm-left">
-                                    <div class="alarm-type">Blue Alert</div>
-                                    <div class="alarm-badge info">Earthy</div>
-                                </div>
-                                <div class="alarm-right">
-                                    <div class="alarm-level">LEVEL 1</div>
-                                </div>
+                                <div class="alarm-type">Blue Alert</div>
+                                <div class="alarm-badge">Earthy</div>
                             </div>
-                            <div class="alarm-details">Interface shifted to earthy blue tones. Visual adjustments applied for calm operations.</div>
-                            <div class="alarm-features">
-                                <span class="feature">✓ Full Access</span>
-                                <span class="feature">~ Blue Tones</span>
-                                <span class="feature">✓ Normal Operation</span>
-                            </div>
+                            <div class="alarm-details">Interface shifted to earthy blue tones. Visual adjustments applied.</div>
                             <div class="alarm-actions">
-                                <button class="alarm-btn" onclick="setAlarmTheme('blue')">
-                                    <span class="btn-icon">→</span> ACTIVATE
-                                </button>
+                                <button onclick="setAlarmTheme('blue')">ACTIVATE</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="alarm-item red" data-theme="red">
-                        <div class="alarm-status-bar"></div>
-                        <div class="alarm-content">
+                        
+                        <div class="alarm-item red">
                             <div class="alarm-header">
-                                <div class="alarm-left">
-                                    <div class="alarm-type">Red Alert</div>
-                                    <div class="alarm-badge warning">Warning</div>
-                                </div>
-                                <div class="alarm-right">
-                                    <div class="alarm-level">LEVEL 2</div>
-                                </div>
+                                <div class="alarm-type">Red Alert</div>
+                                <div class="alarm-badge">Warning</div>
                             </div>
-                            <div class="alarm-details">System running in red-tinted earthy mode. Heightened awareness required for operations.</div>
-                            <div class="alarm-features">
-                                <span class="feature">✓ Full Access</span>
-                                <span class="feature">~ Red Tones</span>
-                                <span class="feature">! High Alert</span>
-                            </div>
+                            <div class="alarm-details">System running in red-tinted earthy mode. Heightened awareness required.</div>
                             <div class="alarm-actions">
-                                <button class="alarm-btn" onclick="setAlarmTheme('red')">
-                                    <span class="btn-icon">→</span> ACTIVATE
-                                </button>
+                                <button onclick="setAlarmTheme('red')">ACTIVATE</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="alarm-item gamma" data-theme="gamma">
-                        <div class="alarm-status-bar"></div>
-                        <div class="alarm-content">
+                        
+                        <div class="alarm-item gamma">
                             <div class="alarm-header">
-                                <div class="alarm-left">
-                                    <div class="alarm-type">Gamma Protocol</div>
-                                    <div class="alarm-badge restricted">Restricted</div>
-                                </div>
-                                <div class="alarm-right">
-                                    <div class="alarm-level">LEVEL 3</div>
-                                </div>
+                                <div class="alarm-type">Gamma Protocol</div>
+                                <div class="alarm-badge">Restricted</div>
                             </div>
                             <div class="alarm-details">Orange/Yellow theme active. Radio and Credentials RESTRICTED for personnel access.</div>
-                            <div class="alarm-features">
-                                <span class="feature">✗ Radio Blocked</span>
-                                <span class="feature">✗ Credentials Blocked</span>
-                                <span class="feature">! Restricted Mode</span>
-                            </div>
                             <div class="alarm-actions">
-                                <button class="alarm-btn" onclick="setAlarmTheme('gamma')">
-                                    <span class="btn-icon">→</span> ACTIVATE
-                                </button>
+                                <button onclick="setAlarmTheme('gamma')">ACTIVATE</button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="alarm-item epsilon" data-theme="epsilon">
-                        <div class="alarm-status-bar"></div>
-                        <div class="alarm-content">
+                        
+                        <div class="alarm-item epsilon">
                             <div class="alarm-header">
-                                <div class="alarm-left">
-                                    <div class="alarm-type">Epsilon Corruption</div>
-                                    <div class="alarm-badge critical">Critical</div>
-                                </div>
-                                <div class="alarm-right">
-                                    <div class="alarm-level">LEVEL 4</div>
-                                </div>
+                                <div class="alarm-type">Epsilon Corruption</div>
+                                <div class="alarm-badge">Critical</div>
                             </div>
                             <div class="alarm-details">CRITICAL: System corruption detected. Visual glitches, dead pixels, and instability present.</div>
-                            <div class="alarm-features">
-                                <span class="feature glitch">! Glitches Active</span>
-                                <span class="feature glitch">! Dead Pixels</span>
-                                <span class="feature glitch">! CORRUPTION</span>
-                            </div>
                             <div class="alarm-actions">
-                                <button class="alarm-btn critical" onclick="setAlarmTheme('epsilon')">
-                                    <span class="btn-icon">⚠</span> ACTIVATE
-                                </button>
+                                <button onclick="setAlarmTheme('epsilon')">ACTIVATE</button>
                             </div>
                         </div>
                     </div>
@@ -552,107 +283,41 @@
             </div>
 
             <div id="adm-tickets" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">[]</span>
-                        PENDING APPROVALS
-                    </h2>
-                    <div class="content-actions">
-                        <button class="action-btn" onclick="refreshPending()">
-                            <span class="icon">↻</span> REFRESH
-                        </button>
+                <div class="content-grid">
+                    <div class="grid-cell release-cell">
+                        <div class="cell-header">PENDING APPROVALS</div>
+                        <div id="pending-list"></div>
                     </div>
-                </div>
-                <div class="tickets-container">
-                    <div id="pending-list"></div>
                 </div>
             </div>
 
             <div id="adm-radio" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">~</span>
-                        RADIO COMMUNICATIONS
-                    </h2>
-                    <div class="content-actions">
-                        <div class="radio-frequency-display">
-                            <span class="freq-label">FREQ:</span>
-                            <span class="freq-value">99.4 MHz</span>
-                            <span class="freq-indicator pulsing"></span>
-                        </div>
-                        <button class="action-btn danger" onclick="clearRadioMessages()">
-                            <span class="icon">×</span> CLEAR ALL
-                        </button>
+                <div class="radio-fullwidth">
+                    <div class="cell-header">RADIO COMMUNICATIONS</div>
+                    <div class="radio-header">
+                        <div class="radio-frequency">FREQUENCY: 99.4 MHz</div>
+                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR ALL</button>
                     </div>
-                </div>
-                <div class="radio-layout">
-                    <div class="radio-main">
-                        <div class="radio-status-bar">
-                            <div class="status-left">
-                                <div class="status-indicator online">
-                                    <span class="indicator-dot"></span>
-                                    <span class="indicator-text">CHANNEL ACTIVE</span>
-                                </div>
-                            </div>
-                            <div class="status-right">
-                                <div class="radio-stats">
-                                    <span class="stat-item">
-                                        <span class="stat-label">USERS:</span>
-                                        <span class="stat-value" id="radio-users-count">1</span>
-                                    </span>
-                                    <span class="stat-divider">|</span>
-                                    <span class="stat-item">
-                                        <span class="stat-label">MESSAGES:</span>
-                                        <span class="stat-value" id="radio-messages-count">0</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="radio-messages" id="radio-messages">
-                            <div class="radio-welcome-message">
-                                <div class="welcome-icon">~</div>
-                                <div class="welcome-text">ENCRYPTED RADIO CHANNEL - 99.4 MHz</div>
-                                <div class="welcome-subtext">All communications are logged and encrypted</div>
-                            </div>
-                        </div>
-                        <div class="radio-input-area">
-                            <div class="input-wrapper-enhanced">
-                                <input type="text" id="radio-input" class="radio-input" placeholder="Type message...">
-                                <div class="input-actions">
-                                    <button class="input-action-btn" onclick="toggleEmoji()" title="Emoji">
-                                        <span class="icon">☺</span>
-                                    </button>
-                                    <button class="input-action-btn" onclick="sendRadioMessage()" title="Send">
-                                        <span class="icon">→</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="radio-status">
+                        <div class="radio-status-indicator"></div>
+                        <span>CHANNEL ACTIVE</span>
+                    </div>
+                    <div class="radio-messages" id="radio-messages">
+                    </div>
+                    <div class="radio-input-area">
+                        <input type="text" id="radio-input" placeholder="Type message...">
+                        <button onclick="sendRadioMessage()">SEND</button>
                     </div>
                 </div>
             </div>
 
             <div id="adm-credentials" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">*</span>
-                        ADMINISTRATOR CREDENTIALS
-                    </h2>
-                </div>
-                <div class="credentials-container">
-                    <div class="credentials-card animated">
-                        <div class="card-shine"></div>
+                <div class="credentials-fullwidth">
+                    <div class="cell-header">ADMINISTRATOR CREDENTIALS</div>
+                    <div class="credentials-card">
                         <div class="credentials-header">
-                            <div class="header-left">
-                                <div class="credentials-logo">ARCS</div>
-                                <div class="credentials-subtitle">Advanced Research & Containment System</div>
-                            </div>
-                            <div class="header-right">
-                                <div class="credentials-level gold">
-                                    <span class="level-icon">★</span>
-                                    <span class="level-text">OMEGA</span>
-                                </div>
-                            </div>
+                            <div class="credentials-logo">ARCS</div>
+                            <div class="credentials-level">LEVEL: OMEGA</div>
                         </div>
                         <div class="credentials-body">
                             <div class="credentials-field">
@@ -660,73 +325,31 @@
                                 <span class="field-value">OBUNTO</span>
                             </div>
                             <div class="credentials-field">
-                                <span class="field-label">OPERATOR ID:</span>
-                                <span class="field-value mono">118107921024376</span>
+                                <span class="field-label">ID:</span>
+                                <span class="field-value">118107921024376</span>
                             </div>
                             <div class="credentials-field">
                                 <span class="field-label">CLEARANCE:</span>
-                                <span class="field-value">
-                                    <span class="clearance-badge gold">GOLD</span>
-                                </span>
+                                <span class="field-value">GOLD</span>
                             </div>
                             <div class="credentials-field">
                                 <span class="field-label">DIVISION:</span>
                                 <span class="field-value">SYSTEM ADMINISTRATION</span>
                             </div>
-                            <div class="credentials-field">
-                                <span class="field-label">ACCESS LEVEL:</span>
-                                <span class="field-value">
-                                    <span class="access-bars">
-                                        <span class="bar filled"></span>
-                                        <span class="bar filled"></span>
-                                        <span class="bar filled"></span>
-                                        <span class="bar filled"></span>
-                                        <span class="bar filled"></span>
-                                    </span>
-                                    MAXIMUM
-                                </span>
-                            </div>
                         </div>
                         <div class="credentials-footer">
-                            <div class="footer-text">AUTHORIZED ACCESS TO ALL FACILITIES</div>
-                            <div class="footer-badge">
-                                <span class="badge-icon">✓</span>
-                                <span class="badge-text">VERIFIED</span>
-                            </div>
+                            AUTHORIZED ACCESS TO ALL FACILITIES
                         </div>
-                        <div class="card-pattern"></div>
                     </div>
                 </div>
             </div>
 
             <div id="adm-users" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">+</span>
-                        USER MANAGEMENT
-                    </h2>
-                    <div class="content-actions">
-                        <div class="search-box">
-                            <input type="text" id="user-search" class="search-input" placeholder="Search users...">
-                            <span class="search-icon">🔍</span>
-                        </div>
-                        <button class="action-btn" onclick="refreshUsers()">
-                            <span class="icon">↻</span> REFRESH
-                        </button>
-                    </div>
-                </div>
-                <div class="users-container">
+                <div class="users-fullwidth">
+                    <div class="cell-header">USER MANAGEMENT</div>
                     <div class="users-tabs">
-                        <div class="users-tab active" onclick="showUsersSection('active')">
-                            <span class="tab-icon">✓</span>
-                            <span class="tab-text">ACTIVE USERS</span>
-                            <span class="tab-count" id="active-count">0</span>
-                        </div>
-                        <div class="users-tab" onclick="showUsersSection('banned')">
-                            <span class="tab-icon">✗</span>
-                            <span class="tab-text">BANNED USERS</span>
-                            <span class="tab-count" id="banned-count">0</span>
-                        </div>
+                        <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE USERS</div>
+                        <div class="users-tab" onclick="showUsersSection('banned')">BANNED USERS</div>
                     </div>
                     <div id="users-active-section" class="users-section">
                         <div id="active-users-list"></div>
@@ -738,76 +361,27 @@
             </div>
 
             <div id="adm-analytics" class="tab-content">
-                <div class="content-header">
-                    <h2 class="content-title">
-                        <span class="title-icon">%</span>
-                        SYSTEM ANALYTICS
-                    </h2>
-                    <div class="content-actions">
-                        <button class="action-btn" onclick="refreshAnalytics()">
-                            <span class="icon">↻</span> REFRESH
-                        </button>
-                        <button class="action-btn" onclick="exportAnalytics()">
-                            <span class="icon">↓</span> EXPORT
-                        </button>
-                    </div>
-                </div>
-                <div class="analytics-container">
+                <div class="analytics-fullwidth">
+                    <div class="cell-header">SYSTEM ANALYTICS</div>
                     <div class="analytics-grid">
-                        <div class="analytics-card animated">
-                            <div class="card-icon users">+</div>
-                            <div class="card-label">TOTAL USERS</div>
-                            <div class="card-value" id="analytics-total-users">0</div>
-                            <div class="card-trend positive">
-                                <span class="trend-icon">↑</span>
-                                <span class="trend-value">+0%</span>
-                            </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">TOTAL USERS</div>
+                            <div class="analytics-value" id="analytics-total-users">0</div>
                         </div>
-                        <div class="analytics-card animated">
-                            <div class="card-icon sessions">~</div>
-                            <div class="card-label">ACTIVE SESSIONS</div>
-                            <div class="card-value" id="analytics-active-sessions">0</div>
-                            <div class="card-trend neutral">
-                                <span class="trend-icon">→</span>
-                                <span class="trend-value">0%</span>
-                            </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">ACTIVE SESSIONS</div>
+                            <div class="analytics-value" id="analytics-active-sessions">0</div>
                         </div>
-                        <div class="analytics-card animated">
-                            <div class="card-icon broadcasts">@</div>
-                            <div class="card-label">BROADCASTS SENT</div>
-                            <div class="card-value" id="analytics-broadcasts">0</div>
-                            <div class="card-trend positive">
-                                <span class="trend-icon">↑</span>
-                                <span class="trend-value">+0%</span>
-                            </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">BROADCASTS SENT</div>
+                            <div class="analytics-value" id="analytics-broadcasts">0</div>
                         </div>
-                        <div class="analytics-card animated">
-                            <div class="card-icon messages">~</div>
-                            <div class="card-label">RADIO MESSAGES</div>
-                            <div class="card-value" id="analytics-radio-msgs">0</div>
-                            <div class="card-trend positive">
-                                <span class="trend-icon">↑</span>
-                                <span class="trend-value">+0%</span>
-                            </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">RADIO MESSAGES</div>
+                            <div class="analytics-value" id="analytics-radio-msgs">0</div>
                         </div>
                     </div>
-                    
-                    <div class="analytics-charts">
-                        <div class="chart-container">
-                            <div class="chart-header">ACTIVITY TIMELINE</div>
-                            <div class="chart-body" id="activity-chart">
-                                <canvas id="activity-canvas"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="analytics-logs">
-                        <div class="logs-header">
-                            <span class="logs-title">SYSTEM LOGS</span>
-                            <button class="logs-clear-btn" onclick="clearLogs()">CLEAR</button>
-                        </div>
-                        <div class="logs-body" id="analytics-logs"></div>
-                    </div>
+                    <div class="analytics-logs" id="analytics-logs"></div>
                 </div>
             </div>
         </div>
@@ -815,136 +389,96 @@
 
     <div id="admin-panel" class="admin-window hidden">
         <div class="window-titlebar">
-            <span class="window-title">
-                <span class="title-icon">⚙</span>
-                ADMIN - OBUNTO
-            </span>
-            <div class="window-actions">
-                <div class="close-btn" onclick="closeAdmin()">×</div>
-            </div>
+            <span>ADMIN - OBUNTO</span>
+            <div class="close-btn" onclick="closeAdmin()">X</div>
         </div>
         <div class="window-body">
             <div class="admin-section">
-                <h3 class="section-title">PENDING ACCOUNTS</h3>
+                <h3>PENDING ACCOUNTS</h3>
                 <div id="pending-list-modal"></div>
             </div>
         </div>
     </div>
 
-    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">
-        <span class="fab-icon">⚙</span>
-        <span class="fab-pulse"></span>
-    </div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
     <div id="broadcast-notification" class="notification hidden">
-        <div class="notification-container">
-            <div class="mascot-container">
-                <img id="notif-sprite" class="notification-sprite bouncing" src="assets/sprites/normal.png" alt="Obunto">
-                <div class="mascot-badge">
-                    <span class="badge-text">OBUNTO</span>
-                </div>
-            </div>
-            <div class="bubble">
-                <div class="bubble-header">
-                    <span class="bubble-title">BROADCAST MESSAGE</span>
-                    <button class="bubble-close" onclick="closeBroadcastNotification()">×</button>
-                </div>
-                <div class="notification-text" id="notif-text"></div>
-                <div class="bubble-footer">
-                    <span class="bubble-time" id="notif-time"></span>
-                </div>
-            </div>
+        <div class="mascot-container">
+            <img id="notif-sprite" class="notification-sprite" src="assets/sprites/normal.png" alt="Obunto">
+            <div class="mascot-label"></div>
+        </div>
+        <div class="bubble">
+            <div class="notification-text" id="notif-text"></div>
         </div>
     </div>
 
     <div id="edit-welcome-modal" class="modal hidden">
-        <div class="modal-overlay" onclick="closeWelcomeModal()"></div>
-        <div class="modal-content animated">
+        <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">
-                    <span class="title-icon">✎</span>
-                    EDIT WELCOME SCREEN
-                </span>
-                <div class="modal-close" onclick="closeWelcomeModal()">×</div>
+                <span>EDIT WELCOME SCREEN</span>
+                <div class="modal-close" onclick="closeWelcomeModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
-                    <label class="editor-label">TITLE:</label>
+                    <label class="editor-label">Title</label>
                     <input type="text" id="welcome-title-input" class="editor-input" value="WELCOME">
                 </div>
                 <div class="editor-field">
-                    <label class="editor-label">MESSAGE:</label>
+                    <label class="editor-label">Message</label>
                     <textarea id="welcome-text-input" class="editor-textarea">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</textarea>
                 </div>
-                <button class="form-submit-btn" onclick="saveWelcomeChanges()">
-                    <span class="btn-icon">✓</span>
-                    SAVE CHANGES
-                </button>
+                <button class="form-submit-btn" onclick="saveWelcomeChanges()">SAVE CHANGES</button>
             </div>
         </div>
     </div>
 
     <div id="new-tab-modal" class="modal hidden">
-        <div class="modal-overlay" onclick="closeNewTabModal()"></div>
-        <div class="modal-content animated">
+        <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">
-                    <span class="title-icon">+</span>
-                    CREATE NEW TAB
-                </span>
-                <div class="modal-close" onclick="closeNewTabModal()">×</div>
+                <span>CREATE NEW TAB</span>
+                <div class="modal-close" onclick="closeNewTabModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
-                    <label class="editor-label">TAB NAME:</label>
+                    <label class="editor-label">Tab Name</label>
                     <input type="text" id="new-tab-name" class="editor-input" placeholder="Enter tab name...">
                 </div>
                 <div class="editor-field">
-                    <label class="editor-label">TAB CONTENT:</label>
+                    <label class="editor-label">Tab Content</label>
                     <textarea id="new-tab-content" class="editor-textarea" placeholder="Enter content..."></textarea>
                 </div>
-                <button class="form-submit-btn" onclick="saveNewTab()">
-                    <span class="btn-icon">+</span>
-                    CREATE TAB
-                </button>
+                <button class="form-submit-btn" onclick="saveNewTab()">CREATE TAB</button>
             </div>
         </div>
     </div>
 
     <div id="edit-user-modal" class="modal hidden">
-        <div class="modal-overlay" onclick="closeEditUserModal()"></div>
-        <div class="modal-content animated">
+        <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">
-                    <span class="title-icon">✎</span>
-                    EDIT USER
-                </span>
-                <div class="modal-close" onclick="closeEditUserModal()">×</div>
+                <span>EDIT USER</span>
+                <div class="modal-close" onclick="closeEditUserModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
-                    <label class="editor-label">USER ID:</label>
+                    <label class="editor-label">User ID</label>
                     <input type="text" id="edit-user-id" class="editor-input" readonly>
                 </div>
                 <div class="editor-field">
-                    <label class="editor-label">DISPLAY NAME:</label>
+                    <label class="editor-label">Display Name</label>
                     <input type="text" id="edit-user-name" class="editor-input">
                 </div>
                 <div class="editor-field">
-                    <label class="editor-label">STATUS:</label>
+                    <label class="editor-label">Status</label>
                     <select id="edit-user-status" class="editor-select">
                         <option value="active">Active</option>
                         <option value="banned">Banned</option>
                     </select>
                 </div>
-                <button class="form-submit-btn" onclick="saveUserChanges()">
-                    <span class="btn-icon">✓</span>
-                    SAVE CHANGES
-                </button>
+                <button class="form-submit-btn" onclick="saveUserChanges()">SAVE CHANGES</button>
             </div>
         </div>
     </div>
 
-    <script src="js/ultra-script.js"></script>
+    <script src="js/script.js"></script>
 </body>
 </html>
