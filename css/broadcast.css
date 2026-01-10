@@ -2,33 +2,51 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-    background: var(--nier-card, #FFFFFF);
+    background: var(--nier-paper, #EEE7DF);
     padding: 24px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
+    border: 1px solid var(--nier-muted, #957E72);
+    position: relative;
+}
+
+/* Decorative corners */
+#adm-broadcast .news-box::before {
+    content: '◆';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 8px;
+    color: var(--nier-muted, #957E72);
+}
+
+#adm-broadcast .news-box::after {
+    content: '◆';
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    font-size: 8px;
+    color: var(--nier-muted, #957E72);
 }
 
 #adm-broadcast label {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
     text-transform: uppercase;
     display: block;
     margin-bottom: 12px;
-    border-bottom: 2px solid var(--nier-border, #1A1A1A);
+    border-bottom: 1px solid var(--nier-muted, #957E72);
     padding-bottom: 8px;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 .sprite-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
+    gap: 10px;
     padding: 16px;
-    background: var(--nier-bg-light, #FBF4E9);
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    max-height: 240px;
+    background: rgba(193, 175, 160, 0.08);
+    border: 1px solid var(--nier-muted, #957E72);
+    max-height: 230px;
     overflow-y: auto;
 }
 
@@ -36,74 +54,86 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 12px;
-    background: var(--nier-card, #FFFFFF);
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
+    padding: 10px;
+    background: var(--nier-paper, #EEE7DF);
+    border: 1px solid var(--nier-panel, #C1AFA0);
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    position: relative;
 }
 
 .sprite-option:hover {
-    opacity: 0.8;
+    background: var(--nier-panel, #C1AFA0);
+    border-color: var(--nier-dark, #6C584C);
 }
 
 .sprite-option.active {
-    border-color: var(--nier-yellow, #FFD700);
-    background: var(--nier-yellow, #FFD700);
-    border-width: 3px;
+    border-color: var(--nier-accent, #D4AF37);
+    background: rgba(212, 175, 55, 0.1);
+    border-width: 2px;
+}
+
+/* Triangle indicator */
+.sprite-option.active::after {
+    content: '▼';
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 6px;
+    color: var(--nier-accent, #D4AF37);
 }
 
 .sprite-option img {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     object-fit: contain;
     image-rendering: pixelated;
     margin-bottom: 6px;
 }
 
 .sprite-option span {
-    font-size: 9px;
+    font-size: 8px;
     text-align: center;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
 }
 
 #adm-broadcast #broadcast-text {
     width: 100%;
-    min-height: 120px;
-    padding: 16px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-bg-light, #FBF4E9);
-    font-size: 13px;
+    min-height: 110px;
+    padding: 14px;
+    border: 1px solid var(--nier-muted, #957E72);
+    background: rgba(193, 175, 160, 0.08);
+    font-size: 12px;
     resize: vertical;
     outline: none;
     line-height: 1.5;
     font-weight: 400;
+    color: var(--nier-text, #3F352F);
+    transition: all 0.2s;
 }
 
 #adm-broadcast #broadcast-text:focus {
-    border-color: var(--nier-yellow, #FFD700);
+    border-color: var(--nier-dark, #6C584C);
+    background: rgba(193, 175, 160, 0.15);
 }
 
 #adm-broadcast #send-broadcast {
     width: 100%;
-    padding: 14px;
-    border: 3px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-turquoise, #7dd3c0);
-    color: var(--nier-border, #1A1A1A);
-    font-size: 16px;
-    font-weight: 700;
+    padding: 13px;
+    border: 1px solid var(--nier-dark, #6C584C);
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
+    font-size: 14px;
+    font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
-    letter-spacing: 2px;
-    transition: opacity 0.2s;
+    letter-spacing: 1.5px;
+    transition: all 0.2s;
 }
 
 #adm-broadcast #send-broadcast:hover {
-    opacity: 0.8;
+    background: var(--nier-dark, #6C584C);
 }

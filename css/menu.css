@@ -1,37 +1,74 @@
 .menu-bar {
-    background: var(--nier-border, #1A1A1A);
-    color: var(--nier-card, #FFFFFF);
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
     display: flex;
     align-items: center;
     padding: 8px 16px 0 16px;
-    font-size: 13px;
+    font-size: 12px;
     gap: 6px;
-    border-bottom: 3px solid var(--nier-border, #1A1A1A);
+    border-bottom: 1px solid var(--nier-dark, #6C584C);
     overflow-x: auto;
+    position: relative;
+}
+
+/* Decorative border pattern */
+.menu-bar::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--nier-dark, #6C584C),
+        var(--nier-dark, #6C584C) 2px,
+        transparent 2px,
+        transparent 10px
+    );
 }
 
 .menu-button {
-    background: var(--nier-card, #FFFFFF);
-    color: var(--nier-text, #1A1A1A);
-    padding: 10px 24px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    border-radius: 4px 4px 0 0;
+    background: var(--nier-paper, #EEE7DF);
+    color: var(--nier-text, #3F352F);
+    padding: 10px 22px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    border-radius: 0;
     cursor: pointer;
-    border: 2px solid var(--nier-border, #1A1A1A);
+    border: 1px solid var(--nier-muted, #957E72);
     border-bottom: none;
-    transition: opacity 0.2s;
+    transition: background 0.2s;
     z-index: 10;
     text-transform: uppercase;
+    font-size: 11px;
+    position: relative;
+}
+
+/* Triangle decoration */
+.menu-button::before {
+    content: '▼';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 6px;
+    color: var(--nier-text, #3F352F);
+    opacity: 0;
+    transition: opacity 0.2s;
 }
 
 .menu-button:hover {
-    opacity: 0.8;
+    background: var(--nier-panel, #C1AFA0);
+}
+
+.menu-button:hover::before {
+    opacity: 1;
 }
 
 .menu-tabs {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     overflow-x: auto;
     padding-bottom: 2px;
 }
@@ -41,48 +78,68 @@
 }
 
 .tab {
-    background: #555;
-    color: #CCC;
-    padding: 10px 20px;
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-panel, #C1AFA0);
+    padding: 10px 18px;
     cursor: pointer;
     letter-spacing: 1px;
-    border-radius: 4px 4px 0 0;
-    transition: opacity 0.2s;
-    border: 2px solid var(--nier-border, #1A1A1A);
+    border-radius: 0;
+    transition: all 0.2s;
+    border: 1px solid var(--nier-text, #3F352F);
     border-bottom: none;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
     white-space: nowrap;
+    font-size: 10px;
+    position: relative;
 }
 
 .tab:hover {
-    opacity: 0.8;
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 .tab.active {
-    background: var(--nier-yellow, #FFD700);
-    color: var(--nier-border, #1A1A1A);
-    font-weight: 700;
-    border-color: var(--nier-border, #1A1A1A);
+    background: var(--nier-accent, #D4AF37);
+    color: var(--nier-text, #3F352F);
+    font-weight: 600;
+    border-color: var(--nier-text, #3F352F);
     position: relative;
     top: 2px;
     z-index: 5;
 }
 
+/* Diamond decoration for active tab */
+.tab.active::after {
+    content: '◆';
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    font-size: 6px;
+    color: var(--nier-text, #3F352F);
+}
+
 #custom-menu-tabs {
     display: flex;
-    gap: 6px;
+    gap: 5px;
 }
 
 #custom-menu-tabs .tab {
-    background: var(--nier-blue, #90B8D0);
-    color: var(--nier-border, #1A1A1A);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+    border-color: var(--nier-muted, #957E72);
+}
+
+#custom-menu-tabs .tab:hover {
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 @media (max-width: 768px) {
     .menu-button,
     .tab {
-        padding: 8px 16px;
-        font-size: 11px;
+        padding: 8px 14px;
+        font-size: 9px;
     }
 }

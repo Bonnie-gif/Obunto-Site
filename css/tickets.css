@@ -7,35 +7,58 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-height: 500px;
+    max-height: 480px;
     overflow-y: auto;
 }
 
 #adm-tickets .pending-item {
-    background: var(--nier-card, #FFFFFF);
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
+    background: var(--nier-paper, #EEE7DF);
+    border: 1px solid var(--nier-muted, #957E72);
     padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* Decorative corner lines */
+#adm-tickets .pending-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border-top: 2px solid var(--nier-dark, #6C584C);
+    border-left: 2px solid var(--nier-dark, #6C584C);
+}
+
+#adm-tickets .pending-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid var(--nier-dark, #6C584C);
+    border-right: 2px solid var(--nier-dark, #6C584C);
 }
 
 #adm-tickets .pending-item:hover {
-    opacity: 0.9;
+    background: rgba(193, 175, 160, 0.08);
+    border-color: var(--nier-dark, #6C584C);
 }
 
 #adm-tickets .pending-item span {
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--nier-text, #1A1A1A);
-    background: var(--nier-yellow, #FFD700);
-    padding: 6px 16px;
-    border-radius: 4px;
-    border: 2px solid var(--nier-border, #1A1A1A);
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--nier-text, #3F352F);
+    background: rgba(212, 175, 55, 0.15);
+    padding: 5px 14px;
+    border: 1px solid var(--nier-muted, #957E72);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 #adm-tickets .actions {
@@ -44,29 +67,29 @@
 }
 
 #adm-tickets button {
-    font-size: 12px;
-    padding: 8px 20px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
+    font-size: 10px;
+    padding: 8px 18px;
+    border: 1px solid var(--nier-dark, #6C584C);
     cursor: pointer;
     text-transform: uppercase;
-    font-weight: 700;
-    transition: opacity 0.2s;
+    font-weight: 600;
+    transition: all 0.2s;
     letter-spacing: 1px;
 }
 
 #adm-tickets button:hover {
-    opacity: 0.8;
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 #adm-tickets button:first-child {
-    background: var(--nier-turquoise, #7dd3c0);
-    color: var(--nier-border, #1A1A1A);
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 #adm-tickets button:last-child {
-    background: var(--nier-orange, #E8B870);
-    color: var(--nier-border, #1A1A1A);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
 }
 
 @media (max-width: 768px) {

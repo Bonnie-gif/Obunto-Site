@@ -6,9 +6,9 @@
 }
 
 .editing-toolbar {
-    padding: 16px 24px;
-    background: var(--nier-bg-light, #FBF4E9);
-    border-bottom: 2px solid var(--nier-border, #1A1A1A);
+    padding: 14px 22px;
+    background: rgba(193, 175, 160, 0.08);
+    border-bottom: 1px solid var(--nier-muted, #957E72);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -16,50 +16,51 @@
 }
 
 .toolbar-title {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
-    letter-spacing: 2px;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
 }
 
 .toolbar-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
 }
 
 .toolbar-btn {
-    padding: 10px 20px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-card, #FFFFFF);
-    color: var(--nier-text, #1A1A1A);
-    font-size: 11px;
-    font-weight: 700;
+    padding: 9px 18px;
+    border: 1px solid var(--nier-dark, #6C584C);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+    font-size: 10px;
+    font-weight: 600;
     cursor: pointer;
     letter-spacing: 1px;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     text-transform: uppercase;
 }
 
 .toolbar-btn:hover {
-    opacity: 0.8;
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 .toolbar-btn.primary {
-    background: var(--nier-turquoise, #7dd3c0);
-    border-width: 3px;
-    font-size: 12px;
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
+    border-width: 2px;
+    font-size: 11px;
 }
 
 .editing-canvas {
     flex: 1;
-    background: var(--nier-bg, #F5E6D3);
+    background: var(--nier-paper, #EEE7DF);
     overflow: auto;
-    border: 2px dashed rgba(26, 26, 26, 0.2);
-    border-radius: 4px;
-    margin: 20px;
-    padding: 24px;
+    border: 1px dashed rgba(149, 126, 114, 0.3);
+    margin: 18px;
+    padding: 22px;
+    position: relative;
 }
 
 .canvas-hint {
@@ -67,58 +68,69 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 16px;
-    color: rgba(26, 26, 26, 0.3);
+    font-size: 14px;
+    color: rgba(63, 53, 47, 0.25);
     letter-spacing: 1px;
     text-align: center;
     pointer-events: none;
     text-transform: uppercase;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .tab-preview-item {
-    background: var(--nier-card, #FFFFFF);
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    padding: 16px;
-    margin-bottom: 16px;
-    transition: opacity 0.2s;
+    background: var(--nier-paper, #EEE7DF);
+    border: 1px solid var(--nier-muted, #957E72);
+    padding: 14px;
+    margin-bottom: 14px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* Corner decorations */
+.tab-preview-item::before {
+    content: '◆';
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    font-size: 7px;
+    color: var(--nier-muted, #957E72);
 }
 
 .tab-preview-item:hover {
-    opacity: 0.9;
+    background: rgba(193, 175, 160, 0.08);
+    border-color: var(--nier-dark, #6C584C);
 }
 
 .tab-preview-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 11px;
 }
 
 .tab-preview-actions {
     display: flex;
-    gap: 8px;
-    padding-top: 12px;
-    border-top: 2px dashed rgba(26, 26, 26, 0.2);
+    gap: 7px;
+    padding-top: 11px;
+    border-top: 1px dashed rgba(149, 126, 114, 0.3);
 }
 
 .tab-preview-actions button {
-    padding: 6px 16px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-red, #D89090);
-    color: var(--nier-border, #1A1A1A);
-    font-size: 10px;
-    font-weight: 700;
+    padding: 5px 14px;
+    border: 1px solid var(--nier-dark, #6C584C);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+    font-size: 9px;
+    font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .tab-preview-actions button:hover {
-    opacity: 0.8;
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
 }

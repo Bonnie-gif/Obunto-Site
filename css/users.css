@@ -4,49 +4,50 @@
 }
 
 .users-fullwidth .cell-header {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
     margin-bottom: 24px;
     padding-bottom: 12px;
-    border-bottom: 2px solid var(--nier-border, #1A1A1A);
+    border-bottom: 1px solid var(--nier-muted, #957E72);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
 }
 
 .users-tabs {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 24px;
 }
 
 .users-tab {
     flex: 1;
-    padding: 14px 24px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-bg-light, #FBF4E9);
-    color: var(--nier-text, #1A1A1A);
-    font-size: 13px;
-    font-weight: 700;
+    padding: 12px 22px;
+    border: 1px solid var(--nier-muted, #957E72);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+    font-size: 11px;
+    font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     text-transform: uppercase;
     letter-spacing: 1px;
     text-align: center;
 }
 
 .users-tab:hover {
-    opacity: 0.8;
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 .users-tab.active {
-    background: var(--nier-yellow, #FFD700);
-    border-width: 3px;
+    background: var(--nier-accent, #D4AF37);
+    border-width: 2px;
+    border-color: var(--nier-dark, #6C584C);
 }
 
 .users-section {
-    min-height: 400px;
+    min-height: 380px;
 }
 
 .users-section.hidden {
@@ -55,20 +56,42 @@
 
 .user-item,
 .banned-item {
-    background: var(--nier-card, #FFFFFF);
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    padding: 20px;
+    background: var(--nier-paper, #EEE7DF);
+    border: 1px solid var(--nier-muted, #957E72);
+    padding: 18px;
     margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
+    position: relative;
+}
+
+/* Corner decorations */
+.user-item::before,
+.banned-item::before {
+    content: '▲';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 6px;
+    color: var(--nier-muted, #957E72);
+}
+
+.user-item::after,
+.banned-item::after {
+    content: '▼';
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    font-size: 6px;
+    color: var(--nier-muted, #957E72);
 }
 
 .user-item:hover,
 .banned-item:hover {
-    opacity: 0.9;
+    background: rgba(193, 175, 160, 0.08);
+    border-color: var(--nier-dark, #6C584C);
 }
 
 .user-info {
@@ -76,19 +99,19 @@
 }
 
 .user-name {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--nier-text, #1A1A1A);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nier-text, #3F352F);
     margin-bottom: 6px;
     letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .user-id {
-    font-size: 11px;
-    color: var(--nier-text-light, #666666);
-    font-weight: 600;
-    letter-spacing: 0.5px;
+    font-size: 10px;
+    color: var(--nier-muted, #957E72);
+    font-weight: 500;
+    letter-spacing: 0.3px;
 }
 
 .user-actions {
@@ -97,33 +120,36 @@
 }
 
 .user-actions button {
-    padding: 8px 20px;
-    border: 2px solid var(--nier-border, #1A1A1A);
-    border-radius: 4px;
-    background: var(--nier-bg-light, #FBF4E9);
-    color: var(--nier-text, #1A1A1A);
-    font-size: 11px;
-    font-weight: 700;
+    padding: 7px 17px;
+    border: 1px solid var(--nier-dark, #6C584C);
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+    font-size: 9px;
+    font-weight: 600;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: all 0.2s;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
 }
 
 .user-actions button:hover {
-    opacity: 0.8;
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 .user-actions button:last-child {
-    background: var(--nier-red, #D89090);
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 .banned-item {
     opacity: 0.7;
+    background: rgba(149, 126, 114, 0.08);
 }
 
 .banned-item .user-actions button {
-    background: var(--nier-green, #90C890);
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
 }
 
 @media (max-width: 768px) {
@@ -134,7 +160,7 @@
     .user-item,
     .banned-item {
         flex-direction: column;
-        gap: 16px;
+        gap: 14px;
     }
     
     .user-actions {
