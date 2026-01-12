@@ -1,1252 +1,561 @@
-/**
- * ARCS - Advanced Research & Containment System
- * Newton OS Ver. 3.2.2
- * NieR:Automata Inspired Admin Dashboard
- */
-
-// ==================== CONFIGURATION ====================
-const ADMIN_ID = '118107921024376';
-const ADMIN_PASSWORD = '2041';
-const STORAGE_PREFIX = 'arcs_';
-
-// ==================== STORAGE WRAPPER ====================
-const storage = {
-    async get(key, shared = false) {
-        // Check for Anthropic persistent storage first
-        if (window.storage && typeof window.storage.get === 'function') {
-            try {
-                return await window.storage.get(STORAGE_PREFIX + key, shared);
-            } catch (e) {
-                console.log('Using localStorage fallback');
-            }
-        }
-        // Fallback to localStorage
-        const value = localStorage.getItem(STORAGE_PREFIX + key);
-        return value ? { key: STORAGE_PREFIX + key, value, shared } : null;
-    },
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCS - Newton OS Ver.3.2.2</title>
+    <link rel="icon" href="assets/icon.png" type="image/png">
     
-    async set(key, value, shared = false) {
-        // Check for Anthropic persistent storage first
-        if (window.storage && typeof window.storage.set === 'function') {
-            try {
-                return await window.storage.set(STORAGE_PREFIX + key, value, shared);
-            } catch (e) {
-                console.log('Using localStorage fallback');
-            }
-        }
-        // Fallback to localStorage
-        localStorage.setItem(STORAGE_PREFIX + key, value);
-        return { key: STORAGE_PREFIX + key, value, shared };
-    },
-    
-    async delete(key, shared = false) {
-        if (window.storage && typeof window.storage.delete === 'function') {
-            try {
-                return await window.storage.delete(STORAGE_PREFIX + key, shared);
-            } catch (e) {
-                console.log('Using localStorage fallback');
-            }
-        }
-        localStorage.removeItem(STORAGE_PREFIX + key);
-        return { key: STORAGE_PREFIX + key, deleted: true, shared };
-    }
-};
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <link rel="stylesheet" href="css/editing.css">
+    <link rel="stylesheet" href="css/alarms.css">
+    <link rel="stylesheet" href="css/tickets.css">
+    <link rel="stylesheet" href="css/radio.css">
+    <link rel="stylesheet" href="css/credentials.css">
+    <link rel="stylesheet" href="css/users.css">
+    <link rel="stylesheet" href="css/analytics.css">
+    <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+    <!-- ==================== AUDIO ELEMENTS ==================== -->
+    <audio id="sfx-poweron" src="assets/audio/poweron.wav" preload="auto"></audio>
+    <audio id="sfx-loading" src="assets/audio/loading.wav" preload="auto"></audio>
+    <audio id="sfx-newmessage" src="assets/audio/newmessage.wav" preload="auto"></audio>
+    <audio id="sfx-error" src="assets/audio/error.wav" preload="auto"></audio>
+    <audio id="sfx-denied" src="assets/audio/denied.wav" preload="auto"></audio>
+    <audio id="sfx-sent" src="assets/audio/sent.wav" preload="auto"></audio>
+    <audio id="sfx-blue" src="assets/audio/blue.wav" preload="auto"></audio>
 
-// ==================== STATE ====================
-let currentUser = null;
-let customTabs = [];
-let isAdmin = false;
+    <!-- ==================== GLITCH BLOCKS (Epsilon Theme) ==================== -->
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
 
-// ==================== UTILITIES ====================
-function playSound(id) {
-    const audio = document.getElementById(id);
-    if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(e => console.log('Audio play prevented:', e));
-    }
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(id);
-    if (screen) screen.classList.add('active');
-}
-
-function showStatus(message, type = 'info') {
-    const status = document.getElementById('login-status');
-    if (!status) return;
-    
-    status.textContent = message;
-    status.className = 'login-status show';
-    if (type === 'error') status.classList.add('error');
-    if (type === 'success') status.classList.add('success');
-    
-    setTimeout(() => status.classList.remove('show'), 4000);
-}
-
-function generateUserId() {
-    return 'OP' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
-}
-
-// ==================== INITIALIZATION ====================
-async function initializeStorage() {
-    try {
-        // Initialize users
-        const usersData = await storage.get('users', true);
-        if (!usersData) {
-            const defaultUsers = {
-                [ADMIN_ID]: {
-                    id: ADMIN_ID,
-                    name: 'OBUNTO',
-                    password: ADMIN_PASSWORD,
-                    approved: true,
-                    status: 'active',
-                    isAdmin: true,
-                    createdAt: Date.now()
-                }
-            };
-            await storage.set('users', JSON.stringify(defaultUsers), true);
-        }
-        
-        // Initialize pending queue
-        const pendingData = await storage.get('pending', true);
-        if (!pendingData) {
-            await storage.set('pending', JSON.stringify([]), true);
-        }
-        
-        // Initialize broadcasts
-        const broadcastData = await storage.get('broadcasts', true);
-        if (!broadcastData) {
-            await storage.set('broadcasts', JSON.stringify([]), true);
-        }
-        
-        // Initialize radio messages
-        const radioData = await storage.get('radio_messages', true);
-        if (!radioData) {
-            await storage.set('radio_messages', JSON.stringify([]), true);
-        }
-        
-        // Initialize custom tabs
-        const tabsData = await storage.get('custom_tabs', true);
-        if (!tabsData) {
-            await storage.set('custom_tabs', JSON.stringify([]), true);
-        }
-        
-        // Initialize welcome content
-        const welcomeData = await storage.get('welcome', true);
-        if (!welcomeData) {
-            await storage.set('welcome', JSON.stringify({
-                title: 'WELCOME',
-                text: 'WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.'
-            }), true);
-        }
-        
-        console.log('Storage initialized successfully');
-    } catch (e) {
-        console.error('Storage initialization error:', e);
-    }
-}
-
-// ==================== LOADING SCREEN ====================
-function startLoading() {
-    playSound('sfx-loading');
-    let progress = 0;
-    const bar = document.getElementById('loading-progress');
-    
-    const interval = setInterval(() => {
-        progress += Math.random() * 12 + 3;
-        if (progress >= 100) {
-            progress = 100;
-            bar.style.width = '100%';
-            clearInterval(interval);
-            setTimeout(() => {
-                document.getElementById('login-panel').classList.remove('hidden');
-            }, 400);
-        } else {
-            bar.style.width = progress + '%';
-        }
-    }, 180);
-}
-
-// ==================== AUTHENTICATION ====================
-async function handleLogin() {
-    const userIdInput = document.getElementById('operator-id');
-    const passwordInput = document.getElementById('operator-password');
-    const userId = userIdInput.value.trim().toUpperCase();
-    const password = passwordInput ? passwordInput.value : '';
-    
-    if (!userId) {
-        playSound('sfx-error');
-        showStatus('PLEASE ENTER AN OPERATOR ID', 'error');
-        return;
-    }
-    
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        const user = users[userId];
-        
-        if (user) {
-            // User exists
-            if (user.status === 'banned') {
-                playSound('sfx-denied');
-                showStatus('ACCESS DENIED - ACCOUNT BANNED', 'error');
-                return;
-            }
+    <!-- ==================== LOADING SCREEN ==================== -->
+    <div id="loading-screen" class="screen active">
+        <div class="loading-left">
+            <div class="upeo-section">
+                <svg class="upeo-logo" viewBox="0 0 200 200">
+                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z" fill="currentColor"/>
+                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
+                </svg>
+                <div class="upeo-text">UPEO</div>
+            </div>
             
-            if (!user.approved) {
-                playSound('sfx-denied');
-                showStatus('ACCESS PENDING - AWAITING APPROVAL', 'error');
-                return;
-            }
-            
-            // Check password for admin
-            if (user.isAdmin && password !== user.password) {
-                playSound('sfx-error');
-                showStatus('INVALID PASSWORD', 'error');
-                return;
-            }
-            
-            // Login successful
-            currentUser = user;
-            isAdmin = user.isAdmin;
-            playSound('sfx-poweron');
-            
-            enterMainScreen();
-        } else {
-            // User doesn't exist - check pending
-            const pendingData = await storage.get('pending', true);
-            const pending = pendingData ? JSON.parse(pendingData.value) : [];
-            
-            const isPending = pending.some(p => p.userId === userId);
-            
-            if (isPending) {
-                playSound('sfx-denied');
-                showStatus('REQUEST PENDING - AWAITING APPROVAL', 'error');
-            } else {
-                playSound('sfx-error');
-                showStatus('USER NOT FOUND - USE NEW OPERATOR', 'error');
-            }
-        }
-    } catch (e) {
-        console.error('Login error:', e);
-        playSound('sfx-error');
-        showStatus('SYSTEM ERROR - TRY AGAIN', 'error');
-    }
-}
+            <div class="loading-info">
+                RESTARTING OS VER.3.2.2<br>
+                UPEO ID confirmed<br>
+                DATA SWALLOW<br>
+                is for registered use only.
+            </div>
+        </div>
 
-async function handleNewOperator() {
-    const userIdInput = document.getElementById('operator-id');
-    let userId = userIdInput.value.trim().toUpperCase();
-    
-    // Generate ID if empty
-    if (!userId) {
-        userId = generateUserId();
-        userIdInput.value = userId;
-    }
-    
-    try {
-        // Check if user already exists
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        if (users[userId]) {
-            playSound('sfx-error');
-            showStatus('ID ALREADY EXISTS - USE LOGIN', 'error');
-            return;
-        }
-        
-        // Check if already pending
-        const pendingData = await storage.get('pending', true);
-        const pending = pendingData ? JSON.parse(pendingData.value) : [];
-        
-        if (pending.some(p => p.userId === userId)) {
-            playSound('sfx-denied');
-            showStatus('ALREADY IN QUEUE - AWAITING APPROVAL', 'error');
-            return;
-        }
-        
-        // Add to pending queue
-        pending.push({
-            userId: userId,
-            requestedAt: Date.now()
-        });
-        
-        await storage.set('pending', JSON.stringify(pending), true);
-        
-        playSound('sfx-sent');
-        showStatus(`REQUEST SENT - ID: ${userId}`, 'success');
-        
-        // Show popup with ID to save
-        showIdPopup(userId);
-        
-    } catch (e) {
-        console.error('New operator error:', e);
-        playSound('sfx-error');
-        showStatus('SYSTEM ERROR - TRY AGAIN', 'error');
-    }
-}
-
-function showIdPopup(userId) {
-    // Create or update popup
-    let popup = document.getElementById('id-popup');
-    if (!popup) {
-        popup = document.createElement('div');
-        popup.id = 'id-popup';
-        popup.className = 'modal';
-        popup.innerHTML = `
-            <div class="modal-content" style="min-width: 360px;">
-                <div class="modal-header">
-                    <span>SAVE YOUR OPERATOR ID</span>
-                    <div class="modal-close" onclick="closeIdPopup()">X</div>
-                </div>
-                <div class="modal-body">
-                    <p style="margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
-                        YOUR REQUEST HAS BEEN SENT. SAVE THIS ID TO LOGIN AFTER APPROVAL:
-                    </p>
-                    <div id="popup-user-id" style="
-                        background: var(--nier-paper-light);
-                        border: 3px solid var(--nier-accent);
-                        padding: 18px;
-                        text-align: center;
-                        font-size: 20px;
-                        font-weight: 700;
-                        letter-spacing: 4px;
-                        margin-bottom: 16px;
-                        font-family: var(--font-mono);
-                    ">${userId}</div>
-                    <button class="form-submit-btn" onclick="copyUserId()">COPY ID</button>
+        <div class="loading-right">
+            <div class="login-panel hidden" id="login-panel">
+                <div class="login-header">OPERATOR ACCESS</div>
+                <div class="login-body">
+                    <label class="login-label">OPERATOR ID:</label>
+                    <input type="text" id="operator-id" class="login-input" placeholder="ENTER ID" maxlength="20" autocomplete="off">
+                    
+                    <label class="login-label">PASSWORD (ADMIN ONLY):</label>
+                    <input type="password" id="operator-password" class="login-input" placeholder="••••" maxlength="20" autocomplete="off">
+                    
+                    <div class="login-status" id="login-status"></div>
+                    
+                    <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                    <button class="login-btn secondary" onclick="handleNewOperator()">NEW OPERATOR</button>
+                    
+                    <div class="login-info-text">
+                        NEW OPERATORS REQUIRE ADMIN APPROVAL<br>
+                        YOUR ID WILL BE SAVED IN THE QUEUE
+                    </div>
                 </div>
             </div>
-        `;
-        document.body.appendChild(popup);
-    } else {
-        document.getElementById('popup-user-id').textContent = userId;
-        popup.classList.remove('hidden');
-    }
-}
-
-function closeIdPopup() {
-    const popup = document.getElementById('id-popup');
-    if (popup) popup.classList.add('hidden');
-}
-
-function copyUserId() {
-    const userId = document.getElementById('popup-user-id').textContent;
-    navigator.clipboard.writeText(userId).then(() => {
-        playSound('sfx-sent');
-        const btn = document.querySelector('#id-popup .form-submit-btn');
-        btn.textContent = 'COPIED!';
-        setTimeout(() => btn.textContent = 'COPY ID', 2000);
-    }).catch(() => {
-        playSound('sfx-error');
-    });
-}
-
-function logout() {
-    currentUser = null;
-    isAdmin = false;
-    showScreen('loading-screen');
-    document.getElementById('operator-id').value = '';
-    if (document.getElementById('operator-password')) {
-        document.getElementById('operator-password').value = '';
-    }
-}
-
-// ==================== MAIN SCREEN ====================
-async function enterMainScreen() {
-    showScreen('main-screen');
-    
-    // Update user info in menu
-    updateMenuUserInfo();
-    
-    // Show/hide admin elements
-    if (isAdmin) {
-        document.getElementById('admin-toggle')?.classList.remove('hidden');
-        document.getElementById('admin-tabs')?.classList.remove('hidden');
-        
-        // Load admin data
-        await loadPendingList('pending-list');
-        await loadActiveUsers();
-        await loadBannedUsers();
-        await loadAnalytics();
-        await loadRadioMessages();
-        loadPublishedTabs();
-    } else {
-        document.getElementById('admin-toggle')?.classList.add('hidden');
-        document.getElementById('admin-tabs')?.classList.add('hidden');
-    }
-    
-    // Load welcome content
-    await loadWelcomeContent();
-    
-    // Go to home
-    goToHome();
-}
-
-function updateMenuUserInfo() {
-    const userInfo = document.querySelector('.menu-user-info');
-    if (userInfo && currentUser) {
-        userInfo.innerHTML = `
-            <span class="menu-user-name">${currentUser.name || currentUser.id}</span>
-            <button class="menu-logout-btn" onclick="logout()">LOGOUT</button>
-        `;
-    }
-}
-
-function goToHome() {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById('view-home')?.classList.add('active');
-}
-
-// ==================== PENDING APPROVALS ====================
-async function loadPendingList(elementId) {
-    try {
-        const data = await storage.get('pending', true);
-        const pending = data ? JSON.parse(data.value) : [];
-        const list = document.getElementById(elementId);
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        if (pending.length === 0) {
-            list.innerHTML = '<div class="pending-empty">NO PENDING REQUESTS</div>';
-            return;
-        }
-        
-        pending.forEach(p => {
-            const item = document.createElement('div');
-            item.className = 'pending-item';
-            const time = new Date(p.requestedAt).toLocaleString();
-            item.innerHTML = `
-                <div class="pending-info">
-                    <span class="user-id">${p.userId}</span>
-                    <span class="request-time">Requested: ${time}</span>
-                </div>
-                <div class="actions">
-                    <button class="approve-btn" onclick="approveUser('${p.userId}')">APPROVE</button>
-                    <button class="deny-btn" onclick="denyUser('${p.userId}')">DENY</button>
-                </div>
-            `;
-            list.appendChild(item);
-        });
-    } catch (e) {
-        console.error('Load pending error:', e);
-    }
-}
-
-async function approveUser(userId) {
-    try {
-        // Get pending list
-        const pendingData = await storage.get('pending', true);
-        const pending = pendingData ? JSON.parse(pendingData.value) : [];
-        
-        // Remove from pending
-        const newPending = pending.filter(p => p.userId !== userId);
-        await storage.set('pending', JSON.stringify(newPending), true);
-        
-        // Add to users
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        users[userId] = {
-            id: userId,
-            name: `Operator_${userId.slice(-4)}`,
-            approved: true,
-            status: 'active',
-            isAdmin: false,
-            createdAt: Date.now()
-        };
-        
-        await storage.set('users', JSON.stringify(users), true);
-        
-        playSound('sfx-blue');
-        
-        // Refresh lists
-        await loadPendingList('pending-list');
-        await loadPendingList('pending-list-modal');
-        await loadActiveUsers();
-        await loadAnalytics();
-        
-    } catch (e) {
-        console.error('Approve error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function denyUser(userId) {
-    try {
-        const pendingData = await storage.get('pending', true);
-        const pending = pendingData ? JSON.parse(pendingData.value) : [];
-        
-        const newPending = pending.filter(p => p.userId !== userId);
-        await storage.set('pending', JSON.stringify(newPending), true);
-        
-        playSound('sfx-denied');
-        
-        await loadPendingList('pending-list');
-        await loadPendingList('pending-list-modal');
-        
-    } catch (e) {
-        console.error('Deny error:', e);
-        playSound('sfx-error');
-    }
-}
-
-// ==================== USERS MANAGEMENT ====================
-async function loadActiveUsers() {
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        const container = document.getElementById('active-users-list');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        const activeUsers = Object.values(users).filter(u => u.status !== 'banned' && u.approved);
-        
-        if (activeUsers.length === 0) {
-            container.innerHTML = '<div class="users-empty">NO ACTIVE USERS</div>';
-            return;
-        }
-        
-        activeUsers.forEach(user => {
-            const div = document.createElement('div');
-            div.className = 'user-item';
-            div.innerHTML = `
-                <div class="user-info">
-                    <div class="user-name">${user.name || user.id}</div>
-                    <div class="user-id">ID: ${user.id}</div>
-                </div>
-                <div class="user-actions">
-                    <button onclick="editUser('${user.id}')">EDIT</button>
-                    ${user.id !== ADMIN_ID ? `<button onclick="banUser('${user.id}')">BAN</button>` : ''}
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load active users error:', e);
-    }
-}
-
-async function loadBannedUsers() {
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        const container = document.getElementById('banned-users-list');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        const bannedUsers = Object.values(users).filter(u => u.status === 'banned');
-        
-        if (bannedUsers.length === 0) {
-            container.innerHTML = '<div class="users-empty">NO BANNED USERS</div>';
-            return;
-        }
-        
-        bannedUsers.forEach(user => {
-            const div = document.createElement('div');
-            div.className = 'banned-item';
-            div.innerHTML = `
-                <div class="user-info">
-                    <div class="user-name">${user.name || user.id}</div>
-                    <div class="user-id">ID: ${user.id}</div>
-                </div>
-                <div class="user-actions">
-                    <button onclick="unbanUser('${user.id}')">UNBAN</button>
-                </div>
-            `;
-            container.appendChild(div);
-        });
-    } catch (e) {
-        console.error('Load banned users error:', e);
-    }
-}
-
-function showUsersSection(section) {
-    document.querySelectorAll('.users-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.users-section').forEach(s => s.classList.add('hidden'));
-    
-    if (section === 'active') {
-        document.querySelector('.users-tab:first-child')?.classList.add('active');
-        document.getElementById('users-active-section')?.classList.remove('hidden');
-    } else {
-        document.querySelector('.users-tab:last-child')?.classList.add('active');
-        document.getElementById('users-banned-section')?.classList.remove('hidden');
-    }
-}
-
-let editingUserId = null;
-
-function editUser(userId) {
-    const modal = document.getElementById('edit-user-modal');
-    if (!modal) return;
-    
-    storage.get('users', true).then(data => {
-        const users = data ? JSON.parse(data.value) : {};
-        const user = users[userId];
-        
-        if (!user) return;
-        
-        editingUserId = userId;
-        document.getElementById('edit-user-id').value = userId;
-        document.getElementById('edit-user-name').value = user.name || userId;
-        document.getElementById('edit-user-status').value = user.status || 'active';
-        
-        modal.classList.remove('hidden');
-    });
-}
-
-function closeEditUserModal() {
-    document.getElementById('edit-user-modal')?.classList.add('hidden');
-    editingUserId = null;
-}
-
-async function saveUserChanges() {
-    if (!editingUserId) return;
-    
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        if (users[editingUserId]) {
-            users[editingUserId].name = document.getElementById('edit-user-name').value;
-            users[editingUserId].status = document.getElementById('edit-user-status').value;
-            
-            await storage.set('users', JSON.stringify(users), true);
-            
-            playSound('sfx-sent');
-            closeEditUserModal();
-            await loadActiveUsers();
-            await loadBannedUsers();
-        }
-    } catch (e) {
-        console.error('Save user error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function banUser(userId) {
-    if (!confirm('Ban this user?')) return;
-    
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        if (users[userId]) {
-            users[userId].status = 'banned';
-            await storage.set('users', JSON.stringify(users), true);
-            
-            playSound('sfx-denied');
-            await loadActiveUsers();
-            await loadBannedUsers();
-        }
-    } catch (e) {
-        console.error('Ban user error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function unbanUser(userId) {
-    if (!confirm('Unban this user?')) return;
-    
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        if (users[userId]) {
-            users[userId].status = 'active';
-            await storage.set('users', JSON.stringify(users), true);
-            
-            playSound('sfx-blue');
-            await loadActiveUsers();
-            await loadBannedUsers();
-        }
-    } catch (e) {
-        console.error('Unban user error:', e);
-        playSound('sfx-error');
-    }
-}
-
-// ==================== BROADCAST ====================
-function initializeSpriteSelector() {
-    document.querySelectorAll('.sprite-option').forEach(option => {
-        option.addEventListener('click', () => {
-            document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('active'));
-            option.classList.add('active');
-            const select = document.getElementById('sprite-select');
-            if (select) select.value = option.dataset.sprite;
-        });
-    });
-}
-
-async function sendBroadcast() {
-    const textEl = document.getElementById('broadcast-text');
-    const text = textEl?.value.trim();
-    const sprite = document.getElementById('sprite-select')?.value || 'normal';
-    
-    if (!text) {
-        playSound('sfx-error');
-        return;
-    }
-    
-    try {
-        const broadcastData = await storage.get('broadcasts', true);
-        const broadcasts = broadcastData ? JSON.parse(broadcastData.value) : [];
-        
-        broadcasts.push({
-            text,
-            sprite,
-            timestamp: Date.now()
-        });
-        
-        // Keep only last 50 broadcasts
-        if (broadcasts.length > 50) broadcasts.shift();
-        
-        await storage.set('broadcasts', JSON.stringify(broadcasts), true);
-        
-        playSound('sfx-sent');
-        textEl.value = '';
-        
-        showBroadcast({ text, sprite });
-        await loadAnalytics();
-        
-    } catch (e) {
-        console.error('Broadcast error:', e);
-        playSound('sfx-error');
-    }
-}
-
-function showBroadcast(data) {
-    const notification = document.getElementById('broadcast-notification');
-    if (!notification) return;
-    
-    // Map sprite names to emojis
-    const spriteEmojis = {
-        'normal': '😐',
-        'happy': '😊',
-        'sad': '😢',
-        'angry': '😠',
-        'confused': '😕',
-        'annoyed': '😤',
-        'bug': '🐛',
-        'dizzy': '😵',
-        'hollow': '😶',
-        'panic': '😰',
-        'sleeping': '😴',
-        'smug': '😏',
-        'stare': '👀',
-        'suspicious': '🤨',
-        'werror': '⚠️'
-    };
-    
-    const spriteContainer = document.getElementById('notif-sprite');
-    if (spriteContainer) {
-        const spriteFace = spriteContainer.querySelector('.sprite-face');
-        if (spriteFace) {
-            spriteFace.textContent = spriteEmojis[data.sprite] || spriteEmojis['normal'];
-        }
-    }
-    
-    // Update notification emotion class
-    notification.className = 'notification';
-    if (data.sprite) {
-        notification.classList.add(`emotion-${data.sprite}`);
-    }
-    
-    const textEl = document.getElementById('notif-text');
-    if (textEl) {
-        textEl.textContent = '';
-        typewriterEffect(textEl, data.text);
-    }
-    
-    notification.classList.remove('hidden');
-    playSound('sfx-newmessage');
-    
-    setTimeout(() => {
-        notification.classList.add('hiding');
-        setTimeout(() => {
-            notification.classList.remove('hiding');
-            notification.classList.add('hidden');
-        }, 400);
-    }, 8000);
-}
-
-function typewriterEffect(element, text, speed = 30) {
-    let i = 0;
-    element.classList.add('typing');
-    
-    function type() {
-        if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-        } else {
-            element.classList.remove('typing');
-        }
-    }
-    
-    type();
-}
-
-function closeBroadcast() {
-    const notification = document.getElementById('broadcast-notification');
-    if (notification) {
-        notification.classList.add('hiding');
-        setTimeout(() => {
-            notification.classList.remove('hiding');
-            notification.classList.add('hidden');
-        }, 400);
-    }
-}
-
-// ==================== RADIO ====================
-async function sendRadioMessage() {
-    const input = document.getElementById('radio-input');
-    const message = input?.value.trim();
-    
-    if (!message) {
-        playSound('sfx-error');
-        return;
-    }
-    
-    try {
-        const radioData = await storage.get('radio_messages', true);
-        const messages = radioData ? JSON.parse(radioData.value) : [];
-        
-        messages.push({
-            user: currentUser ? currentUser.name : 'Unknown',
-            userId: currentUser ? currentUser.id : 'Unknown',
-            text: message,
-            timestamp: Date.now()
-        });
-        
-        // Keep only last 100 messages
-        if (messages.length > 100) messages.shift();
-        
-        await storage.set('radio_messages', JSON.stringify(messages), true);
-        
-        input.value = '';
-        await loadRadioMessages();
-        playSound('sfx-sent');
-        await loadAnalytics();
-        
-    } catch (e) {
-        console.error('Radio message error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function loadRadioMessages() {
-    try {
-        const radioData = await storage.get('radio_messages', true);
-        const messages = radioData ? JSON.parse(radioData.value) : [];
-        
-        const container = document.getElementById('radio-messages');
-        if (!container) return;
-        
-        container.innerHTML = '';
-        
-        if (messages.length === 0) {
-            container.innerHTML = '<div class="radio-empty">NO MESSAGES</div>';
-            return;
-        }
-        
-        messages.forEach((msg, index) => {
-            const div = document.createElement('div');
-            div.className = 'radio-message';
-            const time = new Date(msg.timestamp).toLocaleTimeString();
-            div.innerHTML = `
-                <span class="radio-message-time">[${time}]</span>
-                <span class="radio-message-user">${msg.user}</span>
-                <span class="radio-message-text">${escapeHtml(msg.text)}</span>
-                ${isAdmin ? `<button class="radio-delete-btn" onclick="deleteRadioMessage(${index})">X</button>` : ''}
-            `;
-            container.appendChild(div);
-        });
-        
-        container.scrollTop = container.scrollHeight;
-    } catch (e) {
-        console.error('Load radio error:', e);
-    }
-}
-
-async function deleteRadioMessage(index) {
-    try {
-        const radioData = await storage.get('radio_messages', true);
-        const messages = radioData ? JSON.parse(radioData.value) : [];
-        
-        messages.splice(index, 1);
-        await storage.set('radio_messages', JSON.stringify(messages), true);
-        
-        await loadRadioMessages();
-        playSound('sfx-denied');
-    } catch (e) {
-        console.error('Delete radio message error:', e);
-    }
-}
-
-async function clearRadioMessages() {
-    if (!confirm('Clear all radio messages?')) return;
-    
-    try {
-        await storage.set('radio_messages', JSON.stringify([]), true);
-        await loadRadioMessages();
-        playSound('sfx-denied');
-    } catch (e) {
-        console.error('Clear radio error:', e);
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ==================== ANALYTICS ====================
-async function loadAnalytics() {
-    try {
-        const usersData = await storage.get('users', true);
-        const users = usersData ? JSON.parse(usersData.value) : {};
-        
-        const broadcastData = await storage.get('broadcasts', true);
-        const broadcasts = broadcastData ? JSON.parse(broadcastData.value) : [];
-        
-        const radioData = await storage.get('radio_messages', true);
-        const radioMsgs = radioData ? JSON.parse(radioData.value) : [];
-        
-        const pendingData = await storage.get('pending', true);
-        const pending = pendingData ? JSON.parse(pendingData.value) : [];
-        
-        const totalUsers = Object.keys(users).length;
-        const activeUsers = Object.values(users).filter(u => u.status === 'active').length;
-        
-        const el1 = document.getElementById('analytics-total-users');
-        const el2 = document.getElementById('analytics-active-sessions');
-        const el3 = document.getElementById('analytics-broadcasts');
-        const el4 = document.getElementById('analytics-radio-msgs');
-        
-        if (el1) el1.textContent = totalUsers;
-        if (el2) el2.textContent = activeUsers;
-        if (el3) el3.textContent = broadcasts.length;
-        if (el4) el4.textContent = radioMsgs.length;
-        
-    } catch (e) {
-        console.error('Load analytics error:', e);
-    }
-}
-
-// ==================== ALARMS ====================
-function setAlarmTheme(theme) {
-    document.body.className = '';
-    if (theme !== 'green') {
-        document.body.classList.add(`theme-${theme}`);
-    }
-    localStorage.setItem('arcs_alarm_theme', theme);
-    playSound('sfx-blue');
-}
-
-// ==================== EDITING ====================
-async function loadWelcomeContent() {
-    try {
-        const data = await storage.get('welcome', true);
-        if (data) {
-            const welcome = JSON.parse(data.value);
-            const titleEl = document.getElementById('home-welcome-title');
-            const textEl = document.getElementById('home-welcome-text');
-            if (titleEl) titleEl.textContent = welcome.title;
-            if (textEl) textEl.textContent = welcome.text;
-        }
-    } catch (e) {
-        console.error('Load welcome error:', e);
-    }
-}
-
-function editWelcomeHome() {
-    const title = document.getElementById('home-welcome-title')?.textContent || '';
-    const text = document.getElementById('home-welcome-text')?.textContent || '';
-    
-    document.getElementById('welcome-title-input').value = title;
-    document.getElementById('welcome-text-input').value = text;
-    
-    document.getElementById('edit-welcome-modal')?.classList.remove('hidden');
-}
-
-function closeWelcomeModal() {
-    document.getElementById('edit-welcome-modal')?.classList.add('hidden');
-}
-
-async function saveWelcomeChanges() {
-    try {
-        const title = document.getElementById('welcome-title-input').value;
-        const text = document.getElementById('welcome-text-input').value;
-        
-        document.getElementById('home-welcome-title').textContent = title;
-        document.getElementById('home-welcome-text').textContent = text;
-        
-        await storage.set('welcome', JSON.stringify({ title, text }), true);
-        
-        closeWelcomeModal();
-        playSound('sfx-sent');
-    } catch (e) {
-        console.error('Save welcome error:', e);
-        playSound('sfx-error');
-    }
-}
-
-function addNewTab() {
-    document.getElementById('new-tab-modal')?.classList.remove('hidden');
-}
-
-function closeNewTabModal() {
-    document.getElementById('new-tab-modal')?.classList.add('hidden');
-    document.getElementById('new-tab-name').value = '';
-    document.getElementById('new-tab-content').value = '';
-}
-
-async function saveNewTab() {
-    const name = document.getElementById('new-tab-name')?.value.trim();
-    const content = document.getElementById('new-tab-content')?.value.trim();
-    
-    if (!name || !content) {
-        playSound('sfx-error');
-        return;
-    }
-    
-    try {
-        const tabsData = await storage.get('custom_tabs', true);
-        customTabs = tabsData ? JSON.parse(tabsData.value) : [];
-        
-        customTabs.push({
-            id: Date.now().toString(),
-            name,
-            content,
-            created: Date.now()
-        });
-        
-        await storage.set('custom_tabs', JSON.stringify(customTabs), true);
-        
-        closeNewTabModal();
-        playSound('sfx-sent');
-        renderCustomTabsInEditor();
-    } catch (e) {
-        console.error('Save tab error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function renderCustomTabsInEditor() {
-    try {
-        const tabsData = await storage.get('custom_tabs', true);
-        customTabs = tabsData ? JSON.parse(tabsData.value) : [];
-        
-        const canvas = document.getElementById('editing-canvas');
-        if (!canvas) return;
-        
-        if (customTabs.length === 0) {
-            canvas.innerHTML = '<div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>';
-            return;
-        }
-        
-        canvas.innerHTML = '';
-        
-        customTabs.forEach(tab => {
-            const item = document.createElement('div');
-            item.className = 'tab-preview-item';
-            item.innerHTML = `
-                <div class="tab-preview-name">${escapeHtml(tab.name)}</div>
-                <div class="tab-preview-content">${escapeHtml(tab.content)}</div>
-                <div class="tab-preview-actions">
-                    <button onclick="deleteCustomTab('${tab.id}')">DELETE</button>
-                </div>
-            `;
-            canvas.appendChild(item);
-        });
-    } catch (e) {
-        console.error('Render tabs error:', e);
-    }
-}
-
-async function deleteCustomTab(id) {
-    if (!confirm('Delete this tab?')) return;
-    
-    try {
-        customTabs = customTabs.filter(t => t.id !== id);
-        await storage.set('custom_tabs', JSON.stringify(customTabs), true);
-        
-        renderCustomTabsInEditor();
-        loadPublishedTabs();
-        playSound('sfx-denied');
-    } catch (e) {
-        console.error('Delete tab error:', e);
-    }
-}
-
-async function publishTabs() {
-    if (customTabs.length === 0) {
-        playSound('sfx-error');
-        return;
-    }
-    
-    try {
-        await storage.set('published_tabs', JSON.stringify(customTabs), true);
-        loadPublishedTabs();
-        playSound('sfx-blue');
-        alert(`${customTabs.length} TAB(S) PUBLISHED TO MENU`);
-    } catch (e) {
-        console.error('Publish tabs error:', e);
-        playSound('sfx-error');
-    }
-}
-
-async function loadPublishedTabs() {
-    try {
-        const data = await storage.get('published_tabs', true);
-        if (!data) return;
-        
-        const tabs = JSON.parse(data.value);
-        const menuContainer = document.getElementById('custom-menu-tabs');
-        if (!menuContainer) return;
-        
-        menuContainer.innerHTML = '';
-        
-        tabs.forEach(tab => {
-            const tabEl = document.createElement('div');
-            tabEl.className = 'tab';
-            tabEl.textContent = tab.name;
-            tabEl.onclick = () => showCustomTab(tab);
-            menuContainer.appendChild(tabEl);
-        });
-    } catch (e) {
-        console.error('Load published tabs error:', e);
-    }
-}
-
-function showCustomTab(tab) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-    let customContent = document.getElementById('custom-tab-view');
-    if (!customContent) {
-        customContent = document.createElement('div');
-        customContent.id = 'custom-tab-view';
-        customContent.className = 'tab-content';
-        document.querySelector('.main-window')?.appendChild(customContent);
-    }
-    
-    customContent.innerHTML = `
-        <div class="custom-tab-content">
-            <div class="custom-tab-title">${escapeHtml(tab.name)}</div>
-            <div class="custom-tab-body">${escapeHtml(tab.content)}</div>
         </div>
-    `;
-    
-    customContent.classList.add('active');
-}
 
-// ==================== ADMIN PANEL ====================
-function openAdmin() {
-    document.getElementById('admin-panel')?.classList.remove('hidden');
-    loadPendingList('pending-list-modal');
-}
+        <div class="data-swallow-container">
+            <div class="swallow-box">
+                <div class="swallow-header">
+                    <div class="swallow-brand">DATA SWALLOW</div>
+                    <div class="swallow-disk">
+                        <div class="disk-text">
+                            DATA SWALLOW 40<br>
+                            UPEO VER.3.2<br>
+                            SYSTEM STARTUP
+                        </div>
+                        <div class="disk-icon">O+</div>
+                    </div>
+                </div>
+                <div class="loading-bar">
+                    <div class="bar-fill" id="loading-progress"></div>
+                </div>
+                <div class="swallow-footer">DATA SWALLOW 40 を起動中です。</div>
+            </div>
+        </div>
+    </div>
 
-function closeAdmin() {
-    document.getElementById('admin-panel')?.classList.add('hidden');
-}
+    <!-- ==================== MAIN SCREEN ==================== -->
+    <div id="main-screen" class="screen">
+        <div class="top-decoration">
+            <div class="browser-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++++++</div>
+            <div class="loading-indicator">
+                <span class="loading-icon">◆</span>
+                <span>System Online</span>
+            </div>
+        </div>
 
-// ==================== TAB NAVIGATION ====================
-function switchTab(targetId) {
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-    const target = document.getElementById(targetId);
-    if (target) {
-        target.classList.add('active');
-    }
-}
-
-// ==================== EVENT LISTENERS ====================
-document.addEventListener('DOMContentLoaded', async () => {
-    // Initialize storage
-    await initializeStorage();
-    
-    // Load saved theme
-    const savedTheme = localStorage.getItem('arcs_alarm_theme') || 'green';
-    if (savedTheme !== 'green') {
-        setAlarmTheme(savedTheme);
-    }
-    
-    // Start loading after 1 second
-    setTimeout(startLoading, 1000);
-    
-    // Tab click handlers
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            const target = this.getAttribute('data-target');
-            if (target) {
-                switchTab(target);
+        <div class="main-window">
+            <!-- ==================== MENU BAR ==================== -->
+            <div class="menu-bar">
+                <div class="menu-button" onclick="goToHome()">MENU</div>
                 
-                // Load specific data for tabs
-                if (target === 'adm-editing') {
-                    renderCustomTabsInEditor();
-                }
-            }
-        });
-    });
-    
-    // Enter key handlers
-    document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
-    
-    document.getElementById('operator-password')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
-    
-    document.getElementById('radio-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendRadioMessage();
-    });
-});
+                <div class="menu-tabs hidden" id="admin-tabs">
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-editing">EDITING</div>
+                    <div class="tab" data-target="adm-alarms">ALARMS</div>
+                    <div class="tab" data-target="adm-tickets">TICKETS</div>
+                    <div class="tab" data-target="adm-radio">RADIO</div>
+                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                    <div class="tab" data-target="adm-users">USERS</div>
+                    <div class="tab" data-target="adm-analytics">ANALYTICS</div>
+                    <div class="tab" data-target="adm-chat">CHAT</div>
+                </div>
+                
+                <div id="custom-menu-tabs"></div>
+                
+                <div class="menu-user-info">
+                    <span class="menu-user-name">GUEST</span>
+                    <button class="menu-logout-btn" onclick="logout()">LOGOUT</button>
+                </div>
+            </div>
 
-// Make functions globally available
-window.handleLogin = handleLogin;
-window.handleNewOperator = handleNewOperator;
-window.logout = logout;
-window.goToHome = goToHome;
-window.approveUser = approveUser;
-window.denyUser = denyUser;
-window.editUser = editUser;
-window.closeEditUserModal = closeEditUserModal;
-window.saveUserChanges = saveUserChanges;
-window.banUser = banUser;
-window.unbanUser = unbanUser;
-window.showUsersSection = showUsersSection;
-window.sendBroadcast = sendBroadcast;
-window.closeBroadcast = closeBroadcast;
-window.sendRadioMessage = sendRadioMessage;
-window.deleteRadioMessage = deleteRadioMessage;
-window.clearRadioMessages = clearRadioMessages;
-window.setAlarmTheme = setAlarmTheme;
-window.editWelcomeHome = editWelcomeHome;
-window.closeWelcomeModal = closeWelcomeModal;
-window.saveWelcomeChanges = saveWelcomeChanges;
-window.addNewTab = addNewTab;
-window.closeNewTabModal = closeNewTabModal;
-window.saveNewTab = saveNewTab;
-window.deleteCustomTab = deleteCustomTab;
-window.publishTabs = publishTabs;
-window.showCustomTab = showCustomTab;
-window.openAdmin = openAdmin;
-window.closeAdmin = closeAdmin;
-window.closeIdPopup = closeIdPopup;
-window.copyUserId = copyUserId;
+            <!-- ==================== HOME VIEW ==================== -->
+            <div id="view-home" class="tab-content active">
+                <div class="banner-section">
+                    <img src="assets/banner.png" class="banner-img" alt="ARCS Banner" onerror="this.style.display='none'">
+                </div>
+                <div class="home-welcome" id="home-welcome-section">
+                    <div class="welcome-title" id="home-welcome-title">WELCOME TO ARCS</div>
+                    <div class="welcome-text" id="home-welcome-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS. THIS SYSTEM IS OPERATED BY UPEO AND ALL ACTIVITIES ARE MONITORED.</div>
+                </div>
+            </div>
+
+            <!-- ==================== BROADCAST VIEW ==================== -->
+            <div id="adm-broadcast" class="tab-content">
+                <div class="cell-header">GLOBAL BROADCAST SYSTEM</div>
+                <div class="news-box">
+                    <label>SELECT EMOTION:</label>
+                    <div class="sprite-selector" id="sprite-selector">
+                        <div class="sprite-option active" data-sprite="normal">
+                            <span class="sprite-emoji">😐</span>
+                            <span>Normal</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="happy">
+                            <span class="sprite-emoji">😊</span>
+                            <span>Happy</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="sad">
+                            <span class="sprite-emoji">😢</span>
+                            <span>Sad</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="angry">
+                            <span class="sprite-emoji">😠</span>
+                            <span>Angry</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="confused">
+                            <span class="sprite-emoji">😕</span>
+                            <span>Confused</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="annoyed">
+                            <span class="sprite-emoji">😤</span>
+                            <span>Annoyed</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="bug">
+                            <span class="sprite-emoji">🐛</span>
+                            <span>Bug</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="dizzy">
+                            <span class="sprite-emoji">😵</span>
+                            <span>Dizzy</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="hollow">
+                            <span class="sprite-emoji">😶</span>
+                            <span>Hollow</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="panic">
+                            <span class="sprite-emoji">😰</span>
+                            <span>Panic</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="sleeping">
+                            <span class="sprite-emoji">😴</span>
+                            <span>Sleeping</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="smug">
+                            <span class="sprite-emoji">😏</span>
+                            <span>Smug</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="stare">
+                            <span class="sprite-emoji">👀</span>
+                            <span>Stare</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="suspicious">
+                            <span class="sprite-emoji">🤨</span>
+                            <span>Suspicious</span>
+                        </div>
+                        <div class="sprite-option" data-sprite="werror">
+                            <span class="sprite-emoji">⚠️</span>
+                            <span>W.Error</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="sprite-select" value="normal">
+                    
+                    <label>MESSAGE:</label>
+                    <textarea id="broadcast-text" placeholder="TYPE YOUR BROADCAST MESSAGE..."></textarea>
+                    <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT BROADCAST</button>
+                </div>
+            </div>
+
+            <!-- ==================== EDITING VIEW ==================== -->
+            <div id="adm-editing" class="tab-content">
+                <div class="editing-workspace">
+                    <div class="editing-toolbar">
+                        <div class="toolbar-title">CONTENT EDITOR</div>
+                        <div class="toolbar-actions">
+                            <button class="toolbar-btn" onclick="editWelcomeHome()">EDIT WELCOME</button>
+                            <button class="toolbar-btn" onclick="addNewTab()">+ NEW TAB</button>
+                            <button class="toolbar-btn primary" onclick="publishTabs()">PUBLISH ALL</button>
+                        </div>
+                    </div>
+                    <div class="editing-canvas" id="editing-canvas">
+                        <div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ALARMS VIEW ==================== -->
+            <div id="adm-alarms" class="tab-content">
+                <div class="alarms-fullwidth">
+                    <div class="cell-header">SYSTEM ALARM LEVELS</div>
+                    <div id="alarms-container">
+                        <div class="alarm-item green">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Code Green</div>
+                                <div class="alarm-badge">Normal</div>
+                            </div>
+                            <div class="alarm-details">All systems operational. Standard interface active. Normal operations permitted.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('green')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item blue">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Code Blue</div>
+                                <div class="alarm-badge">Advisory</div>
+                            </div>
+                            <div class="alarm-details">Interface shifted to cool blue tones. Enhanced monitoring active.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('blue')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item red">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Code Red</div>
+                                <div class="alarm-badge">Warning</div>
+                            </div>
+                            <div class="alarm-details">System running in warning mode. Heightened awareness required. Non-essential operations suspended.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('red')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item gamma">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Gamma Protocol</div>
+                                <div class="alarm-badge">Restricted</div>
+                            </div>
+                            <div class="alarm-details">RESTRICTED ACCESS MODE. Radio and Credentials sections locked. Personnel verification required.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('gamma')">ACTIVATE</button>
+                            </div>
+                        </div>
+                        
+                        <div class="alarm-item epsilon">
+                            <div class="alarm-header">
+                                <div class="alarm-type">Epsilon Corruption</div>
+                                <div class="alarm-badge">Critical</div>
+                            </div>
+                            <div class="alarm-details">CRITICAL: System corruption detected. Visual glitches, dead pixels, and interface instability present. Use with caution.</div>
+                            <div class="alarm-actions">
+                                <button onclick="setAlarmTheme('epsilon')">ACTIVATE</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TICKETS VIEW ==================== -->
+            <div id="adm-tickets" class="tab-content">
+                <div class="tickets-fullwidth">
+                    <div class="cell-header">PENDING OPERATOR APPROVALS</div>
+                    <div id="pending-list"></div>
+                </div>
+            </div>
+
+            <!-- ==================== RADIO VIEW ==================== -->
+            <div id="adm-radio" class="tab-content">
+                <div class="radio-fullwidth">
+                    <div class="cell-header">RADIO COMMUNICATIONS</div>
+                    <div class="radio-header">
+                        <div class="radio-frequency">FREQUENCY: 99.4 MHz</div>
+                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR ALL</button>
+                    </div>
+                    <div class="radio-status">
+                        <div class="radio-status-indicator"></div>
+                        <span>CHANNEL ACTIVE - BROADCASTING</span>
+                    </div>
+                    <div class="radio-messages" id="radio-messages">
+                        <div class="radio-empty">NO MESSAGES</div>
+                    </div>
+                    <div class="radio-input-area">
+                        <input type="text" id="radio-input" placeholder="Type your message..." maxlength="500">
+                        <button onclick="sendRadioMessage()">TRANSMIT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CREDENTIALS VIEW ==================== -->
+            <div id="adm-credentials" class="tab-content">
+                <div class="credentials-fullwidth">
+                    <div class="credentials-card">
+                        <div class="credentials-header">
+                            <div class="credentials-logo">ARCS</div>
+                            <div class="credentials-badge">LEVEL: OMEGA</div>
+                        </div>
+                        <div class="credentials-body">
+                            <div class="credentials-field">
+                                <span class="field-label">NAME:</span>
+                                <span class="field-value">OBUNTO</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">OPERATOR ID:</span>
+                                <span class="field-value">118107921024376</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">CLEARANCE:</span>
+                                <span class="field-value">GOLD - UNRESTRICTED</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">DIVISION:</span>
+                                <span class="field-value">SYSTEM ADMINISTRATION</span>
+                            </div>
+                            <div class="credentials-field">
+                                <span class="field-label">STATUS:</span>
+                                <span class="field-value">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="credentials-footer">
+                            AUTHORIZED ACCESS TO ALL FACILITIES AND SYSTEMS
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== USERS VIEW ==================== -->
+            <div id="adm-users" class="tab-content">
+                <div class="users-fullwidth">
+                    <div class="cell-header">USER MANAGEMENT</div>
+                    <div class="users-tabs">
+                        <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE USERS</div>
+                        <div class="users-tab" onclick="showUsersSection('banned')">BANNED USERS</div>
+                    </div>
+                    <div id="users-active-section" class="users-section">
+                        <div id="active-users-list"></div>
+                    </div>
+                    <div id="users-banned-section" class="users-section hidden">
+                        <div id="banned-users-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ANALYTICS VIEW ==================== -->
+            <div id="adm-analytics" class="tab-content">
+                <div class="analytics-fullwidth">
+                    <div class="cell-header">SYSTEM ANALYTICS</div>
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-label">TOTAL USERS</div>
+                            <div class="analytics-value" id="analytics-total-users">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">ACTIVE USERS</div>
+                            <div class="analytics-value" id="analytics-active-sessions">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">BROADCASTS</div>
+                            <div class="analytics-value" id="analytics-broadcasts">0</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-label">RADIO MSGS</div>
+                            <div class="analytics-value" id="analytics-radio-msgs">0</div>
+                        </div>
+                    </div>
+                    <div class="analytics-logs" id="analytics-logs">
+                        <div class="analytics-logs-title">RECENT ACTIVITY</div>
+                        <div class="log-entry info">
+                            <span class="log-message">System initialized</span>
+                            <span class="log-time">--:--:--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CHAT VIEW ==================== -->
+            <div id="adm-chat" class="tab-content">
+                <div class="chat-fullwidth">
+                    <div class="cell-header">DIRECT MESSAGING</div>
+                    <div class="chat-container">
+                        <div class="chat-sidebar">
+                            <div class="chat-sidebar-header">CONTACTS</div>
+                            <div class="chat-user-list" id="chat-user-list">
+                                <div class="chat-user-empty">NO USERS ONLINE</div>
+                            </div>
+                        </div>
+                        <div class="chat-main">
+                            <div class="chat-header" id="chat-header">
+                                <span class="chat-recipient">SELECT A USER</span>
+                                <span class="chat-status">OFFLINE</span>
+                            </div>
+                            <div class="chat-messages" id="chat-messages">
+                                <div class="chat-empty">SELECT A USER TO START CHATTING</div>
+                            </div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chat-input" placeholder="Type a message..." maxlength="1000" disabled>
+                                <button id="chat-send-btn" onclick="sendChatMessage()" disabled>SEND</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== ADMIN PANEL MODAL ==================== -->
+    <div id="admin-panel" class="admin-window hidden">
+        <div class="window-titlebar">
+            <span>ADMIN PANEL - OBUNTO</span>
+            <div class="close-btn" onclick="closeAdmin()">X</div>
+        </div>
+        <div class="window-body">
+            <div class="admin-section">
+                <h3 style="margin-bottom: 16px; font-size: 14px; letter-spacing: 1.5px; text-transform: uppercase;">PENDING ACCOUNTS</h3>
+                <div id="pending-list-modal"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADMIN FAB BUTTON ==================== -->
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
+
+    <!-- ==================== BROADCAST NOTIFICATION ==================== -->
+    <div id="broadcast-notification" class="notification hidden">
+        <div class="mascot-container">
+            <div id="notif-sprite">
+                <span class="sprite-face">😐</span>
+            </div>
+            <div class="mascot-label">OBUNTO</div>
+        </div>
+        <div class="bubble">
+            <span class="bubble-decoration top-left">◆</span>
+            <div class="notification-text" id="notif-text"></div>
+            <span class="bubble-decoration bottom-right">◆</span>
+            <button class="notification-close" onclick="closeBroadcast()">X</button>
+        </div>
+    </div>
+
+    <!-- ==================== EDIT WELCOME MODAL ==================== -->
+    <div id="edit-welcome-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>EDIT WELCOME SCREEN</span>
+                <div class="modal-close" onclick="closeWelcomeModal()">X</div>
+            </div>
+            <div class="modal-body">
+                <div class="editor-field">
+                    <label class="editor-label">TITLE</label>
+                    <input type="text" id="welcome-title-input" class="editor-input" value="WELCOME TO ARCS">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">MESSAGE</label>
+                    <textarea id="welcome-text-input" class="editor-textarea">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</textarea>
+                </div>
+                <button class="form-submit-btn" onclick="saveWelcomeChanges()">SAVE CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== NEW TAB MODAL ==================== -->
+    <div id="new-tab-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>CREATE NEW TAB</span>
+                <div class="modal-close" onclick="closeNewTabModal()">X</div>
+            </div>
+            <div class="modal-body">
+                <div class="editor-field">
+                    <label class="editor-label">TAB NAME</label>
+                    <input type="text" id="new-tab-name" class="editor-input" placeholder="Enter tab name...">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">TAB CONTENT</label>
+                    <textarea id="new-tab-content" class="editor-textarea" placeholder="Enter content for this tab..."></textarea>
+                </div>
+                <button class="form-submit-btn" onclick="saveNewTab()">CREATE TAB</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== EDIT USER MODAL ==================== -->
+    <div id="edit-user-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>EDIT USER</span>
+                <div class="modal-close" onclick="closeEditUserModal()">X</div>
+            </div>
+            <div class="modal-body">
+                <div class="editor-field">
+                    <label class="editor-label">USER ID</label>
+                    <input type="text" id="edit-user-id" class="editor-input" readonly>
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">DISPLAY NAME</label>
+                    <input type="text" id="edit-user-name" class="editor-input">
+                </div>
+                <div class="editor-field">
+                    <label class="editor-label">STATUS</label>
+                    <select id="edit-user-status" class="editor-select">
+                        <option value="active">Active</option>
+                        <option value="banned">Banned</option>
+                    </select>
+                </div>
+                <button class="form-submit-btn" onclick="saveUserChanges()">SAVE CHANGES</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script src="js/script.js"></script>
+</body>
+</html>
