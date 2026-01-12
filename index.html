@@ -4,21 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="icon" href="assets/icon-small-duplicate-18x14.png" type="image/png">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="menu.css">
-    <link rel="stylesheet" href="notification.css">
-    <link rel="stylesheet" href="broadcast.css">
-    <link rel="stylesheet" href="editing.css">
-    <link rel="stylesheet" href="alarms.css">
-    <link rel="stylesheet" href="tickets.css">
-    <link rel="stylesheet" href="radio.css">
-    <link rel="stylesheet" href="credentials.css">
-    <link rel="stylesheet" href="users.css">
-    <link rel="stylesheet" href="analytics.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/menu.css">
+    <link rel="stylesheet" href="css/notification.css">
+    <link rel="stylesheet" href="css/broadcast.css">
+    <link rel="stylesheet" href="css/editing.css">
+    <link rel="stylesheet" href="css/alarms.css">
+    <link rel="stylesheet" href="css/tickets.css">
+    <link rel="stylesheet" href="css/radio.css">
+    <link rel="stylesheet" href="css/credentials.css">
+    <link rel="stylesheet" href="css/users.css">
+    <link rel="stylesheet" href="css/analytics.css">
+    <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
-    <!-- Audio Elements -->
     <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
     <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
     <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
@@ -27,14 +26,12 @@
     <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
     <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
 
-    <!-- Glitch Blocks for Epsilon Theme -->
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
 
-    <!-- ==================== LOADING SCREEN ==================== -->
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
             <div class="upeo-section">
@@ -86,30 +83,27 @@
                 <div class="loading-bar">
                     <div class="bar-fill" id="loading-progress"></div>
                 </div>
-                <div class="swallow-footer">DATA SWALLOW 40 を起動中です。</div>
+                <div class="swallow-footer">DATA SWALLOW 40 starting...</div>
             </div>
         </div>
     </div>
 
-    <!-- ==================== MAIN SCREEN ==================== -->
     <div id="main-screen" class="screen">
         <div class="top-decoration">
             <div class="browser-dots">
                 <span></span><span></span><span></span>
             </div>
-            <div class="url-bar">ARCS - ADVANCED RESEARCH & CONTAINMENT SYSTEM ••••••••••••••••••••••••••••</div>
-            <div class="system-status">
-                <span class="status-dot"></span>
-                <span>SYSTEM ONLINE</span>
-            </div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++</div>
+        </div>
+
+        <div class="loading-indicator">
+            <span class="loading-icon">*</span>
+            <span>System initialized</span>
         </div>
 
         <div class="main-window">
-            <!-- Menu Bar with Admin Tabs (HIDDEN BY DEFAULT) -->
             <div class="menu-bar">
                 <div class="menu-button" onclick="goToHome()">MENU</div>
-                
-                <!-- Admin Tabs - HIDDEN by default, shown when admin logs in -->
                 <div class="menu-tabs hidden" id="admin-tabs">
                     <div class="tab" data-target="adm-broadcast">BROADCAST</div>
                     <div class="tab" data-target="adm-editing">EDITING</div>
@@ -121,17 +115,13 @@
                     <div class="tab" data-target="adm-analytics">ANALYTICS</div>
                     <div id="custom-menu-tabs"></div>
                 </div>
-                
-                <!-- User Info Section -->
-                <div class="menu-user-info">
+                <div class="menu-user-info hidden" id="menu-user-info">
                     <span class="menu-user-name" id="menu-user-name">OPERATOR</span>
-                    <button class="menu-logout-btn" onclick="logout()">LOGOUT</button>
+                    <button class="menu-logout-btn" onclick="handleLogout()">LOGOUT</button>
                 </div>
             </div>
 
-            <!-- Content Area -->
             <div class="content-area">
-                <!-- Home View -->
                 <div id="view-home" class="tab-content active">
                     <div class="banner-section">
                         <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
@@ -142,7 +132,6 @@
                     </div>
                 </div>
 
-                <!-- Broadcast Tab -->
                 <div id="adm-broadcast" class="tab-content">
                     <div class="broadcast-fullwidth">
                         <div class="cell-header">BROADCAST SYSTEM</div>
@@ -210,7 +199,6 @@
                     </div>
                 </div>
 
-                <!-- Editing Tab -->
                 <div id="adm-editing" class="tab-content">
                     <div class="editing-workspace">
                         <div class="editing-toolbar">
@@ -227,7 +215,6 @@
                     </div>
                 </div>
 
-                <!-- Alarms Tab -->
                 <div id="adm-alarms" class="tab-content">
                     <div class="alarms-fullwidth">
                         <div class="cell-header">SYSTEM ALARM LEVELS</div>
@@ -290,7 +277,6 @@
                     </div>
                 </div>
 
-                <!-- Tickets Tab -->
                 <div id="adm-tickets" class="tab-content">
                     <div class="tickets-fullwidth">
                         <div class="cell-header">PENDING APPROVALS</div>
@@ -298,7 +284,6 @@
                     </div>
                 </div>
 
-                <!-- Radio Tab -->
                 <div id="adm-radio" class="tab-content">
                     <div class="radio-fullwidth">
                         <div class="cell-header">RADIO COMMUNICATIONS</div>
@@ -318,7 +303,6 @@
                     </div>
                 </div>
 
-                <!-- Credentials Tab -->
                 <div id="adm-credentials" class="tab-content">
                     <div class="credentials-fullwidth">
                         <div class="credentials-card">
@@ -329,11 +313,11 @@
                             <div class="credentials-body">
                                 <div class="credential-field">
                                     <span class="credential-label">NAME:</span>
-                                    <span class="credential-value" id="cred-name">OBUNTO</span>
+                                    <span class="credential-value">OBUNTO</span>
                                 </div>
                                 <div class="credential-field">
                                     <span class="credential-label">ID:</span>
-                                    <span class="credential-value" id="cred-id">118107921024376</span>
+                                    <span class="credential-value">118107921024376</span>
                                 </div>
                                 <div class="credential-field">
                                     <span class="credential-label">CLEARANCE:</span>
@@ -351,7 +335,6 @@
                     </div>
                 </div>
 
-                <!-- Users Tab -->
                 <div id="adm-users" class="tab-content">
                     <div class="users-fullwidth">
                         <div class="cell-header">USER MANAGEMENT</div>
@@ -368,7 +351,6 @@
                     </div>
                 </div>
 
-                <!-- Analytics Tab -->
                 <div id="adm-analytics" class="tab-content">
                     <div class="analytics-fullwidth">
                         <div class="cell-header">SYSTEM ANALYTICS</div>
@@ -392,7 +374,7 @@
                         </div>
                         <div class="analytics-logs" id="analytics-logs">
                             <div class="log-entry info">
-                                <span>System initialized successfully</span>
+                                <span>System initialized</span>
                                 <span class="log-time">--:--:--</span>
                             </div>
                         </div>
@@ -402,13 +384,10 @@
         </div>
     </div>
 
-    <!-- ==================== MODALS ==================== -->
-    
-    <!-- Admin Panel Modal -->
     <div id="admin-panel" class="admin-window hidden">
         <div class="window-titlebar">
             <span>ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">×</div>
+            <div class="close-btn" onclick="closeAdmin()">X</div>
         </div>
         <div class="window-body">
             <div class="admin-section">
@@ -418,26 +397,23 @@
         </div>
     </div>
 
-    <!-- Admin FAB Button -->
     <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
-    <!-- Broadcast Notification -->
     <div id="broadcast-notification" class="notification hidden">
-        <div class="bubble">
-            <div class="notification-text" id="notif-text"></div>
-        </div>
         <div class="mascot-container">
             <img id="notif-sprite" class="notification-sprite" src="assets/sprites/normal.png" alt="Obunto">
             <div class="mascot-label">OBUNTO</div>
         </div>
+        <div class="bubble">
+            <div class="notification-text" id="notif-text"></div>
+        </div>
     </div>
 
-    <!-- Edit Welcome Modal -->
     <div id="edit-welcome-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <span>EDIT WELCOME SCREEN</span>
-                <div class="modal-close" onclick="closeWelcomeModal()">×</div>
+                <div class="modal-close" onclick="closeWelcomeModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
@@ -453,12 +429,11 @@
         </div>
     </div>
 
-    <!-- New Tab Modal -->
     <div id="new-tab-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <span>CREATE NEW TAB</span>
-                <div class="modal-close" onclick="closeNewTabModal()">×</div>
+                <div class="modal-close" onclick="closeNewTabModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">
@@ -474,12 +449,11 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <span>EDIT USER</span>
-                <div class="modal-close" onclick="closeEditUserModal()">×</div>
+                <div class="modal-close" onclick="closeEditUserModal()">X</div>
             </div>
             <div class="modal-body">
                 <div class="editor-field">

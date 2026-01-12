@@ -1,226 +1,119 @@
-/**
- * ARCS Tickets/Pending Approvals Styles
- * NieR:Automata Design System
- */
-
-/* ==================== TICKETS SECTION ==================== */
 .tickets-fullwidth {
-    padding: 28px;
+    padding: 24px;
     width: 100%;
 }
 
 .tickets-fullwidth .cell-header {
     font-size: 16px;
     font-weight: 600;
-    color: var(--nier-text);
+    color: var(--nier-text, #3F352F);
     margin-bottom: 24px;
-    padding-bottom: 14px;
-    border-bottom: 2px solid var(--nier-border);
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--nier-muted, #957E72);
     text-transform: uppercase;
-    letter-spacing: 2px;
-    position: relative;
+    letter-spacing: 1.5px;
 }
 
-.tickets-fullwidth .cell-header::after {
-    content: '◆ ◆ ◆';
-    position: absolute;
-    right: 0;
-    bottom: 14px;
-    font-size: 8px;
-    color: var(--nier-muted);
-    letter-spacing: 5px;
-}
-
-/* ==================== PENDING LIST ==================== */
-#adm-tickets #pending-list {
+#pending-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    max-height: 520px;
+    gap: 12px;
+    max-height: 480px;
     overflow-y: auto;
 }
 
-/* ==================== PENDING ITEM ==================== */
-#adm-tickets .pending-item {
-    background: var(--nier-paper);
-    border: 2px solid var(--nier-border);
-    padding: 20px;
+.pending-item {
+    background: var(--nier-paper, #EEE7DF);
+    border: 1px solid var(--nier-muted, #957E72);
+    padding: 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all var(--transition-fast);
+    transition: all 0.2s;
     position: relative;
 }
 
-/* Decorative Corner Lines */
-#adm-tickets .pending-item::before {
+.pending-item::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 24px;
-    height: 24px;
-    border-top: 3px solid var(--nier-dark);
-    border-left: 3px solid var(--nier-dark);
+    width: 20px;
+    height: 20px;
+    border-top: 2px solid var(--nier-dark, #6C584C);
+    border-left: 2px solid var(--nier-dark, #6C584C);
 }
 
-#adm-tickets .pending-item::after {
+.pending-item::after {
     content: '';
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 24px;
-    height: 24px;
-    border-bottom: 3px solid var(--nier-dark);
-    border-right: 3px solid var(--nier-dark);
+    width: 20px;
+    height: 20px;
+    border-bottom: 2px solid var(--nier-dark, #6C584C);
+    border-right: 2px solid var(--nier-dark, #6C584C);
 }
 
-#adm-tickets .pending-item:hover {
-    background: var(--nier-paper-light);
-    border-color: var(--nier-dark);
-    transform: translateX(4px);
+.pending-item:hover {
+    background: rgba(193, 175, 160, 0.08);
+    border-color: var(--nier-dark, #6C584C);
 }
 
-/* ==================== PENDING INFO ==================== */
-#adm-tickets .pending-info {
-    flex: 1;
+.pending-item span {
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--nier-text, #3F352F);
+    background: rgba(212, 175, 55, 0.15);
+    padding: 5px 14px;
+    border: 1px solid var(--nier-muted, #957E72);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.pending-item .actions {
     display: flex;
-    flex-direction: column;
     gap: 8px;
 }
 
-#adm-tickets .pending-info .user-id {
-    font-weight: 600;
-    font-size: 14px;
-    color: var(--nier-text);
-    background: rgba(201, 162, 39, 0.12);
-    padding: 8px 18px;
-    border: 2px solid var(--nier-border);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: inline-block;
-    font-family: var(--font-mono);
-}
-
-#adm-tickets .pending-info .request-time {
+.pending-item button {
     font-size: 10px;
-    color: var(--nier-muted);
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-}
-
-/* ==================== ACTIONS ==================== */
-#adm-tickets .actions {
-    display: flex;
-    gap: 10px;
-}
-
-#adm-tickets button {
-    font-size: 11px;
-    padding: 10px 22px;
-    border: 2px solid var(--nier-dark);
+    padding: 8px 18px;
+    border: 1px solid var(--nier-dark, #6C584C);
     cursor: pointer;
     text-transform: uppercase;
     font-weight: 600;
-    transition: all var(--transition-fast);
-    letter-spacing: 1.5px;
-    font-family: var(--font-main);
-}
-
-#adm-tickets button:hover {
-    transform: translateY(-2px);
-}
-
-#adm-tickets button.approve-btn {
-    background: var(--nier-muted);
-    color: var(--nier-paper);
-}
-
-#adm-tickets button.approve-btn:hover {
-    background: #6A9A6A;
-}
-
-#adm-tickets button.deny-btn {
-    background: var(--nier-panel);
-    color: var(--nier-text);
-}
-
-#adm-tickets button.deny-btn:hover {
-    background: #8A5555;
-    color: var(--nier-paper);
-}
-
-/* ==================== EMPTY STATE ==================== */
-#adm-tickets .pending-empty {
-    padding: 50px 30px;
-    text-align: center;
-    color: var(--nier-muted);
-    font-size: 13px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    background: var(--nier-paper-light);
-    border: 2px dashed var(--nier-border);
-}
-
-#adm-tickets .pending-empty::before {
-    content: '◆';
-    display: block;
-    font-size: 32px;
-    margin-bottom: 18px;
-    color: var(--nier-border);
-}
-
-/* ==================== TICKET STATS ==================== */
-.ticket-stats {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.ticket-stat {
-    flex: 1;
-    background: var(--nier-panel);
-    border: 2px solid var(--nier-border);
-    padding: 16px;
-    text-align: center;
-}
-
-.ticket-stat-value {
-    font-size: 32px;
-    font-weight: 600;
-    color: var(--nier-text);
-    margin-bottom: 6px;
-}
-
-.ticket-stat-label {
-    font-size: 10px;
-    color: var(--nier-muted);
-    text-transform: uppercase;
+    transition: all 0.2s;
     letter-spacing: 1px;
 }
 
-/* ==================== RESPONSIVE ==================== */
+.pending-item button:hover {
+    background: var(--nier-dark, #6C584C);
+    color: var(--nier-paper, #EEE7DF);
+}
+
+.pending-item button:first-child {
+    background: var(--nier-muted, #957E72);
+    color: var(--nier-paper, #EEE7DF);
+}
+
+.pending-item button:last-child {
+    background: var(--nier-panel, #C1AFA0);
+    color: var(--nier-text, #3F352F);
+}
+
 @media (max-width: 768px) {
-    .tickets-fullwidth {
-        padding: 18px;
-    }
-    
-    #adm-tickets .pending-item {
+    .pending-item {
         flex-direction: column;
-        gap: 14px;
-        padding: 18px;
+        gap: 12px;
     }
     
-    #adm-tickets .actions {
+    .pending-item .actions {
         width: 100%;
         flex-direction: column;
     }
     
-    #adm-tickets button {
+    .pending-item button {
         width: 100%;
-    }
-    
-    .ticket-stats {
-        flex-direction: column;
     }
 }
