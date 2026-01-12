@@ -1,52 +1,90 @@
-#adm-broadcast .news-box {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    background: var(--nier-paper, #EEE7DF);
-    padding: 24px;
-    border: 1px solid var(--nier-muted, #957E72);
+/**
+ * ARCS Broadcast Panel Styles
+ * Admin Broadcast System
+ * NieR:Automata Design System
+ */
+
+/* ==================== BROADCAST SECTION ==================== */
+#adm-broadcast {
+    padding: 28px;
+    width: 100%;
+}
+
+#adm-broadcast .cell-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--nier-text);
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--nier-border);
+    text-transform: uppercase;
+    letter-spacing: 2px;
     position: relative;
 }
 
-/* Decorative corners */
+/* Decorative Triangles */
+#adm-broadcast .cell-header::after {
+    content: '▲ ▲ ▲';
+    position: absolute;
+    right: 0;
+    bottom: 14px;
+    font-size: 8px;
+    color: var(--nier-muted);
+    letter-spacing: 5px;
+}
+
+/* ==================== NEWS BOX ==================== */
+#adm-broadcast .news-box {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--nier-paper);
+    padding: 28px;
+    border: 2px solid var(--nier-border);
+    position: relative;
+}
+
+/* Decorative Corners */
 #adm-broadcast .news-box::before {
     content: '◆';
     position: absolute;
-    top: 8px;
-    left: 8px;
-    font-size: 8px;
-    color: var(--nier-muted, #957E72);
+    top: 12px;
+    left: 12px;
+    font-size: 10px;
+    color: var(--nier-muted);
 }
 
 #adm-broadcast .news-box::after {
     content: '◆';
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    font-size: 8px;
-    color: var(--nier-muted, #957E72);
+    bottom: 12px;
+    right: 12px;
+    font-size: 10px;
+    color: var(--nier-muted);
 }
 
+/* ==================== LABELS ==================== */
 #adm-broadcast label {
     font-size: 12px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
+    color: var(--nier-text);
     text-transform: uppercase;
     display: block;
-    margin-bottom: 12px;
-    border-bottom: 1px solid var(--nier-muted, #957E72);
-    padding-bottom: 8px;
-    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+    border-bottom: 2px solid var(--nier-border);
+    padding-bottom: 10px;
+    letter-spacing: 2px;
 }
 
+/* ==================== SPRITE SELECTOR ==================== */
 .sprite-selector {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(75px, 1fr));
-    gap: 10px;
-    padding: 16px;
-    background: rgba(193, 175, 160, 0.08);
-    border: 1px solid var(--nier-muted, #957E72);
-    max-height: 230px;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 12px;
+    padding: 18px;
+    background: var(--nier-paper-light);
+    border: 2px solid var(--nier-border);
+    max-height: 260px;
     overflow-y: auto;
 }
 
@@ -54,86 +92,193 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px;
-    background: var(--nier-paper, #EEE7DF);
-    border: 1px solid var(--nier-panel, #C1AFA0);
+    padding: 12px;
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-panel);
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
 .sprite-option:hover {
-    background: var(--nier-panel, #C1AFA0);
-    border-color: var(--nier-dark, #6C584C);
+    background: var(--nier-panel);
+    border-color: var(--nier-dark);
+    transform: translateY(-2px);
 }
 
 .sprite-option.active {
-    border-color: var(--nier-accent, #D4AF37);
-    background: rgba(212, 175, 55, 0.1);
-    border-width: 2px;
+    border-color: var(--nier-accent);
+    background: rgba(201, 162, 39, 0.12);
+    border-width: 3px;
 }
 
-/* Triangle indicator */
+/* Triangle Indicator */
 .sprite-option.active::after {
     content: '▼';
     position: absolute;
-    bottom: 2px;
-    right: 2px;
-    font-size: 6px;
-    color: var(--nier-accent, #D4AF37);
+    bottom: 4px;
+    right: 4px;
+    font-size: 8px;
+    color: var(--nier-accent);
 }
 
 .sprite-option img {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
     object-fit: contain;
     image-rendering: pixelated;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+/* Emoji Fallback for Sprites */
+.sprite-option .sprite-emoji {
+    font-size: 36px;
+    margin-bottom: 8px;
+    line-height: 1;
 }
 
 .sprite-option span {
-    font-size: 8px;
+    font-size: 9px;
     text-align: center;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
+    color: var(--nier-text);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
 }
 
+/* ==================== BROADCAST TEXT INPUT ==================== */
 #adm-broadcast #broadcast-text {
     width: 100%;
-    min-height: 110px;
-    padding: 14px;
-    border: 1px solid var(--nier-muted, #957E72);
-    background: rgba(193, 175, 160, 0.08);
-    font-size: 12px;
+    min-height: 130px;
+    padding: 16px;
+    border: 2px solid var(--nier-border);
+    background: var(--nier-paper-light);
+    font-size: 13px;
     resize: vertical;
     outline: none;
-    line-height: 1.5;
+    line-height: 1.6;
     font-weight: 400;
-    color: var(--nier-text, #3F352F);
-    transition: all 0.2s;
+    color: var(--nier-text);
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
 }
 
 #adm-broadcast #broadcast-text:focus {
-    border-color: var(--nier-dark, #6C584C);
-    background: rgba(193, 175, 160, 0.15);
+    border-color: var(--nier-dark);
+    background: var(--nier-paper);
 }
 
+#adm-broadcast #broadcast-text::placeholder {
+    color: var(--nier-muted);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ==================== SEND BUTTON ==================== */
 #adm-broadcast #send-broadcast {
     width: 100%;
-    padding: 13px;
-    border: 1px solid var(--nier-dark, #6C584C);
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    padding: 16px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
     font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
-    letter-spacing: 1.5px;
-    transition: all 0.2s;
+    letter-spacing: 2px;
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
 }
 
 #adm-broadcast #send-broadcast:hover {
-    background: var(--nier-dark, #6C584C);
+    background: var(--nier-dark);
+    transform: translateY(-2px);
+}
+
+#adm-broadcast #send-broadcast:active {
+    transform: translateY(0);
+}
+
+/* ==================== STATUS DISPLAY ==================== */
+.broadcast-status {
+    padding: 14px;
+    background: var(--nier-paper-light);
+    border: 2px solid var(--nier-border);
+    font-size: 11px;
+    color: var(--nier-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+.broadcast-status.success {
+    background: rgba(106, 154, 106, 0.12);
+    border-color: #6A9A6A;
+}
+
+.broadcast-status.error {
+    background: rgba(138, 85, 85, 0.12);
+    border-color: #8A5555;
+}
+
+/* ==================== BROADCAST HISTORY ==================== */
+.broadcast-history {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px dashed var(--nier-border);
+}
+
+.broadcast-history-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+}
+
+.broadcast-history-item {
+    padding: 12px;
+    background: var(--nier-paper-light);
+    border: 1px solid var(--nier-border);
+    margin-bottom: 8px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.broadcast-history-text {
+    flex: 1;
+    color: var(--nier-text);
+}
+
+.broadcast-history-time {
+    font-size: 10px;
+    color: var(--nier-muted);
+    font-family: var(--font-mono);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    #adm-broadcast {
+        padding: 18px;
+    }
+    
+    .sprite-selector {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 8px;
+    }
+    
+    .sprite-option {
+        padding: 8px;
+    }
+    
+    .sprite-option img,
+    .sprite-option .sprite-emoji {
+        width: 40px;
+        height: 40px;
+        font-size: 28px;
+    }
 }

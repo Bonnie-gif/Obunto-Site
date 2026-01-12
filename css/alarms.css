@@ -1,48 +1,57 @@
+/**
+ * ARCS Alarm System Styles
+ * Theme Variations & Visual Effects
+ * NieR:Automata Design System
+ */
+
+/* ==================== ALARMS SECTION ==================== */
 .alarms-fullwidth {
-    padding: 24px;
+    padding: 28px;
     width: 100%;
 }
 
 .alarms-fullwidth .cell-header {
     font-size: 16px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
+    color: var(--nier-text);
     margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--nier-muted, #957E72);
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--nier-border);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     position: relative;
 }
 
-/* Decorative triangles */
+/* Decorative Triangles */
 .alarms-fullwidth .cell-header::after {
     content: '▲ ▲ ▲';
     position: absolute;
     right: 0;
-    bottom: 12px;
-    font-size: 6px;
-    color: var(--nier-muted, #957E72);
-    letter-spacing: 4px;
+    bottom: 14px;
+    font-size: 8px;
+    color: var(--nier-muted);
+    letter-spacing: 5px;
 }
 
+/* ==================== ALARMS CONTAINER ==================== */
 #alarms-container {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    max-height: calc(100vh - 220px);
+    gap: 18px;
+    max-height: calc(100vh - 240px);
     overflow-y: auto;
 }
 
+/* ==================== ALARM ITEM ==================== */
 .alarm-item {
-    background: var(--nier-paper, #EEE7DF);
-    border: 1px solid var(--nier-muted, #957E72);
-    padding: 20px;
-    transition: all 0.2s;
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-border);
+    padding: 24px;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
-/* Geometric corner decorations */
+/* Geometric Corner Decorations */
 .alarm-item::before {
     content: '';
     position: absolute;
@@ -51,8 +60,8 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 10px 10px 0 0;
-    border-color: var(--nier-muted, #957E72) transparent transparent transparent;
+    border-width: 14px 14px 0 0;
+    border-color: var(--nier-muted) transparent transparent transparent;
 }
 
 .alarm-item::after {
@@ -63,122 +72,148 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 0 0 10px 10px;
-    border-color: transparent transparent var(--nier-muted, #957E72) transparent;
+    border-width: 0 0 14px 14px;
+    border-color: transparent transparent var(--nier-muted) transparent;
 }
 
 .alarm-item:hover {
-    background: rgba(193, 175, 160, 0.08);
+    background: var(--nier-paper-light);
+    transform: translateX(4px);
 }
 
+/* ==================== ALARM HEADER ==================== */
 .alarm-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .alarm-type {
-    font-size: 14px;
-    color: var(--nier-text, #3F352F);
+    font-size: 15px;
+    color: var(--nier-text);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
+/* ==================== ALARM BADGE ==================== */
 .alarm-badge {
-    padding: 4px 14px;
-    border: 1px solid var(--nier-text, #3F352F);
-    font-size: 9px;
+    padding: 6px 18px;
+    border: 2px solid var(--nier-text);
+    font-size: 10px;
     font-weight: 600;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
+    background: var(--nier-panel);
+    color: var(--nier-text);
 }
 
+/* Badge Variations */
 .alarm-item.green .alarm-badge {
-    background: rgba(144, 200, 144, 0.3);
+    background: rgba(106, 154, 106, 0.25);
     border-color: #5A7A5A;
 }
 
 .alarm-item.blue .alarm-badge {
-    background: rgba(144, 184, 208, 0.3);
+    background: rgba(106, 134, 154, 0.25);
     border-color: #5A6A7A;
 }
 
 .alarm-item.red .alarm-badge {
-    background: rgba(216, 144, 144, 0.3);
+    background: rgba(154, 106, 106, 0.25);
     border-color: #7A5A5A;
 }
 
 .alarm-item.gamma .alarm-badge {
-    background: var(--nier-accent, #D4AF37);
-    border-color: var(--nier-text, #3F352F);
+    background: var(--nier-accent);
+    border-color: var(--nier-text);
 }
 
 .alarm-item.epsilon .alarm-badge {
-    background: var(--nier-black, #1A1410);
-    color: var(--nier-paper, #EEE7DF);
-    border-color: var(--nier-text, #3F352F);
+    background: var(--nier-black);
+    color: var(--nier-paper);
+    border-color: var(--nier-text);
+    animation: epsilonPulse 1.5s ease-in-out infinite;
 }
 
+@keyframes epsilonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ==================== ALARM DETAILS ==================== */
 .alarm-details {
-    font-size: 11px;
-    color: var(--nier-text, #3F352F);
-    margin-bottom: 16px;
-    line-height: 1.6;
-    padding-left: 12px;
-    border-left: 2px solid var(--nier-muted, #957E72);
+    font-size: 12px;
+    color: var(--nier-text);
+    margin-bottom: 18px;
+    line-height: 1.7;
+    padding-left: 14px;
+    border-left: 3px solid var(--nier-muted);
     font-weight: 400;
 }
 
+/* ==================== ALARM ACTIONS ==================== */
 .alarm-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
 .alarm-item button {
     flex: 1;
-    padding: 9px 18px;
-    border: 1px solid var(--nier-dark, #6C584C);
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    font-size: 10px;
+    padding: 12px 22px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
 }
 
 .alarm-item button:hover {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
 }
 
-/* Theme changes */
+/* ==================== THEME VARIATIONS ==================== */
+
+/* Green Theme (Default) */
 body.theme-green {
-    --nier-paper: rgba(232, 240, 232, 1);
+    --nier-paper: #DAD4BB;
 }
 
+/* Blue Theme */
 body.theme-blue {
-    --nier-paper: rgba(232, 240, 248, 1);
+    --nier-paper: #D4DAE8;
+    --nier-panel: #B5BAC8;
+    --nier-accent: #5A8AC9;
 }
 
+/* Red Theme */
 body.theme-red {
-    --nier-paper: rgba(248, 232, 232, 1);
+    --nier-paper: #E8D4D4;
+    --nier-panel: #C8B5B5;
+    --nier-accent: #C95A5A;
 }
 
+/* Gamma Theme (Restricted) */
 body.theme-gamma {
-    --nier-paper: rgba(255, 248, 224, 1);
+    --nier-paper: #E8E0C8;
+    --nier-panel: #D4C8A0;
+    --nier-accent: #E8B020;
 }
 
 body.theme-gamma #adm-radio,
 body.theme-gamma #adm-credentials {
     pointer-events: none;
     position: relative;
-    opacity: 0.25;
+    opacity: 0.2;
+    filter: grayscale(50%);
 }
 
 body.theme-gamma #adm-radio::after,
@@ -188,86 +223,130 @@ body.theme-gamma #adm-credentials::after {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
-    background: rgba(212, 175, 55, 0.95);
-    padding: 18px 28px;
-    border: 2px solid var(--nier-text, #3F352F);
-    letter-spacing: 1.5px;
+    color: var(--nier-text);
+    background: rgba(232, 176, 32, 0.95);
+    padding: 22px 36px;
+    border: 3px solid var(--nier-text);
+    letter-spacing: 2px;
     z-index: 1000;
     text-transform: uppercase;
 }
 
+/* Epsilon Theme (Corruption) */
 body.theme-epsilon {
-    --nier-paper: #2A2420;
-    --nier-panel: #3A3430;
+    --nier-paper: #2A2620;
+    --nier-panel: #3A3630;
     --nier-text: #D0C8C0;
     --nier-muted: #A0A080;
-    --nier-dark: #4A4440;
+    --nier-dark: #4A4640;
+    --nier-border: #5A5650;
 }
 
 body.theme-epsilon #main-screen {
-    filter: contrast(1.05);
+    filter: contrast(1.08);
 }
 
-/* Glitch blocks for Epsilon */
+/* Glitch Blocks for Epsilon */
 body.theme-epsilon .glitch-block {
     position: fixed;
     background: #000;
     pointer-events: none;
     z-index: 9998;
     opacity: 0;
-    animation: glitchAppear 5s infinite;
+    animation: glitchAppear 6s infinite;
 }
 
 body.theme-epsilon .glitch-block:nth-child(1) {
-    width: 90px;
-    height: 70px;
-    top: 14%;
-    right: 9%;
-    animation-delay: 0.6s;
+    width: 100px;
+    height: 80px;
+    top: 12%;
+    right: 8%;
+    animation-delay: 0.5s;
 }
 
 body.theme-epsilon .glitch-block:nth-child(2) {
-    width: 130px;
-    height: 90px;
-    bottom: 20%;
-    left: 11%;
-    animation-delay: 1.5s;
+    width: 140px;
+    height: 100px;
+    bottom: 18%;
+    left: 10%;
+    animation-delay: 1.8s;
 }
 
 body.theme-epsilon .glitch-block:nth-child(3) {
-    width: 75px;
-    height: 50px;
-    top: 58%;
-    left: 27%;
-    animation-delay: 2.3s;
+    width: 85px;
+    height: 60px;
+    top: 55%;
+    left: 25%;
+    animation-delay: 2.6s;
 }
 
 body.theme-epsilon .glitch-block:nth-child(4) {
-    width: 110px;
-    height: 80px;
-    bottom: 35%;
-    right: 20%;
-    animation-delay: 3.1s;
+    width: 120px;
+    height: 90px;
+    bottom: 32%;
+    right: 18%;
+    animation-delay: 3.4s;
 }
 
 body.theme-epsilon .glitch-block:nth-child(5) {
-    width: 150px;
-    height: 60px;
-    top: 32%;
-    left: 48%;
-    animation-delay: 3.9s;
+    width: 160px;
+    height: 70px;
+    top: 30%;
+    left: 45%;
+    animation-delay: 4.2s;
 }
 
 @keyframes glitchAppear {
-    0%, 95%, 100% { opacity: 0; }
-    96%, 98% { opacity: 1; }
+    0%, 94%, 100% { opacity: 0; }
+    95%, 97% { opacity: 1; }
 }
 
+/* Static Noise Overlay for Epsilon */
+body.theme-epsilon::before {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='2' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    animation: noiseFlicker 0.1s infinite;
+}
+
+@keyframes noiseFlicker {
+    0%, 100% { opacity: 0.06; }
+    50% { opacity: 0.08; }
+}
+
+/* Scanline Enhancement for Epsilon */
+body.theme-epsilon::after {
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 1px,
+        rgba(0, 0, 0, 0.05) 1px,
+        rgba(0, 0, 0, 0.05) 2px
+    );
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
+    .alarms-fullwidth {
+        padding: 18px;
+    }
+    
+    .alarm-item {
+        padding: 18px;
+    }
+    
     .alarm-actions {
         flex-direction: column;
+    }
+    
+    .alarm-item button {
+        width: 100%;
+    }
+    
+    .alarm-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 }

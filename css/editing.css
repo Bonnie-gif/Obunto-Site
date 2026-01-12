@@ -1,3 +1,10 @@
+/**
+ * ARCS Content Editing Styles
+ * Tab & Welcome Editor System
+ * NieR:Automata Design System
+ */
+
+/* ==================== EDITING WORKSPACE ==================== */
 .editing-workspace {
     width: 100%;
     height: 100%;
@@ -5,10 +12,11 @@
     flex-direction: column;
 }
 
+/* ==================== EDITING TOOLBAR ==================== */
 .editing-toolbar {
-    padding: 14px 22px;
-    background: rgba(193, 175, 160, 0.08);
-    border-bottom: 1px solid var(--nier-muted, #957E72);
+    padding: 16px 26px;
+    background: var(--nier-paper-light);
+    border-bottom: 2px solid var(--nier-border);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -16,121 +24,312 @@
 }
 
 .toolbar-title {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
-    letter-spacing: 1.5px;
+    color: var(--nier-text);
+    letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .toolbar-actions {
     display: flex;
-    gap: 10px;
+    gap: 12px;
 }
 
+/* ==================== TOOLBAR BUTTONS ==================== */
 .toolbar-btn {
-    padding: 9px 18px;
-    border: 1px solid var(--nier-dark, #6C584C);
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    font-size: 10px;
+    padding: 12px 22px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 11px;
     font-weight: 600;
     cursor: pointer;
-    letter-spacing: 1px;
-    transition: all 0.2s;
+    letter-spacing: 1.5px;
+    transition: all var(--transition-fast);
     text-transform: uppercase;
+    font-family: var(--font-main);
 }
 
 .toolbar-btn:hover {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
 }
 
 .toolbar-btn.primary {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
-    border-width: 2px;
-    font-size: 11px;
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    border-width: 3px;
+    font-size: 12px;
 }
 
+.toolbar-btn.primary:hover {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+}
+
+/* ==================== EDITING CANVAS ==================== */
 .editing-canvas {
     flex: 1;
-    background: var(--nier-paper, #EEE7DF);
+    background: var(--nier-paper);
     overflow: auto;
-    border: 1px dashed rgba(149, 126, 114, 0.3);
-    margin: 18px;
-    padding: 22px;
+    border: 2px dashed rgba(87, 83, 74, 0.3);
+    margin: 20px;
+    padding: 26px;
     position: relative;
 }
 
+/* ==================== CANVAS HINT ==================== */
 .canvas-hint {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 14px;
-    color: rgba(63, 53, 47, 0.25);
-    letter-spacing: 1px;
+    font-size: 15px;
+    color: rgba(69, 65, 56, 0.25);
+    letter-spacing: 2px;
     text-align: center;
     pointer-events: none;
     text-transform: uppercase;
     font-weight: 500;
 }
 
+/* ==================== TAB PREVIEW ITEM ==================== */
 .tab-preview-item {
-    background: var(--nier-paper, #EEE7DF);
-    border: 1px solid var(--nier-muted, #957E72);
-    padding: 14px;
-    margin-bottom: 14px;
-    transition: all 0.2s;
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-border);
+    padding: 18px;
+    margin-bottom: 16px;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
-/* Corner decorations */
+/* Corner Decoration */
 .tab-preview-item::before {
     content: '◆';
     position: absolute;
-    top: 6px;
-    left: 6px;
-    font-size: 7px;
-    color: var(--nier-muted, #957E72);
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    color: var(--nier-muted);
 }
 
 .tab-preview-item:hover {
-    background: rgba(193, 175, 160, 0.08);
-    border-color: var(--nier-dark, #6C584C);
+    background: var(--nier-paper-light);
+    border-color: var(--nier-dark);
+    transform: translateX(4px);
 }
 
+/* ==================== TAB PREVIEW NAME ==================== */
 .tab-preview-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
-    letter-spacing: 1px;
+    color: var(--nier-text);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    margin-bottom: 11px;
+    margin-bottom: 12px;
 }
 
+/* ==================== TAB PREVIEW CONTENT ==================== */
+.tab-preview-content {
+    font-size: 12px;
+    color: var(--nier-muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+    padding: 12px;
+    background: var(--nier-paper-light);
+    border: 1px solid var(--nier-border);
+    max-height: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==================== TAB PREVIEW ACTIONS ==================== */
 .tab-preview-actions {
     display: flex;
-    gap: 7px;
-    padding-top: 11px;
-    border-top: 1px dashed rgba(149, 126, 114, 0.3);
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(87, 83, 74, 0.3);
 }
 
 .tab-preview-actions button {
-    padding: 5px 14px;
-    border: 1px solid var(--nier-dark, #6C584C);
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    font-size: 9px;
+    padding: 8px 18px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 10px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-family: var(--font-main);
 }
 
 .tab-preview-actions button:hover {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+}
+
+.tab-preview-actions button.delete-btn {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+}
+
+.tab-preview-actions button.delete-btn:hover {
+    background: #8A5555;
+}
+
+/* ==================== EDITOR PANEL ==================== */
+.editor-panel {
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-border);
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.editor-panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nier-text);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--nier-border);
+}
+
+/* ==================== PREVIEW SECTION ==================== */
+.preview-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 2px dashed var(--nier-border);
+}
+
+.preview-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 14px;
+}
+
+.preview-content {
+    background: var(--nier-paper-light);
+    border: 2px solid var(--nier-border);
+    padding: 20px;
+    min-height: 100px;
+}
+
+/* ==================== EMPTY EDITOR STATE ==================== */
+.editor-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    color: var(--nier-muted);
+}
+
+.editor-empty::before {
+    content: '✎';
+    font-size: 48px;
+    margin-bottom: 20px;
+    color: var(--nier-border);
+}
+
+.editor-empty-text {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+/* ==================== CONTENT GRID ==================== */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 24px;
+}
+
+.grid-cell {
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-border);
+    padding: 20px;
+    position: relative;
+}
+
+.grid-cell .cell-header {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--nier-text);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--nier-border);
+}
+
+/* ==================== STICKER ==================== */
+.sticker {
+    position: absolute;
+    top: -8px;
+    right: 16px;
+    padding: 6px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 2px solid var(--nier-dark);
+}
+
+.sticker.yellow {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+}
+
+.sticker.blue {
+    background: #5A7A9A;
+    color: var(--nier-paper);
+}
+
+.sticker.red {
+    background: #8A5555;
+    color: var(--nier-paper);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .editing-toolbar {
+        flex-direction: column;
+        gap: 14px;
+        padding: 14px;
+    }
+    
+    .toolbar-title {
+        font-size: 18px;
+    }
+    
+    .toolbar-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .toolbar-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .editing-canvas {
+        margin: 12px;
+        padding: 16px;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
 }

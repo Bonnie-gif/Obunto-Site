@@ -1,145 +1,220 @@
+/**
+ * ARCS Menu Bar Styles
+ * NieR:Automata Design System
+ */
+
+/* ==================== MENU BAR ==================== */
 .menu-bar {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
     display: flex;
     align-items: center;
-    padding: 8px 16px 0 16px;
+    padding: 10px 18px 0 18px;
     font-size: 12px;
-    gap: 6px;
-    border-bottom: 1px solid var(--nier-dark, #6C584C);
+    gap: 8px;
+    border-bottom: 2px solid var(--nier-dark);
     overflow-x: auto;
     position: relative;
+    flex-shrink: 0;
 }
 
-/* Decorative border pattern */
+/* Decorative Border Pattern */
 .menu-bar::before {
     content: '';
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 3px;
+    height: 4px;
     background: repeating-linear-gradient(
         90deg,
-        var(--nier-dark, #6C584C),
-        var(--nier-dark, #6C584C) 2px,
-        transparent 2px,
-        transparent 10px
+        var(--nier-dark),
+        var(--nier-dark) 3px,
+        transparent 3px,
+        transparent 12px
     );
 }
 
+/* ==================== MENU BUTTON ==================== */
 .menu-button {
-    background: var(--nier-paper, #EEE7DF);
-    color: var(--nier-text, #3F352F);
-    padding: 10px 22px;
+    background: var(--nier-paper);
+    color: var(--nier-text);
+    padding: 12px 26px;
     font-weight: 600;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
     border-radius: 0;
     cursor: pointer;
-    border: 1px solid var(--nier-muted, #957E72);
+    border: 2px solid var(--nier-border);
     border-bottom: none;
-    transition: background 0.2s;
+    transition: all var(--transition-fast);
     z-index: 10;
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 12px;
     position: relative;
+    font-family: var(--font-main);
 }
 
-/* Triangle decoration */
+/* Triangle Decoration */
 .menu-button::before {
     content: '▼';
     position: absolute;
-    bottom: -8px;
+    bottom: -10px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 6px;
-    color: var(--nier-text, #3F352F);
+    font-size: 8px;
+    color: var(--nier-text);
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-fast);
 }
 
 .menu-button:hover {
-    background: var(--nier-panel, #C1AFA0);
+    background: var(--nier-panel);
 }
 
 .menu-button:hover::before {
     opacity: 1;
 }
 
+/* ==================== MENU USER INFO ==================== */
+.menu-user-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 16px;
+    background: rgba(26, 24, 20, 0.2);
+    border: 2px solid var(--nier-dark);
+}
+
+.menu-user-name {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--nier-paper);
+}
+
+.menu-logout-btn {
+    padding: 6px 14px;
+    border: 2px solid var(--nier-paper);
+    background: transparent;
+    color: var(--nier-paper);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    font-family: var(--font-main);
+}
+
+.menu-logout-btn:hover {
+    background: var(--nier-paper);
+    color: var(--nier-dark);
+}
+
+/* ==================== MENU TABS ==================== */
 .menu-tabs {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     overflow-x: auto;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
 }
 
 .menu-tabs.hidden {
     display: none;
 }
 
+/* ==================== TAB STYLES ==================== */
 .tab {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-panel, #C1AFA0);
-    padding: 10px 18px;
+    background: var(--nier-dark);
+    color: var(--nier-panel);
+    padding: 12px 20px;
     cursor: pointer;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     border-radius: 0;
-    transition: all 0.2s;
-    border: 1px solid var(--nier-text, #3F352F);
+    transition: all var(--transition-fast);
+    border: 2px solid var(--nier-text);
     border-bottom: none;
     font-weight: 500;
     text-transform: uppercase;
     white-space: nowrap;
-    font-size: 10px;
+    font-size: 11px;
     position: relative;
+    font-family: var(--font-main);
 }
 
 .tab:hover {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
 }
 
 .tab.active {
-    background: var(--nier-accent, #D4AF37);
-    color: var(--nier-text, #3F352F);
+    background: var(--nier-accent);
+    color: var(--nier-text);
     font-weight: 600;
-    border-color: var(--nier-text, #3F352F);
+    border-color: var(--nier-text);
     position: relative;
-    top: 2px;
+    top: 3px;
     z-index: 5;
 }
 
-/* Diamond decoration for active tab */
+/* Diamond Decoration for Active Tab */
 .tab.active::after {
     content: '◆';
     position: absolute;
     top: 50%;
-    right: 6px;
+    right: 8px;
     transform: translateY(-50%);
-    font-size: 6px;
-    color: var(--nier-text, #3F352F);
+    font-size: 8px;
+    color: var(--nier-text);
 }
 
+/* ==================== CUSTOM MENU TABS ==================== */
 #custom-menu-tabs {
     display: flex;
-    gap: 5px;
+    gap: 6px;
 }
 
 #custom-menu-tabs .tab {
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    border-color: var(--nier-muted, #957E72);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    border-color: var(--nier-muted);
 }
 
 #custom-menu-tabs .tab:hover {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
 }
 
+#custom-menu-tabs .tab.active {
+    background: var(--nier-accent);
+    border-color: var(--nier-dark);
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
+    .menu-bar {
+        flex-wrap: wrap;
+        padding: 8px 12px 0 12px;
+    }
+    
     .menu-button,
     .tab {
-        padding: 8px 14px;
-        font-size: 9px;
+        padding: 10px 16px;
+        font-size: 10px;
+    }
+    
+    .menu-user-info {
+        order: -1;
+        width: 100%;
+        margin-left: 0;
+        margin-bottom: 10px;
+        justify-content: space-between;
+    }
+    
+    .menu-tabs {
+        width: 100%;
+        padding-bottom: 8px;
     }
 }

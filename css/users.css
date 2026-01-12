@@ -1,158 +1,288 @@
+/**
+ * ARCS User Management Styles
+ * NieR:Automata Design System
+ */
+
+/* ==================== USERS SECTION ==================== */
 .users-fullwidth {
-    padding: 24px;
+    padding: 28px;
     width: 100%;
 }
 
 .users-fullwidth .cell-header {
     font-size: 16px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
+    color: var(--nier-text);
     margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--nier-muted, #957E72);
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--nier-border);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 2px;
 }
 
+/* ==================== USER TABS ==================== */
 .users-tabs {
     display: flex;
-    gap: 10px;
-    margin-bottom: 24px;
+    gap: 12px;
+    margin-bottom: 28px;
 }
 
 .users-tab {
     flex: 1;
-    padding: 12px 22px;
-    border: 1px solid var(--nier-muted, #957E72);
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    font-size: 11px;
+    padding: 14px 26px;
+    border: 2px solid var(--nier-border);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-align: center;
+    font-family: var(--font-main);
 }
 
 .users-tab:hover {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
 }
 
 .users-tab.active {
-    background: var(--nier-accent, #D4AF37);
-    border-width: 2px;
-    border-color: var(--nier-dark, #6C584C);
+    background: var(--nier-accent);
+    border-width: 3px;
+    border-color: var(--nier-dark);
 }
 
+/* ==================== USER SECTION ==================== */
 .users-section {
-    min-height: 380px;
+    min-height: 400px;
 }
 
 .users-section.hidden {
     display: none;
 }
 
+/* ==================== USER ITEM ==================== */
 .user-item,
 .banned-item {
-    background: var(--nier-paper, #EEE7DF);
-    border: 1px solid var(--nier-muted, #957E72);
-    padding: 18px;
-    margin-bottom: 12px;
+    background: var(--nier-paper-light);
+    border: 2px solid var(--nier-border);
+    padding: 20px;
+    margin-bottom: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
-/* Corner decorations */
+/* Corner Decorations */
 .user-item::before,
 .banned-item::before {
-    content: '▲';
+    content: '▶';
     position: absolute;
-    top: 4px;
-    left: 4px;
-    font-size: 6px;
-    color: var(--nier-muted, #957E72);
+    top: 8px;
+    left: 8px;
+    font-size: 8px;
+    color: var(--nier-muted);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
 .user-item::after,
 .banned-item::after {
-    content: '▼';
+    content: '◀';
     position: absolute;
-    bottom: 4px;
-    right: 4px;
-    font-size: 6px;
-    color: var(--nier-muted, #957E72);
+    bottom: 8px;
+    right: 8px;
+    font-size: 8px;
+    color: var(--nier-muted);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
 .user-item:hover,
 .banned-item:hover {
-    background: rgba(193, 175, 160, 0.08);
-    border-color: var(--nier-dark, #6C584C);
+    background: var(--nier-paper);
+    border-color: var(--nier-dark);
+    transform: translateX(4px);
 }
 
+.user-item:hover::before,
+.user-item:hover::after,
+.banned-item:hover::before,
+.banned-item:hover::after {
+    opacity: 1;
+}
+
+/* ==================== USER INFO ==================== */
 .user-info {
     flex: 1;
 }
 
 .user-name {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
-    color: var(--nier-text, #3F352F);
-    margin-bottom: 6px;
-    letter-spacing: 1px;
+    color: var(--nier-text);
+    margin-bottom: 8px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
 }
 
 .user-id {
-    font-size: 10px;
-    color: var(--nier-muted, #957E72);
+    font-size: 11px;
+    color: var(--nier-muted);
     font-weight: 500;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    font-family: var(--font-mono);
 }
 
+/* ==================== USER ACTIONS ==================== */
 .user-actions {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .user-actions button {
-    padding: 7px 17px;
-    border: 1px solid var(--nier-dark, #6C584C);
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
-    font-size: 9px;
+    padding: 10px 20px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 10px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: var(--font-main);
+}
+
+.user-actions button:hover {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+}
+
+.user-actions button:last-child {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+}
+
+.user-actions button:last-child:hover {
+    background: #8A5555;
+}
+
+/* ==================== BANNED ITEM ==================== */
+.banned-item {
+    opacity: 0.7;
+    background: rgba(138, 85, 85, 0.08);
+    border-color: #8A6666;
+}
+
+.banned-item .user-name {
+    text-decoration: line-through;
+    color: var(--nier-muted);
+}
+
+.banned-item .user-actions button {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+}
+
+.banned-item .user-actions button:hover {
+    background: #6A9A6A;
+    color: var(--nier-paper);
+}
+
+/* ==================== ONLINE INDICATOR ==================== */
+.user-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.online-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--nier-muted);
+    border: 2px solid var(--nier-dark);
+}
+
+.online-indicator.online {
+    background: #6A9A6A;
+    animation: onlinePulse 2s ease-in-out infinite;
+}
+
+@keyframes onlinePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.status-text {
+    font-size: 9px;
+    color: var(--nier-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.user-actions button:hover {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-paper, #EEE7DF);
+/* ==================== EMPTY STATE ==================== */
+.users-empty {
+    padding: 50px 30px;
+    text-align: center;
+    color: var(--nier-muted);
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    background: var(--nier-paper-light);
+    border: 2px dashed var(--nier-border);
 }
 
-.user-actions button:last-child {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+.users-empty::before {
+    content: '◆';
+    display: block;
+    font-size: 32px;
+    margin-bottom: 18px;
+    color: var(--nier-border);
 }
 
-.banned-item {
-    opacity: 0.7;
-    background: rgba(149, 126, 114, 0.08);
+/* ==================== USER STATS ==================== */
+.users-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.banned-item .user-actions button {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-paper, #EEE7DF);
+.users-stat {
+    flex: 1;
+    background: var(--nier-panel);
+    border: 2px solid var(--nier-border);
+    padding: 16px;
+    text-align: center;
 }
 
+.users-stat-value {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--nier-text);
+}
+
+.users-stat-label {
+    font-size: 10px;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
+    .users-fullwidth {
+        padding: 18px;
+    }
+    
     .users-tabs {
         flex-direction: column;
     }
@@ -160,7 +290,7 @@
     .user-item,
     .banned-item {
         flex-direction: column;
-        gap: 14px;
+        gap: 16px;
     }
     
     .user-actions {
@@ -170,5 +300,9 @@
     
     .user-actions button {
         width: 100%;
+    }
+    
+    .users-stats {
+        flex-direction: column;
     }
 }

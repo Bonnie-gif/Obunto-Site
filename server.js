@@ -1,3 +1,11 @@
+/**
+ * ARCS - Advanced Research & Containment System
+ * Server v3.2.2
+ * 
+ * Backend server with Express, Socket.io, authentication,
+ * encrypted data storage, and real-time features.
+ */
+
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -6,74 +14,81 @@ const fs = require('fs');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Joi = require('joi');
-const multer = require('multer');
 const rateLimit = require('express-rate-limit');
 const CryptoJS = require('crypto-js');
-const winston = require('winston');
 
+// ==================== CONFIGURATION ====================
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
+// Environment Variables
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'arcs_jwt_secret_v322_secure';
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'arcs_encryption_v322';
+const PEPPER = process.env.PEPPER || 'arcs_pepper_2041';
+const SALT_ROUNDS = 12;
+
+// Admin Configuration
+const ADMIN_ID = '118107921024376';
+const ADMIN_PASSWORD = '2041';
+const ADMIN_NAME = 'OBUNTO';
+
+// File Paths
+const DATA_FILE = path.join(__dirname, 'data', 'arcs_data.enc');
+const LOG_FILE = path.join(__dirname, 'data', 'arcs.log');
+
+// ==================== MIDDLEWARE ====================
 app.use(express.json());
 app.use(express.static(__dirname));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-const JWT_SECRET = process.env.JWT_SECRET || 'arcs_secret_key_v322_ultra_secure';
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'arcs_encryption_key_v322';
-const PEPPER = process.env.PEPPER || 'arcs_pepper_2041';
-const SALT_ROUNDS = 12;
-
-const logger = winston.createLogger({
-    transports: [
-        new winston.transports.File({ filename: 'security.log' }),
-        new winston.transports.Console()
-    ]
-});
-
+// Rate Limiting
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 10,
-    message: 'Too many login attempts, try again later'
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 15,
+    message: { success: false, message: 'Too many attempts. Try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false
 });
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadDir = path.join(__dirname, 'uploads');
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir);
-        }
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 100,
+    message: { success: false, message: 'Rate limit exceeded.' }
 });
 
-const upload = multer({ 
-    storage,
-    limits: { fileSize: 5 * 1024 * 1024 }
-});
-
-const DATA_FILE = path.join(__dirname, 'arcs_data.json');
-const ADMIN_ID = '118107921024376';
-
+// ==================== DATA STORE ====================
 let dataStore = {
     users: {},
     pendingUsers: [],
     broadcasts: [],
     messages: [],
-    tickets: [],
-    alarms: [],
-    radioMessages: {},
+    radioMessages: [],
+    customTabs: [],
+    publishedTabs: [],
+    welcome: {
+        title: 'WELCOME',
+        text: 'WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.'
+    },
     onlineUsers: {},
-    bannedUsers: {},
-    userDevices: {},
-    userAnalytics: {}
+    alarmTheme: 'green',
+    systemLog: []
 };
 
+// ==================== ENCRYPTION ====================
 function encryptData(data) {
-    return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+    try {
+        return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+    } catch (e) {
+        logError('Encryption error', e);
+        return null;
+    }
 }
 
 function decryptData(encrypted) {
@@ -81,98 +96,170 @@ function decryptData(encrypted) {
         const bytes = CryptoJS.AES.decrypt(encrypted, ENCRYPTION_KEY);
         return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     } catch (e) {
+        logError('Decryption error', e);
         return null;
+    }
+}
+
+// ==================== DATA PERSISTENCE ====================
+function ensureDataDirectory() {
+    const dataDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
     }
 }
 
 function saveData() {
     try {
-        fs.writeFileSync(DATA_FILE, encryptData(dataStore));
+        ensureDataDirectory();
+        const encrypted = encryptData(dataStore);
+        if (encrypted) {
+            fs.writeFileSync(DATA_FILE, encrypted, 'utf8');
+        }
     } catch (e) {
-        logger.error('Error saving data:', e);
+        logError('Save data error', e);
     }
 }
 
 function loadData() {
-    if (fs.existsSync(DATA_FILE)) {
-        try {
+    try {
+        if (fs.existsSync(DATA_FILE)) {
             const encrypted = fs.readFileSync(DATA_FILE, 'utf8');
             const decrypted = decryptData(encrypted);
             if (decrypted) {
-                dataStore = decrypted;
-                if (!dataStore.radioMessages) dataStore.radioMessages = {};
-                if (!dataStore.onlineUsers) dataStore.onlineUsers = {};
-                if (!dataStore.bannedUsers) dataStore.bannedUsers = {};
-                if (!dataStore.userDevices) dataStore.userDevices = {};
-                if (!dataStore.userAnalytics) dataStore.userAnalytics = {};
+                dataStore = { ...dataStore, ...decrypted };
             }
-        } catch (e) {
-            logger.error('Error loading data:', e);
         }
+    } catch (e) {
+        logError('Load data error', e);
     }
 }
 
-loadData();
-
-if (!dataStore.users[ADMIN_ID]) {
-    const hashedPassword = bcrypt.hashSync('2041' + PEPPER + ADMIN_ID, SALT_ROUNDS);
-    dataStore.users[ADMIN_ID] = {
-        id: ADMIN_ID,
-        name: 'Obunto',
-        password: hashedPassword,
-        approved: true,
-        isAdmin: true,
-        avatar: 'assets/sprites/normal.png',
-        createdAt: new Date().toISOString()
-    };
-    saveData();
+// ==================== LOGGING ====================
+function log(message, type = 'INFO') {
+    const timestamp = new Date().toISOString();
+    const logEntry = `[${timestamp}] [${type}] ${message}`;
+    console.log(logEntry);
+    
+    // Add to system log
+    dataStore.systemLog.push({
+        timestamp,
+        type,
+        message
+    });
+    
+    // Keep only last 500 log entries
+    if (dataStore.systemLog.length > 500) {
+        dataStore.systemLog = dataStore.systemLog.slice(-500);
+    }
+    
+    // Write to file
+    try {
+        ensureDataDirectory();
+        fs.appendFileSync(LOG_FILE, logEntry + '\n');
+    } catch (e) {
+        console.error('Log write error:', e);
+    }
 }
 
+function logError(message, error) {
+    log(`${message}: ${error.message}`, 'ERROR');
+}
+
+// ==================== PASSWORD HASHING ====================
+async function hashPassword(password, salt) {
+    return await bcrypt.hash(password + PEPPER + salt, SALT_ROUNDS);
+}
+
+async function verifyPassword(input, storedHash, salt) {
+    return await bcrypt.compare(input + PEPPER + salt, storedHash);
+}
+
+// ==================== JWT ====================
+function generateToken(userId, isAdmin = false) {
+    return jwt.sign({ userId, isAdmin }, JWT_SECRET, { expiresIn: '24h' });
+}
+
+function verifyToken(token) {
+    try {
+        return jwt.verify(token, JWT_SECRET);
+    } catch (e) {
+        return null;
+    }
+}
+
+// Authentication Middleware
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+        return res.status(401).json({ success: false, message: 'Authentication required' });
+    }
+    
+    const decoded = verifyToken(token);
+    if (!decoded) {
+        return res.status(403).json({ success: false, message: 'Invalid token' });
+    }
+    
+    req.user = decoded;
+    next();
+}
+
+// Admin Check Middleware
+function requireAdmin(req, res, next) {
+    if (!req.user || !req.user.isAdmin) {
+        return res.status(403).json({ success: false, message: 'Admin access required' });
+    }
+    next();
+}
+
+// ==================== VALIDATION SCHEMAS ====================
 const schemas = {
     login: Joi.object({
-        userId: Joi.string().min(5).max(20).required(),
-        password: Joi.string().min(3).max(50).allow('').optional(),
-        deviceInfo: Joi.object({
-            userAgent: Joi.string().optional(),
-            platform: Joi.string().optional()
-        }).optional()
+        userId: Joi.string().min(3).max(30).required(),
+        password: Joi.string().max(50).allow('').optional()
     }),
-    createAccount: Joi.object({
-        userId: Joi.string().min(5).max(20).required(),
-        password: Joi.string().min(4).max(50).required()
+    
+    register: Joi.object({
+        userId: Joi.string().min(3).max(30).required()
     }),
+    
     broadcast: Joi.object({
-        message: Joi.string().min(1).max(500).required(),
-        sprite: Joi.string().required(),
-        adminId: Joi.string().required()
+        text: Joi.string().min(1).max(500).required(),
+        sprite: Joi.string().valid(
+            'normal', 'happy', 'sad', 'angry', 'confused', 
+            'annoyed', 'bug', 'dizzy', 'hollow', 'panic',
+            'sleeping', 'smug', 'stare', 'suspicious', 'werror'
+        ).default('normal')
     }),
+    
+    radioMessage: Joi.object({
+        text: Joi.string().min(1).max(500).required()
+    }),
+    
     chatMessage: Joi.object({
-        senderId: Joi.string().required(),
-        receiverId: Joi.string().required(),
-        message: Joi.string().max(1000).required(),
-        attachment: Joi.string().optional()
+        recipientId: Joi.string().required(),
+        text: Joi.string().min(1).max(1000).required()
     }),
-    ticket: Joi.object({
-        userId: Joi.string().required(),
-        subject: Joi.string().min(5).max(100).required(),
-        description: Joi.string().min(10).max(1000).required()
+    
+    updateUser: Joi.object({
+        name: Joi.string().min(2).max(50).optional(),
+        status: Joi.string().valid('active', 'banned').optional()
     }),
-    updateProfile: Joi.object({
-        userId: Joi.string().required(),
-        updates: Joi.object({
-            name: Joi.string().min(3).max(50).optional(),
-            avatar: Joi.string().optional()
-        }).required()
+    
+    customTab: Joi.object({
+        name: Joi.string().min(1).max(50).required(),
+        content: Joi.string().min(1).max(5000).required()
     }),
-    banUser: Joi.object({
-        userId: Joi.string().required(),
-        reason: Joi.string().min(5).max(200).required(),
-        duration: Joi.number().optional(),
-        adminId: Joi.string().required()
+    
+    welcome: Joi.object({
+        title: Joi.string().min(1).max(100).required(),
+        text: Joi.string().min(1).max(1000).required()
     })
 };
 
-function validateInput(data, schema) {
+function validate(data, schema) {
     const { error, value } = schema.validate(data);
     if (error) {
         throw new Error(error.details[0].message);
@@ -180,832 +267,715 @@ function validateInput(data, schema) {
     return value;
 }
 
-function errorHandler(err, req, res, next) {
-    logger.error('Error:', err);
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message || 'Internal server error'
-    });
-}
-
-function generateToken(userId) {
-    return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
-}
-
-function authenticateToken(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ success: false, message: 'No token' });
-    
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ success: false, message: 'Invalid token' });
-        req.user = user;
-        next();
-    });
-}
-
-async function hashPassword(password, userId) {
-    return await bcrypt.hash(password + PEPPER + userId, SALT_ROUNDS);
-}
-
-async function verifyPassword(input, storedHash, userId) {
-    return await bcrypt.compare(input + PEPPER + userId, storedHash);
-}
-
-function checkIfBanned(userId) {
-    const ban = dataStore.bannedUsers[userId];
-    if (!ban || !ban.active) return null;
-    
-    if (ban.duration && Date.now() > ban.bannedAt + ban.duration) {
-        ban.active = false;
-        saveData();
-        return null;
-    }
-    
-    return ban;
-}
-
-function registerDevice(userId, deviceInfo) {
-    if (!dataStore.userDevices[userId]) {
-        dataStore.userDevices[userId] = [];
-    }
-    
-    const deviceId = deviceInfo.userAgent + deviceInfo.platform;
-    const existing = dataStore.userDevices[userId].find(d => d.id === deviceId);
-    
-    if (!existing) {
-        dataStore.userDevices[userId].push({
-            id: deviceId,
-            userAgent: deviceInfo.userAgent,
-            platform: deviceInfo.platform,
-            firstSeen: new Date().toISOString(),
-            lastSeen: new Date().toISOString()
-        });
-    } else {
-        existing.lastSeen = new Date().toISOString();
-    }
-    
-    saveData();
-}
-
-function trackActivity(userId, action) {
-    if (!dataStore.userAnalytics[userId]) {
-        dataStore.userAnalytics[userId] = {
-            logins: 0,
-            messagesSent: 0,
-            broadcastsSent: 0,
-            ticketsCreated: 0,
-            lastActivity: null,
-            activities: []
+// ==================== INITIALIZATION ====================
+async function initializeAdmin() {
+    if (!dataStore.users[ADMIN_ID]) {
+        const hashedPassword = await hashPassword(ADMIN_PASSWORD, ADMIN_ID);
+        dataStore.users[ADMIN_ID] = {
+            id: ADMIN_ID,
+            name: ADMIN_NAME,
+            password: hashedPassword,
+            approved: true,
+            status: 'active',
+            isAdmin: true,
+            createdAt: Date.now()
         };
+        saveData();
+        log(`Admin account created: ${ADMIN_ID}`);
     }
-    
-    const analytics = dataStore.userAnalytics[userId];
-    
-    switch(action) {
-        case 'login':
-            analytics.logins++;
-            break;
-        case 'message':
-            analytics.messagesSent++;
-            break;
-        case 'broadcast':
-            analytics.broadcastsSent++;
-            break;
-        case 'ticket':
-            analytics.ticketsCreated++;
-            break;
-    }
-    
-    analytics.lastActivity = new Date().toISOString();
-    analytics.activities.push({
-        action,
+}
+
+// ==================== API ROUTES ====================
+
+// Health Check
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        success: true, 
+        status: 'online',
+        version: '3.2.2',
         timestamp: new Date().toISOString()
     });
-    
-    if (analytics.activities.length > 100) {
-        analytics.activities.shift();
-    }
-    
-    saveData();
-}
+});
 
-app.post('/api/login', loginLimiter, async (req, res, next) => {
+// ==================== AUTH ROUTES ====================
+
+// Login
+app.post('/api/login', loginLimiter, async (req, res) => {
     try {
-        const { userId, password, deviceInfo } = validateInput(req.body, schemas.login);
+        const { userId, password } = validate(req.body, schemas.login);
+        const normalizedId = userId.toUpperCase();
         
-        const ban = checkIfBanned(userId);
-        if (ban) {
-            logger.warn(`Banned user attempted login: ${userId}`);
-            return res.status(403).json({ 
+        const user = dataStore.users[normalizedId];
+        
+        if (!user) {
+            log(`Login failed - User not found: ${normalizedId}`, 'WARN');
+            return res.status(404).json({ 
                 success: false, 
-                message: `Account banned: ${ban.reason}` 
+                message: 'User not found. Use NEW OPERATOR to request access.' 
             });
         }
         
-        const user = dataStore.users[userId];
-        
-        if (!user) {
-            logger.warn(`Failed login attempt for non-existent user: ${userId} from IP: ${req.ip}`);
-            return res.status(404).json({ 
+        if (user.status === 'banned') {
+            log(`Login blocked - User banned: ${normalizedId}`, 'WARN');
+            return res.status(403).json({ 
                 success: false, 
-                message: 'User not found. Click "NEW OPERATOR?" to request access.' 
+                message: 'Account banned. Contact administrator.' 
             });
         }
         
         if (!user.approved) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Account pending approval' 
+                message: 'Account pending approval.' 
             });
         }
         
-        if (user.password && password) {
-            const validPassword = await verifyPassword(password, user.password, userId);
-            if (!validPassword) {
-                logger.warn(`Failed password for userId: ${userId} from IP: ${req.ip}`);
+        // Check password for admin
+        if (user.isAdmin) {
+            if (!password) {
                 return res.status(401).json({ 
                     success: false, 
-                    message: 'Invalid password' 
+                    message: 'Password required for admin.' 
+                });
+            }
+            
+            const validPassword = await verifyPassword(password, user.password, normalizedId);
+            if (!validPassword) {
+                log(`Login failed - Invalid password: ${normalizedId}`, 'WARN');
+                return res.status(401).json({ 
+                    success: false, 
+                    message: 'Invalid password.' 
                 });
             }
         }
         
-        if (deviceInfo) {
-            registerDevice(userId, deviceInfo);
-        }
+        // Generate token
+        const token = generateToken(normalizedId, user.isAdmin);
         
-        trackActivity(userId, 'login');
-        
-        dataStore.onlineUsers[userId] = {
-            userId,
+        // Update online status
+        dataStore.onlineUsers[normalizedId] = {
+            id: normalizedId,
             name: user.name,
-            loginTime: new Date().toISOString()
+            loginTime: Date.now()
         };
         saveData();
         
-        const token = generateToken(userId);
+        // Emit online event
+        io.emit('user:online', { userId: normalizedId, name: user.name });
         
-        io.emit('user_online', { userId, name: user.name });
+        log(`User logged in: ${normalizedId}`);
         
         res.json({
             success: true,
             token,
-            userData: {
+            user: {
                 id: user.id,
                 name: user.name,
-                isAdmin: user.id === ADMIN_ID,
-                avatar: user.avatar || 'assets/sprites/normal.png'
+                isAdmin: user.isAdmin,
+                status: user.status
             }
         });
-    } catch (error) {
-        next(error);
+        
+    } catch (e) {
+        logError('Login error', e);
+        res.status(400).json({ success: false, message: e.message });
     }
 });
 
-app.post('/api/create-account', loginLimiter, async (req, res, next) => {
+// Register (New Operator)
+app.post('/api/register', loginLimiter, async (req, res) => {
     try {
-        const { userId, password } = validateInput(req.body, schemas.createAccount);
+        const { userId } = validate(req.body, schemas.register);
+        const normalizedId = userId.toUpperCase();
         
-        if (dataStore.users[userId]) {
+        // Check if user exists
+        if (dataStore.users[normalizedId]) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'User ID already exists' 
+                message: 'User ID already exists.' 
             });
         }
         
-        if (dataStore.pendingUsers.find(p => p.userId === userId)) {
+        // Check if already pending
+        if (dataStore.pendingUsers.some(p => p.userId === normalizedId)) {
             return res.status(400).json({ 
                 success: false, 
-                message: 'Already pending approval' 
+                message: 'Already in approval queue.' 
             });
         }
         
-        const hashedPassword = await hashPassword(password, userId);
-        
+        // Add to pending queue
         dataStore.pendingUsers.push({
-            userId,
-            password: hashedPassword,
-            requestedAt: new Date().toISOString()
+            userId: normalizedId,
+            requestedAt: Date.now()
         });
         saveData();
         
-        io.emit('pending_update', dataStore.pendingUsers);
+        // Notify admins
+        io.to('admins').emit('pending:new', { userId: normalizedId });
         
-        logger.info(`New account request: ${userId}`);
+        log(`New operator request: ${normalizedId}`);
         
         res.json({ 
             success: true, 
-            message: 'Account request sent. Please wait for admin approval.' 
-        });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.get('/api/pending', (req, res) => {
-    const pending = dataStore.pendingUsers.map(p => p.userId);
-    res.json({ pending });
-});
-
-app.post('/api/approve', authenticateToken, async (req, res, next) => {
-    try {
-        const { userId, adminId } = req.body;
-        
-        if (adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        const pendingUser = dataStore.pendingUsers.find(p => p.userId === userId);
-        if (!pendingUser) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not in pending list' 
-            });
-        }
-        
-        dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== userId);
-        
-        dataStore.users[userId] = {
-            id: userId,
-            name: `Operator_${userId.slice(-4)}`,
-            password: pendingUser.password,
-            approved: true,
-            isAdmin: false,
-            avatar: 'assets/sprites/normal.png',
-            createdAt: new Date().toISOString()
-        };
-        saveData();
-        
-        io.emit('pending_update', dataStore.pendingUsers.map(p => p.userId));
-        io.emit('user_approved', { userId });
-        
-        logger.info(`User approved: ${userId}`);
-        
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.post('/api/deny', authenticateToken, (req, res, next) => {
-    try {
-        const { userId, adminId } = req.body;
-        
-        if (adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== userId);
-        saveData();
-        
-        io.emit('pending_update', dataStore.pendingUsers.map(p => p.userId));
-        
-        logger.info(`User denied: ${userId}`);
-        
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.post('/api/ban-user', authenticateToken, (req, res, next) => {
-    try {
-        const validData = validateInput(req.body, schemas.banUser);
-        
-        if (validData.adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        if (validData.userId === ADMIN_ID) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Cannot ban admin' 
-            });
-        }
-        
-        dataStore.bannedUsers[validData.userId] = {
-            reason: validData.reason,
-            duration: validData.duration,
-            bannedAt: Date.now(),
-            bannedBy: ADMIN_ID,
-            active: true
-        };
-        
-        if (dataStore.onlineUsers[validData.userId]) {
-            delete dataStore.onlineUsers[validData.userId];
-        }
-        
-        saveData();
-        
-        io.emit('user_banned', { 
-            userId: validData.userId, 
-            reason: validData.reason 
+            message: 'Request sent. Save your ID and wait for approval.',
+            userId: normalizedId
         });
         
-        logger.info(`User banned: ${validData.userId} - Reason: ${validData.reason}`);
-        
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
+    } catch (e) {
+        logError('Register error', e);
+        res.status(400).json({ success: false, message: e.message });
     }
 });
 
-app.post('/api/unban-user', authenticateToken, (req, res) => {
-    const { userId, adminId } = req.body;
+// Logout
+app.post('/api/logout', authenticateToken, (req, res) => {
+    const { userId } = req.user;
     
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
+    delete dataStore.onlineUsers[userId];
+    saveData();
     
-    if (dataStore.bannedUsers[userId]) {
-        dataStore.bannedUsers[userId].active = false;
-        saveData();
-        
-        io.emit('user_unbanned', userId);
-        logger.info(`User unbanned: ${userId}`);
-    }
+    io.emit('user:offline', { userId });
+    
+    log(`User logged out: ${userId}`);
     
     res.json({ success: true });
 });
 
-app.get('/api/banned-users', authenticateToken, (req, res) => {
-    const { adminId } = req.query;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Unauthorized' 
-        });
-    }
-    
-    const banned = Object.entries(dataStore.bannedUsers)
-        .filter(([_, ban]) => ban.active)
-        .map(([userId, ban]) => ({
-            userId,
-            ...ban
-        }));
-    
-    res.json({ success: true, banned });
+// ==================== USER MANAGEMENT ====================
+
+// Get Pending Users
+app.get('/api/pending', authenticateToken, requireAdmin, (req, res) => {
+    res.json({ 
+        success: true, 
+        pending: dataStore.pendingUsers 
+    });
 });
 
-app.get('/api/user-analytics', authenticateToken, (req, res) => {
-    const { userId, adminId } = req.query;
-    
-    if (adminId !== ADMIN_ID && userId !== req.user.userId) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Unauthorized' 
-        });
+// Approve User
+app.post('/api/users/approve', authenticateToken, requireAdmin, async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const normalizedId = userId.toUpperCase();
+        
+        const pendingIndex = dataStore.pendingUsers.findIndex(p => p.userId === normalizedId);
+        if (pendingIndex === -1) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'User not in pending queue.' 
+            });
+        }
+        
+        // Remove from pending
+        dataStore.pendingUsers.splice(pendingIndex, 1);
+        
+        // Create user account
+        dataStore.users[normalizedId] = {
+            id: normalizedId,
+            name: `Operator_${normalizedId.slice(-4)}`,
+            approved: true,
+            status: 'active',
+            isAdmin: false,
+            createdAt: Date.now()
+        };
+        saveData();
+        
+        // Notify
+        io.emit('user:approved', { userId: normalizedId });
+        
+        log(`User approved: ${normalizedId} by ${req.user.userId}`);
+        
+        res.json({ success: true });
+        
+    } catch (e) {
+        logError('Approve error', e);
+        res.status(400).json({ success: false, message: e.message });
     }
+});
+
+// Deny User
+app.post('/api/users/deny', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const { userId } = req.body;
+        const normalizedId = userId.toUpperCase();
+        
+        dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== normalizedId);
+        saveData();
+        
+        log(`User denied: ${normalizedId} by ${req.user.userId}`);
+        
+        res.json({ success: true });
+        
+    } catch (e) {
+        logError('Deny error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Get All Users
+app.get('/api/users', authenticateToken, requireAdmin, (req, res) => {
+    const users = Object.values(dataStore.users).map(u => ({
+        id: u.id,
+        name: u.name,
+        status: u.status,
+        isAdmin: u.isAdmin,
+        createdAt: u.createdAt,
+        isOnline: !!dataStore.onlineUsers[u.id]
+    }));
     
-    const targetId = userId || req.user.userId;
-    const analytics = dataStore.userAnalytics[targetId] || {
-        logins: 0,
-        messagesSent: 0,
-        broadcastsSent: 0,
-        ticketsCreated: 0,
-        activities: []
+    res.json({ success: true, users });
+});
+
+// Update User
+app.put('/api/users/:userId', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const { userId } = req.params;
+        const updates = validate(req.body, schemas.updateUser);
+        
+        const user = dataStore.users[userId];
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        
+        // Prevent modifying admin
+        if (user.isAdmin && req.user.userId !== ADMIN_ID) {
+            return res.status(403).json({ success: false, message: 'Cannot modify admin.' });
+        }
+        
+        if (updates.name) user.name = updates.name;
+        if (updates.status) user.status = updates.status;
+        
+        saveData();
+        
+        log(`User updated: ${userId} by ${req.user.userId}`);
+        
+        res.json({ success: true, user });
+        
+    } catch (e) {
+        logError('Update user error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Ban User
+app.post('/api/users/:userId/ban', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const user = dataStore.users[userId];
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        
+        if (user.isAdmin) {
+            return res.status(403).json({ success: false, message: 'Cannot ban admin.' });
+        }
+        
+        user.status = 'banned';
+        delete dataStore.onlineUsers[userId];
+        saveData();
+        
+        io.emit('user:banned', { userId });
+        
+        log(`User banned: ${userId} by ${req.user.userId}`);
+        
+        res.json({ success: true });
+        
+    } catch (e) {
+        logError('Ban error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Unban User
+app.post('/api/users/:userId/unban', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const { userId } = req.params;
+        
+        const user = dataStore.users[userId];
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found.' });
+        }
+        
+        user.status = 'active';
+        saveData();
+        
+        log(`User unbanned: ${userId} by ${req.user.userId}`);
+        
+        res.json({ success: true });
+        
+    } catch (e) {
+        logError('Unban error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// ==================== BROADCAST ====================
+
+// Send Broadcast
+app.post('/api/broadcast', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const data = validate(req.body, schemas.broadcast);
+        
+        const broadcast = {
+            id: Date.now().toString(),
+            text: data.text,
+            sprite: data.sprite,
+            senderId: req.user.userId,
+            timestamp: Date.now()
+        };
+        
+        dataStore.broadcasts.push(broadcast);
+        
+        // Keep only last 100 broadcasts
+        if (dataStore.broadcasts.length > 100) {
+            dataStore.broadcasts = dataStore.broadcasts.slice(-100);
+        }
+        
+        saveData();
+        
+        // Emit to all clients
+        io.emit('broadcast:new', broadcast);
+        
+        log(`Broadcast sent by ${req.user.userId}`);
+        
+        res.json({ success: true, broadcast });
+        
+    } catch (e) {
+        logError('Broadcast error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Get Broadcasts
+app.get('/api/broadcasts', (req, res) => {
+    const limit = parseInt(req.query.limit) || 20;
+    res.json({ 
+        success: true, 
+        broadcasts: dataStore.broadcasts.slice(-limit) 
+    });
+});
+
+// ==================== RADIO ====================
+
+// Send Radio Message
+app.post('/api/radio', authenticateToken, (req, res) => {
+    try {
+        const data = validate(req.body, schemas.radioMessage);
+        const user = dataStore.users[req.user.userId];
+        
+        const message = {
+            id: Date.now().toString(),
+            userId: req.user.userId,
+            user: user ? user.name : 'Unknown',
+            text: data.text,
+            timestamp: Date.now()
+        };
+        
+        dataStore.radioMessages.push(message);
+        
+        // Keep only last 200 messages
+        if (dataStore.radioMessages.length > 200) {
+            dataStore.radioMessages = dataStore.radioMessages.slice(-200);
+        }
+        
+        saveData();
+        
+        io.emit('radio:message', message);
+        
+        res.json({ success: true, message });
+        
+    } catch (e) {
+        logError('Radio error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Get Radio Messages
+app.get('/api/radio', (req, res) => {
+    res.json({ success: true, messages: dataStore.radioMessages });
+});
+
+// Delete Radio Message
+app.delete('/api/radio/:messageId', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const { messageId } = req.params;
+        
+        dataStore.radioMessages = dataStore.radioMessages.filter(m => m.id !== messageId);
+        saveData();
+        
+        io.emit('radio:deleted', { messageId });
+        
+        res.json({ success: true });
+        
+    } catch (e) {
+        logError('Delete radio error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Clear Radio Messages
+app.delete('/api/radio', authenticateToken, requireAdmin, (req, res) => {
+    dataStore.radioMessages = [];
+    saveData();
+    
+    io.emit('radio:cleared');
+    
+    log(`Radio cleared by ${req.user.userId}`);
+    
+    res.json({ success: true });
+});
+
+// ==================== CHAT ====================
+
+// Get Chat Messages
+app.get('/api/chat/:recipientId', authenticateToken, (req, res) => {
+    const { recipientId } = req.params;
+    const userId = req.user.userId;
+    
+    const messages = dataStore.messages.filter(m => 
+        (m.senderId === userId && m.recipientId === recipientId) ||
+        (m.senderId === recipientId && m.recipientId === userId)
+    );
+    
+    res.json({ success: true, messages });
+});
+
+// ==================== CUSTOM TABS ====================
+
+// Create Tab
+app.post('/api/tabs', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const data = validate(req.body, schemas.customTab);
+        
+        const tab = {
+            id: Date.now().toString(),
+            name: data.name,
+            content: data.content,
+            createdAt: Date.now()
+        };
+        
+        dataStore.customTabs.push(tab);
+        saveData();
+        
+        res.json({ success: true, tab });
+        
+    } catch (e) {
+        logError('Create tab error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// Get Tabs
+app.get('/api/tabs', (req, res) => {
+    res.json({ 
+        success: true, 
+        tabs: dataStore.customTabs,
+        published: dataStore.publishedTabs 
+    });
+});
+
+// Delete Tab
+app.delete('/api/tabs/:tabId', authenticateToken, requireAdmin, (req, res) => {
+    const { tabId } = req.params;
+    
+    dataStore.customTabs = dataStore.customTabs.filter(t => t.id !== tabId);
+    dataStore.publishedTabs = dataStore.publishedTabs.filter(t => t.id !== tabId);
+    saveData();
+    
+    res.json({ success: true });
+});
+
+// Publish Tabs
+app.post('/api/tabs/publish', authenticateToken, requireAdmin, (req, res) => {
+    dataStore.publishedTabs = [...dataStore.customTabs];
+    saveData();
+    
+    io.emit('tabs:published', dataStore.publishedTabs);
+    
+    res.json({ success: true, published: dataStore.publishedTabs });
+});
+
+// ==================== WELCOME ====================
+
+// Get Welcome
+app.get('/api/welcome', (req, res) => {
+    res.json({ success: true, welcome: dataStore.welcome });
+});
+
+// Update Welcome
+app.put('/api/welcome', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const data = validate(req.body, schemas.welcome);
+        
+        dataStore.welcome = data;
+        saveData();
+        
+        io.emit('welcome:updated', data);
+        
+        res.json({ success: true, welcome: dataStore.welcome });
+        
+    } catch (e) {
+        logError('Update welcome error', e);
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+// ==================== ANALYTICS ====================
+
+// Get Analytics
+app.get('/api/analytics', authenticateToken, requireAdmin, (req, res) => {
+    const analytics = {
+        totalUsers: Object.keys(dataStore.users).length,
+        activeUsers: Object.values(dataStore.users).filter(u => u.status === 'active').length,
+        bannedUsers: Object.values(dataStore.users).filter(u => u.status === 'banned').length,
+        pendingUsers: dataStore.pendingUsers.length,
+        onlineUsers: Object.keys(dataStore.onlineUsers).length,
+        totalBroadcasts: dataStore.broadcasts.length,
+        totalRadioMessages: dataStore.radioMessages.length,
+        totalChatMessages: dataStore.messages.length,
+        customTabs: dataStore.customTabs.length
     };
     
     res.json({ success: true, analytics });
 });
 
-app.get('/api/all-analytics', authenticateToken, (req, res) => {
-    const { adminId } = req.query;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Unauthorized' 
-        });
-    }
-    
-    const allAnalytics = Object.entries(dataStore.userAnalytics).map(([userId, data]) => ({
-        userId,
-        userName: dataStore.users[userId]?.name || 'Unknown',
-        ...data
-    }));
-    
-    res.json({ success: true, analytics: allAnalytics });
-});
-
-app.get('/api/user-devices', authenticateToken, (req, res) => {
-    const { userId, adminId } = req.query;
-    
-    if (adminId !== ADMIN_ID && userId !== req.user.userId) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Unauthorized' 
-        });
-    }
-    
-    const targetId = userId || req.user.userId;
-    const devices = dataStore.userDevices[targetId] || [];
-    
-    res.json({ success: true, devices });
-});
-
-app.post('/api/radio/clear', authenticateToken, (req, res) => {
-    const { frequency, adminId } = req.body;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
-    
-    if (frequency) {
-        dataStore.radioMessages[frequency] = [];
-    } else {
-        dataStore.radioMessages = {};
-    }
-    
-    saveData();
-    
-    io.emit('radio_cleared', frequency);
-    
-    res.json({ success: true });
-});
-
-app.get('/api/radio/messages', (req, res) => {
-    const { frequency } = req.query;
-    
-    const messages = dataStore.radioMessages[frequency] || [];
-    
-    res.json({ success: true, messages });
-});
-
-app.post('/api/broadcast', authenticateToken, (req, res, next) => {
-    try {
-        const validData = validateInput(req.body, schemas.broadcast);
-        
-        if (validData.adminId !== ADMIN_ID) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Not authorized' 
-            });
-        }
-        
-        const broadcast = {
-            message: validData.message,
-            sprite: validData.sprite,
-            timestamp: Date.now()
-        };
-        
-        dataStore.broadcasts.push(broadcast);
-        if (dataStore.broadcasts.length > 50) {
-            dataStore.broadcasts.shift();
-        }
-        
-        trackActivity(ADMIN_ID, 'broadcast');
-        saveData();
-        
-        io.emit('broadcast', broadcast);
-        
-        res.json({ success: true });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.get('/api/broadcasts', (req, res) => {
-    res.json({ broadcasts: dataStore.broadcasts.slice(-10) });
-});
-
-app.post('/api/ticket', authenticateToken, (req, res, next) => {
-    try {
-        const validData = validateInput(req.body, schemas.ticket);
-        
-        const ticket = {
-            id: 'T' + Date.now(),
-            userId: validData.userId,
-            subject: validData.subject,
-            description: validData.description,
-            status: 'open',
-            createdAt: new Date().toISOString(),
-            responses: []
-        };
-        
-        dataStore.tickets.push(ticket);
-        trackActivity(validData.userId, 'ticket');
-        saveData();
-        
-        io.emit('ticket_created', ticket);
-        
-        res.json({ success: true, ticket });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.get('/api/tickets', authenticateToken, (req, res) => {
-    const { userId } = req.query;
-    
-    let tickets = dataStore.tickets;
-    if (userId && userId !== ADMIN_ID) {
-        tickets = tickets.filter(t => t.userId === userId);
-    }
-    
-    res.json({ success: true, tickets });
-});
-
-app.post('/api/ticket/respond', authenticateToken, (req, res) => {
-    const { ticketId, response, adminId } = req.body;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
-    
-    const ticket = dataStore.tickets.find(t => t.id === ticketId);
-    if (!ticket) {
-        return res.status(404).json({ 
-            success: false, 
-            message: 'Ticket not found' 
-        });
-    }
-    
-    ticket.responses.push({
-        text: response,
-        timestamp: new Date().toISOString(),
-        from: 'admin'
+// Get System Log
+app.get('/api/logs', authenticateToken, requireAdmin, (req, res) => {
+    const limit = parseInt(req.query.limit) || 100;
+    res.json({ 
+        success: true, 
+        logs: dataStore.systemLog.slice(-limit) 
     });
-    ticket.status = 'responded';
-    saveData();
-    
-    io.emit('ticket_updated', ticket);
-    
-    res.json({ success: true });
 });
 
-app.post('/api/ticket/close', authenticateToken, (req, res) => {
-    const { ticketId, adminId } = req.body;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
-    
-    const ticket = dataStore.tickets.find(t => t.id === ticketId);
-    if (!ticket) {
-        return res.status(404).json({ 
-            success: false, 
-            message: 'Ticket not found' 
-        });
-    }
-    
-    ticket.status = 'closed';
-    saveData();
-    
-    io.emit('ticket_updated', ticket);
-    
-    res.json({ success: true });
-});
-
-app.post('/api/alarm', authenticateToken, (req, res) => {
-    const { type, details, adminId } = req.body;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
-    
-    const alarm = {
-        id: 'A' + Date.now(),
-        type,
-        details,
-        timestamp: new Date().toISOString(),
-        active: true
-    };
-    
-    dataStore.alarms.push(alarm);
-    saveData();
-    
-    io.emit('alarm_triggered', alarm);
-    
-    res.json({ success: true, alarm });
-});
-
-app.get('/api/alarms', (req, res) => {
-    const activeAlarms = dataStore.alarms.filter(a => a.active);
-    res.json({ success: true, alarms: activeAlarms });
-});
-
-app.post('/api/alarm/dismiss', authenticateToken, (req, res) => {
-    const { alarmId, adminId } = req.body;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Not authorized' 
-        });
-    }
-    
-    const alarm = dataStore.alarms.find(a => a.id === alarmId);
-    if (alarm) {
-        alarm.active = false;
-        saveData();
-        io.emit('alarm_dismissed', alarmId);
-    }
-    
-    res.json({ success: true });
-});
-
-app.post('/api/update-profile', authenticateToken, (req, res, next) => {
-    try {
-        const validData = validateInput(req.body, schemas.updateProfile);
-        const { userId, updates } = validData;
-        
-        const user = dataStore.users[userId];
-        if (!user) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'User not found' 
-            });
-        }
-        
-        if (updates.name) user.name = updates.name;
-        if (updates.avatar) user.avatar = updates.avatar;
-        
-        saveData();
-        
-        io.emit('profile_updated', { userId, updates });
-        
-        res.json({ success: true, user });
-    } catch (error) {
-        next(error);
-    }
-});
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ 
-            success: false, 
-            message: 'No file uploaded' 
-        });
-    }
-    
-    const fileUrl = `/uploads/${req.file.filename}`;
-    res.json({ success: true, url: fileUrl });
-});
-
-app.post('/api/logout', (req, res) => {
-    const { userId } = req.body;
-    
-    if (dataStore.onlineUsers[userId]) {
-        delete dataStore.onlineUsers[userId];
-        saveData();
-        io.emit('user_offline', userId);
-    }
-    
-    res.json({ success: true });
-});
-
-app.get('/api/users', authenticateToken, (req, res) => {
-    const { adminId } = req.query;
-    
-    if (adminId !== ADMIN_ID) {
-        return res.status(403).json({ 
-            success: false, 
-            message: 'Unauthorized' 
-        });
-    }
-    
-    const activeUsers = Object.values(dataStore.users)
-        .filter(u => u.approved)
-        .map(u => ({
-            id: u.id,
-            name: u.name,
-            isAdmin: u.isAdmin,
-            avatar: u.avatar,
-            isOnline: !!dataStore.onlineUsers[u.id],
-            isBanned: dataStore.bannedUsers[u.id]?.active || false
-        }));
-    
-    res.json({ success: true, users: activeUsers });
-});
-
-app.get('/api/system-status', (req, res) => {
-    const stats = {
-        totalUsers: Object.keys(dataStore.users).length,
-        onlineUsers: Object.keys(dataStore.onlineUsers).length,
-        pendingApprovals: dataStore.pendingUsers.length,
-        activeTickets: dataStore.tickets.filter(t => t.status === 'open').length,
-        activeAlarms: dataStore.alarms.filter(a => a.active).length,
-        totalBroadcasts: dataStore.broadcasts.length,
-        bannedUsers: Object.values(dataStore.bannedUsers).filter(b => b.active).length
-    };
-    
-    res.json({ success: true, stats });
-});
+// ==================== SOCKET.IO ====================
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    log(`Socket connected: ${socket.id}`);
     
-    socket.on('register', (userId) => {
-        socket.userId = userId;
-        socket.join(userId);
-        
-        if (userId === ADMIN_ID) {
-            socket.join('admins');
+    // Register user
+    socket.on('register', (data) => {
+        if (data && data.userId) {
+            socket.userId = data.userId;
+            socket.join(data.userId);
+            
+            // Join admin room if admin
+            if (data.isAdmin) {
+                socket.join('admins');
+            }
+            
+            log(`Socket registered: ${data.userId}`);
         }
     });
     
-    socket.on('chat_message', (data) => {
+    // Chat message
+    socket.on('chat:send', (data) => {
         try {
-            const validData = validateInput(data, schemas.chatMessage);
+            if (!socket.userId) return;
+            
+            const { recipientId, text } = data;
+            const user = dataStore.users[socket.userId];
             
             const message = {
-                id: 'M' + Date.now(),
-                senderId: validData.senderId,
-                receiverId: validData.receiverId,
-                message: validData.message,
-                attachment: validData.attachment,
-                timestamp: new Date().toISOString()
+                id: Date.now().toString(),
+                senderId: socket.userId,
+                senderName: user ? user.name : 'Unknown',
+                recipientId,
+                text,
+                timestamp: Date.now()
             };
             
             dataStore.messages.push(message);
+            
+            // Keep only last 1000 messages
             if (dataStore.messages.length > 1000) {
-                dataStore.messages.shift();
+                dataStore.messages = dataStore.messages.slice(-1000);
             }
             
-            trackActivity(validData.senderId, 'message');
             saveData();
             
-            io.to(validData.receiverId).emit('chat_message', message);
-            io.to(validData.senderId).emit('chat_message', message);
-        } catch (error) {
-            socket.emit('error', { message: error.message });
+            // Send to recipient
+            io.to(recipientId).emit('chat:message', message);
+            // Send back to sender
+            socket.emit('chat:message', message);
+            
+        } catch (e) {
+            logError('Chat socket error', e);
         }
     });
     
-    socket.on('join_radio', (frequency) => {
-        socket.join(`radio_${frequency}`);
-        console.log(`User ${socket.userId} joined radio ${frequency}`);
-    });
-    
-    socket.on('radio_message', (data) => {
-        const { frequency, message, userId } = data;
-        
-        if (!dataStore.radioMessages[frequency]) {
-            dataStore.radioMessages[frequency] = [];
+    // Typing indicator
+    socket.on('chat:typing', (data) => {
+        if (data && data.recipientId) {
+            io.to(data.recipientId).emit('chat:typing', {
+                userId: socket.userId,
+                isTyping: data.isTyping
+            });
         }
-        
-        const radioMsg = {
-            userId,
-            userName: dataStore.users[userId]?.name || 'Unknown',
-            message,
-            timestamp: new Date().toISOString()
-        };
-        
-        dataStore.radioMessages[frequency].push(radioMsg);
-        if (dataStore.radioMessages[frequency].length > 100) {
-            dataStore.radioMessages[frequency].shift();
-        }
-        saveData();
-        
-        io.to(`radio_${frequency}`).emit('radio_message', radioMsg);
     });
     
-    socket.on('request_chat_history', (data) => {
-        const { userId, otherId } = data;
-        const history = dataStore.messages.filter(m => 
-            (m.senderId === userId && m.receiverId === otherId) ||
-            (m.senderId === otherId && m.receiverId === userId)
-        );
-        socket.emit('chat_history', history);
-    });
-    
+    // Disconnect
     socket.on('disconnect', () => {
-        console.log('User disconnected:', socket.id);
+        if (socket.userId) {
+            delete dataStore.onlineUsers[socket.userId];
+            saveData();
+            io.emit('user:offline', { userId: socket.userId });
+        }
+        log(`Socket disconnected: ${socket.id}`);
     });
 });
 
-app.use(errorHandler);
+// ==================== ERROR HANDLING ====================
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`ARCS Server running on port ${PORT}`);
-    console.log(`Admin ID: ${ADMIN_ID}`);
-    console.log(`Default Admin Password: 2041`);
-    logger.info('ARCS Server started successfully');
+app.use((err, req, res, next) => {
+    logError('Unhandled error', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
 });
+
+// 404 Handler
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: 'Endpoint not found' });
+});
+
+// ==================== SERVER START ====================
+
+async function startServer() {
+    try {
+        loadData();
+        await initializeAdmin();
+        
+        server.listen(PORT, () => {
+            console.log('====================================');
+            console.log('   ARCS Server v3.2.2');
+            console.log('====================================');
+            console.log(`   Port: ${PORT}`);
+            console.log(`   Admin ID: ${ADMIN_ID}`);
+            console.log(`   Admin Password: ${ADMIN_PASSWORD}`);
+            console.log('====================================');
+            log('Server started successfully');
+        });
+        
+    } catch (e) {
+        logError('Server start error', e);
+        process.exit(1);
+    }
+}
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+    log('Server shutting down...');
+    saveData();
+    process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+    log('Server terminating...');
+    saveData();
+    process.exit(0);
+});
+
+// Start server
+startServer();
+
+module.exports = { app, server, io };
