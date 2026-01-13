@@ -1,7 +1,8 @@
 /**
- * ARCS Notification / Broadcast Styles
+ * ARCS Notification System - IMPROVED
  * Obunto Speech Bubble System
  * NieR:Automata Design System
+ * Layout: Text Left, Sprite Right (inspired by inventory item display)
  */
 
 /* ==================== NOTIFICATION CONTAINER ==================== */
@@ -11,10 +12,12 @@
     right: 36px;
     z-index: 9999;
     display: flex;
-    align-items: flex-end;
+    align-items: stretch;
     gap: 0;
-    max-width: 560px;
+    max-width: 580px;
+    min-height: 140px;
     animation: notificationSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.25));
 }
 
 @keyframes notificationSlideUp {
@@ -43,52 +46,131 @@
     }
 }
 
-/* ==================== MASCOT CONTAINER ==================== */
+/* ==================== MAIN CONTENT BOX (LEFT) ==================== */
+.bubble {
+    background: var(--nier-paper-light);
+    border: 3px solid var(--nier-black);
+    padding: 20px 24px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--nier-text);
+    position: relative;
+    flex: 1;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    letter-spacing: 0.3px;
+    line-height: 1.65;
+}
+
+/* Top left corner bracket */
+.bubble::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid var(--nier-black);
+    border-left: 3px solid var(--nier-black);
+}
+
+/* Bottom right corner bracket */
+.bubble::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    border-bottom: 3px solid var(--nier-black);
+    border-right: 3px solid var(--nier-black);
+}
+
+/* ==================== NOTIFICATION TEXT ==================== */
+.notification-text,
+#notif-text {
+    line-height: 1.7;
+    letter-spacing: 0.4px;
+    font-family: var(--font-main);
+    color: var(--nier-text);
+}
+
+.notification-text.typing::after,
+#notif-text.typing::after {
+    content: '▌';
+    animation: cursorBlink 0.7s infinite;
+    margin-left: 2px;
+    color: var(--nier-dark);
+}
+
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ==================== MASCOT CONTAINER (RIGHT) ==================== */
 .mascot-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0;
+    background: var(--nier-panel);
+    border: 3px solid var(--nier-black);
+    border-left: none;
+    min-width: 160px;
     position: relative;
-    z-index: 2;
+}
+
+/* Top right corner bracket */
+.mascot-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid var(--nier-black);
+    border-right: 3px solid var(--nier-black);
+}
+
+/* Bottom left corner bracket */
+.mascot-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -3px;
+    width: 16px;
+    height: 16px;
+    border-bottom: 3px solid var(--nier-black);
+    border-left: 3px solid var(--nier-black);
 }
 
 /* ==================== SPRITE DISPLAY ==================== */
 #notif-sprite {
-    width: 120px;
-    height: 120px;
-    background: var(--nier-panel);
-    border: 3px solid var(--nier-dark);
+    width: 100%;
+    height: 100%;
+    min-height: 110px;
+    background: var(--nier-muted);
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
+    flex: 1;
+    padding: 16px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
 }
 
-/* Decorative Corners on Sprite */
+/* Subtle inner shadow */
 #notif-sprite::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 12px 12px 0 0;
-    border-color: var(--nier-text) transparent transparent transparent;
-}
-
-#notif-sprite::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 0 0 12px 12px;
-    border-color: transparent transparent var(--nier-text) transparent;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
 }
 
 .sprite-face {
@@ -102,181 +184,267 @@
     50% { transform: translateY(-4px); }
 }
 
-/* ==================== MASCOT LABEL ==================== */
+/* ==================== STATUS BAR (BOTTOM) ==================== */
 .mascot-label {
-    background: var(--nier-dark);
-    color: var(--nier-accent);
-    padding: 8px 22px;
-    font-size: 13px;
+    background: var(--nier-black);
+    color: var(--nier-paper-light);
+    padding: 8px 12px;
+    font-size: 10px;
     letter-spacing: 2px;
-    font-weight: 600;
-    border: 2px solid var(--nier-text);
-    border-top: none;
+    font-weight: 700;
+    border-top: 3px solid var(--nier-black);
     text-transform: uppercase;
-}
-
-/* ==================== SPEECH BUBBLE ==================== */
-.bubble {
-    background: var(--nier-paper);
-    border: 3px solid var(--nier-dark);
-    padding: 24px 28px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--nier-text);
-    position: relative;
-    flex: 1;
-    min-height: 100px;
+    text-align: center;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin-left: -3px;
-    box-shadow: 6px 6px 0 rgba(0,0,0,0.15);
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
 }
 
-/* Triangle Pointer - Left Side */
-.bubble::before {
-    content: '';
-    position: absolute;
-    left: -18px;
-    bottom: 40px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 12px 18px 12px 0;
-    border-color: transparent var(--nier-dark) transparent transparent;
+/* Stats display in label */
+.mascot-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 9px;
+    letter-spacing: 1px;
 }
 
-.bubble::after {
-    content: '';
-    position: absolute;
-    left: -12px;
-    bottom: 43px;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 9px 12px 9px 0;
-    border-color: transparent var(--nier-paper) transparent transparent;
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
-/* ==================== NOTIFICATION TEXT ==================== */
-.notification-text {
-    line-height: 1.7;
-    letter-spacing: 0.5px;
-    font-family: var(--font-main);
+.stat-label {
+    opacity: 0.7;
 }
 
-.notification-text.typing::after {
-    content: '▌';
-    animation: cursorBlink 0.7s infinite;
-    margin-left: 2px;
-    color: var(--nier-accent);
-}
-
-@keyframes cursorBlink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+.stat-value {
+    font-weight: 700;
 }
 
 /* ==================== CLOSE BUTTON ==================== */
 .notification-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
     width: 24px;
     height: 24px;
-    background: var(--nier-panel);
-    border: 2px solid var(--nier-dark);
-    color: var(--nier-text);
-    font-size: 14px;
+    background: var(--nier-black);
+    border: 2px solid var(--nier-paper-light);
+    color: var(--nier-paper-light);
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-fast);
+    z-index: 10;
 }
 
 .notification-close:hover {
-    background: var(--nier-dark);
-    color: var(--nier-paper);
+    background: var(--nier-accent);
+    color: var(--nier-black);
+    border-color: var(--nier-black);
 }
 
 /* ==================== EMOTION VARIATIONS ==================== */
+
+/* Happy - Green tint */
+.notification[data-emotion="happy"] .mascot-container,
+.notification.emotion-happy .mascot-container {
+    background: #B5C5A8;
+}
+
+.notification[data-emotion="happy"] .mascot-label,
 .notification.emotion-happy .mascot-label {
     background: #5A7A5A;
 }
 
+/* Sad - Blue tint */
+.notification[data-emotion="sad"] .mascot-container,
+.notification.emotion-sad .mascot-container {
+    background: #A8B5C5;
+}
+
+.notification[data-emotion="sad"] .mascot-label,
 .notification.emotion-sad .mascot-label {
     background: #5A6A7A;
 }
 
-.notification.emotion-angry .mascot-label,
-.notification.emotion-annoyed .mascot-label {
+/* Annoyed/Angry - Red tint */
+.notification[data-emotion="annoyed"] .mascot-container,
+.notification[data-emotion="angry"] .mascot-container,
+.notification.emotion-annoyed .mascot-container,
+.notification.emotion-angry .mascot-container {
+    background: #C5A8A8;
+}
+
+.notification[data-emotion="annoyed"] .mascot-label,
+.notification[data-emotion="angry"] .mascot-label,
+.notification.emotion-annoyed .mascot-label,
+.notification.emotion-angry .mascot-label {
     background: #7A5A5A;
 }
 
-.notification.emotion-confused .mascot-label,
-.notification.emotion-dizzy .mascot-label {
-    background: #7A7A5A;
+/* Panic/Error - Intense red with pulse */
+.notification[data-emotion="panic"] .mascot-container,
+.notification[data-emotion="werror"] .mascot-container,
+.notification.emotion-panic .mascot-container,
+.notification.emotion-werror .mascot-container {
+    background: #D5A0A0;
+    animation: panicPulse 0.5s infinite;
 }
 
+.notification[data-emotion="panic"] .mascot-label,
+.notification[data-emotion="werror"] .mascot-label,
 .notification.emotion-panic .mascot-label,
 .notification.emotion-werror .mascot-label {
-    background: #8A5A5A;
+    background: #8A4A4A;
     animation: panicPulse 0.5s infinite;
 }
 
 @keyframes panicPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+    50% { opacity: 0.75; }
 }
 
+/* Dizzy/Confused - Yellow tint */
+.notification[data-emotion="dizzy"] .mascot-container,
+.notification[data-emotion="confused"] .mascot-container,
+.notification.emotion-dizzy .mascot-container,
+.notification.emotion-confused .mascot-container {
+    background: #C5C5A8;
+}
+
+.notification[data-emotion="dizzy"] .mascot-label,
+.notification[data-emotion="confused"] .mascot-label,
+.notification.emotion-dizzy .mascot-label,
+.notification.emotion-confused .mascot-label {
+    background: #7A7A5A;
+}
+
+/* Sleeping - Dark/muted */
+.notification[data-emotion="sleeping"] .mascot-container,
+.notification.emotion-sleeping .mascot-container {
+    background: #A0A0A8;
+}
+
+.notification[data-emotion="sleeping"] .mascot-label,
+.notification.emotion-sleeping .mascot-label {
+    background: #5A5A6A;
+}
+
+.notification[data-emotion="sleeping"] .sprite-face,
 .notification.emotion-sleeping .sprite-face {
     animation: sleepingBreathe 3s ease-in-out infinite;
 }
 
 @keyframes sleepingBreathe {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.05); }
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.03); opacity: 1; }
 }
 
+/* Smirk/Smug - Orange tint */
+.notification[data-emotion="smirk"] .mascot-container,
+.notification[data-emotion="smug"] .mascot-container,
+.notification.emotion-smirk .mascot-container,
+.notification.emotion-smug .mascot-container {
+    background: #C5B5A8;
+}
+
+.notification[data-emotion="smirk"] .mascot-label,
+.notification[data-emotion="smug"] .mascot-label,
+.notification.emotion-smirk .mascot-label,
+.notification.emotion-smug .mascot-label {
+    background: #8A6A5A;
+}
+
+.notification[data-emotion="smirk"] .sprite-face,
+.notification[data-emotion="smug"] .sprite-face,
+.notification.emotion-smirk .sprite-face,
 .notification.emotion-smug .sprite-face {
     animation: smugBounce 1s ease-in-out infinite;
 }
 
 @keyframes smugBounce {
     0%, 100% { transform: translateY(0) rotate(0deg); }
-    25% { transform: translateY(-3px) rotate(2deg); }
-    75% { transform: translateY(-3px) rotate(-2deg); }
+    25% { transform: translateY(-3px) rotate(1deg); }
+    75% { transform: translateY(-3px) rotate(-1deg); }
 }
 
-/* ==================== BUBBLE DECORATIONS ==================== */
-.bubble-decoration {
-    position: absolute;
-    font-size: 8px;
-    color: var(--nier-muted);
-    opacity: 0.5;
+/* Suspicious/Stare - Purple tint */
+.notification[data-emotion="suspicious"] .mascot-container,
+.notification[data-emotion="stare"] .mascot-container,
+.notification.emotion-suspicious .mascot-container,
+.notification.emotion-stare .mascot-container {
+    background: #B5A8C5;
 }
 
-.bubble-decoration.top-left {
-    top: 8px;
-    left: 8px;
+.notification[data-emotion="suspicious"] .mascot-label,
+.notification[data-emotion="stare"] .mascot-label,
+.notification.emotion-suspicious .mascot-label,
+.notification.emotion-stare .mascot-label {
+    background: #6A5A7A;
 }
 
-.bubble-decoration.bottom-right {
-    bottom: 8px;
-    right: 8px;
+/* Bug - Glitchy effect */
+.notification[data-emotion="bug"] .mascot-container,
+.notification.emotion-bug .mascot-container {
+    background: #A0A8A8;
+    animation: glitchShake 0.3s ease-in-out infinite;
+}
+
+.notification[data-emotion="bug"] .mascot-label,
+.notification.emotion-bug .mascot-label {
+    background: #4A5A5A;
+}
+
+@keyframes glitchShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+}
+
+/* Hollow - Faded/ghostly */
+.notification[data-emotion="hollow"] .mascot-container,
+.notification.emotion-hollow .mascot-container {
+    background: #C0C0C0;
+    opacity: 0.85;
+}
+
+.notification[data-emotion="hollow"] .mascot-label,
+.notification.emotion-hollow .mascot-label {
+    background: #707070;
+}
+
+.notification[data-emotion="hollow"] #notif-sprite,
+.notification.emotion-hollow #notif-sprite {
+    opacity: 0.7;
+}
+
+/* Normal - Default neutral */
+.notification[data-emotion="normal"] .mascot-container,
+.notification.emotion-normal .mascot-container {
+    background: var(--nier-panel);
+}
+
+.notification[data-emotion="normal"] .mascot-label,
+.notification.emotion-normal .mascot-label {
+    background: var(--nier-black);
 }
 
 /* ==================== TIMESTAMP ==================== */
 .notification-time {
-    font-size: 10px;
+    font-size: 9px;
     color: var(--nier-muted);
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--nier-border);
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(87, 83, 74, 0.3);
+    font-family: var(--font-mono);
 }
 
 /* ==================== RESPONSIVE ==================== */
@@ -286,39 +454,30 @@
         right: 20px;
         left: 20px;
         max-width: calc(100% - 40px);
-        flex-direction: column-reverse;
-        align-items: center;
+        flex-direction: column;
     }
     
     .mascot-container {
+        border-left: 3px solid var(--nier-black);
+        border-top: none;
+        min-width: 100%;
         flex-direction: row;
-        width: 100%;
-        justify-content: center;
+        min-height: 80px;
     }
     
     #notif-sprite {
-        width: 80px;
-        height: 80px;
-    }
-    
-    .sprite-face {
-        font-size: 40px;
-    }
-    
-    .bubble {
-        margin-left: 0;
-        margin-top: -3px;
-        width: 100%;
-    }
-    
-    .bubble::before,
-    .bubble::after {
-        display: none;
+        min-height: 80px;
+        min-width: 100px;
     }
     
     .mascot-label {
-        padding: 6px 16px;
-        font-size: 11px;
+        flex: 1;
+        border-top: none;
+        border-left: 3px solid var(--nier-black);
+    }
+    
+    .bubble {
+        min-height: 100px;
     }
 }
 
@@ -329,16 +488,4 @@
 
 .notification-exit {
     animation: notificationSlideDown 0.4s ease forwards;
-}
-
-/* Glitch Effect for Error States */
-.notification.emotion-werror .bubble,
-.notification.emotion-bug .bubble {
-    animation: glitchShake 0.3s ease-in-out;
-}
-
-@keyframes glitchShake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-3px); }
-    75% { transform: translateX(3px); }
 }

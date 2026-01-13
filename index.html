@@ -9,7 +9,9 @@
 
     <link rel="icon" href="/assets/icon-small-duplicate-18x14.png" type="image/png">
     
+    <!-- CSS ATUALIZADO -->
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/menu.css">
     <link rel="stylesheet" href="/css/notification.css">
     <link rel="stylesheet" href="/css/broadcast.css">
@@ -69,7 +71,7 @@
                     
                     <div class="login-buttons" style="margin-top:20px; display:flex; gap:10px;">
                         <button class="login-btn" onclick="handleLogin()">LOGIN</button>
-                        <button class="login-btn secondary" onclick="handleNewOperator()" style="background:transparent; border:1px solid var(--text-color);">NEW OP</button>
+                        <button class="login-btn secondary" onclick="handleNewOperator()">NEW OP</button>
                     </div>
                     
                     <div class="login-info-text">
@@ -123,7 +125,7 @@
                 </div>
                 <div class="menu-user-info">
                     <span class="menu-user-name">GUEST</span>
-                    <button class="menu-logout-btn" onclick="logout()" style="margin-left:10px; cursor:pointer;">LOGOUT</button>
+                    <button class="menu-logout-btn" onclick="logout()">LOGOUT</button>
                 </div>
             </div>
 
@@ -135,15 +137,29 @@
                     <div class="welcome-title" id="home-welcome-title">WELCOME</div>
                     <div class="welcome-text" id="home-welcome-text">Loading content...</div>
                 </div>
+                <div id="home-content-container"></div>
             </div>
 
             <div id="adm-broadcast" class="tab-content">
                 <div class="news-box">
                     <label>SPRITE:</label>
                     <div class="sprite-selector" id="sprite-selector">
-                        <div class="sprite-option active" data-sprite="normal"><img src="/assets/sprites/normal.png"></div>
-                        <div class="sprite-option" data-sprite="happy"><img src="/assets/sprites/happy.png"></div>
-                        <div class="sprite-option" data-sprite="werror"><img src="/assets/sprites/werror.png"></div>
+                        <div class="sprite-option active" data-sprite="normal"><img src="/assets/sprites/normal.png"><span>NORMAL</span></div>
+                        <div class="sprite-option" data-sprite="happy"><img src="/assets/sprites/happy.png"><span>HAPPY</span></div>
+                        <div class="sprite-option" data-sprite="sad"><img src="/assets/sprites/sad.png"><span>SAD</span></div>
+                        <div class="sprite-option" data-sprite="annoyed"><img src="/assets/sprites/annoyed.png"><span>ANNOYED</span></div>
+                        <div class="sprite-option" data-sprite="angry"><img src="/assets/sprites/angry.png"><span>ANGRY</span></div>
+                        <div class="sprite-option" data-sprite="panic"><img src="/assets/sprites/panic.png"><span>PANIC</span></div>
+                        <div class="sprite-option" data-sprite="werror"><img src="/assets/sprites/werror.png"><span>ERROR</span></div>
+                        <div class="sprite-option" data-sprite="dizzy"><img src="/assets/sprites/dizzy.png"><span>DIZZY</span></div>
+                        <div class="sprite-option" data-sprite="confused"><img src="/assets/sprites/confused.png"><span>CONFUSED</span></div>
+                        <div class="sprite-option" data-sprite="sleeping"><img src="/assets/sprites/sleeping.png"><span>SLEEPING</span></div>
+                        <div class="sprite-option" data-sprite="smirk"><img src="/assets/sprites/smirk.png"><span>SMIRK</span></div>
+                        <div class="sprite-option" data-sprite="smug"><img src="/assets/sprites/smug.png"><span>SMUG</span></div>
+                        <div class="sprite-option" data-sprite="stare"><img src="/assets/sprites/stare.png"><span>STARE</span></div>
+                        <div class="sprite-option" data-sprite="suspicious"><img src="/assets/sprites/suspicious.png"><span>SUSPICIOUS</span></div>
+                        <div class="sprite-option" data-sprite="bug"><img src="/assets/sprites/bug.png"><span>BUG</span></div>
+                        <div class="sprite-option" data-sprite="hollow"><img src="/assets/sprites/hollow.png"><span>HOLLOW</span></div>
                     </div>
                     <input type="hidden" id="sprite-select" value="normal">
                     <textarea id="broadcast-text" placeholder="MESSAGE..."></textarea>
@@ -152,12 +168,44 @@
             </div>
 
             <div id="adm-editing" class="tab-content">
-                <div class="editing-toolbar">
-                    <button onclick="editWelcomeHome()">EDIT WELCOME</button>
-                    <button onclick="addNewTab()">+ TAB</button>
-                    <button onclick="publishTabs()">PUBLISH</button>
+                <div class="editing-workspace">
+                    <div class="editing-toolbar">
+                        <div class="toolbar-title">EDITOR DE CONTEÚDO</div>
+                        <div class="toolbar-actions">
+                            <button class="toolbar-btn" onclick="addNewContent()">+ NOVO</button>
+                            <button class="toolbar-btn primary" onclick="saveContentChanges()">SALVAR</button>
+                        </div>
+                    </div>
+                    
+                    <div class="editing-canvas">
+                        <div class="editing-sidebar">
+                            <div class="sidebar-header">CONTEÚDOS</div>
+                            <div class="content-list" id="content-list"></div>
+                            <button class="add-content-btn" onclick="addNewContent()">ADICIONAR</button>
+                        </div>
+                        
+                        <div class="editing-main">
+                            <div class="editor-empty-state" id="editor-empty">
+                                <div class="editor-empty-text">SELECIONE UM CONTEÚDO PARA EDITAR</div>
+                            </div>
+                            
+                            <div class="editor-form hidden" id="editor-form"></div>
+                        </div>
+                        
+                        <div class="editing-properties">
+                            <div class="properties-header">PROPRIEDADES</div>
+                            <div class="properties-content" id="properties-panel">
+                                <div class="property-group">
+                                    <div class="property-group-title">STATUS</div>
+                                    <div class="property-item">
+                                        <span class="property-label">Visível</span>
+                                        <div class="property-toggle" id="content-visible-toggle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div id="editing-canvas" class="editing-canvas"></div>
             </div>
 
             <div id="adm-radio" class="tab-content">
@@ -226,11 +274,24 @@
     
     <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
-    <div id="broadcast-notification" class="notification hidden">
-        <div class="mascot-container"><img id="notif-sprite" src=""></div>
-        <div class="bubble"><div id="notif-text"></div></div>
+    <!-- NOTIFICAÇÃO ATUALIZADA - LAYOUT INVERTIDO -->
+    <div id="broadcast-notification" class="notification hidden" data-emotion="normal">
+        <div class="bubble">
+            <div id="notif-text" class="notification-text"></div>
+            <div class="notification-time" id="notif-time"></div>
+        </div>
+        
+        <div class="mascot-container">
+            <img id="notif-sprite" src="/assets/sprites/normal.png" alt="Obuntu">
+            <div class="mascot-label">
+                <span>OBUNTU</span>
+            </div>
+        </div>
+        
+        <button class="notification-close" onclick="hideNotification()">×</button>
     </div>
 
+    <!-- MODAIS -->
     <div id="edit-welcome-modal" class="modal hidden">
         <div class="modal-content">
             <h3>EDIT WELCOME</h3>
@@ -241,13 +302,27 @@
         </div>
     </div>
 
-    <div id="new-tab-modal" class="modal hidden">
+    <div id="new-content-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>NEW TAB</h3>
-            <input type="text" id="new-tab-name" placeholder="Name">
-            <textarea id="new-tab-content" placeholder="HTML Content"></textarea>
-            <button onclick="saveNewTab()">CREATE</button>
-            <button onclick="closeNewTabModal()">CANCEL</button>
+            <h3>NOVO CONTEÚDO</h3>
+            <div class="content-type-selector">
+                <div class="type-option" data-type="text" onclick="selectContentType('text')">
+                    <div class="type-option-icon">📝</div>
+                    <div class="type-option-name">TEXTO</div>
+                </div>
+                <div class="type-option" data-type="image" onclick="selectContentType('image')">
+                    <div class="type-option-icon">🖼️</div>
+                    <div class="type-option-name">IMAGEM</div>
+                </div>
+                <div class="type-option" data-type="link" onclick="selectContentType('link')">
+                    <div class="type-option-icon">🔗</div>
+                    <div class="type-option-name">LINK</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="createNewContent()">CRIAR</button>
+                <button class="btn-secondary" onclick="closeNewContentModal()">CANCELAR</button>
+            </div>
         </div>
     </div>
 

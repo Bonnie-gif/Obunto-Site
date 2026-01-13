@@ -1,0 +1,486 @@
+/**
+ * ARCS Button System - IMPROVED
+ * Enhanced button styles with NieR:Automata aesthetics
+ */
+
+/* ==================== BASE BUTTON STYLES ==================== */
+button,
+.btn,
+.button {
+    padding: 12px 24px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Corner accent */
+button::before,
+.btn::before,
+.button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid var(--nier-dark);
+    border-left: 2px solid var(--nier-dark);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+button:hover::before,
+.btn:hover::before,
+.button:hover::before {
+    opacity: 1;
+}
+
+button:hover,
+.btn:hover,
+.button:hover {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active,
+.btn:active,
+.button:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+button:disabled,
+.btn:disabled,
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ==================== PRIMARY BUTTON ==================== */
+.btn-primary,
+button.primary,
+.primary-btn {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    border-width: 3px;
+    font-size: 12px;
+    padding: 14px 28px;
+}
+
+.btn-primary::after,
+button.primary::after,
+.primary-btn::after {
+    content: '▶';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary:hover::after,
+button.primary:hover::after,
+.primary-btn:hover::after {
+    opacity: 1;
+    right: 8px;
+}
+
+.btn-primary:hover,
+button.primary:hover,
+.primary-btn:hover {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+}
+
+/* ==================== SECONDARY BUTTON ==================== */
+.btn-secondary,
+button.secondary,
+.secondary-btn {
+    background: transparent;
+    border: 2px solid var(--nier-muted);
+    color: var(--nier-text);
+}
+
+.btn-secondary:hover,
+button.secondary:hover,
+.secondary-btn:hover {
+    background: var(--nier-panel);
+    border-color: var(--nier-dark);
+}
+
+/* ==================== DANGER/DELETE BUTTON ==================== */
+.btn-danger,
+button.danger,
+.delete-btn,
+.deny-btn {
+    background: #8A6666;
+    color: var(--nier-paper);
+    border-color: #5A3535;
+}
+
+.btn-danger:hover,
+button.danger:hover,
+.delete-btn:hover,
+.deny-btn:hover {
+    background: #8A5555;
+    border-color: #5A3535;
+}
+
+/* ==================== SUCCESS/APPROVE BUTTON ==================== */
+.btn-success,
+button.success,
+.approve-btn {
+    background: #7A8A6A;
+    color: var(--nier-paper);
+    border-color: #5A6A4A;
+}
+
+.btn-success:hover,
+button.success:hover,
+.approve-btn:hover {
+    background: #6A9A6A;
+    border-color: #4A7A4A;
+}
+
+/* ==================== WARNING BUTTON ==================== */
+.btn-warning,
+button.warning {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+    border-color: var(--nier-dark);
+}
+
+.btn-warning:hover,
+button.warning:hover {
+    background: #D4B030;
+}
+
+/* ==================== GHOST BUTTON ==================== */
+.btn-ghost,
+button.ghost {
+    background: transparent;
+    border: 1px solid var(--nier-border);
+    color: var(--nier-text);
+}
+
+.btn-ghost:hover,
+button.ghost:hover {
+    background: rgba(186, 181, 161, 0.2);
+    border-color: var(--nier-dark);
+}
+
+/* ==================== ICON BUTTONS ==================== */
+.btn-icon,
+button.icon {
+    padding: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.btn-icon-lg,
+button.icon-lg {
+    width: 44px;
+    height: 44px;
+    font-size: 18px;
+}
+
+/* ==================== BUTTON SIZES ==================== */
+.btn-sm,
+button.sm {
+    padding: 8px 16px;
+    font-size: 10px;
+}
+
+.btn-lg,
+button.lg {
+    padding: 16px 32px;
+    font-size: 13px;
+}
+
+/* ==================== BUTTON GROUPS ==================== */
+.btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-group.vertical {
+    flex-direction: column;
+}
+
+.btn-group button:not(:last-child) {
+    border-right: none;
+}
+
+/* ==================== TOOLBAR BUTTONS ==================== */
+.toolbar-btn {
+    padding: 12px 22px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    position: relative;
+}
+
+.toolbar-btn::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-bottom: 2px solid var(--nier-dark);
+    border-right: 2px solid var(--nier-dark);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.toolbar-btn:hover {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+}
+
+.toolbar-btn:hover::before {
+    opacity: 1;
+}
+
+.toolbar-btn.primary {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    border-width: 3px;
+    font-size: 12px;
+}
+
+.toolbar-btn.primary:hover {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+}
+
+/* ==================== SPECIAL BUTTONS ==================== */
+
+/* Login buttons */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    position: relative;
+}
+
+.login-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 100%;
+    height: 100%;
+    background: var(--nier-dark);
+    transition: transform var(--transition-fast);
+    z-index: -1;
+}
+
+.login-btn:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.login-btn:hover {
+    color: var(--nier-paper);
+}
+
+.login-btn.secondary {
+    background: transparent;
+    border: 2px solid var(--nier-muted);
+    color: var(--nier-text);
+}
+
+.login-btn.secondary:hover {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+    border-color: var(--nier-dark);
+}
+
+/* Alarm theme buttons */
+.alarm-btn {
+    flex: 1;
+    padding: 32px 24px;
+    border: 3px solid var(--nier-black);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: all var(--transition-fast);
+    position: relative;
+    background: var(--nier-panel);
+    color: var(--nier-text);
+}
+
+.alarm-btn::after {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border: 1px solid currentColor;
+    opacity: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.alarm-btn:hover::after {
+    opacity: 0.5;
+}
+
+.alarm-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.alarm-btn.green {
+    background: #6A9A6A;
+    color: #2A4A2A;
+    border-color: #3A5A3A;
+}
+
+.alarm-btn.blue {
+    background: #6A8AAA;
+    color: #2A4A6A;
+    border-color: #3A5A7A;
+}
+
+.alarm-btn.red {
+    background: #AA6A6A;
+    color: #6A2A2A;
+    border-color: #7A3A3A;
+}
+
+.alarm-btn.epsilon {
+    background: var(--nier-black);
+    color: var(--nier-accent);
+    border-color: var(--nier-accent);
+    animation: epsilonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes epsilonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+/* Radio/Chat buttons */
+.radio-clear-btn,
+.chat-send-btn,
+#chat-send-btn {
+    padding: 10px 20px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+.radio-clear-btn:hover {
+    background: #8A5555;
+    color: var(--nier-paper);
+    border-color: #5A3535;
+}
+
+.chat-send-btn:hover,
+#chat-send-btn:hover:not(:disabled) {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+}
+
+/* Broadcast button */
+#send-broadcast,
+.broadcast-btn {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all var(--transition-fast);
+    position: relative;
+}
+
+#send-broadcast::before,
+.broadcast-btn::before {
+    content: '»';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 40px;
+    opacity: 0;
+    transition: all var(--transition-fast);
+}
+
+#send-broadcast:hover::before,
+.broadcast-btn:hover::before {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.15;
+}
+
+#send-broadcast:hover,
+.broadcast-btn:hover {
+    background: var(--nier-dark);
+    transform: translateY(-2px);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    button,
+    .btn,
+    .button {
+        padding: 10px 18px;
+        font-size: 10px;
+    }
+    
+    .btn-primary,
+    button.primary {
+        padding: 12px 22px;
+        font-size: 11px;
+    }
+    
+    .alarm-btn {
+        padding: 24px 18px;
+        font-size: 14px;
+    }
+}

@@ -1,8 +1,3 @@
-/**
- * ARCS - Advanced Research & Containment System
- * Server v3.2.2 - CORRIGIDO E DEFINITIVO
- */
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -14,7 +9,6 @@ const Joi = require('joi');
 const rateLimit = require('express-rate-limit');
 const CryptoJS = require('crypto-js');
 
-// ==================== CONFIGURATION ====================
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -24,45 +18,35 @@ const io = new Server(server, {
     }
 });
 
-// Environment Variables
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'arcs_jwt_secret_v322_secure';
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'arcs_encryption_v322';
 const PEPPER = process.env.PEPPER || 'arcs_pepper_2041';
 const SALT_ROUNDS = 12;
 
-// Admin Configuration
 const ADMIN_ID = '118107921024376';
 const ADMIN_PASSWORD = '2041';
 const ADMIN_NAME = 'OBUNTO';
 
-// File Paths
 const DATA_FILE = path.join(__dirname, 'data', 'arcs_data.enc');
 const LOG_FILE = path.join(__dirname, 'data', 'arcs.log');
 
-// ==================== MIDDLEWARE (ROTAS ESTÁTICAS CORRIGIDAS) ====================
 app.use(express.json());
-
-// 1. Servir pastas estáticas explicitamente
-// Isso garante que /css venha da pasta 'css' na raiz, /assets venha de 'assets', etc.
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 2. Servir o index.html na rota raiz
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Rate Limiting
 const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 15,
     message: { success: false, message: 'Too many attempts. Try again later.' }
 });
 
-// ==================== DATA STORE ====================
 let dataStore = {
     users: {},
     pendingUsers: [],
@@ -71,6 +55,16 @@ let dataStore = {
     radioMessages: [],
     customTabs: [],
     publishedTabs: [],
+    menuContents: [
+        {
+            id: 1,
+            type: 'text',
+            title: 'BEM-VINDO AO ARCS',
+            content: 'Sistema de Pesquisa e Contenção Avançado - Versão 3.2.2',
+            visible: true,
+            order: 1
+        }
+    ],
     welcome: {
         title: 'WELCOME',
         text: 'WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.'
@@ -79,7 +73,6 @@ let dataStore = {
     systemLog: []
 };
 
-// ==================== ENCRYPTION ====================
 function encryptData(data) {
     try {
         return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
@@ -99,104 +92,97 @@ function decryptData(encrypted) {
     }
 }
 
-// ==================== DATA PERSISTENCE ====================
-function ensureDataDirectory() {
-    const dataDir = path.join(__dirname, 'data');
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-}
-
 function saveData() {
     try {
-        ensureDataDirectory();
+        const dataDir = path.join(__dirname, 'data');
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        
         const encrypted = encryptData(dataStore);
-        if (encrypted) {
-            fs.writeFileSync(DATA_FILE, encrypted, 'utf8');
-        }
+        fs.writeFileSync(DATA_FILE, encrypted, 'utf8');
     } catch (e) {
-        console.error('Save data error', e);
+        console.error('Save error', e);
     }
 }
 
 function loadData() {
     try {
-        if (fs.existsSync(DATA_FILE)) {
-            const encrypted = fs.readFileSync(DATA_FILE, 'utf8');
-            const decrypted = decryptData(encrypted);
-            if (decrypted) {
-                dataStore = { ...dataStore, ...decrypted };
-                dataStore.onlineUsers = {}; // Limpar users online ao reiniciar
-            }
+        if (!fs.existsSync(DATA_FILE)) {
+            console.log('No data file found. Starting fresh.');
+            return;
+        }
+        
+        const encrypted = fs.readFileSync(DATA_FILE, 'utf8');
+        const decrypted = decryptData(encrypted);
+        
+        if (decrypted) {
+            dataStore = { ...dataStore, ...decrypted };
+            console.log('Data loaded successfully');
         }
     } catch (e) {
-        console.error('Load data error', e);
+        console.error('Load error', e);
     }
 }
 
-// ==================== LOGGING ====================
-function log(message, type = 'INFO') {
+function log(message) {
     const timestamp = new Date().toISOString();
-    const logEntry = `[${timestamp}] [${type}] ${message}`;
-    console.log(logEntry);
+    const entry = `[${timestamp}] ${message}\n`;
+    dataStore.systemLog.push({ timestamp, message });
+    if (dataStore.systemLog.length > 1000) dataStore.systemLog.shift();
     
-    dataStore.systemLog.push({ timestamp, type, message });
-    if (dataStore.systemLog.length > 500) {
-        dataStore.systemLog = dataStore.systemLog.slice(-500);
+    try {
+        const dataDir = path.join(__dirname, 'data');
+        if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+        fs.appendFileSync(LOG_FILE, entry);
+    } catch (e) {
+        console.error('Log error', e);
     }
 }
 
-function logError(message, error) {
-    log(`${message}: ${error.message}`, 'ERROR');
+async function hashPassword(password, userId) {
+    const peppered = password + PEPPER + userId;
+    return await bcrypt.hash(peppered, SALT_ROUNDS);
 }
 
-// ==================== AUTH & SECURITY ====================
-async function hashPassword(password, salt) {
-    return await bcrypt.hash(password + PEPPER + salt, SALT_ROUNDS);
+async function verifyPassword(password, hash, userId) {
+    const peppered = password + PEPPER + userId;
+    return await bcrypt.compare(peppered, hash);
 }
 
-async function verifyPassword(input, storedHash, salt) {
-    return await bcrypt.compare(input + PEPPER + salt, storedHash);
-}
-
-function generateToken(userId, isAdmin = false) {
+function generateToken(userId, isAdmin) {
     return jwt.sign({ userId, isAdmin }, JWT_SECRET, { expiresIn: '24h' });
 }
 
-function verifyToken(token) {
-    try { return jwt.verify(token, JWT_SECRET); } catch (e) { return null; }
-}
-
 function authenticateToken(req, res, next) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'No token' });
     
-    if (!token) return res.status(401).json({ success: false, message: 'Authentication required' });
-    
-    const decoded = verifyToken(token);
-    if (!decoded) return res.status(403).json({ success: false, message: 'Invalid token' });
-    
-    req.user = decoded;
-    next();
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ success: false, message: 'Invalid token' });
+        req.user = user;
+        next();
+    });
 }
 
 function requireAdmin(req, res, next) {
-    if (!req.user || !req.user.isAdmin) return res.status(403).json({ success: false, message: 'Admin access required' });
+    if (!req.user?.isAdmin) return res.status(403).json({ success: false, message: 'Admin required' });
     next();
 }
 
-// ==================== VALIDATION SCHEMAS ====================
 const schemas = {
     login: Joi.object({
         userId: Joi.string().required(),
-        password: Joi.string().allow('').optional()
+        password: Joi.string().optional()
     }),
-    register: Joi.object({ userId: Joi.string().required() }),
+    register: Joi.object({
+        userId: Joi.string().required()
+    }),
     broadcast: Joi.object({
         text: Joi.string().required(),
-        sprite: Joi.string().default('normal')
+        sprite: Joi.string().optional()
     }),
-    radioMessage: Joi.object({ text: Joi.string().required() }),
+    radioMessage: Joi.object({
+        text: Joi.string().required()
+    }),
     updateUser: Joi.object({
         name: Joi.string().optional(),
         status: Joi.string().valid('active', 'banned').optional()
@@ -208,6 +194,20 @@ const schemas = {
     welcome: Joi.object({
         title: Joi.string().required(),
         text: Joi.string().required()
+    }),
+    contents: Joi.object({
+        contents: Joi.array().items(Joi.object({
+            id: Joi.number().required(),
+            type: Joi.string().valid('text', 'image', 'link').required(),
+            title: Joi.string().allow('').optional(),
+            content: Joi.string().allow('').optional(),
+            imageUrl: Joi.string().allow('').optional(),
+            alt: Joi.string().allow('').optional(),
+            url: Joi.string().allow('').optional(),
+            buttonText: Joi.string().allow('').optional(),
+            visible: Joi.boolean().required(),
+            order: Joi.number().required()
+        })).required()
     })
 };
 
@@ -217,7 +217,6 @@ function validate(data, schema) {
     return value;
 }
 
-// ==================== INITIALIZATION ====================
 async function initializeAdmin() {
     if (!dataStore.users[ADMIN_ID]) {
         const hashedPassword = await hashPassword(ADMIN_PASSWORD, ADMIN_ID);
@@ -235,11 +234,8 @@ async function initializeAdmin() {
     }
 }
 
-// ==================== ROUTES ====================
-
 app.get('/api/health', (req, res) => res.json({ success: true, status: 'online' }));
 
-// Login
 app.post('/api/login', loginLimiter, async (req, res) => {
     try {
         const { userId, password } = validate(req.body, schemas.login);
@@ -250,7 +246,6 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         if (user.status === 'banned') return res.status(403).json({ success: false, message: 'Account banned.' });
         if (!user.approved) return res.status(403).json({ success: false, message: 'Account pending approval.' });
         
-        // Admin Password Check
         if (user.isAdmin) {
             if (!password) return res.status(401).json({ success: false, message: 'Password required for admin.' });
             const valid = await verifyPassword(password, user.password, normalizedId);
@@ -268,7 +263,6 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     }
 });
 
-// Register
 app.post('/api/register', loginLimiter, (req, res) => {
     try {
         const { userId } = validate(req.body, schemas.register);
@@ -287,14 +281,13 @@ app.post('/api/register', loginLimiter, (req, res) => {
     }
 });
 
-// Features & Data Routes (Simplified for brevity but fully functional)
 app.get('/api/pending', authenticateToken, requireAdmin, (req, res) => res.json({ success: true, pending: dataStore.pendingUsers }));
+
 app.get('/api/users', authenticateToken, requireAdmin, (req, res) => {
     const users = Object.values(dataStore.users).map(u => ({ id: u.id, name: u.name, status: u.status, isAdmin: u.isAdmin }));
     res.json({ success: true, users });
 });
 
-// Approve/Deny
 app.post('/api/users/approve', authenticateToken, requireAdmin, (req, res) => {
     const { userId } = req.body;
     const normalizedId = userId.toUpperCase();
@@ -315,7 +308,6 @@ app.post('/api/users/deny', authenticateToken, requireAdmin, (req, res) => {
     res.json({ success: true });
 });
 
-// Ban/Unban/Edit
 app.post('/api/users/:userId/ban', authenticateToken, requireAdmin, (req, res) => {
     if (dataStore.users[req.params.userId] && !dataStore.users[req.params.userId].isAdmin) {
         dataStore.users[req.params.userId].status = 'banned';
@@ -323,6 +315,7 @@ app.post('/api/users/:userId/ban', authenticateToken, requireAdmin, (req, res) =
     }
     res.json({ success: true });
 });
+
 app.post('/api/users/:userId/unban', authenticateToken, requireAdmin, (req, res) => {
     if (dataStore.users[req.params.userId]) {
         dataStore.users[req.params.userId].status = 'active';
@@ -330,6 +323,7 @@ app.post('/api/users/:userId/unban', authenticateToken, requireAdmin, (req, res)
     }
     res.json({ success: true });
 });
+
 app.put('/api/users/:userId', authenticateToken, requireAdmin, (req, res) => {
     const user = dataStore.users[req.params.userId];
     if (user && (!user.isAdmin || req.user.userId === ADMIN_ID)) {
@@ -340,7 +334,6 @@ app.put('/api/users/:userId', authenticateToken, requireAdmin, (req, res) => {
     res.json({ success: true });
 });
 
-// Broadcast & Radio
 app.post('/api/broadcast', authenticateToken, requireAdmin, (req, res) => {
     const data = validate(req.body, schemas.broadcast);
     const item = { ...data, id: Date.now().toString(), senderId: req.user.userId, timestamp: Date.now() };
@@ -350,7 +343,9 @@ app.post('/api/broadcast', authenticateToken, requireAdmin, (req, res) => {
     io.emit('broadcast:new', item);
     res.json({ success: true });
 });
+
 app.get('/api/radio', (req, res) => res.json({ success: true, messages: dataStore.radioMessages }));
+
 app.post('/api/radio', authenticateToken, (req, res) => {
     const data = validate(req.body, schemas.radioMessage);
     const user = dataStore.users[req.user.userId];
@@ -361,6 +356,7 @@ app.post('/api/radio', authenticateToken, (req, res) => {
     io.emit('radio:message', item);
     res.json({ success: true });
 });
+
 app.delete('/api/radio', authenticateToken, requireAdmin, (req, res) => {
     dataStore.radioMessages = [];
     saveData();
@@ -368,31 +364,67 @@ app.delete('/api/radio', authenticateToken, requireAdmin, (req, res) => {
     res.json({ success: true });
 });
 
-// Tabs & Welcome
+app.delete('/api/radio/:id', authenticateToken, requireAdmin, (req, res) => {
+    dataStore.radioMessages = dataStore.radioMessages.filter(m => m.id !== req.params.id);
+    saveData();
+    res.json({ success: true });
+});
+
 app.get('/api/tabs', (req, res) => res.json({ success: true, tabs: dataStore.customTabs, published: dataStore.publishedTabs }));
+
 app.post('/api/tabs', authenticateToken, requireAdmin, (req, res) => {
     const data = validate(req.body, schemas.customTab);
     dataStore.customTabs.push({ ...data, id: Date.now().toString(), createdAt: Date.now() });
     saveData();
     res.json({ success: true });
 });
+
 app.delete('/api/tabs/:id', authenticateToken, requireAdmin, (req, res) => {
     dataStore.customTabs = dataStore.customTabs.filter(t => t.id !== req.params.id);
     dataStore.publishedTabs = dataStore.publishedTabs.filter(t => t.id !== req.params.id);
     saveData();
     res.json({ success: true });
 });
+
 app.post('/api/tabs/publish', authenticateToken, requireAdmin, (req, res) => {
     dataStore.publishedTabs = [...dataStore.customTabs];
     saveData();
     io.emit('tabs:published', dataStore.publishedTabs);
     res.json({ success: true });
 });
+
 app.get('/api/welcome', (req, res) => res.json({ success: true, welcome: dataStore.welcome }));
+
 app.put('/api/welcome', authenticateToken, requireAdmin, (req, res) => {
     dataStore.welcome = req.body;
     saveData();
     io.emit('welcome:updated', req.body);
+    res.json({ success: true });
+});
+
+app.get('/api/contents', (req, res) => {
+    res.json({ success: true, contents: dataStore.menuContents });
+});
+
+app.post('/api/contents', authenticateToken, requireAdmin, (req, res) => {
+    try {
+        const data = validate(req.body, schemas.contents);
+        dataStore.menuContents = data.contents;
+        saveData();
+        io.emit('content:updated', dataStore.menuContents);
+        log(`Menu contents updated by ${req.user.userId}`);
+        res.json({ success: true });
+    } catch (e) {
+        res.status(400).json({ success: false, message: e.message });
+    }
+});
+
+app.delete('/api/contents/:id', authenticateToken, requireAdmin, (req, res) => {
+    const contentId = parseInt(req.params.id);
+    dataStore.menuContents = dataStore.menuContents.filter(c => c.id !== contentId);
+    saveData();
+    io.emit('content:updated', dataStore.menuContents);
+    log(`Content ${contentId} deleted by ${req.user.userId}`);
     res.json({ success: true });
 });
 
@@ -401,33 +433,46 @@ app.get('/api/analytics', authenticateToken, requireAdmin, (req, res) => {
         totalUsers: Object.keys(dataStore.users).length,
         onlineUsers: Object.keys(dataStore.onlineUsers).length,
         totalBroadcasts: dataStore.broadcasts.length,
-        totalRadioMessages: dataStore.radioMessages.length
+        totalRadioMessages: dataStore.radioMessages.length,
+        totalContents: dataStore.menuContents.length
     }});
 });
 
-// Socket
 io.on('connection', (socket) => {
+    console.log('Client connected:', socket.id);
+    
     socket.on('register', (data) => {
         if (data?.userId) {
             socket.userId = data.userId;
             socket.join(data.userId);
             if (data.isAdmin) socket.join('admins');
+            console.log(`User registered: ${data.userId}`);
         }
     });
+    
     socket.on('disconnect', () => {
         if (socket.userId && dataStore.onlineUsers[socket.userId]) {
             delete dataStore.onlineUsers[socket.userId];
             saveData();
             io.emit('user:offline', { userId: socket.userId });
+            console.log(`User disconnected: ${socket.userId}`);
         }
     });
 });
 
-// Start
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+});
+
 loadData();
 initializeAdmin().then(() => {
     server.listen(PORT, () => {
-        console.log(`ARCS Server running on port ${PORT}`);
-        console.log(`Admin: ${ADMIN_ID} | Pass: ${ADMIN_PASSWORD}`);
+        console.log('========================================');
+        console.log(`ARCS Server v3.2.2 RUNNING`);
+        console.log(`Port: ${PORT}`);
+        console.log(`Admin ID: ${ADMIN_ID}`);
+        console.log(`Admin Password: ${ADMIN_PASSWORD}`);
+        console.log('========================================');
     });
 });
