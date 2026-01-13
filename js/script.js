@@ -1,6 +1,6 @@
 /**
  * ARCS - Advanced Research & Containment System
- * Client v3.2.2 - Full Integration
+ * Client v3.2.2 - Full Integration (Login, Admin, Radio, Tabs, Chat)
  */
 
 // ==================== CONFIGURATION ====================
@@ -8,36 +8,46 @@ const API_URL = '/api';
 let currentUser = null;
 let authToken = localStorage.getItem('arcs_token');
 let socket = null;
-let customTabsCache = []; // Cache local para o editor
+
+// Chat Variables
+let currentChatRecipient = null;
+let chatTypingTimeout = null;
 
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Socket.io
-    socket = io();
-    setupSocketListeners();
+    // 1. Initialize Socket.io (Requer <script src="/socket.io/socket.io.js"> no HTML)
+    try {
+        socket = io();
+        setupSocketListeners();
+        console.log('Socket initialized');
+    } catch (e) {
+        console.error('Socket.io failed to load. Ensure script tag is in HTML.', e);
+    }
 
-    // Check for saved theme
+    // 2. Load Theme
     const savedTheme = localStorage.getItem('arcs_theme') || 'green';
     setAlarmTheme(savedTheme);
 
-    // Start Loading Animation
+    // 3. Start Loading Animation
     setTimeout(startLoading, 1000);
 
-    // Enter key handlers
-    setupKeyHandlers();
+    // 4. Input Handlers (Enter key)
+    setupInputHandlers();
     
-    // Tab handlers
+    // 5. Tab System
     setupTabHandlers();
 });
 
 function setupSocketListeners() {
     socket.on('connect', () => console.log('Connected to server'));
     
+    // Broadcasts
     socket.on('broadcast:new', (data) => {
         showBroadcast(data);
         if(currentUser?.isAdmin) loadAnalytics();
     });
 
+    // Radio
     socket.on('radio:message', (data) => {
         appendRadioMessage(data);
         playSound('sfx-newmessage');
@@ -49,50 +59,31 @@ function setupSocketListeners() {
         if(container) container.innerHTML = '<div class="radio-empty">NO MESSAGES</div>';
     });
 
-    socket.on('user:approved', () => {
+    // Users
+    socket.on('user:approved', (data) => {
         playSound('sfx-blue');
+        // Se eu sou admin, recarrego as listas
         if(currentUser?.isAdmin) {
             loadPendingList();
             loadActiveUsers();
         }
     });
 
-    socket.on('welcome:updated', (data) => {
-        updateWelcomeScreen(data);
-    });
+    socket.on('user:banned', () => { if(currentUser?.isAdmin) loadActiveUsers(); });
+    socket.on('user:online', () => { if(currentUser) loadChatUsers(); });
+    socket.on('user:offline', () => { if(currentUser) loadChatUsers(); });
+
+    // Welcome Screen
+    socket.on('welcome:updated', (data) => updateWelcomeScreen(data));
     
-    socket.on('tabs:published', (tabs) => {
-        renderMenuTabs(tabs);
-    });
+    // Tabs
+    socket.on('tabs:published', (tabs) => renderMenuTabs(tabs));
+
+    // Chat
+    socket.on('chat:message', (msg) => handleIncomingChatMessage(msg));
 }
 
-// ==================== UTILITIES ====================
-function playSound(id) {
-    const audio = document.getElementById(id);
-    if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(e => console.log('Audio play prevented'));
-    }
-}
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    const screen = document.getElementById(id);
-    if (screen) screen.classList.add('active');
-}
-
-function showStatus(message, type = 'info') {
-    const status = document.getElementById('login-status');
-    if (!status) return;
-    
-    status.textContent = message;
-    status.className = 'login-status show';
-    if (type === 'error') status.classList.add('error');
-    if (type === 'success') status.classList.add('success');
-    
-    setTimeout(() => status.classList.remove('show'), 4000);
-}
-
+// ==================== API HELPER ====================
 async function apiCall(endpoint, method = 'GET', body = null) {
     const headers = { 'Content-Type': 'application/json' };
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
@@ -103,6 +94,15 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     try {
         const res = await fetch(`${API_URL}${endpoint}`, config);
         const data = await res.json();
+        
+        // Se der erro 401/403 (Token inválido), desloga
+        if (res.status === 401 || res.status === 403) {
+            if (endpoint !== '/login' && endpoint !== '/register') {
+                console.warn('Session expired');
+                // logout(); // Opcional: auto-logout
+            }
+        }
+        
         if (!res.ok) throw new Error(data.message || 'Server Error');
         return data;
     } catch (e) {
@@ -111,37 +111,31 @@ async function apiCall(endpoint, method = 'GET', body = null) {
     }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// ==================== LOADING & LOGIN ====================
+// ==================== AUTHENTICATION ====================
 function startLoading() {
     playSound('sfx-loading');
     let progress = 0;
     const bar = document.getElementById('loading-progress');
     
     const interval = setInterval(() => {
-        progress += Math.random() * 12 + 3;
+        progress += Math.random() * 15 + 5;
         if (progress >= 100) {
             progress = 100;
             bar.style.width = '100%';
             clearInterval(interval);
             setTimeout(() => {
                 document.getElementById('login-panel').classList.remove('hidden');
-            }, 400);
+            }, 500);
         } else {
             bar.style.width = progress + '%';
         }
-    }, 180);
+    }, 200);
 }
 
 async function handleLogin() {
     const userId = document.getElementById('operator-id').value.trim();
-    const password = document.getElementById('operator-password') ? document.getElementById('operator-password').value : '';
+    const passwordEl = document.getElementById('operator-password');
+    const password = passwordEl ? passwordEl.value : '';
 
     if (!userId) {
         playSound('sfx-error');
@@ -156,7 +150,7 @@ async function handleLogin() {
         currentUser = data.user;
         localStorage.setItem('arcs_token', authToken);
 
-        // Register socket
+        // Register socket identity
         socket.emit('register', { userId: currentUser.id, isAdmin: currentUser.isAdmin });
 
         playSound('sfx-poweron');
@@ -169,24 +163,22 @@ async function handleLogin() {
 }
 
 async function handleNewOperator() {
-    const userId = document.getElementById('operator-id').value.trim().toUpperCase() || generateUserId();
+    const userIdInput = document.getElementById('operator-id');
+    const userId = userIdInput.value.trim().toUpperCase() || generateUserId();
     
     try {
         await apiCall('/register', 'POST', { userId });
         playSound('sfx-sent');
         showStatus('REQUEST SENT', 'success');
         
-        // Show ID popup visualmente rico (restaurado do original)
+        // Show Popup
         showIdPopup(userId);
+        userIdInput.value = userId; // Fill input for convenience
         
     } catch (e) {
         playSound('sfx-error');
         showStatus(e.message.toUpperCase(), 'error');
     }
-}
-
-function generateUserId() {
-    return 'OP' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 function logout() {
@@ -196,101 +188,57 @@ function logout() {
     location.reload();
 }
 
-// ==================== REGISTRATION POPUP ====================
-function showIdPopup(userId) {
-    let popup = document.getElementById('id-popup');
-    if (!popup) {
-        popup = document.createElement('div');
-        popup.id = 'id-popup';
-        popup.className = 'modal';
-        popup.innerHTML = `
-            <div class="modal-content" style="min-width: 360px;">
-                <div class="modal-header">
-                    <span>SAVE YOUR OPERATOR ID</span>
-                    <div class="modal-close" onclick="closeIdPopup()">X</div>
-                </div>
-                <div class="modal-body">
-                    <p style="margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
-                        YOUR REQUEST HAS BEEN SENT. SAVE THIS ID TO LOGIN AFTER APPROVAL:
-                    </p>
-                    <div id="popup-user-id" style="
-                        background: rgba(255, 255, 255, 0.1);
-                        border: 2px solid var(--text-color);
-                        padding: 18px;
-                        text-align: center;
-                        font-size: 20px;
-                        font-weight: 700;
-                        letter-spacing: 4px;
-                        margin-bottom: 16px;
-                        font-family: monospace;
-                    ">${userId}</div>
-                    <button class="form-submit-btn" onclick="copyUserId()">COPY ID</button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(popup);
-    } else {
-        document.getElementById('popup-user-id').textContent = userId;
-    }
-    popup.classList.remove('hidden');
+function generateUserId() {
+    return 'OP' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-function closeIdPopup() {
-    document.getElementById('id-popup')?.classList.add('hidden');
-}
-
-function copyUserId() {
-    const userId = document.getElementById('popup-user-id').textContent;
-    navigator.clipboard.writeText(userId).then(() => {
-        playSound('sfx-sent');
-        const btn = document.querySelector('#id-popup .form-submit-btn');
-        const originalText = btn.textContent;
-        btn.textContent = 'COPIED!';
-        setTimeout(() => btn.textContent = originalText, 2000);
-    });
-}
-
-// ==================== MAIN SCREEN ====================
+// ==================== MAIN SCREEN LOGIC ====================
 async function enterMainScreen() {
     showScreen('main-screen');
     
-    // Update User Info
+    // Update Header
     const userDisplay = document.querySelector('.menu-user-name');
     if(userDisplay) userDisplay.textContent = currentUser.name;
 
-    // Admin UI
+    // Show Admin Tabs if Admin
+    const adminTabs = document.getElementById('admin-tabs');
+    const adminToggle = document.getElementById('admin-toggle');
+    
     if (currentUser.isAdmin) {
-        document.getElementById('admin-toggle')?.classList.remove('hidden');
-        document.getElementById('admin-tabs')?.classList.remove('hidden');
-        // Initial Admin Load
+        adminTabs.classList.remove('hidden');
+        adminToggle.classList.remove('hidden');
+        
+        // Load Admin Data
         loadPendingList();
         loadActiveUsers();
         loadAnalytics();
-        renderCustomTabsInEditor(); // Load tabs for editor
+        renderCustomTabsInEditor();
     } else {
-        document.getElementById('admin-toggle')?.classList.add('hidden');
-        document.getElementById('admin-tabs')?.classList.add('hidden');
+        adminTabs.classList.add('hidden');
+        adminToggle.classList.add('hidden');
     }
 
-    // Common Data
+    // Load Common Data
     loadRadioMessages();
     loadWelcomeContent();
-    loadPublishedTabs(); // Load tabs for menu
+    loadPublishedTabs();
+    loadChatUsers(); // Populate chat list
+    
     goToHome();
 }
 
-// ==================== ADMIN: USERS & APPROVALS ====================
-async function loadPendingList(modal = false) {
+// ==================== ADMIN: USERS & TICKETS ====================
+async function loadPendingList(isModal = false) {
     if (!currentUser.isAdmin) return;
     try {
         const data = await apiCall('/pending');
-        const listId = modal ? 'pending-list-modal' : 'pending-list';
+        const listId = isModal ? 'pending-list-modal' : 'pending-list';
         const list = document.getElementById(listId);
         if (!list) return;
 
         list.innerHTML = '';
         if (data.pending.length === 0) {
-            list.innerHTML = '<div class="pending-empty">NO REQUESTS</div>';
+            list.innerHTML = '<div class="pending-empty">NO PENDING REQUESTS</div>';
             return;
         }
 
@@ -300,6 +248,7 @@ async function loadPendingList(modal = false) {
             item.innerHTML = `
                 <div class="pending-info">
                     <span class="user-id">${p.userId}</span>
+                    <span class="pending-time">${new Date(p.requestedAt).toLocaleTimeString()}</span>
                 </div>
                 <div class="actions">
                     <button class="approve-btn" onclick="approveUser('${p.userId}')">✓</button>
@@ -315,10 +264,8 @@ async function approveUser(userId) {
     try {
         await apiCall('/users/approve', 'POST', { userId });
         playSound('sfx-blue');
-        loadPendingList(); // Reload lists
-        if(document.getElementById('admin-panel').classList.contains('hidden') === false) {
-             loadPendingList(true); // Reload modal list if open
-        }
+        // Listas atualizam via socket, mas forçamos refresh do modal se aberto
+        loadPendingList(true);
     } catch (e) { playSound('sfx-error'); }
 }
 
@@ -326,11 +273,10 @@ async function denyUser(userId) {
     try {
         await apiCall('/users/deny', 'POST', { userId });
         playSound('sfx-denied');
-        loadPendingList();
+        loadPendingList(true);
     } catch (e) { playSound('sfx-error'); }
 }
 
-// --- Users Management ---
 async function loadActiveUsers() {
     if (!currentUser.isAdmin) return;
     try {
@@ -345,23 +291,24 @@ async function loadActiveUsers() {
             const div = document.createElement('div');
             div.className = u.status === 'banned' ? 'banned-item' : 'user-item';
             
-            let actions = '';
-            if (u.id !== currentUser.id && u.id !== '118107921024376') { // Admin hardcoded ID check
+            let btnAction = '';
+            // Não banir a si mesmo nem o Admin Supremo
+            if (u.id !== currentUser.id && u.id !== '118107921024376') {
                 if (u.status === 'active') {
-                    actions = `<button onclick="banUser('${u.id}')">BAN</button>`;
+                    btnAction = `<button onclick="banUser('${u.id}')">BAN</button>`;
                 } else {
-                    actions = `<button onclick="unbanUser('${u.id}')">UNBAN</button>`;
+                    btnAction = `<button onclick="unbanUser('${u.id}')">UNBAN</button>`;
                 }
             }
             
             div.innerHTML = `
                 <div class="user-info">
-                    <div class="user-name">${u.name}</div>
-                    <div class="user-id">${u.id}</div>
+                    <div class="user-name">${escapeHtml(u.name)}</div>
+                    <div class="user-id">${u.id} ${u.isAdmin ? '(ADMIN)' : ''}</div>
                 </div>
                 <div class="user-actions">
-                    <button onclick="editUser('${u.id}', '${u.name}', '${u.status}')">EDIT</button>
-                    ${actions}
+                    <button onclick="editUser('${u.id}', '${escapeHtml(u.name)}', '${u.status}')">EDIT</button>
+                    ${btnAction}
                 </div>
             `;
 
@@ -371,27 +318,26 @@ async function loadActiveUsers() {
     } catch (e) { console.error(e); }
 }
 
-async function banUser(userId) {
+// User Actions
+async function banUser(id) {
     if(!confirm('Ban user?')) return;
-    try { await apiCall(`/users/${userId}/ban`, 'POST'); } catch(e) { playSound('sfx-error'); }
+    try { await apiCall(`/users/${id}/ban`, 'POST'); playSound('sfx-denied'); } catch(e) { playSound('sfx-error'); }
+}
+async function unbanUser(id) {
+    try { await apiCall(`/users/${id}/unban`, 'POST'); playSound('sfx-blue'); } catch(e) { playSound('sfx-error'); }
 }
 
-async function unbanUser(userId) {
-    try { await apiCall(`/users/${userId}/unban`, 'POST'); } catch(e) { playSound('sfx-error'); }
-}
-
+// Edit User Modal
 function editUser(id, name, status) {
     document.getElementById('edit-user-id').value = id;
     document.getElementById('edit-user-name').value = name;
     document.getElementById('edit-user-status').value = status;
     document.getElementById('edit-user-modal').classList.remove('hidden');
 }
-
 async function saveUserChanges() {
     const id = document.getElementById('edit-user-id').value;
     const name = document.getElementById('edit-user-name').value;
     const status = document.getElementById('edit-user-status').value;
-    
     try {
         await apiCall(`/users/${id}`, 'PUT', { name, status });
         document.getElementById('edit-user-modal').classList.add('hidden');
@@ -400,26 +346,10 @@ async function saveUserChanges() {
     } catch(e) { playSound('sfx-error'); }
 }
 
-async function loadAnalytics() {
-    try {
-        const data = await apiCall('/analytics');
-        const el1 = document.getElementById('analytics-total-users');
-        const el2 = document.getElementById('analytics-active-sessions');
-        const el3 = document.getElementById('analytics-broadcasts');
-        const el4 = document.getElementById('analytics-radio-msgs');
-
-        if(el1) el1.textContent = data.analytics.totalUsers;
-        if(el2) el2.textContent = data.analytics.onlineUsers;
-        if(el3) el3.textContent = data.analytics.totalBroadcasts;
-        if(el4) el4.textContent = data.analytics.totalRadioMessages;
-    } catch(e) { console.error(e); }
-}
-
-// ==================== BROADCAST ====================
+// ==================== BROADCAST SYSTEM ====================
 async function sendBroadcast() {
     const text = document.getElementById('broadcast-text').value;
     const sprite = document.getElementById('sprite-select').value;
-    
     if(!text) return playSound('sfx-error');
 
     try {
@@ -434,14 +364,20 @@ function showBroadcast(data) {
     const spriteImg = document.getElementById('notif-sprite');
     const textEl = document.getElementById('notif-text');
     
-    // Set sprite image path (garante que usa o caminho absoluto)
-    spriteImg.src = `/assets/sprites/${data.sprite || 'normal'}.png`;
+    // Procura imagem do sprite (se for img tag) ou emoji (se for div)
+    // Ajustando para sua estrutura HTML (que usa img)
+    if (spriteImg.tagName === 'IMG') {
+        spriteImg.src = `/assets/sprites/${data.sprite || 'normal'}.png`;
+    } else {
+        // Fallback para emoji se o HTML mudou
+        spriteImg.innerHTML = `<span class="sprite-face">⚠️</span>`; 
+    }
     
     textEl.textContent = '';
     notif.classList.remove('hidden');
     playSound('sfx-newmessage');
     
-    // Typewriter
+    // Typewriter effect
     let i = 0;
     const type = () => {
         if (i < data.text.length) {
@@ -452,10 +388,11 @@ function showBroadcast(data) {
     };
     type();
 
+    // Auto hide
     setTimeout(() => notif.classList.add('hidden'), 8000);
 }
 
-// ==================== RADIO ====================
+// ==================== RADIO SYSTEM ====================
 async function sendRadioMessage() {
     const input = document.getElementById('radio-input');
     const text = input.value.trim();
@@ -473,7 +410,6 @@ async function loadRadioMessages() {
         const data = await apiCall('/radio');
         const container = document.getElementById('radio-messages');
         if(!container) return;
-        
         container.innerHTML = '';
         data.messages.forEach(appendRadioMessage);
     } catch(e) { console.error(e); }
@@ -482,20 +418,20 @@ async function loadRadioMessages() {
 function appendRadioMessage(msg) {
     const container = document.getElementById('radio-messages');
     if(!container) return;
-
-    if(container.querySelector('.radio-empty')) container.innerHTML = '';
     
+    // Remove "Empty" msg
+    if(container.querySelector('.radio-empty')) container.innerHTML = '';
+
     const div = document.createElement('div');
     div.className = 'radio-message';
     
-    // Delete button for admin
     const deleteBtn = currentUser?.isAdmin 
         ? `<button class="radio-delete-btn" onclick="deleteRadio('${msg.id}')">X</button>` 
         : '';
 
     div.innerHTML = `
         <span class="radio-message-time">[${new Date(msg.timestamp).toLocaleTimeString()}]</span>
-        <span class="radio-message-user">${msg.user}:</span>
+        <span class="radio-message-user">${escapeHtml(msg.user)}:</span>
         <span class="radio-message-text">${escapeHtml(msg.text)}</span>
         ${deleteBtn}
     `;
@@ -508,138 +444,139 @@ async function deleteRadio(id) {
 }
 
 async function clearRadioMessages() {
-    if(!confirm('Clear all?')) return;
+    if(!confirm('Clear all radio messages?')) return;
     try { await apiCall('/radio', 'DELETE'); } catch(e) { console.error(e); }
 }
 
-// ==================== CONTENT EDITOR (TABS & WELCOME) ====================
-
-// --- Welcome Screen ---
-async function loadWelcomeContent() {
+// ==================== CHAT SYSTEM ====================
+async function loadChatUsers() {
     try {
-        const data = await apiCall('/welcome');
-        updateWelcomeScreen(data.welcome);
-    } catch(e) { console.error(e); }
-}
+        // Reusamos a lista de usuários
+        const data = await apiCall('/users'); // Retorna todos os usuários
+        const list = document.getElementById('chat-user-list');
+        if(!list) return;
 
-function updateWelcomeScreen(welcome) {
-    const title = document.getElementById('home-welcome-title');
-    const text = document.getElementById('home-welcome-text');
-    if(title) title.textContent = welcome.title;
-    if(text) text.textContent = welcome.text;
-}
+        list.innerHTML = '';
+        const onlineUsers = data.users.filter(u => u.id !== currentUser.id); // Filtra o próprio usuário
 
-function editWelcomeHome() {
-    const title = document.getElementById('home-welcome-title')?.textContent || '';
-    const text = document.getElementById('home-welcome-text')?.textContent || '';
-    
-    document.getElementById('welcome-title-input').value = title;
-    document.getElementById('welcome-text-input').value = text;
-    
-    document.getElementById('edit-welcome-modal')?.classList.remove('hidden');
-}
-
-function closeWelcomeModal() {
-    document.getElementById('edit-welcome-modal')?.classList.add('hidden');
-}
-
-async function saveWelcomeChanges() {
-    const title = document.getElementById('welcome-title-input').value;
-    const text = document.getElementById('welcome-text-input').value;
-    
-    try {
-        await apiCall('/welcome', 'PUT', { title, text });
-        document.getElementById('edit-welcome-modal').classList.add('hidden');
-        playSound('sfx-sent');
-    } catch(e) { playSound('sfx-error'); }
-}
-
-// --- Custom Tabs Editor ---
-
-// Carrega as abas no canvas de edição (somente Admin)
-async function renderCustomTabsInEditor() {
-    try {
-        const data = await apiCall('/tabs');
-        const tabs = data.tabs || [];
-        customTabsCache = tabs; // Atualiza cache
-        
-        const canvas = document.getElementById('editing-canvas');
-        if (!canvas) return;
-        
-        if (tabs.length === 0) {
-            canvas.innerHTML = '<div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>';
+        if (onlineUsers.length === 0) {
+            list.innerHTML = '<div class="chat-user-empty">NO USERS FOUND</div>';
             return;
         }
-        
-        canvas.innerHTML = '';
-        
-        tabs.forEach(tab => {
+
+        onlineUsers.forEach(u => {
             const item = document.createElement('div');
-            item.className = 'tab-preview-item';
-            // Estilização inline para garantir o visual no editor
-            item.style.border = '1px solid var(--text-color)';
-            item.style.padding = '10px';
-            item.style.marginBottom = '10px';
-            item.style.background = 'rgba(0,0,0,0.2)';
+            item.className = 'chat-user-item';
+            if (currentChatRecipient === u.id) item.classList.add('active');
             
+            // Status Indicator (usando a propriedade isOnline se o backend mandar, ou assumindo offline)
+            // No seu server atual, /api/users não retorna isOnline diretamente no array principal,
+            // mas podemos implementar se o server mudar. Por hora, listamos todos.
+            
+            item.onclick = () => selectChatUser(u.id, u.name);
             item.innerHTML = `
-                <div style="font-weight:bold; margin-bottom:5px;">${escapeHtml(tab.name)}</div>
-                <div style="font-size: 0.9em; opacity: 0.8; margin-bottom:10px; max-height:50px; overflow:hidden;">${escapeHtml(tab.content)}</div>
-                <button onclick="deleteCustomTab('${tab.id}')" style="background:transparent; border:1px solid red; color:red; cursor:pointer; padding:5px;">DELETE</button>
+                <div class="chat-user-name">${escapeHtml(u.name)}</div>
+                <div class="chat-user-id">${u.id}</div>
             `;
-            canvas.appendChild(item);
+            list.appendChild(item);
         });
-    } catch (e) {
-        console.error('Editor render error', e);
+    } catch (e) { console.error(e); }
+}
+
+async function selectChatUser(userId, userName) {
+    currentChatRecipient = userId;
+    
+    // Update UI
+    document.querySelectorAll('.chat-user-item').forEach(el => el.classList.remove('active'));
+    // (Adicionar classe active visualmente seria melhor com referência direta ao elemento, mas ok)
+    
+    const header = document.getElementById('chat-header');
+    if(header) {
+        header.innerHTML = `
+            <span class="chat-recipient">CHAT WITH: ${escapeHtml(userName)}</span>
+            <span class="chat-status">CONNECTED</span>
+        `;
+    }
+
+    // Enable inputs
+    document.getElementById('chat-input').disabled = false;
+    document.getElementById('chat-send-btn').disabled = false;
+
+    // Load history
+    await loadChatHistory(userId);
+}
+
+async function loadChatHistory(recipientId) {
+    const container = document.getElementById('chat-messages');
+    container.innerHTML = '<div class="chat-loading">Loading...</div>';
+    
+    try {
+        const data = await apiCall(`/chat/${recipientId}`);
+        container.innerHTML = '';
+        
+        if (data.messages.length === 0) {
+            container.innerHTML = '<div class="chat-empty">NO MESSAGES YET</div>';
+        } else {
+            data.messages.forEach(msg => appendChatMessage(msg));
+        }
+    } catch(e) {
+        container.innerHTML = '<div class="chat-error">Failed to load history</div>';
     }
 }
 
-function addNewTab() {
-    document.getElementById('new-tab-modal')?.classList.remove('hidden');
+async function sendChatMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if(!text || !currentChatRecipient) return;
+
+    // Send via socket directly for instant update
+    socket.emit('chat:send', {
+        recipientId: currentChatRecipient,
+        text: text
+    });
+
+    input.value = '';
 }
 
-function closeNewTabModal() {
-    document.getElementById('new-tab-modal')?.classList.add('hidden');
-    document.getElementById('new-tab-name').value = '';
-    document.getElementById('new-tab-content').value = '';
+function handleIncomingChatMessage(msg) {
+    // Se a mensagem for para mim OU fui eu que mandei
+    const isForMe = msg.recipientId === currentUser.id;
+    const isFromMe = msg.senderId === currentUser.id;
+
+    if (isForMe || isFromMe) {
+        // Se estivermos vendo o chat dessa pessoa, adiciona na tela
+        if (currentChatRecipient === (isForMe ? msg.senderId : msg.recipientId)) {
+            appendChatMessage(msg);
+            playSound('sfx-newmessage');
+        } else if (isForMe) {
+            // Notificação visual de mensagem não lida (opcional)
+            playSound('sfx-newmessage');
+            showStatus(`New message from ${msg.senderName}`, 'info');
+        }
+    }
 }
 
-async function saveNewTab() {
-    const name = document.getElementById('new-tab-name').value;
-    const content = document.getElementById('new-tab-content').value;
+function appendChatMessage(msg) {
+    const container = document.getElementById('chat-messages');
+    if(container.querySelector('.chat-empty')) container.innerHTML = '';
     
-    if(!name || !content) return playSound('sfx-error');
-
-    try {
-        await apiCall('/tabs', 'POST', { name, content });
-        closeNewTabModal();
-        playSound('sfx-sent');
-        renderCustomTabsInEditor(); // Recarrega editor
-    } catch(e) { playSound('sfx-error'); }
-}
-
-async function deleteCustomTab(tabId) {
-    if(!confirm('Delete this tab permanently?')) return;
+    const isMine = msg.senderId === currentUser.id;
     
-    try {
-        await apiCall(`/tabs/${tabId}`, 'DELETE');
-        playSound('sfx-denied');
-        renderCustomTabsInEditor();
-    } catch(e) { playSound('sfx-error'); }
+    const div = document.createElement('div');
+    div.className = `chat-bubble ${isMine ? 'mine' : 'theirs'}`;
+    div.innerHTML = `
+        <div class="chat-text">${escapeHtml(msg.text)}</div>
+        <div class="chat-meta">${new Date(msg.timestamp).toLocaleTimeString()}</div>
+    `;
+    
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
 }
 
-async function publishTabs() {
-    try {
-        await apiCall('/tabs/publish', 'POST');
-        playSound('sfx-blue');
-        alert('TABS PUBLISHED TO MENU!');
-    } catch(e) { playSound('sfx-error'); }
-}
-
-// ==================== TABS RENDERING (MENU) ====================
+// ==================== TABS & EDITOR ====================
 async function loadPublishedTabs() {
     try {
-        const data = await apiCall('/tabs'); // Retorna { tabs: [], published: [] }
+        const data = await apiCall('/tabs'); 
         renderMenuTabs(data.published || []);
     } catch(e) { console.error(e); }
 }
@@ -680,23 +617,135 @@ function showCustomTab(tab) {
         `;
         document.querySelector('.main-window').appendChild(view);
     } else {
-        // Se existir, atualiza conteúdo caso tenha mudado
         view.querySelector('.custom-body').textContent = tab.content;
     }
     
-    // Ativa a aba
     view.classList.add('active');
-    
-    // Marca visualmente o botão no menu como ativo (opcional, requer lógica extra de seleção de irmãos)
-    // Simplesmente removemos 'active' de todos acima e o usuário vê o conteúdo.
 }
 
+// --- Editor Logic ---
+async function renderCustomTabsInEditor() {
+    try {
+        const data = await apiCall('/tabs');
+        const tabs = data.tabs || [];
+        const canvas = document.getElementById('editing-canvas');
+        if (!canvas) return;
+        
+        if (tabs.length === 0) {
+            canvas.innerHTML = '<div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>';
+            return;
+        }
+        
+        canvas.innerHTML = '';
+        tabs.forEach(tab => {
+            const item = document.createElement('div');
+            item.className = 'tab-preview-item';
+            item.style.border = '1px solid var(--text-color)';
+            item.style.padding = '10px';
+            item.style.marginBottom = '10px';
+            item.style.background = 'rgba(0,0,0,0.2)';
+            
+            item.innerHTML = `
+                <div style="font-weight:bold;">${escapeHtml(tab.name)}</div>
+                <div style="font-size: 0.8em; opacity: 0.7;">${escapeHtml(tab.content.substring(0, 50))}...</div>
+                <button onclick="deleteCustomTab('${tab.id}')" style="color: red; margin-top:5px; cursor:pointer;">DELETE</button>
+            `;
+            canvas.appendChild(item);
+        });
+    } catch (e) { console.error(e); }
+}
 
-// ==================== UI HELPERS ====================
+async function saveNewTab() {
+    const name = document.getElementById('new-tab-name').value;
+    const content = document.getElementById('new-tab-content').value;
+    if(!name || !content) return playSound('sfx-error');
+
+    try {
+        await apiCall('/tabs', 'POST', { name, content });
+        closeNewTabModal();
+        playSound('sfx-sent');
+        renderCustomTabsInEditor();
+    } catch(e) { playSound('sfx-error'); }
+}
+
+async function deleteCustomTab(id) {
+    if(!confirm('Delete tab permanently?')) return;
+    try { await apiCall(`/tabs/${id}`, 'DELETE'); playSound('sfx-denied'); renderCustomTabsInEditor(); } catch(e) { playSound('sfx-error'); }
+}
+
+async function publishTabs() {
+    try { await apiCall('/tabs/publish', 'POST'); playSound('sfx-blue'); alert('Tabs published!'); } catch(e) { playSound('sfx-error'); }
+}
+
+// Welcome Screen Editor
+async function loadWelcomeContent() {
+    try {
+        const data = await apiCall('/welcome');
+        updateWelcomeScreen(data.welcome);
+    } catch(e) { console.error(e); }
+}
+
+function updateWelcomeScreen(welcome) {
+    const title = document.getElementById('home-welcome-title');
+    const text = document.getElementById('home-welcome-text');
+    if(title) title.textContent = welcome.title;
+    if(text) text.textContent = welcome.text;
+}
+
+async function saveWelcomeChanges() {
+    const title = document.getElementById('welcome-title-input').value;
+    const text = document.getElementById('welcome-text-input').value;
+    try {
+        await apiCall('/welcome', 'PUT', { title, text });
+        document.getElementById('edit-welcome-modal').classList.add('hidden');
+        playSound('sfx-sent');
+    } catch(e) { playSound('sfx-error'); }
+}
+
+// ==================== ANALYTICS ====================
+async function loadAnalytics() {
+    try {
+        const data = await apiCall('/analytics');
+        document.getElementById('analytics-total-users').textContent = data.analytics.totalUsers;
+        document.getElementById('analytics-active-sessions').textContent = data.analytics.onlineUsers;
+        document.getElementById('analytics-broadcasts').textContent = data.analytics.totalBroadcasts;
+        document.getElementById('analytics-radio-msgs').textContent = data.analytics.totalRadioMessages;
+    } catch(e) { console.error(e); }
+}
+
+// ==================== UI & UTILS ====================
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
 function goToHome() {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById('view-home').classList.add('active');
+}
+
+function showStatus(msg, type) {
+    const status = document.getElementById('login-status');
+    if(!status) return;
+    status.textContent = msg;
+    status.className = 'login-status show ' + type;
+    setTimeout(() => status.classList.remove('show'), 4000);
+}
+
+function playSound(id) {
+    const audio = document.getElementById(id);
+    if(audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function setAlarmTheme(theme) {
@@ -705,20 +754,62 @@ function setAlarmTheme(theme) {
     localStorage.setItem('arcs_theme', theme);
 }
 
-// UI Setup Helpers
-function setupKeyHandlers() {
-    document.getElementById('operator-id')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
-    document.getElementById('radio-input')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendRadioMessage();
-    });
+// Registration Popup
+function showIdPopup(userId) {
+    let popup = document.getElementById('id-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'id-popup';
+        popup.className = 'modal';
+        popup.innerHTML = `
+            <div class="modal-content" style="min-width: 350px;">
+                <h3>SAVE YOUR ID</h3>
+                <p>Request sent. Save this ID to login:</p>
+                <div id="popup-user-id" style="font-family:monospace; font-size:1.5em; margin:15px 0; border:1px solid #ccc; padding:10px;">${userId}</div>
+                <button onclick="copyUserId()">COPY ID</button>
+                <button onclick="closeIdPopup()" style="margin-top:10px;">CLOSE</button>
+            </div>
+        `;
+        document.body.appendChild(popup);
+    } else {
+        document.getElementById('popup-user-id').textContent = userId;
+    }
+    popup.classList.remove('hidden');
+}
+
+function closeIdPopup() { document.getElementById('id-popup')?.classList.add('hidden'); }
+function copyUserId() {
+    const txt = document.getElementById('popup-user-id').textContent;
+    navigator.clipboard.writeText(txt).then(() => { alert('ID COPIED!'); });
+}
+
+// Modals
+window.addNewTab = () => document.getElementById('new-tab-modal').classList.remove('hidden');
+window.closeNewTabModal = () => document.getElementById('new-tab-modal').classList.add('hidden');
+window.editWelcomeHome = () => {
+    document.getElementById('welcome-title-input').value = document.getElementById('home-welcome-title').textContent;
+    document.getElementById('welcome-text-input').value = document.getElementById('home-welcome-text').textContent;
+    document.getElementById('edit-welcome-modal').classList.remove('hidden');
+};
+window.closeWelcomeModal = () => document.getElementById('edit-welcome-modal').classList.add('hidden');
+window.closeEditUserModal = () => document.getElementById('edit-user-modal').classList.add('hidden');
+
+window.openAdmin = () => {
+    document.getElementById('admin-panel').classList.remove('hidden');
+    loadPendingList(true);
+};
+window.closeAdmin = () => document.getElementById('admin-panel').classList.add('hidden');
+
+// Handlers Setup
+function setupInputHandlers() {
+    document.getElementById('operator-id')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); });
+    document.getElementById('radio-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendRadioMessage(); });
+    document.getElementById('chat-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 }
 
 function setupTabHandlers() {
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', function() {
-            // Standard tabs (aqueles que tem data-target no HTML)
             const target = this.dataset.target;
             if (target) {
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -726,15 +817,14 @@ function setupTabHandlers() {
                 this.classList.add('active');
                 document.getElementById(target)?.classList.add('active');
                 
-                // Se clicou no editor, carrega as abas
-                if(target === 'adm-editing') {
-                    renderCustomTabsInEditor();
-                }
+                // Specific Reloads
+                if(target === 'adm-chat') loadChatUsers();
+                if(target === 'adm-editing') renderCustomTabsInEditor();
             }
         });
     });
     
-    // Sprite selector
+    // Sprites
     document.querySelectorAll('.sprite-option').forEach(opt => {
         opt.onclick = () => {
             document.querySelectorAll('.sprite-option').forEach(o => o.classList.remove('active'));
@@ -744,54 +834,38 @@ function setupTabHandlers() {
     });
 }
 
-// ==================== GLOBAL EXPORTS (Crucial for HTML onclicks) ====================
+// ==================== EXPORTS ====================
+// Make functions globally available for HTML onclick attributes
 window.handleLogin = handleLogin;
 window.handleNewOperator = handleNewOperator;
 window.logout = logout;
 window.goToHome = goToHome;
 window.setAlarmTheme = setAlarmTheme;
-
 window.sendBroadcast = sendBroadcast;
 window.closeBroadcast = () => document.getElementById('broadcast-notification').classList.add('hidden');
-
 window.sendRadioMessage = sendRadioMessage;
 window.clearRadioMessages = clearRadioMessages;
 window.deleteRadio = deleteRadio;
-
 window.approveUser = approveUser;
 window.denyUser = denyUser;
 window.banUser = banUser;
 window.unbanUser = unbanUser;
 window.editUser = editUser;
-window.closeEditUserModal = () => document.getElementById('edit-user-modal').classList.add('hidden');
 window.saveUserChanges = saveUserChanges;
-window.showUsersSection = (type) => {
-    document.getElementById('users-active-section').classList.toggle('hidden', type !== 'active');
-    document.getElementById('users-banned-section').classList.toggle('hidden', type !== 'banned');
-    document.querySelectorAll('.users-tab').forEach(t => t.classList.remove('active'));
-    // O event.target funciona porque é chamado via onclick no HTML
-    if(event && event.target) event.target.classList.add('active');
-};
-
-// Editor & Welcome Exports
-window.editWelcomeHome = editWelcomeHome;
-window.closeWelcomeModal = closeWelcomeModal;
 window.saveWelcomeChanges = saveWelcomeChanges;
-
-window.addNewTab = addNewTab;
-window.closeNewTabModal = closeNewTabModal;
 window.saveNewTab = saveNewTab;
 window.deleteCustomTab = deleteCustomTab;
 window.publishTabs = publishTabs;
 window.showCustomTab = showCustomTab;
-
-// Admin Panel
-window.openAdmin = () => {
-    document.getElementById('admin-panel').classList.remove('hidden');
-    loadPendingList(true);
+window.showUsersSection = (type) => {
+    document.getElementById('users-active-section').classList.toggle('hidden', type !== 'active');
+    document.getElementById('users-banned-section').classList.toggle('hidden', type !== 'banned');
+    document.querySelectorAll('.users-tab').forEach(t => t.classList.remove('active'));
+    // Encontrar a aba clicada e ativar
+    const tabs = document.querySelectorAll('.users-tab');
+    if (type === 'active') tabs[0].classList.add('active');
+    else tabs[1].classList.add('active');
 };
-window.closeAdmin = () => document.getElementById('admin-panel').classList.add('hidden');
-
-// Registration Popup
 window.closeIdPopup = closeIdPopup;
 window.copyUserId = copyUserId;
+window.sendChatMessage = sendChatMessage;

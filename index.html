@@ -3,28 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCS - Newton OS</title>
-    <link rel="icon" href="assets/icon-small-duplicate-18x14.png" type="image/png">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
-    <link rel="stylesheet" href="css/notification.css">
-    <link rel="stylesheet" href="css/broadcast.css">
-    <link rel="stylesheet" href="css/editing.css">
-    <link rel="stylesheet" href="css/alarms.css">
-    <link rel="stylesheet" href="css/tickets.css">
-    <link rel="stylesheet" href="css/radio.css">
-    <link rel="stylesheet" href="css/credentials.css">
-    <link rel="stylesheet" href="css/users.css">
-    <link rel="stylesheet" href="css/analytics.css">
+    <title>ARCS - Newton OS Ver.3.2.2</title>
+    
+    <script src="/socket.io/socket.io.js"></script>
+
+    <link rel="icon" href="/assets/icon-small-duplicate-18x14.png" type="image/png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/notification.css">
+    <link rel="stylesheet" href="/css/broadcast.css">
+    <link rel="stylesheet" href="/css/editing.css">
+    <link rel="stylesheet" href="/css/alarms.css">
+    <link rel="stylesheet" href="/css/tickets.css">
+    <link rel="stylesheet" href="/css/radio.css">
+    <link rel="stylesheet" href="/css/credentials.css">
+    <link rel="stylesheet" href="/css/users.css">
+    <link rel="stylesheet" href="/css/analytics.css">
 </head>
 <body>
-    <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
-    <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
-    <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
-    <audio id="sfx-error" src="assets/audio/uh_oh.wav"></audio>
-    <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
-    <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
-    <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
+    <audio id="sfx-poweron" src="/assets/audio/poweron.wav"></audio>
+    <audio id="sfx-loading" src="/assets/audio/loading1.wav"></audio>
+    <audio id="sfx-newmessage" src="/assets/audio/newmessage.wav"></audio>
+    <audio id="sfx-error" src="/assets/audio/uh_oh.wav"></audio>
+    <audio id="sfx-denied" src="/assets/audio/requestdenied.wav"></audio>
+    <audio id="sfx-sent" src="/assets/audio/requestsent.wav"></audio>
+    <audio id="sfx-blue" src="/assets/audio/bluecode.wav"></audio>
 
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
@@ -36,7 +40,7 @@
         <div class="loading-left">
             <div class="upeo-section">
                 <svg class="upeo-logo" viewBox="0 0 200 200">
-                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z"/>
+                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z" fill="currentColor"/>
                     <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
                     <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
                 </svg>
@@ -56,12 +60,21 @@
                 <div class="login-header">OPERATOR ACCESS</div>
                 <div class="login-body">
                     <label class="login-label">ENTER OPERATOR ID:</label>
-                    <input type="text" id="operator-id" class="login-input" maxlength="20">
+                    <input type="text" id="operator-id" class="login-input" maxlength="20" autocomplete="off">
+                    
+                    <label class="login-label">PASSWORD (ADMIN ONLY):</label>
+                    <input type="password" id="operator-password" class="login-input" placeholder="••••" maxlength="20">
+                    
                     <div class="login-status" id="login-status"></div>
-                    <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                    
+                    <div class="login-buttons" style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                        <button class="login-btn secondary" onclick="handleNewOperator()" style="background:transparent; border:1px solid var(--text-color);">NEW OP</button>
+                    </div>
+                    
                     <div class="login-info-text">
-                        NEW OPERATOR?<br>
-                        ENTER YOUR ID TO REQUEST ACCESS
+                        ADMIN ID: 118107921024376 (REQ. PASS)<br>
+                        NEW OPERATORS: CLICK NEW OP
                     </div>
                 </div>
             </div>
@@ -90,15 +103,8 @@
 
     <div id="main-screen" class="screen">
         <div class="top-decoration">
-            <div class="browser-dots">
-                <span></span><span></span><span></span>
-            </div>
-            <div class="url-bar">ARCS - Advanced Research & Containment System ++++++++++++++++++++</div>
-        </div>
-
-        <div class="loading-indicator">
-            <span class="loading-icon">*</span>
-            <span>System initialized</span>
+            <div class="browser-dots"><span></span><span></span><span></span></div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System</div>
         </div>
 
         <div class="main-window">
@@ -113,373 +119,152 @@
                     <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
                     <div class="tab" data-target="adm-users">USERS</div>
                     <div class="tab" data-target="adm-analytics">ANALYTICS</div>
-                    <div id="custom-menu-tabs"></div>
+                    <div id="custom-menu-tabs" style="display:inline-flex;"></div>
+                </div>
+                <div class="menu-user-info">
+                    <span class="menu-user-name">GUEST</span>
+                    <button class="menu-logout-btn" onclick="logout()" style="margin-left:10px; cursor:pointer;">LOGOUT</button>
                 </div>
             </div>
 
             <div id="view-home" class="tab-content active">
                 <div class="banner-section">
-                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                    <img src="/assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
                 </div>
-                <div class="home-welcome" id="home-welcome-section">
+                <div class="home-welcome">
                     <div class="welcome-title" id="home-welcome-title">WELCOME</div>
-                    <div class="welcome-text" id="home-welcome-text">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</div>
+                    <div class="welcome-text" id="home-welcome-text">Loading content...</div>
                 </div>
             </div>
 
             <div id="adm-broadcast" class="tab-content">
-                <div class="content-grid">
-                    <div class="grid-cell empty-cell">
-                        <div class="x-mark"><div class="line"></div><div class="line"></div></div>
+                <div class="news-box">
+                    <label>SPRITE:</label>
+                    <div class="sprite-selector" id="sprite-selector">
+                        <div class="sprite-option active" data-sprite="normal"><img src="/assets/sprites/normal.png"></div>
+                        <div class="sprite-option" data-sprite="happy"><img src="/assets/sprites/happy.png"></div>
+                        <div class="sprite-option" data-sprite="werror"><img src="/assets/sprites/werror.png"></div>
                     </div>
-                    <div class="grid-cell news-cell">
-                        <div class="sticker yellow">BROADCAST SYSTEM</div>
-                        <div class="cell-header">GLOBAL MESSAGE</div>
-                        <div class="news-box">
-                            <label>SELECT EMOTION:</label>
-                            <div class="sprite-selector" id="sprite-selector">
-                                <div class="sprite-option active" data-sprite="normal">
-                                    <img src="assets/sprites/normal.png" alt="Normal">
-                                    <span>Normal</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="happy">
-                                    <img src="assets/sprites/happy.png" alt="Happy">
-                                    <span>Happy</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="sad">
-                                    <img src="assets/sprites/sad.png" alt="Sad">
-                                    <span>Sad</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="annoyed">
-                                    <img src="assets/sprites/annoyed.png" alt="Annoyed">
-                                    <span>Annoyed</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="bug">
-                                    <img src="assets/sprites/bug.png" alt="Bug">
-                                    <span>Bug</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="dizzy">
-                                    <img src="assets/sprites/dizzy.png" alt="Dizzy">
-                                    <span>Dizzy</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="hollow">
-                                    <img src="assets/sprites/hollow.png" alt="Hollow">
-                                    <span>Hollow</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="panic">
-                                    <img src="assets/sprites/panic.png" alt="Panic">
-                                    <span>Panic</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="sleeping">
-                                    <img src="assets/sprites/sleeping.png" alt="Sleeping">
-                                    <span>Sleeping</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="smug">
-                                    <img src="assets/sprites/smug.png" alt="Smug">
-                                    <span>Smug</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="stare">
-                                    <img src="assets/sprites/stare.png" alt="Stare">
-                                    <span>Stare</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="suspicious">
-                                    <img src="assets/sprites/suspicious.png" alt="Suspicious">
-                                    <span>Suspicious</span>
-                                </div>
-                                <div class="sprite-option" data-sprite="werror">
-                                    <img src="assets/sprites/werror.png" alt="W.Error">
-                                    <span>W.Error</span>
-                                </div>
-                            </div>
-                            <input type="hidden" id="sprite-select" value="normal">
-                            <textarea id="broadcast-text" placeholder="TYPE MESSAGE..."></textarea>
-                            <button id="send-broadcast" onclick="sendBroadcast()">TRANSMIT</button>
-                        </div>
-                    </div>
-                    <div class="grid-cell updates-cell">
-                        <div class="cell-header">STATUS</div>
-                        <div class="updates-box">
-                            <div class="updates-title">READY</div>
-                            <div class="updates-text">SYSTEM READY FOR INPUT.</div>
-                        </div>
-                    </div>
+                    <input type="hidden" id="sprite-select" value="normal">
+                    <textarea id="broadcast-text" placeholder="MESSAGE..."></textarea>
+                    <button onclick="sendBroadcast()">TRANSMIT</button>
                 </div>
             </div>
 
             <div id="adm-editing" class="tab-content">
-                <div class="editing-workspace">
-                    <div class="editing-toolbar">
-                        <div class="toolbar-title">CONTENT EDITOR</div>
-                        <div class="toolbar-actions">
-                            <button class="toolbar-btn" onclick="editWelcomeHome()">EDIT WELCOME</button>
-                            <button class="toolbar-btn" onclick="addNewTab()">+ NEW TAB</button>
-                            <button class="toolbar-btn primary" onclick="publishTabs()">PUBLISH</button>
-                        </div>
-                    </div>
-                    <div class="editing-canvas" id="editing-canvas">
-                        <div class="canvas-hint">CREATE NEW TABS OR EDIT THE WELCOME SCREEN</div>
-                    </div>
+                <div class="editing-toolbar">
+                    <button onclick="editWelcomeHome()">EDIT WELCOME</button>
+                    <button onclick="addNewTab()">+ TAB</button>
+                    <button onclick="publishTabs()">PUBLISH</button>
                 </div>
-            </div>
-
-            <div id="adm-alarms" class="tab-content">
-                <div class="alarms-fullwidth">
-                    <div class="cell-header">SYSTEM ALARM LEVELS</div>
-                    <div id="alarms-container">
-                        <div class="alarm-item green">
-                            <div class="alarm-header">
-                                <div class="alarm-type">Green Alert</div>
-                                <div class="alarm-badge">Normal</div>
-                            </div>
-                            <div class="alarm-details">All systems operational. Standard interface active.</div>
-                            <div class="alarm-actions">
-                                <button onclick="setAlarmTheme('green')">ACTIVATE</button>
-                            </div>
-                        </div>
-                        
-                        <div class="alarm-item blue">
-                            <div class="alarm-header">
-                                <div class="alarm-type">Blue Alert</div>
-                                <div class="alarm-badge">Earthy</div>
-                            </div>
-                            <div class="alarm-details">Interface shifted to earthy blue tones. Visual adjustments applied.</div>
-                            <div class="alarm-actions">
-                                <button onclick="setAlarmTheme('blue')">ACTIVATE</button>
-                            </div>
-                        </div>
-                        
-                        <div class="alarm-item red">
-                            <div class="alarm-header">
-                                <div class="alarm-type">Red Alert</div>
-                                <div class="alarm-badge">Warning</div>
-                            </div>
-                            <div class="alarm-details">System running in red-tinted earthy mode. Heightened awareness required.</div>
-                            <div class="alarm-actions">
-                                <button onclick="setAlarmTheme('red')">ACTIVATE</button>
-                            </div>
-                        </div>
-                        
-                        <div class="alarm-item gamma">
-                            <div class="alarm-header">
-                                <div class="alarm-type">Gamma Protocol</div>
-                                <div class="alarm-badge">Restricted</div>
-                            </div>
-                            <div class="alarm-details">Orange/Yellow theme active. Radio and Credentials RESTRICTED for personnel access.</div>
-                            <div class="alarm-actions">
-                                <button onclick="setAlarmTheme('gamma')">ACTIVATE</button>
-                            </div>
-                        </div>
-                        
-                        <div class="alarm-item epsilon">
-                            <div class="alarm-header">
-                                <div class="alarm-type">Epsilon Corruption</div>
-                                <div class="alarm-badge">Critical</div>
-                            </div>
-                            <div class="alarm-details">CRITICAL: System corruption detected. Visual glitches, dead pixels, and instability present.</div>
-                            <div class="alarm-actions">
-                                <button onclick="setAlarmTheme('epsilon')">ACTIVATE</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="adm-tickets" class="tab-content">
-                <div class="tickets-fullwidth">
-                    <div class="cell-header">PENDING APPROVALS</div>
-                    <div id="pending-list"></div>
-                </div>
+                <div id="editing-canvas" class="editing-canvas"></div>
             </div>
 
             <div id="adm-radio" class="tab-content">
                 <div class="radio-fullwidth">
-                    <div class="cell-header">RADIO COMMUNICATIONS</div>
+                    <div class="cell-header">RADIO FREQUENCY 99.4</div>
                     <div class="radio-header">
-                        <div class="radio-frequency">FREQUENCY: 99.4 MHz</div>
-                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR ALL</button>
-                    </div>
-                    <div class="radio-status">
-                        <div class="radio-status-indicator"></div>
-                        <span>CHANNEL ACTIVE</span>
+                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR</button>
                     </div>
                     <div class="radio-messages" id="radio-messages"></div>
                     <div class="radio-input-area">
-                        <input type="text" id="radio-input" placeholder="Type message...">
+                        <input type="text" id="radio-input" placeholder="Radio check...">
                         <button onclick="sendRadioMessage()">SEND</button>
                     </div>
                 </div>
             </div>
-
-            <div id="adm-credentials" class="tab-content">
-                <div class="credentials-fullwidth">
-                    <div class="cell-header">ADMINISTRATOR CREDENTIALS</div>
-                    <div class="credentials-card">
-                        <div class="credentials-header">
-                            <div class="credentials-logo">ARCS</div>
-                            <div class="credentials-badge">LEVEL: OMEGA</div>
-                        </div>
-                        <div class="credentials-body">
-                            <div class="credential-field">
-                                <span class="credential-label">NAME:</span>
-                                <span class="credential-value">OBUNTO</span>
-                            </div>
-                            <div class="credential-field">
-                                <span class="credential-label">ID:</span>
-                                <span class="credential-value">118107921024376</span>
-                            </div>
-                            <div class="credential-field">
-                                <span class="credential-label">CLEARANCE:</span>
-                                <span class="credential-value">GOLD</span>
-                            </div>
-                            <div class="credential-field">
-                                <span class="credential-label">DIVISION:</span>
-                                <span class="credential-value">SYSTEM ADMINISTRATION</span>
-                            </div>
-                        </div>
-                        <div class="credentials-footer">
-                            AUTHORIZED ACCESS TO ALL FACILITIES
-                        </div>
-                    </div>
-                </div>
+            
+            <div id="adm-tickets" class="tab-content">
+                 <div class="cell-header">APPROVAL QUEUE</div>
+                 <div id="pending-list"></div>
             </div>
 
             <div id="adm-users" class="tab-content">
-                <div class="users-fullwidth">
-                    <div class="cell-header">USER MANAGEMENT</div>
-                    <div class="users-tabs">
-                        <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE USERS</div>
-                        <div class="users-tab" onclick="showUsersSection('banned')">BANNED USERS</div>
-                    </div>
-                    <div id="users-active-section" class="users-section">
-                        <div id="active-users-list"></div>
-                    </div>
-                    <div id="users-banned-section" class="users-section hidden">
-                        <div id="banned-users-list"></div>
-                    </div>
+                <div class="users-tabs">
+                    <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE</div>
+                    <div class="users-tab" onclick="showUsersSection('banned')">BANNED</div>
+                </div>
+                <div id="users-active-section">
+                    <div id="active-users-list"></div>
+                </div>
+                <div id="users-banned-section" class="hidden">
+                    <div id="banned-users-list"></div>
                 </div>
             </div>
 
             <div id="adm-analytics" class="tab-content">
-                <div class="analytics-fullwidth">
-                    <div class="cell-header">SYSTEM ANALYTICS</div>
-                    <div class="analytics-grid">
-                        <div class="analytics-card">
-                            <div class="analytics-label">TOTAL USERS</div>
-                            <div class="analytics-value" id="analytics-total-users">0</div>
-                        </div>
-                        <div class="analytics-card">
-                            <div class="analytics-label">ACTIVE SESSIONS</div>
-                            <div class="analytics-value" id="analytics-active-sessions">0</div>
-                        </div>
-                        <div class="analytics-card">
-                            <div class="analytics-label">BROADCASTS SENT</div>
-                            <div class="analytics-value" id="analytics-broadcasts">0</div>
-                        </div>
-                        <div class="analytics-card">
-                            <div class="analytics-label">RADIO MESSAGES</div>
-                            <div class="analytics-value" id="analytics-radio-msgs">0</div>
-                        </div>
-                    </div>
-                    <div class="analytics-logs" id="analytics-logs"></div>
+                <div class="analytics-grid">
+                    <div class="analytics-card">USERS: <span id="analytics-total-users">0</span></div>
+                    <div class="analytics-card">ONLINE: <span id="analytics-active-sessions">0</span></div>
+                    <div class="analytics-card">BROADCASTS: <span id="analytics-broadcasts">0</span></div>
+                    <div class="analytics-card">RADIO: <span id="analytics-radio-msgs">0</span></div>
+                </div>
+            </div>
+            
+            <div id="adm-alarms" class="tab-content">
+                <div class="alarms-container">
+                    <button onclick="setAlarmTheme('green')" class="alarm-btn green">GREEN</button>
+                    <button onclick="setAlarmTheme('blue')" class="alarm-btn blue">BLUE</button>
+                    <button onclick="setAlarmTheme('red')" class="alarm-btn red">RED</button>
+                    <button onclick="setAlarmTheme('epsilon')" class="alarm-btn epsilon">EPSILON</button>
+                </div>
+            </div>
+
+            <div id="adm-credentials" class="tab-content">
+                <div class="credentials-card">
+                    <div class="credentials-header">OMEGA LEVEL</div>
+                    <div class="credentials-body">OBUNTO - SYSTEM ADMIN</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="admin-panel" class="admin-window hidden">
-        <div class="window-titlebar">
-            <span>ADMIN - OBUNTO</span>
-            <div class="close-btn" onclick="closeAdmin()">X</div>
-        </div>
-        <div class="window-body">
-            <div class="admin-section">
-                <h3>PENDING ACCOUNTS</h3>
-                <div id="pending-list-modal"></div>
-            </div>
-        </div>
+        <div class="window-titlebar"><span>ADMIN</span><div class="close-btn" onclick="closeAdmin()">X</div></div>
+        <div id="pending-list-modal"></div>
     </div>
-
+    
     <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
     <div id="broadcast-notification" class="notification hidden">
-        <div class="mascot-container">
-            <img id="notif-sprite" class="notification-sprite" src="assets/sprites/normal.png" alt="Obunto">
-            <div class="mascot-label"></div>
-        </div>
-        <div class="bubble">
-            <div class="notification-text" id="notif-text"></div>
-        </div>
+        <div class="mascot-container"><img id="notif-sprite" src=""></div>
+        <div class="bubble"><div id="notif-text"></div></div>
     </div>
 
     <div id="edit-welcome-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>EDIT WELCOME SCREEN</span>
-                <div class="modal-close" onclick="closeWelcomeModal()">X</div>
-            </div>
-            <div class="modal-body">
-                <div class="editor-field">
-                    <label class="editor-label">Title</label>
-                    <input type="text" id="welcome-title-input" class="editor-input" value="WELCOME">
-                </div>
-                <div class="editor-field">
-                    <label class="editor-label">Message</label>
-                    <textarea id="welcome-text-input" class="editor-textarea">WELCOME TO ARCS V3.2.2. SELECT A MODULE FROM THE MENU BAR TO BEGIN OPERATIONS.</textarea>
-                </div>
-                <button class="form-submit-btn" onclick="saveWelcomeChanges()">SAVE CHANGES</button>
-            </div>
+            <h3>EDIT WELCOME</h3>
+            <input type="text" id="welcome-title-input">
+            <textarea id="welcome-text-input"></textarea>
+            <button onclick="saveWelcomeChanges()">SAVE</button>
+            <button onclick="closeWelcomeModal()">CANCEL</button>
         </div>
     </div>
 
     <div id="new-tab-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>CREATE NEW TAB</span>
-                <div class="modal-close" onclick="closeNewTabModal()">X</div>
-            </div>
-            <div class="modal-body">
-                <div class="editor-field">
-                    <label class="editor-label">Tab Name</label>
-                    <input type="text" id="new-tab-name" class="editor-input" placeholder="Enter tab name...">
-                </div>
-                <div class="editor-field">
-                    <label class="editor-label">Tab Content</label>
-                    <textarea id="new-tab-content" class="editor-textarea" placeholder="Enter content..."></textarea>
-                </div>
-                <button class="form-submit-btn" onclick="saveNewTab()">CREATE TAB</button>
-            </div>
+            <h3>NEW TAB</h3>
+            <input type="text" id="new-tab-name" placeholder="Name">
+            <textarea id="new-tab-content" placeholder="HTML Content"></textarea>
+            <button onclick="saveNewTab()">CREATE</button>
+            <button onclick="closeNewTabModal()">CANCEL</button>
         </div>
     </div>
 
     <div id="edit-user-modal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <span>EDIT USER</span>
-                <div class="modal-close" onclick="closeEditUserModal()">X</div>
-            </div>
-            <div class="modal-body">
-                <div class="editor-field">
-                    <label class="editor-label">User ID</label>
-                    <input type="text" id="edit-user-id" class="editor-input" readonly>
-                </div>
-                <div class="editor-field">
-                    <label class="editor-label">Display Name</label>
-                    <input type="text" id="edit-user-name" class="editor-input">
-                </div>
-                <div class="editor-field">
-                    <label class="editor-label">Status</label>
-                    <select id="edit-user-status" class="editor-select">
-                        <option value="active">Active</option>
-                        <option value="banned">Banned</option>
-                    </select>
-                </div>
-                <button class="form-submit-btn" onclick="saveUserChanges()">SAVE CHANGES</button>
-            </div>
+            <h3>EDIT USER</h3>
+            <input type="text" id="edit-user-id" readonly>
+            <input type="text" id="edit-user-name">
+            <select id="edit-user-status">
+                <option value="active">Active</option>
+                <option value="banned">Banned</option>
+            </select>
+            <button onclick="saveUserChanges()">SAVE</button>
+            <button onclick="closeEditUserModal()">CANCEL</button>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-
-    <script src="js/script.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>
