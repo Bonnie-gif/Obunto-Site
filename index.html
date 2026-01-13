@@ -4,38 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARCS - Newton OS</title>
-    <link rel="icon" href="assets/icon-small-duplicate-18x14.png" type="image/png">
-    <!-- CSS Files - todos na pasta css/ -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/menu.css">
-    <link rel="stylesheet" href="css/notification.css">
-    <link rel="stylesheet" href="css/broadcast.css">
-    <link rel="stylesheet" href="css/editing.css">
-    <link rel="stylesheet" href="css/alarms.css">
-    <link rel="stylesheet" href="css/tickets.css">
-    <link rel="stylesheet" href="css/radio.css">
-    <link rel="stylesheet" href="css/credentials.css">
-    <link rel="stylesheet" href="css/users.css">
-    <link rel="stylesheet" href="css/analytics.css">
+    <link rel="icon" href="/assets/icon-small-duplicate-18x14.png" type="image/png">
+    
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/menu.css">
+    <link rel="stylesheet" href="/css/notification.css">
+    <link rel="stylesheet" href="/css/broadcast.css">
+    <link rel="stylesheet" href="/css/editing.css">
+    <link rel="stylesheet" href="/css/alarms.css">
+    <link rel="stylesheet" href="/css/tickets.css">
+    <link rel="stylesheet" href="/css/radio.css">
+    <link rel="stylesheet" href="/css/credentials.css">
+    <link rel="stylesheet" href="/css/users.css">
+    <link rel="stylesheet" href="/css/analytics.css">
 </head>
 <body>
-    <!-- Audio files - todos na pasta assets/audio/ -->
-    <audio id="sfx-poweron" src="assets/audio/poweron.wav"></audio>
-    <audio id="sfx-loading" src="assets/audio/loading1.wav"></audio>
-    <audio id="sfx-newmessage" src="assets/audio/newmessage.wav"></audio>
-    <audio id="sfx-error" src="assets/audio/uh_oh.wav"></audio>
-    <audio id="sfx-denied" src="assets/audio/requestdenied.wav"></audio>
-    <audio id="sfx-sent" src="assets/audio/requestsent.wav"></audio>
-    <audio id="sfx-blue" src="assets/audio/bluecode.wav"></audio>
+    <audio id="sfx-poweron" src="/assets/audio/poweron.wav"></audio>
+    <audio id="sfx-loading" src="/assets/audio/loading1.wav"></audio>
+    <audio id="sfx-newmessage" src="/assets/audio/newmessage.wav"></audio>
+    <audio id="sfx-error" src="/assets/audio/uh_oh.wav"></audio>
+    <audio id="sfx-denied" src="/assets/audio/requestdenied.wav"></audio>
+    <audio id="sfx-sent" src="/assets/audio/requestsent.wav"></audio>
+    <audio id="sfx-blue" src="/assets/audio/bluecode.wav"></audio>
 
-    <!-- Glitch blocks for Epsilon theme -->
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
     <div class="glitch-block"></div>
 
-    <!-- ==================== LOADING SCREEN ==================== -->
     <div id="loading-screen" class="screen active">
         <div class="loading-left">
             <div class="upeo-section">
@@ -92,7 +89,6 @@
         </div>
     </div>
 
-    <!-- ==================== MAIN SCREEN ==================== -->
     <div id="main-screen" class="screen">
         <div class="top-decoration">
             <div class="browser-dots">
@@ -107,7 +103,6 @@
         </div>
 
         <div class="main-window">
-            <!-- Menu Bar -->
             <div class="menu-bar">
                 <div class="menu-button" onclick="goToHome()">MENU</div>
                 <div class="menu-tabs" id="admin-tabs">
@@ -123,10 +118,9 @@
                 </div>
             </div>
 
-            <!-- HOME VIEW -->
             <div id="view-home" class="tab-content active">
                 <div class="banner-section">
-                    <img src="assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                    <img src="/assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
                 </div>
                 <div class="home-welcome" id="home-welcome-section">
                     <div class="welcome-title" id="home-welcome-title">WELCOME</div>
@@ -134,7 +128,6 @@
                 </div>
             </div>
 
-            <!-- BROADCAST VIEW -->
             <div id="adm-broadcast" class="tab-content">
                 <div class="content-grid">
                     <div class="grid-cell empty-cell">
@@ -147,55 +140,55 @@
                             <label>SELECT EMOTION:</label>
                             <div class="sprite-selector" id="sprite-selector">
                                 <div class="sprite-option active" data-sprite="normal">
-                                    <img src="assets/sprites/normal.png" alt="Normal">
+                                    <img src="/assets/sprites/normal.png" alt="Normal">
                                     <span>Normal</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="happy">
-                                    <img src="assets/sprites/happy.png" alt="Happy">
+                                    <img src="/assets/sprites/happy.png" alt="Happy">
                                     <span>Happy</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="sad">
-                                    <img src="assets/sprites/sad.png" alt="Sad">
+                                    <img src="/assets/sprites/sad.png" alt="Sad">
                                     <span>Sad</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="annoyed">
-                                    <img src="assets/sprites/annoyed.png" alt="Annoyed">
+                                    <img src="/assets/sprites/annoyed.png" alt="Annoyed">
                                     <span>Annoyed</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="bug">
-                                    <img src="assets/sprites/bug.png" alt="Bug">
+                                    <img src="/assets/sprites/bug.png" alt="Bug">
                                     <span>Bug</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="dizzy">
-                                    <img src="assets/sprites/dizzy.png" alt="Dizzy">
+                                    <img src="/assets/sprites/dizzy.png" alt="Dizzy">
                                     <span>Dizzy</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="hollow">
-                                    <img src="assets/sprites/hollow.png" alt="Hollow">
+                                    <img src="/assets/sprites/hollow.png" alt="Hollow">
                                     <span>Hollow</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="panic">
-                                    <img src="assets/sprites/panic.png" alt="Panic">
+                                    <img src="/assets/sprites/panic.png" alt="Panic">
                                     <span>Panic</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="sleeping">
-                                    <img src="assets/sprites/sleeping.png" alt="Sleeping">
+                                    <img src="/assets/sprites/sleeping.png" alt="Sleeping">
                                     <span>Sleeping</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="smug">
-                                    <img src="assets/sprites/smug.png" alt="Smug">
+                                    <img src="/assets/sprites/smug.png" alt="Smug">
                                     <span>Smug</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="stare">
-                                    <img src="assets/sprites/stare.png" alt="Stare">
+                                    <img src="/assets/sprites/stare.png" alt="Stare">
                                     <span>Stare</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="suspicious">
-                                    <img src="assets/sprites/suspicious.png" alt="Suspicious">
+                                    <img src="/assets/sprites/suspicious.png" alt="Suspicious">
                                     <span>Suspicious</span>
                                 </div>
                                 <div class="sprite-option" data-sprite="werror">
-                                    <img src="assets/sprites/werror.png" alt="W.Error">
+                                    <img src="/assets/sprites/werror.png" alt="W.Error">
                                     <span>W.Error</span>
                                 </div>
                             </div>
@@ -214,7 +207,6 @@
                 </div>
             </div>
 
-            <!-- EDITING VIEW -->
             <div id="adm-editing" class="tab-content">
                 <div class="editing-workspace">
                     <div class="editing-toolbar">
@@ -231,7 +223,6 @@
                 </div>
             </div>
 
-            <!-- ALARMS VIEW -->
             <div id="adm-alarms" class="tab-content">
                 <div class="alarms-fullwidth">
                     <div class="cell-header">SYSTEM ALARM LEVELS</div>
@@ -294,7 +285,6 @@
                 </div>
             </div>
 
-            <!-- TICKETS VIEW -->
             <div id="adm-tickets" class="tab-content">
                 <div class="tickets-fullwidth">
                     <div class="cell-header">PENDING APPROVALS</div>
@@ -302,7 +292,6 @@
                 </div>
             </div>
 
-            <!-- RADIO VIEW -->
             <div id="adm-radio" class="tab-content">
                 <div class="radio-fullwidth">
                     <div class="cell-header">RADIO COMMUNICATIONS</div>
@@ -322,7 +311,6 @@
                 </div>
             </div>
 
-            <!-- CREDENTIALS VIEW -->
             <div id="adm-credentials" class="tab-content">
                 <div class="credentials-fullwidth">
                     <div class="cell-header">ADMINISTRATOR CREDENTIALS</div>
@@ -356,7 +344,6 @@
                 </div>
             </div>
 
-            <!-- USERS VIEW -->
             <div id="adm-users" class="tab-content">
                 <div class="users-fullwidth">
                     <div class="cell-header">USER MANAGEMENT</div>
@@ -373,7 +360,6 @@
                 </div>
             </div>
 
-            <!-- ANALYTICS VIEW -->
             <div id="adm-analytics" class="tab-content">
                 <div class="analytics-fullwidth">
                     <div class="cell-header">SYSTEM ANALYTICS</div>
@@ -401,9 +387,6 @@
         </div>
     </div>
 
-    <!-- ==================== MODALS ==================== -->
-    
-    <!-- Admin Panel Modal -->
     <div id="admin-panel" class="admin-window hidden">
         <div class="window-titlebar">
             <span>ADMIN - OBUNTO</span>
@@ -417,13 +400,11 @@
         </div>
     </div>
 
-    <!-- Admin FAB Button -->
     <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
 
-    <!-- Broadcast Notification -->
     <div id="broadcast-notification" class="notification hidden">
         <div class="mascot-container">
-            <img id="notif-sprite" class="notification-sprite" src="assets/sprites/normal.png" alt="Obunto">
+            <img id="notif-sprite" class="notification-sprite" src="/assets/sprites/normal.png" alt="Obunto">
             <div class="mascot-label"></div>
         </div>
         <div class="bubble">
@@ -431,7 +412,6 @@
         </div>
     </div>
 
-    <!-- Edit Welcome Modal -->
     <div id="edit-welcome-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -452,7 +432,6 @@
         </div>
     </div>
 
-    <!-- New Tab Modal -->
     <div id="new-tab-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -473,7 +452,6 @@
         </div>
     </div>
 
-    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -501,7 +479,6 @@
         </div>
     </div>
 
-    <!-- JavaScript - na pasta js/ -->
-    <script src="js/script.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>

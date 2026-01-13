@@ -1,9 +1,6 @@
 /**
  * ARCS - Advanced Research & Containment System
- * Server v3.2.2
- * 
- * Backend server with Express, Socket.io, authentication,
- * encrypted data storage, and real-time features.
+ * Server v3.2.2 - CORRIGIDO
  */
 
 const express = require('express');
@@ -43,10 +40,20 @@ const ADMIN_NAME = 'OBUNTO';
 const DATA_FILE = path.join(__dirname, 'data', 'arcs_data.enc');
 const LOG_FILE = path.join(__dirname, 'data', 'arcs.log');
 
-// ==================== MIDDLEWARE ====================
+// ==================== MIDDLEWARE (CORRIGIDO) ====================
 app.use(express.json());
-app.use(express.static(__dirname));
+
+// 1. Servir pastas estáticas explicitamente
+// Isso garante que /css venha da pasta 'css' na raiz, etc.
+app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// 2. Servir o index.html na rota raiz
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Rate Limiting
 const loginLimiter = rateLimit({
