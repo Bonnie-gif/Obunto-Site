@@ -53,7 +53,7 @@
 }
 
 .toolbar-title::before {
-    content: '✎';
+    content: 'âœŽ';
     font-size: 24px;
     color: var(--nier-muted);
 }
@@ -111,7 +111,7 @@
 }
 
 .content-item::before {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     top: 6px;
     left: 6px;
@@ -138,7 +138,7 @@
 }
 
 .content-item.active::after {
-    content: '▶';
+    content: 'â–¶';
     position: absolute;
     right: 8px;
     top: 50%;
@@ -227,7 +227,7 @@
 }
 
 .editor-empty-state::before {
-    content: '◇';
+    content: 'â—‡';
     font-size: 56px;
     color: var(--nier-border);
 }

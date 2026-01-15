@@ -24,7 +24,7 @@
 
 /* Decorative Triangles */
 .alarms-fullwidth .cell-header::after {
-    content: '▲ ▲ ▲';
+    content: 'â–² â–² â–²';
     position: absolute;
     right: 0;
     bottom: 14px;

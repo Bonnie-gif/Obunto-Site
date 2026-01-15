@@ -80,7 +80,7 @@
 /* Corner Decorations */
 .user-item::before,
 .banned-item::before {
-    content: '▶';
+    content: 'â–¶';
     position: absolute;
     top: 8px;
     left: 8px;
@@ -92,7 +92,7 @@
 
 .user-item::after,
 .banned-item::after {
-    content: '◀';
+    content: 'â—€';
     position: absolute;
     bottom: 8px;
     right: 8px;
@@ -241,7 +241,7 @@
 }
 
 .users-empty::before {
-    content: '◆';
+    content: 'â—†';
     display: block;
     font-size: 32px;
     margin-bottom: 18px;

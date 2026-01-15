@@ -1,35 +1,60 @@
-.tickets-fullwidth {
-    padding: 24px;
-    width: 100%;
+.tickets-container {
+    padding: 28px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.tickets-fullwidth .cell-header {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--nier-text, #3F352F);
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--nier-muted, #957E72);
+.tickets-header {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--nier-text);
+    margin-bottom: 28px;
+    padding: 18px 24px;
+    background: var(--nier-accent);
+    border: 3px solid var(--nier-dark);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 3px;
+    position: relative;
 }
 
-#pending-list {
+.tickets-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid var(--nier-black);
+    border-left: 3px solid var(--nier-black);
+}
+
+.tickets-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    border-bottom: 3px solid var(--nier-black);
+    border-right: 3px solid var(--nier-black);
+}
+
+.pending-list-container {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-height: 480px;
+    gap: 16px;
+    max-height: 600px;
     overflow-y: auto;
 }
 
 .pending-item {
-    background: var(--nier-paper, #EEE7DF);
-    border: 1px solid var(--nier-muted, #957E72);
-    padding: 16px;
+    background: var(--nier-paper);
+    border: 3px solid var(--nier-border);
+    padding: 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: all 0.2s;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
@@ -40,8 +65,10 @@
     left: 0;
     width: 20px;
     height: 20px;
-    border-top: 2px solid var(--nier-dark, #6C584C);
-    border-left: 2px solid var(--nier-dark, #6C584C);
+    border-top: 3px solid var(--nier-dark);
+    border-left: 3px solid var(--nier-dark);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
 .pending-item::after {
@@ -51,61 +78,115 @@
     right: 0;
     width: 20px;
     height: 20px;
-    border-bottom: 2px solid var(--nier-dark, #6C584C);
-    border-right: 2px solid var(--nier-dark, #6C584C);
+    border-bottom: 3px solid var(--nier-dark);
+    border-right: 3px solid var(--nier-dark);
+    opacity: 0;
+    transition: opacity var(--transition-fast);
 }
 
 .pending-item:hover {
-    background: rgba(193, 175, 160, 0.08);
-    border-color: var(--nier-dark, #6C584C);
+    background: var(--nier-paper-light);
+    border-color: var(--nier-dark);
+    transform: translateX(4px);
 }
 
-.pending-item span {
-    font-weight: 600;
-    font-size: 11px;
-    color: var(--nier-text, #3F352F);
-    background: rgba(212, 175, 55, 0.15);
-    padding: 5px 14px;
-    border: 1px solid var(--nier-muted, #957E72);
+.pending-item:hover::before,
+.pending-item:hover::after {
+    opacity: 1;
+}
+
+.pending-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pending-info .user-id {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--nier-text);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
+    font-family: var(--font-mono);
+}
+
+.pending-info .request-time {
+    font-size: 11px;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500;
 }
 
 .pending-item .actions {
     display: flex;
-    gap: 8px;
+    gap: 12px;
 }
 
 .pending-item button {
-    font-size: 10px;
-    padding: 8px 18px;
-    border: 1px solid var(--nier-dark, #6C584C);
+    padding: 12px 24px;
+    border: 3px solid var(--nier-dark);
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
     text-transform: uppercase;
-    font-weight: 600;
-    transition: all 0.2s;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
 }
 
-.pending-item button:hover {
-    background: var(--nier-dark, #6C584C);
-    color: var(--nier-paper, #EEE7DF);
+.pending-item button.approve-btn {
+    background: #6A9A6A;
+    color: var(--nier-paper);
+    border-color: #4A7A4A;
 }
 
-.pending-item button:first-child {
-    background: var(--nier-muted, #957E72);
-    color: var(--nier-paper, #EEE7DF);
+.pending-item button.approve-btn:hover {
+    background: #5A8A5A;
+    transform: translateY(-2px);
 }
 
-.pending-item button:last-child {
-    background: var(--nier-panel, #C1AFA0);
-    color: var(--nier-text, #3F352F);
+.pending-item button.deny-btn {
+    background: #8A6666;
+    color: var(--nier-paper);
+    border-color: #6A4646;
+}
+
+.pending-item button.deny-btn:hover {
+    background: #8A5555;
+    transform: translateY(-2px);
+}
+
+.pending-empty {
+    padding: 60px 40px;
+    text-align: center;
+    color: var(--nier-muted);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--nier-paper-light);
+    border: 3px dashed var(--nier-border);
+    position: relative;
+}
+
+.pending-empty::before {
+    content: '◆';
+    display: block;
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: var(--nier-border);
 }
 
 @media (max-width: 768px) {
+    .tickets-container {
+        padding: 18px;
+    }
+    
     .pending-item {
         flex-direction: column;
-        gap: 12px;
+        gap: 18px;
+        padding: 20px;
     }
     
     .pending-item .actions {

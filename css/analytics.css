@@ -23,7 +23,7 @@
 
 /* Decorative Pattern */
 .analytics-fullwidth .cell-header::after {
-    content: '▲ ▲ ▲';
+    content: 'â–² â–² â–²';
     position: absolute;
     right: 0;
     bottom: 14px;
@@ -294,7 +294,7 @@
 }
 
 .analytics-empty::before {
-    content: '◇';
+    content: 'â—‡';
     font-size: 40px;
     margin-bottom: 16px;
     color: var(--nier-border);

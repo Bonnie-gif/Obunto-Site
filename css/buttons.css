@@ -82,7 +82,7 @@ button.primary,
 .btn-primary::after,
 button.primary::after,
 .primary-btn::after {
-    content: '▶';
+    content: 'â–¶';
     position: absolute;
     right: 10px;
     top: 50%;
@@ -442,7 +442,7 @@ button.lg {
 
 #send-broadcast::before,
 .broadcast-btn::before {
-    content: '»';
+    content: 'Â»';
     position: absolute;
     left: 50%;
     top: 50%;

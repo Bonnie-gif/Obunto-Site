@@ -56,7 +56,7 @@
 
 /* Triangle Decoration */
 .menu-button::before {
-    content: '▼';
+    content: 'â–¼';
     position: absolute;
     bottom: -10px;
     left: 50%;
@@ -161,7 +161,7 @@
 
 /* Diamond Decoration for Active Tab */
 .tab.active::after {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     top: 50%;
     right: 8px;

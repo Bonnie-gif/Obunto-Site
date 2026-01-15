@@ -24,7 +24,7 @@
 
 /* Decorative Triangles */
 #adm-broadcast .cell-header::after {
-    content: '▲ ▲ ▲';
+    content: 'â–² â–² â–²';
     position: absolute;
     right: 0;
     bottom: 14px;
@@ -46,7 +46,7 @@
 
 /* Decorative Corners */
 #adm-broadcast .news-box::before {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     top: 12px;
     left: 12px;
@@ -55,7 +55,7 @@
 }
 
 #adm-broadcast .news-box::after {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     bottom: 12px;
     right: 12px;
@@ -114,7 +114,7 @@
 
 /* Triangle Indicator */
 .sprite-option.active::after {
-    content: '▼';
+    content: 'â–¼';
     position: absolute;
     bottom: 4px;
     right: 4px;

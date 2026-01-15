@@ -185,7 +185,10 @@ const schemas = {
     }),
     updateUser: Joi.object({
         name: Joi.string().optional(),
-        status: Joi.string().valid('active', 'banned').optional()
+        status: Joi.string().valid('active', 'banned').optional(),
+        clearance: Joi.number().min(1).max(5).optional(),
+        role: Joi.string().optional(),
+        department: Joi.string().optional()
     }),
     customTab: Joi.object({
         name: Joi.string().required(),
@@ -227,6 +230,9 @@ async function initializeAdmin() {
             approved: true,
             status: 'active',
             isAdmin: true,
+            clearance: 5,
+            role: 'SYSTEM ADMINISTRATOR',
+            department: 'UPEO COMMAND',
             createdAt: Date.now()
         };
         saveData();
@@ -257,7 +263,19 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         saveData();
         io.emit('user:online', { userId: normalizedId, name: user.name });
         
-        res.json({ success: true, token, user: { id: user.id, name: user.name, isAdmin: user.isAdmin, status: user.status } });
+        res.json({ 
+            success: true, 
+            token, 
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                isAdmin: user.isAdmin, 
+                status: user.status,
+                clearance: user.clearance || 1,
+                role: user.role || 'OPERATOR',
+                department: user.department || 'FIELD OPERATIONS'
+            } 
+        });
     } catch (e) {
         res.status(400).json({ success: false, message: e.message });
     }
@@ -284,7 +302,15 @@ app.post('/api/register', loginLimiter, (req, res) => {
 app.get('/api/pending', authenticateToken, requireAdmin, (req, res) => res.json({ success: true, pending: dataStore.pendingUsers }));
 
 app.get('/api/users', authenticateToken, requireAdmin, (req, res) => {
-    const users = Object.values(dataStore.users).map(u => ({ id: u.id, name: u.name, status: u.status, isAdmin: u.isAdmin }));
+    const users = Object.values(dataStore.users).map(u => ({ 
+        id: u.id, 
+        name: u.name, 
+        status: u.status, 
+        isAdmin: u.isAdmin,
+        clearance: u.clearance || 1,
+        role: u.role || 'OPERATOR',
+        department: u.department || 'FIELD OPERATIONS'
+    }));
     res.json({ success: true, users });
 });
 
@@ -293,8 +319,15 @@ app.post('/api/users/approve', authenticateToken, requireAdmin, (req, res) => {
     const normalizedId = userId.toUpperCase();
     dataStore.pendingUsers = dataStore.pendingUsers.filter(p => p.userId !== normalizedId);
     dataStore.users[normalizedId] = {
-        id: normalizedId, name: `Operator_${normalizedId.slice(-4)}`,
-        approved: true, status: 'active', isAdmin: false, createdAt: Date.now()
+        id: normalizedId, 
+        name: `Operator_${normalizedId.slice(-4)}`,
+        approved: true, 
+        status: 'active', 
+        isAdmin: false,
+        clearance: 1,
+        role: 'OPERATOR',
+        department: 'FIELD OPERATIONS',
+        createdAt: Date.now()
     };
     saveData();
     io.emit('user:approved', { userId: normalizedId });
@@ -312,6 +345,7 @@ app.post('/api/users/:userId/ban', authenticateToken, requireAdmin, (req, res) =
     if (dataStore.users[req.params.userId] && !dataStore.users[req.params.userId].isAdmin) {
         dataStore.users[req.params.userId].status = 'banned';
         saveData();
+        io.emit('user:banned', { userId: req.params.userId });
     }
     res.json({ success: true });
 });
@@ -320,6 +354,7 @@ app.post('/api/users/:userId/unban', authenticateToken, requireAdmin, (req, res)
     if (dataStore.users[req.params.userId]) {
         dataStore.users[req.params.userId].status = 'active';
         saveData();
+        io.emit('user:unbanned', { userId: req.params.userId });
     }
     res.json({ success: true });
 });
@@ -327,9 +362,14 @@ app.post('/api/users/:userId/unban', authenticateToken, requireAdmin, (req, res)
 app.put('/api/users/:userId', authenticateToken, requireAdmin, (req, res) => {
     const user = dataStore.users[req.params.userId];
     if (user && (!user.isAdmin || req.user.userId === ADMIN_ID)) {
-        if(req.body.name) user.name = req.body.name;
-        if(req.body.status) user.status = req.body.status;
+        const validated = validate(req.body, schemas.updateUser);
+        if(validated.name) user.name = validated.name;
+        if(validated.status) user.status = validated.status;
+        if(validated.clearance !== undefined) user.clearance = validated.clearance;
+        if(validated.role) user.role = validated.role;
+        if(validated.department) user.department = validated.department;
         saveData();
+        io.emit('user:updated', { userId: req.params.userId });
     }
     res.json({ success: true });
 });
@@ -367,6 +407,7 @@ app.delete('/api/radio', authenticateToken, requireAdmin, (req, res) => {
 app.delete('/api/radio/:id', authenticateToken, requireAdmin, (req, res) => {
     dataStore.radioMessages = dataStore.radioMessages.filter(m => m.id !== req.params.id);
     saveData();
+    io.emit('radio:deleted', { id: req.params.id });
     res.json({ success: true });
 });
 

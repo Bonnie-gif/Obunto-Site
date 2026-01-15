@@ -392,7 +392,7 @@ body::after {
 
 /* Decorative Diamonds */
 .swallow-box::before {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     top: 8px;
     left: 8px;
@@ -402,7 +402,7 @@ body::after {
 }
 
 .swallow-box::after {
-    content: '◆';
+    content: 'â—†';
     position: absolute;
     bottom: 8px;
     right: 8px;
@@ -569,7 +569,7 @@ body::after {
 
 /* Corner Triangle Marker */
 .main-window::after {
-    content: '▲';
+    content: 'â–²';
     position: absolute;
     top: 14px;
     right: 14px;
