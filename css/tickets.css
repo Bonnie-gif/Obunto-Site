@@ -1,134 +1,370 @@
-.tickets-container {
-    padding: 28px;
-    max-width: 1200px;
-    margin: 0 auto;
+/**
+ * ARCS Help Tickets System
+ * NieR:Automata Design System
+ */
+
+/* ==================== TICKETS SECTIONS ==================== */
+.tickets-section {
+    margin-bottom: 32px;
 }
 
-.tickets-header {
-    font-size: 20px;
-    font-weight: 700;
+.tickets-section-header {
+    font-size: 14px;
+    font-weight: 600;
     color: var(--nier-text);
-    margin-bottom: 28px;
-    padding: 18px 24px;
-    background: var(--nier-accent);
-    border: 3px solid var(--nier-dark);
     text-transform: uppercase;
-    letter-spacing: 3px;
-    position: relative;
+    letter-spacing: 2px;
+    padding: 14px 20px;
+    background: var(--nier-panel);
+    border: 2px solid var(--nier-border);
+    margin-bottom: 16px;
 }
 
-.tickets-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 16px;
-    height: 16px;
-    border-top: 3px solid var(--nier-black);
-    border-left: 3px solid var(--nier-black);
-}
-
-.tickets-header::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 16px;
-    height: 16px;
-    border-bottom: 3px solid var(--nier-black);
-    border-right: 3px solid var(--nier-black);
-}
-
-.pending-list-container {
+.tickets-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-height: 600px;
-    overflow-y: auto;
 }
 
-.pending-item {
+.tickets-empty {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--nier-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background: var(--nier-paper-light);
+    border: 2px dashed var(--nier-border);
+}
+
+/* ==================== TICKET CARD ==================== */
+.ticket-card {
     background: var(--nier-paper);
-    border: 3px solid var(--nier-border);
-    padding: 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border: 2px solid var(--nier-border);
+    padding: 20px;
     transition: all var(--transition-fast);
     position: relative;
 }
 
-.pending-item::before {
+.ticket-card::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 20px;
-    height: 20px;
-    border-top: 3px solid var(--nier-dark);
-    border-left: 3px solid var(--nier-dark);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid var(--nier-muted);
+    border-left: 3px solid var(--nier-muted);
 }
 
-.pending-item::after {
+.ticket-card::after {
     content: '';
     position: absolute;
     bottom: 0;
     right: 0;
-    width: 20px;
-    height: 20px;
-    border-bottom: 3px solid var(--nier-dark);
-    border-right: 3px solid var(--nier-dark);
-    opacity: 0;
-    transition: opacity var(--transition-fast);
+    width: 16px;
+    height: 16px;
+    border-bottom: 3px solid var(--nier-muted);
+    border-right: 3px solid var(--nier-muted);
 }
 
-.pending-item:hover {
+.ticket-card:hover {
     background: var(--nier-paper-light);
     border-color: var(--nier-dark);
-    transform: translateX(4px);
+    transform: translateY(-2px);
 }
 
-.pending-item:hover::before,
-.pending-item:hover::after {
-    opacity: 1;
+/* Ticket Status Variants */
+.ticket-card.ticket-pending {
+    border-left: 4px solid var(--nier-accent);
 }
 
-.pending-info {
-    flex: 1;
+.ticket-card.ticket-active {
+    border-left: 4px solid #6A9A6A;
+}
+
+.ticket-card.ticket-closed {
+    opacity: 0.7;
+    border-left: 4px solid var(--nier-muted);
+}
+
+/* ==================== TICKET CONTENT ==================== */
+.ticket-header {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--nier-border);
 }
 
-.pending-info .user-id {
+.ticket-id {
+    font-size: 11px;
     font-weight: 700;
-    font-size: 18px;
-    color: var(--nier-text);
+    color: var(--nier-muted);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     font-family: var(--font-mono);
 }
 
-.pending-info .request-time {
+.ticket-user {
     font-size: 11px;
-    color: var(--nier-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 500;
+    color: var(--nier-text);
+    font-weight: 600;
 }
 
-.pending-item .actions {
+.ticket-status-badge {
+    padding: 4px 12px;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid;
+}
+
+.ticket-status-badge.status-pending {
+    background: rgba(201, 162, 39, 0.15);
+    color: var(--nier-accent);
+    border-color: var(--nier-accent);
+}
+
+.ticket-status-badge.status-active {
+    background: rgba(106, 154, 106, 0.15);
+    color: #5A7A5A;
+    border-color: #6A9A6A;
+}
+
+.ticket-status-badge.status-closed {
+    background: rgba(138, 132, 122, 0.15);
+    color: var(--nier-muted);
+    border-color: var(--nier-muted);
+}
+
+.ticket-subject {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--nier-text);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.ticket-message {
+    font-size: 12px;
+    color: var(--nier-text);
+    line-height: 1.6;
+    margin-bottom: 14px;
+}
+
+.ticket-meta {
+    font-size: 10px;
+    color: var(--nier-muted);
+    font-family: var(--font-mono);
+    margin-bottom: 16px;
+}
+
+.ticket-actions {
     display: flex;
+    gap: 10px;
+}
+
+.ticket-btn {
+    flex: 1;
+    padding: 10px 18px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all var(--transition-fast);
+    font-family: var(--font-main);
+}
+
+.ticket-btn:hover {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+}
+
+.ticket-btn.approve {
+    background: #6A9A6A;
+    color: var(--nier-paper);
+    border-color: #5A7A5A;
+}
+
+.ticket-btn.approve:hover {
+    background: #5A8A5A;
+}
+
+.ticket-btn.reject,
+.ticket-btn.close {
+    background: #8A6666;
+    color: var(--nier-paper);
+    border-color: #7A5656;
+}
+
+.ticket-btn.reject:hover,
+.ticket-btn.close:hover {
+    background: #7A5656;
+}
+
+.ticket-btn.chat {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+    border-color: var(--nier-dark);
+}
+
+.ticket-btn.chat:hover {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+}
+
+/* ==================== TICKET CHAT WINDOW ==================== */
+.ticket-chat-window {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 450px;
+    height: 550px;
+    background: var(--nier-paper);
+    border: 3px solid var(--nier-dark);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.ticket-chat-header {
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--nier-dark);
+}
+
+.ticket-chat-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ticket-chat-title span:first-child {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    font-family: var(--font-mono);
+}
+
+.ticket-chat-subject {
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.ticket-chat-close {
+    width: 28px;
+    height: 28px;
+    background: var(--nier-dark);
+    border: 2px solid var(--nier-paper);
+    color: var(--nier-paper);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.ticket-chat-close:hover {
+    background: var(--nier-accent);
+    color: var(--nier-text);
+}
+
+.ticket-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: var(--nier-paper-light);
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
-.pending-item button {
-    padding: 12px 24px;
-    border: 3px solid var(--nier-dark);
-    font-size: 12px;
+.ticket-chat-message {
+    padding: 12px 14px;
+    border: 2px solid var(--nier-border);
+    background: var(--nier-paper);
+    max-width: 80%;
+}
+
+.ticket-chat-message.admin {
+    align-self: flex-end;
+    background: rgba(201, 162, 39, 0.12);
+    border-color: var(--nier-accent);
+}
+
+.ticket-chat-message.user {
+    align-self: flex-start;
+    background: rgba(106, 154, 106, 0.12);
+    border-color: #6A9A6A;
+}
+
+.message-sender {
+    font-size: 10px;
     font-weight: 700;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.message-text {
+    font-size: 12px;
+    color: var(--nier-text);
+    line-height: 1.5;
+    margin-bottom: 6px;
+}
+
+.message-time {
+    font-size: 9px;
+    color: var(--nier-muted);
+    font-family: var(--font-mono);
+}
+
+.ticket-chat-input-area {
+    display: flex;
+    gap: 10px;
+    padding: 16px;
+    background: var(--nier-panel);
+    border-top: 2px solid var(--nier-border);
+}
+
+.ticket-chat-input-area input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid var(--nier-border);
+    background: var(--nier-paper);
+    font-size: 12px;
+    color: var(--nier-text);
+    font-family: var(--font-main);
+}
+
+.ticket-chat-input-area input:focus {
+    outline: none;
+    border-color: var(--nier-dark);
+}
+
+.ticket-chat-input-area button {
+    padding: 12px 24px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-muted);
+    color: var(--nier-paper);
+    font-size: 11px;
+    font-weight: 600;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 1.5px;
@@ -136,65 +372,103 @@
     font-family: var(--font-main);
 }
 
-.pending-item button.approve-btn {
-    background: #6A9A6A;
+.ticket-chat-input-area button:hover {
+    background: var(--nier-dark);
+}
+
+/* ==================== TICKET NOTIFICATION ==================== */
+.ticket-notification {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    padding: 16px 20px;
+    background: var(--nier-accent);
+    border: 3px solid var(--nier-dark);
+    color: var(--nier-text);
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    z-index: 999;
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.ticket-notification button {
+    padding: 6px 14px;
+    border: 2px solid var(--nier-text);
+    background: var(--nier-dark);
     color: var(--nier-paper);
-    border-color: #4A7A4A;
-}
-
-.pending-item button.approve-btn:hover {
-    background: #5A8A5A;
-    transform: translateY(-2px);
-}
-
-.pending-item button.deny-btn {
-    background: #8A6666;
-    color: var(--nier-paper);
-    border-color: #6A4646;
-}
-
-.pending-item button.deny-btn:hover {
-    background: #8A5555;
-    transform: translateY(-2px);
-}
-
-.pending-empty {
-    padding: 60px 40px;
-    text-align: center;
-    color: var(--nier-muted);
-    font-size: 14px;
-    letter-spacing: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
     text-transform: uppercase;
+}
+
+/* ==================== PERMISSIONS MODAL ==================== */
+#permissions-modal .modal-content {
+    min-width: 480px;
+}
+
+.permissions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.permission-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
     background: var(--nier-paper-light);
-    border: 3px dashed var(--nier-border);
-    position: relative;
+    border: 2px solid var(--nier-border);
+    transition: all var(--transition-fast);
 }
 
-.pending-empty::before {
-    content: '◆';
-    display: block;
-    font-size: 40px;
-    margin-bottom: 20px;
-    color: var(--nier-border);
+.permission-item:hover {
+    background: var(--nier-paper);
+    border-color: var(--nier-dark);
 }
 
+.permission-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--nier-text);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.permission-checkbox {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
-    .tickets-container {
-        padding: 18px;
+    .ticket-chat-window {
+        width: calc(100% - 40px);
+        height: 500px;
     }
     
-    .pending-item {
-        flex-direction: column;
-        gap: 18px;
-        padding: 20px;
-    }
-    
-    .pending-item .actions {
-        width: 100%;
+    .ticket-actions {
         flex-direction: column;
     }
     
-    .pending-item button {
+    .ticket-btn {
         width: 100%;
     }
 }
