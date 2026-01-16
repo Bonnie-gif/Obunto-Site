@@ -84,7 +84,7 @@
 }
 
 .chat-user-item.active::after {
-    content: '◀';
+    content: 'â—€';
     position: absolute;
     right: 10px;
     font-size: 10px;

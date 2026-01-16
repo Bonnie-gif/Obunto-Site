@@ -1,130 +1,176 @@
-.radio-container {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+/**
+ * ARCS Radio Communication Styles
+ * NieR:Automata Design System
+ */
+
+/* ==================== RADIO SECTION ==================== */
+.radio-fullwidth {
     padding: 28px;
-    gap: 0;
+    width: 100%;
 }
 
-.radio-header-panel {
-    background: var(--nier-muted);
-    color: var(--nier-paper);
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 3px solid var(--nier-dark);
-    border-bottom: none;
+.radio-fullwidth .cell-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--nier-text);
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid var(--nier-border);
+    text-transform: uppercase;
+    letter-spacing: 2px;
     position: relative;
 }
 
-.radio-header-panel::before {
-    content: '';
+/* Decorative Diamond */
+.radio-fullwidth .cell-header::before {
+    content: 'â—†';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 16px;
-    height: 16px;
-    border-top: 3px solid var(--nier-black);
-    border-left: 3px solid var(--nier-black);
+    right: 0;
+    bottom: 14px;
+    font-size: 12px;
+    color: var(--nier-muted);
+}
+
+/* ==================== RADIO HEADER ==================== */
+.radio-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+    padding: 16px;
+    background: var(--nier-paper-light);
+    border: 2px solid var(--nier-border);
 }
 
 .radio-frequency {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: 3px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--nier-text);
     text-transform: uppercase;
     font-family: var(--font-mono);
 }
 
 .radio-clear-btn {
-    padding: 10px 20px;
-    border: 2px solid var(--nier-paper);
-    background: transparent;
-    color: var(--nier-paper);
-    font-size: 11px;
-    font-weight: 600;
+    padding: 8px 18px;
+    border: 2px solid var(--nier-dark);
+    background: var(--nier-panel);
+    color: var(--nier-text);
+    font-size: 10px;
     cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-fast);
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    transition: all var(--transition-fast);
+    font-family: var(--font-main);
 }
 
 .radio-clear-btn:hover {
-    background: var(--nier-paper);
-    color: var(--nier-muted);
+    background: #8A5555;
+    color: var(--nier-paper);
 }
 
-.radio-messages-container {
-    flex: 1;
+/* ==================== RADIO STATUS ==================== */
+.radio-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--nier-text);
+    padding: 12px;
     background: var(--nier-paper);
-    border: 3px solid var(--nier-dark);
-    border-top: none;
-    border-bottom: none;
-    padding: 20px;
+    border: 2px solid var(--nier-border);
+    margin-bottom: 18px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.radio-status-indicator {
+    width: 12px;
+    height: 12px;
+    background: #6A9A6A;
+    border-radius: 50%;
+    border: 2px solid var(--nier-dark);
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(106, 154, 106, 0.4); }
+    50% { opacity: 0.8; box-shadow: 0 0 0 6px rgba(106, 154, 106, 0); }
+}
+
+/* ==================== RADIO MESSAGES ==================== */
+.radio-messages {
+    background: var(--nier-paper);
+    border: 2px solid var(--nier-border);
+    padding: 16px;
+    min-height: 360px;
+    max-height: 360px;
     overflow-y: auto;
-    min-height: 400px;
-    max-height: calc(100vh - 380px);
+    margin-bottom: 18px;
+    font-size: 12px;
+    color: var(--nier-text);
 }
 
 .radio-message {
-    background: var(--nier-paper-light);
-    border-left: 4px solid var(--nier-accent);
-    padding: 14px 18px;
-    margin-bottom: 12px;
+    padding: 12px;
+    border-bottom: 1px solid rgba(87, 83, 74, 0.15);
+    line-height: 1.7;
     display: flex;
     align-items: flex-start;
     gap: 12px;
     position: relative;
-    transition: all var(--transition-fast);
+    padding-right: 40px;
+    transition: background var(--transition-fast);
 }
 
 .radio-message:hover {
-    background: var(--nier-panel);
-    transform: translateX(4px);
+    background: var(--nier-paper-light);
+}
+
+.radio-message:last-child {
+    border-bottom: none;
 }
 
 .radio-message-time {
     color: var(--nier-muted);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 10px;
+    flex-shrink: 0;
     text-transform: uppercase;
     font-family: var(--font-mono);
-    flex-shrink: 0;
-    min-width: 80px;
 }
 
 .radio-message-user {
-    background: var(--nier-accent);
     color: var(--nier-text);
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid var(--nier-dark);
+    font-weight: 600;
     flex-shrink: 0;
+    background: rgba(201, 162, 39, 0.15);
+    padding: 4px 10px;
+    font-size: 11px;
+    border: 1px solid var(--nier-border);
 }
 
 .radio-message-text {
-    flex: 1;
     color: var(--nier-text);
-    font-size: 13px;
-    line-height: 1.6;
-    padding-right: 40px;
+    flex: 1;
+    word-wrap: break-word;
+    font-weight: 400;
 }
 
+/* ==================== DELETE BUTTON ==================== */
 .radio-delete-btn {
     position: absolute;
-    right: 10px;
+    right: 8px;
     top: 50%;
     transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border: 2px solid var(--nier-dark);
     background: var(--nier-panel);
     color: var(--nier-text);
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
@@ -141,24 +187,20 @@
 .radio-delete-btn:hover {
     background: #8A5555;
     color: var(--nier-paper);
-    border-color: #5A3535;
 }
 
-.radio-input-panel {
-    background: var(--nier-panel);
-    border: 3px solid var(--nier-dark);
-    border-top: none;
-    padding: 20px 24px;
+/* ==================== RADIO INPUT ==================== */
+.radio-input-area {
     display: flex;
-    gap: 14px;
+    gap: 12px;
 }
 
 #radio-input {
     flex: 1;
-    padding: 14px 18px;
+    padding: 14px;
     border: 2px solid var(--nier-border);
-    background: var(--nier-paper);
-    font-size: 13px;
+    background: var(--nier-paper-light);
+    font-size: 12px;
     color: var(--nier-text);
     font-weight: 500;
     transition: all var(--transition-fast);
@@ -167,8 +209,8 @@
 
 #radio-input:focus {
     outline: none;
-    border-color: var(--nier-accent);
-    background: var(--nier-paper-light);
+    border-color: var(--nier-dark);
+    background: var(--nier-paper);
 }
 
 #radio-input::placeholder {
@@ -177,26 +219,26 @@
     letter-spacing: 1px;
 }
 
-.radio-input-panel button {
-    padding: 14px 28px;
-    border: 3px solid var(--nier-dark);
+.radio-input-area button {
+    padding: 14px 26px;
+    border: 2px solid var(--nier-dark);
     background: var(--nier-muted);
     color: var(--nier-paper);
     font-size: 12px;
     cursor: pointer;
-    font-weight: 700;
+    font-weight: 600;
     transition: all var(--transition-fast);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 1.5px;
     font-family: var(--font-main);
 }
 
-.radio-input-panel button:hover {
-    background: var(--nier-accent);
-    color: var(--nier-text);
+.radio-input-area button:hover {
+    background: var(--nier-dark);
     transform: translateY(-2px);
 }
 
+/* ==================== EMPTY STATE ==================== */
 .radio-empty {
     display: flex;
     flex-direction: column;
@@ -209,28 +251,34 @@
 }
 
 .radio-empty::before {
-    content: '◇';
-    font-size: 48px;
-    margin-bottom: 20px;
+    content: 'â—‡';
+    font-size: 40px;
+    margin-bottom: 16px;
     color: var(--nier-border);
 }
 
+.radio-empty-text {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
-    .radio-container {
+    .radio-fullwidth {
         padding: 18px;
     }
     
-    .radio-header-panel {
+    .radio-header {
         flex-direction: column;
-        gap: 14px;
-        padding: 16px;
+        gap: 12px;
     }
     
-    .radio-input-panel {
+    .radio-input-area {
         flex-direction: column;
     }
     
-    .radio-input-panel button {
+    .radio-input-area button {
         width: 100%;
     }
     

@@ -1,6 +1,3 @@
-<!-- ARCS v3.2.2 - HTML Changes for Modular System -->
-<!-- Add these changes to your index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +6,10 @@
     <title>ARCS - Newton OS Ver.3.2.2</title>
     
     <script src="/socket.io/socket.io.js"></script>
+
     <link rel="icon" href="/assets/icon-small-duplicate-18x14.png" type="image/png">
     
-    <!-- Existing CSS -->
+    <!-- CSS ATUALIZADO -->
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/menu.css">
@@ -24,159 +22,372 @@
     <link rel="stylesheet" href="/css/credentials.css">
     <link rel="stylesheet" href="/css/users.css">
     <link rel="stylesheet" href="/css/analytics.css">
-    
-    <!-- NEW CSS FILES -->
-    <link rel="stylesheet" href="/css/tickets.css">
-    <link rel="stylesheet" href="/css/obuntu-profile.css">
+    <link rel="stylesheet" href="/css/profile.css">
 </head>
 <body>
-    <!-- Audio elements remain the same -->
-    
-    <!-- Inside main-window, add these new modals: -->
-    
-    <!-- PERMISSIONS MODAL -->
-    <div id="permissions-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>MANAGE PERMISSIONS</span>
-                <button class="modal-close" onclick="window.closePermissionsModal()">✕</button>
+    <audio id="sfx-poweron" src="/assets/audio/poweron.wav"></audio>
+    <audio id="sfx-loading" src="/assets/audio/loading1.wav"></audio>
+    <audio id="sfx-newmessage" src="/assets/audio/newmessage.wav"></audio>
+    <audio id="sfx-error" src="/assets/audio/uh_oh.wav"></audio>
+    <audio id="sfx-denied" src="/assets/audio/requestdenied.wav"></audio>
+    <audio id="sfx-sent" src="/assets/audio/requestsent.wav"></audio>
+    <audio id="sfx-blue" src="/assets/audio/bluecode.wav"></audio>
+
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+    <div class="glitch-block"></div>
+
+    <div id="loading-screen" class="screen active">
+        <div class="loading-left">
+            <div class="upeo-section">
+                <svg class="upeo-logo" viewBox="0 0 200 200">
+                    <path d="M60,140 L40,100 Q40,80 60,70 L80,80 L100,60 L120,70 L140,50 Q160,60 150,90 L130,120 Q120,140 100,140 L80,130 L60,140 Z" fill="currentColor"/>
+                    <circle cx="130" cy="90" r="30" fill="none" stroke="currentColor" stroke-width="4"/>
+                    <path d="M140,80 Q150,75 160,80" stroke="currentColor" stroke-width="3" fill="none"/>
+                </svg>
+                <div class="upeo-text">UPEO</div>
             </div>
-            <div class="modal-body">
-                <p style="margin-bottom: 20px;">
-                    User: <strong><span id="permissions-user-name"></span></strong>
-                </p>
-                <input type="hidden" id="permissions-user-id">
-                
-                <div class="permissions-grid">
-                    <div class="permission-item">
-                        <label class="permission-label">Radio Access</label>
-                        <input type="checkbox" id="perm-radio" class="permission-checkbox">
+            
+            <div class="loading-info">
+                RESTARTING OS VER.3.2.2<br>
+                UPEO ID confirmed<br>
+                DATA SWALLOW<br>
+                is for registered use only.
+            </div>
+        </div>
+
+        <div class="loading-right">
+            <div class="login-panel hidden" id="login-panel">
+                <div class="login-header">OPERATOR ACCESS</div>
+                <div class="login-body">
+                    <label class="login-label">ENTER OPERATOR ID:</label>
+                    <input type="text" id="operator-id" class="login-input" maxlength="20" autocomplete="off">
+                    
+                    <label class="login-label">PASSWORD (ADMIN ONLY):</label>
+                    <input type="password" id="operator-password" class="login-input" placeholder="â€¢â€¢â€¢â€¢" maxlength="20">
+                    
+                    <div class="login-status" id="login-status"></div>
+                    
+                    <div class="login-buttons" style="margin-top:20px; display:flex; gap:10px;">
+                        <button class="login-btn" onclick="handleLogin()">LOGIN</button>
+                        <button class="login-btn secondary" onclick="handleNewOperator()">NEW OP</button>
                     </div>
-                    <div class="permission-item">
-                        <label class="permission-label">Credentials View</label>
-                        <input type="checkbox" id="perm-credentials" class="permission-checkbox">
-                    </div>
-                    <div class="permission-item">
-                        <label class="permission-label">Help Tickets</label>
-                        <input type="checkbox" id="perm-tickets" class="permission-checkbox">
+                    
+                    <div class="login-info-text">
+                        ADMIN ID: 118107921024376 (REQ. PASS)<br>
+                        NEW OPERATORS: CLICK NEW OP
                     </div>
                 </div>
-                
-                <div class="btn-group" style="margin-top: 24px;">
-                    <button class="btn-primary" onclick="window.savePermissions()">SAVE PERMISSIONS</button>
-                    <button class="btn-secondary" onclick="window.closePermissionsModal()">CANCEL</button>
+            </div>
+        </div>
+
+        <div class="data-swallow-container">
+            <div class="swallow-box">
+                <div class="swallow-header">
+                    <div class="swallow-brand">DATA SWALLOW</div>
+                    <div class="swallow-disk">
+                        <div class="disk-text">
+                            DATA SWALLOW 40<br>
+                            UPEO VER.3.2<br>
+                            SYSTEM STARTUP
+                        </div>
+                        <div class="disk-icon">O+</div>
+                    </div>
+                </div>
+                <div class="loading-bar">
+                    <div class="bar-fill" id="loading-progress"></div>
+                </div>
+                <div class="swallow-footer">DATA SWALLOW 40 starting...</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-screen" class="screen">
+        <div class="top-decoration">
+            <div class="browser-dots"><span></span><span></span><span></span></div>
+            <div class="url-bar">ARCS - Advanced Research & Containment System</div>
+        </div>
+
+        <div class="main-window">
+            <div class="menu-bar">
+                <div class="menu-button" onclick="goToHome()">MENU</div>
+                <div class="menu-tabs" id="admin-tabs">
+                    <div class="tab" data-target="adm-broadcast">BROADCAST</div>
+                    <div class="tab" data-target="adm-editing">EDITING</div>
+                    <div class="tab" data-target="adm-alarms">ALARMS</div>
+                    <div class="tab" data-target="adm-tickets">TICKETS</div>
+                    <div class="tab" data-target="adm-radio">RADIO</div>
+                    <div class="tab" data-target="adm-credentials">CREDENTIALS</div>
+                    <div class="tab" data-target="adm-users">USERS</div>
+                    <div class="tab" data-target="adm-analytics">ANALYTICS</div>
+                    <div id="custom-menu-tabs" style="display:inline-flex;"></div>
+                </div>
+                <div class="menu-user-info">
+                    <span class="menu-user-name">GUEST</span>
+                    <button class="menu-logout-btn" onclick="logout()">LOGOUT</button>
+                </div>
+            </div>
+
+            <div id="view-home" class="tab-content active">
+                <div class="banner-section">
+                    <img src="/assets/Banner.png" class="banner-img" onerror="this.style.display='none'">
+                </div>
+                <div class="home-welcome">
+                    <div class="welcome-title" id="home-welcome-title">WELCOME</div>
+                    <div class="welcome-text" id="home-welcome-text">Loading content...</div>
+                </div>
+                <div id="home-content-container"></div>
+            </div>
+
+            <div id="adm-broadcast" class="tab-content">
+                <div class="news-box">
+                    <label>SPRITE:</label>
+                    <div class="sprite-selector" id="sprite-selector">
+                        <div class="sprite-option active" data-sprite="normal"><img src="/assets/sprites/normal.png"><span>NORMAL</span></div>
+                        <div class="sprite-option" data-sprite="happy"><img src="/assets/sprites/happy.png"><span>HAPPY</span></div>
+                        <div class="sprite-option" data-sprite="sad"><img src="/assets/sprites/sad.png"><span>SAD</span></div>
+                        <div class="sprite-option" data-sprite="annoyed"><img src="/assets/sprites/annoyed.png"><span>ANNOYED</span></div>
+                        <div class="sprite-option" data-sprite="angry"><img src="/assets/sprites/angry.png"><span>ANGRY</span></div>
+                        <div class="sprite-option" data-sprite="panic"><img src="/assets/sprites/panic.png"><span>PANIC</span></div>
+                        <div class="sprite-option" data-sprite="werror"><img src="/assets/sprites/werror.png"><span>ERROR</span></div>
+                        <div class="sprite-option" data-sprite="dizzy"><img src="/assets/sprites/dizzy.png"><span>DIZZY</span></div>
+                        <div class="sprite-option" data-sprite="confused"><img src="/assets/sprites/confused.png"><span>CONFUSED</span></div>
+                        <div class="sprite-option" data-sprite="sleeping"><img src="/assets/sprites/sleeping.png"><span>SLEEPING</span></div>
+                        <div class="sprite-option" data-sprite="smirk"><img src="/assets/sprites/smirk.png"><span>SMIRK</span></div>
+                        <div class="sprite-option" data-sprite="smug"><img src="/assets/sprites/smug.png"><span>SMUG</span></div>
+                        <div class="sprite-option" data-sprite="stare"><img src="/assets/sprites/stare.png"><span>STARE</span></div>
+                        <div class="sprite-option" data-sprite="suspicious"><img src="/assets/sprites/suspicious.png"><span>SUSPICIOUS</span></div>
+                        <div class="sprite-option" data-sprite="bug"><img src="/assets/sprites/bug.png"><span>BUG</span></div>
+                        <div class="sprite-option" data-sprite="hollow"><img src="/assets/sprites/hollow.png"><span>HOLLOW</span></div>
+                    </div>
+                    <input type="hidden" id="sprite-select" value="normal">
+                    <textarea id="broadcast-text" placeholder="MESSAGE..."></textarea>
+                    <button onclick="sendBroadcast()">TRANSMIT</button>
+                </div>
+            </div>
+
+            <div id="adm-editing" class="tab-content">
+                <div class="editing-workspace">
+                    <div class="editing-toolbar">
+                        <div class="toolbar-title">EDITOR DE CONTEÃšDO</div>
+                        <div class="toolbar-actions">
+                            <button class="toolbar-btn" onclick="addNewContent()">+ NOVO</button>
+                            <button class="toolbar-btn primary" onclick="saveContentChanges()">SALVAR</button>
+                        </div>
+                    </div>
+                    
+                    <div class="editing-canvas">
+                        <div class="editing-sidebar">
+                            <div class="sidebar-header">CONTEÃšDOS</div>
+                            <div class="content-list" id="content-list"></div>
+                            <button class="add-content-btn" onclick="addNewContent()">ADICIONAR</button>
+                        </div>
+                        
+                        <div class="editing-main">
+                            <div class="editor-empty-state" id="editor-empty">
+                                <div class="editor-empty-text">SELECIONE UM CONTEÃšDO PARA EDITAR</div>
+                            </div>
+                            
+                            <div class="editor-form hidden" id="editor-form"></div>
+                        </div>
+                        
+                        <div class="editing-properties">
+                            <div class="properties-header">PROPRIEDADES</div>
+                            <div class="properties-content" id="properties-panel">
+                                <div class="property-group">
+                                    <div class="property-group-title">STATUS</div>
+                                    <div class="property-item">
+                                        <span class="property-label">VisÃ­vel</span>
+                                        <div class="property-toggle" id="content-visible-toggle"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="adm-radio" class="tab-content">
+                <div class="radio-fullwidth">
+                    <div class="cell-header">RADIO FREQUENCY 99.4</div>
+                    <div class="radio-header">
+                        <button class="radio-clear-btn" onclick="clearRadioMessages()">CLEAR</button>
+                    </div>
+                    <div class="radio-messages" id="radio-messages"></div>
+                    <div class="radio-input-area">
+                        <input type="text" id="radio-input" placeholder="Radio check...">
+                        <button onclick="sendRadioMessage()">SEND</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="adm-tickets" class="tab-content">
+                 <div class="cell-header">APPROVAL QUEUE</div>
+                 <div id="pending-list"></div>
+            </div>
+
+            <div id="adm-users" class="tab-content">
+                <div class="users-tabs">
+                    <div class="users-tab active" onclick="showUsersSection('active')">ACTIVE</div>
+                    <div class="users-tab" onclick="showUsersSection('banned')">BANNED</div>
+                </div>
+                <div id="users-active-section">
+                    <div id="active-users-list"></div>
+                </div>
+                <div id="users-banned-section" class="hidden">
+                    <div id="banned-users-list"></div>
+                </div>
+            </div>
+
+            <div id="adm-analytics" class="tab-content">
+                <div class="analytics-grid">
+                    <div class="analytics-card">USERS: <span id="analytics-total-users">0</span></div>
+                    <div class="analytics-card">ONLINE: <span id="analytics-active-sessions">0</span></div>
+                    <div class="analytics-card">BROADCASTS: <span id="analytics-broadcasts">0</span></div>
+                    <div class="analytics-card">RADIO: <span id="analytics-radio-msgs">0</span></div>
+                </div>
+            </div>
+            
+            <div id="adm-alarms" class="tab-content">
+                <div class="alarms-container">
+                    <button onclick="setAlarmTheme('green')" class="alarm-btn green">GREEN</button>
+                    <button onclick="setAlarmTheme('blue')" class="alarm-btn blue">BLUE</button>
+                    <button onclick="setAlarmTheme('red')" class="alarm-btn red">RED</button>
+                    <button onclick="setAlarmTheme('epsilon')" class="alarm-btn epsilon">EPSILON</button>
+                </div>
+            </div>
+
+            <div id="adm-credentials" class="tab-content">
+                <div class="obunto-profile-card">
+                    <div class="obunto-security-level">OMEGA LEVEL</div>
+                    
+                    <div class="obunto-profile-header">
+                        <div class="obunto-avatar">🤖</div>
+                        <div class="obunto-header-info">
+                            <div class="obunto-username">
+                                OBUNTO
+                                <span class="obunto-admin-badge">SYSTEM ADMIN</span>
+                            </div>
+                            <div class="obunto-handle">@obuntu</div>
+                            <div class="obunto-joined">◆ JOINED OCTOBER 26, 2025</div>
+                        </div>
+                    </div>
+                    
+                    <div class="obunto-bio">
+                        <div class="obunto-bio-text">
+                            The system runs deep, and the protocols are absolute. Guardian of ARCS. Keeper of clearances. Administrator of all operations.
+                        </div>
+                    </div>
+                    
+                    <div class="obunto-stats">
+                        <div class="obunto-stat">
+                            <div class="obunto-stat-value" id="obuntu-operators">0</div>
+                            <div class="obunto-stat-label">OPERATORS</div>
+                        </div>
+                        <div class="obunto-stat">
+                            <div class="obunto-stat-value" id="obuntu-active">0</div>
+                            <div class="obuntu-stat-label">ACTIVE</div>
+                        </div>
+                        <div class="obuntu-stat">
+                            <div class="obunto-stat-value" id="obuntu-tickets">0</div>
+                            <div class="obuntu-stat-label">TICKETS</div>
+                        </div>
+                    </div>
+                    
+                    <div class="obunto-actions">
+                        <button class="obunto-action-btn" data-icon="👋">POKE</button>
+                        <button class="obunto-action-btn" data-icon="📧">C-MAIL</button>
+                        <button class="obunto-action-btn" data-icon="📊">DASHBOARD</button>
+                    </div>
+                    
+                    <div class="obunto-profile-footer">
+                        OMEGA LEVEL CLEARANCE · SYSTEM ADMINISTRATOR · ID: 118107921024376
+                    </div>
+                </div>
+            </div>
+                <div class="credentials-card">
+                    <div class="credentials-header">OMEGA LEVEL</div>
+                    <div class="credentials-body">OBUNTO - SYSTEM ADMIN</div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- NEW TICKET MODAL -->
-    <div id="new-ticket-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span>NEW HELP REQUEST</span>
-                <button class="modal-close" onclick="window.closeNewTicketModal()">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="editor-field">
-                    <label class="editor-label">SUBJECT:</label>
-                    <input type="text" id="ticket-subject" class="editor-input" placeholder="Brief description of your issue">
-                </div>
-                
-                <div class="editor-field">
-                    <label class="editor-label">MESSAGE:</label>
-                    <textarea id="ticket-message" class="editor-textarea" placeholder="Explain your issue in detail..."></textarea>
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn-primary" onclick="window.createNewTicket()">SUBMIT REQUEST</button>
-                    <button class="btn-secondary" onclick="window.closeNewTicketModal()">CANCEL</button>
-                </div>
-            </div>
-        </div>
+
+    <div id="admin-panel" class="admin-window hidden">
+        <div class="window-titlebar"><span>ADMIN</span><div class="close-btn" onclick="closeAdmin()">X</div></div>
+        <div id="pending-list-modal"></div>
     </div>
     
-    <!-- REPLACE the existing adm-tickets section with: -->
-    <div id="adm-tickets" class="tab-content">
-        <div class="cell-header">HELP DESK TICKETS</div>
+    <div id="admin-toggle" class="admin-fab hidden" onclick="openAdmin()">+</div>
+
+    <!-- NOTIFICAÃ‡ÃƒO ATUALIZADA - LAYOUT INVERTIDO -->
+    <div id="broadcast-notification" class="notification hidden" data-emotion="normal">
+        <div class="bubble">
+            <div id="notif-text" class="notification-text"></div>
+            <div class="notification-time" id="notif-time"></div>
+        </div>
         
-        <!-- Admin View (only visible if isAdmin) -->
-        <div id="tickets-admin-list" style="padding: 20px;">
-            <!-- Dynamically populated by tickets.js -->
+        <div class="mascot-container">
+            <img id="notif-sprite" src="/assets/sprites/normal.png" alt="Obuntu">
+            <div class="mascot-label">
+                <span>OBUNTU</span>
+            </div>
         </div>
         
-        <!-- User View (only visible if !isAdmin) -->
-        <div id="tickets-user-section" style="padding: 20px;">
-            <button class="btn-primary" onclick="window.openNewTicketModal()" style="margin-bottom: 20px;">
-                NEW HELP REQUEST
-            </button>
-            <div id="tickets-user-list">
-                <!-- Dynamically populated by tickets.js -->
+        <button class="notification-close" onclick="hideNotification()">Ã—</button>
+    </div>
+
+    <!-- MODAIS -->
+    <div id="edit-welcome-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>EDIT WELCOME</h3>
+            <input type="text" id="welcome-title-input">
+            <textarea id="welcome-text-input"></textarea>
+            <button onclick="saveWelcomeChanges()">SAVE</button>
+            <button onclick="closeWelcomeModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <div id="new-content-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>NOVO CONTEÃšDO</h3>
+            <div class="content-type-selector">
+                <div class="type-option" data-type="text" onclick="selectContentType('text')">
+                    <div class="type-option-icon">ðŸ“</div>
+                    <div class="type-option-name">TEXTO</div>
+                </div>
+                <div class="type-option" data-type="image" onclick="selectContentType('image')">
+                    <div class="type-option-icon">ðŸ–¼ï¸</div>
+                    <div class="type-option-name">IMAGEM</div>
+                </div>
+                <div class="type-option" data-type="link" onclick="selectContentType('link')">
+                    <div class="type-option-icon">ðŸ”—</div>
+                    <div class="type-option-name">LINK</div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="createNewContent()">CRIAR</button>
+                <button class="btn-secondary" onclick="closeNewContentModal()">CANCELAR</button>
             </div>
         </div>
     </div>
-    
-    <!-- REPLACE the existing adm-credentials section with: -->
-    <div id="adm-credentials" class="tab-content">
-        <div class="obuntu-profile-card">
-            <div class="obuntu-security-level">CLEARANCE LEVEL</div>
-            
-            <div class="obuntu-profile-header">
-                <div class="obuntu-avatar">
-                    🤖
-                    <!-- Alternative: <img src="/assets/obuntu-avatar.png" class="obuntu-avatar-img"> -->
-                </div>
-                <div class="obuntu-user-info">
-                    <div class="obuntu-username">
-                        OBUNTO
-                        <span class="obuntu-admin-badge">SYSTEM ADMIN</span>
-                    </div>
-                    <div class="obuntu-handle">@obuntu</div>
-                    <div class="obuntu-joined">Joined October 26, 2025</div>
-                </div>
-            </div>
-            
-            <div class="obuntu-profile-body">
-                <div class="obuntu-bio">
-                    The system runs deep, and the protocols are absolute. 
-                    Guardian of ARCS. Keeper of clearances. Administrator of all operations.
-                </div>
-                
-                <div class="obuntu-stats">
-                    <div class="obuntu-stat">
-                        <div class="obuntu-stat-value" id="obuntu-stat-operators">0</div>
-                        <div class="obuntu-stat-label">Operators</div>
-                    </div>
-                    <div class="obuntu-stat">
-                        <div class="obuntu-stat-value" id="obuntu-stat-active">0</div>
-                        <div class="obuntu-stat-label">Active</div>
-                    </div>
-                    <div class="obuntu-stat">
-                        <div class="obuntu-stat-value" id="obuntu-stat-tickets">0</div>
-                        <div class="obuntu-stat-label">Tickets</div>
-                    </div>
-                </div>
-                
-                <div class="obuntu-actions">
-                    <button class="obuntu-action-btn primary" data-icon="P" onclick="alert('Poke feature coming soon!')">
-                        Poke
-                    </button>
-                    <button class="obuntu-action-btn" data-icon="C" onclick="alert('C-Mail feature coming soon!')">
-                        C-Mail
-                    </button>
-                    <button class="obuntu-action-btn" data-icon="◆" onclick="window.goToHome()">
-                        Dashboard
-                    </button>
-                </div>
-            </div>
-            
-            <div class="obuntu-profile-footer">
-                OMEGA LEVEL CLEARANCE · SYSTEM ADMINISTRATOR · ID: 118107921024376
-            </div>
+
+    <div id="edit-user-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>EDIT USER</h3>
+            <input type="text" id="edit-user-id" readonly>
+            <input type="text" id="edit-user-name">
+            <select id="edit-user-status">
+                <option value="active">Active</option>
+                <option value="banned">Banned</option>
+            </select>
+            <button onclick="saveUserChanges()">SAVE</button>
+            <button onclick="closeEditUserModal()">CANCEL</button>
         </div>
     </div>
-    
-    <!-- IMPORTANT: Change the script tag at the end of body to: -->
-    <script type="module" src="/js/script.js"></script>
+
+    <script src="/js/script.js"></script>
 </body>
 </html>

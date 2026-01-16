@@ -1,57 +1,71 @@
-.notification-modern {
+/**
+ * ARCS Notification System - IMPROVED
+ * Obunto Speech Bubble System
+ * NieR:Automata Design System
+ * Layout: Text Left, Sprite Right (inspired by inventory item display)
+ */
+
+/* ==================== NOTIFICATION CONTAINER ==================== */
+.notification {
     position: fixed;
-    bottom: 40px;
-    right: 40px;
+    bottom: 36px;
+    right: 36px;
     z-index: 9999;
     display: flex;
     align-items: stretch;
     gap: 0;
-    max-width: 600px;
-    background: var(--nier-paper);
-    border: 4px solid var(--nier-black);
-    animation: notifSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
+    max-width: 580px;
+    min-height: 140px;
+    animation: notificationSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(4px 4px 8px rgba(0, 0, 0, 0.25));
 }
 
-@keyframes notifSlideIn {
+@keyframes notificationSlideUp {
     from { 
-        transform: translateX(120%);
+        transform: translateY(150%);
         opacity: 0;
     }
     to { 
-        transform: translateX(0);
+        transform: translateY(0);
         opacity: 1;
     }
 }
 
-.notification-modern.hidden {
+.notification.hidden {
     display: none !important;
 }
 
-.notification-modern.hiding {
-    animation: notifSlideOut 0.4s ease forwards;
+.notification.hiding {
+    animation: notificationSlideDown 0.4s ease forwards;
 }
 
-@keyframes notifSlideOut {
+@keyframes notificationSlideDown {
     to {
-        transform: translateX(120%);
+        transform: translateY(150%);
         opacity: 0;
     }
 }
 
-.notif-mascot {
-    width: 180px;
-    background: var(--nier-muted);
-    border-right: 4px solid var(--nier-black);
+/* ==================== MAIN CONTENT BOX (LEFT) ==================== */
+.bubble {
+    background: var(--nier-paper-light);
+    border: 3px solid var(--nier-black);
+    padding: 20px 24px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--nier-text);
+    position: relative;
+    flex: 1;
+    min-height: 140px;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    padding: 20px;
-    position: relative;
+    letter-spacing: 0.3px;
+    line-height: 1.65;
 }
 
-.notif-mascot::before {
+/* Top left corner bracket */
+.bubble::before {
     content: '';
     position: absolute;
     top: 0;
@@ -62,36 +76,8 @@
     border-left: 3px solid var(--nier-black);
 }
 
-#notif-sprite {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    image-rendering: pixelated;
-    margin-bottom: 12px;
-}
-
-.mascot-name {
-    background: var(--nier-black);
-    color: var(--nier-paper);
-    padding: 8px 16px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: 2px solid var(--nier-black);
-}
-
-.notif-content {
-    flex: 1;
-    padding: 24px 28px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 160px;
-    position: relative;
-}
-
-.notif-content::before {
+/* Bottom right corner bracket */
+.bubble::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -102,35 +88,152 @@
     border-right: 3px solid var(--nier-black);
 }
 
-.notif-text {
-    font-size: 14px;
-    line-height: 1.8;
+/* ==================== NOTIFICATION TEXT ==================== */
+.notification-text,
+#notif-text {
+    line-height: 1.7;
+    letter-spacing: 0.4px;
+    font-family: var(--font-main);
     color: var(--nier-text);
-    font-weight: 500;
-    letter-spacing: 0.5px;
 }
 
-.notif-time {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 2px dashed rgba(87, 83, 74, 0.3);
-    font-size: 10px;
-    color: var(--nier-muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-family: var(--font-mono);
+.notification-text.typing::after,
+#notif-text.typing::after {
+    content: 'â–Œ';
+    animation: cursorBlink 0.7s infinite;
+    margin-left: 2px;
+    color: var(--nier-dark);
 }
 
-.notif-close {
+@keyframes cursorBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+/* ==================== MASCOT CONTAINER (RIGHT) ==================== */
+.mascot-container {
+    display: flex;
+    flex-direction: column;
+    background: var(--nier-panel);
+    border: 3px solid var(--nier-black);
+    border-left: none;
+    min-width: 160px;
+    position: relative;
+}
+
+/* Top right corner bracket */
+.mascot-container::before {
+    content: '';
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 30px;
-    height: 30px;
+    top: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid var(--nier-black);
+    border-right: 3px solid var(--nier-black);
+}
+
+/* Bottom left corner bracket */
+.mascot-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -3px;
+    width: 16px;
+    height: 16px;
+    border-bottom: 3px solid var(--nier-black);
+    border-left: 3px solid var(--nier-black);
+}
+
+/* ==================== SPRITE DISPLAY ==================== */
+#notif-sprite {
+    width: 100%;
+    height: 100%;
+    min-height: 110px;
+    background: var(--nier-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    padding: 16px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* Subtle inner shadow */
+#notif-sprite::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+}
+
+.sprite-face {
+    font-size: 56px;
+    line-height: 1;
+    animation: spriteBob 2s ease-in-out infinite;
+}
+
+@keyframes spriteBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+/* ==================== STATUS BAR (BOTTOM) ==================== */
+.mascot-label {
     background: var(--nier-black);
-    border: 2px solid var(--nier-dark);
-    color: var(--nier-paper);
-    font-size: 18px;
+    color: var(--nier-paper-light);
+    padding: 8px 12px;
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    border-top: 3px solid var(--nier-black);
+    text-transform: uppercase;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+/* Stats display in label */
+.mascot-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-label {
+    opacity: 0.7;
+}
+
+.stat-value {
+    font-weight: 700;
+}
+
+/* ==================== CLOSE BUTTON ==================== */
+.notification-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    background: var(--nier-black);
+    border: 2px solid var(--nier-paper-light);
+    color: var(--nier-paper-light);
+    font-size: 12px;
     font-weight: 700;
     cursor: pointer;
     display: flex;
@@ -140,65 +243,213 @@
     z-index: 10;
 }
 
-.notif-close:hover {
+.notification-close:hover {
     background: var(--nier-accent);
     color: var(--nier-black);
     border-color: var(--nier-black);
 }
 
-.notification-modern[data-emotion="happy"] .notif-mascot {
+/* ==================== EMOTION VARIATIONS ==================== */
+
+/* Happy - Green tint */
+.notification[data-emotion="happy"] .mascot-container,
+.notification.emotion-happy .mascot-container {
     background: #B5C5A8;
 }
 
-.notification-modern[data-emotion="sad"] .notif-mascot {
+.notification[data-emotion="happy"] .mascot-label,
+.notification.emotion-happy .mascot-label {
+    background: #5A7A5A;
+}
+
+/* Sad - Blue tint */
+.notification[data-emotion="sad"] .mascot-container,
+.notification.emotion-sad .mascot-container {
     background: #A8B5C5;
 }
 
-.notification-modern[data-emotion="annoyed"] .notif-mascot,
-.notification-modern[data-emotion="angry"] .notif-mascot {
+.notification[data-emotion="sad"] .mascot-label,
+.notification.emotion-sad .mascot-label {
+    background: #5A6A7A;
+}
+
+/* Annoyed/Angry - Red tint */
+.notification[data-emotion="annoyed"] .mascot-container,
+.notification[data-emotion="angry"] .mascot-container,
+.notification.emotion-annoyed .mascot-container,
+.notification.emotion-angry .mascot-container {
     background: #C5A8A8;
 }
 
-.notification-modern[data-emotion="panic"] .notif-mascot,
-.notification-modern[data-emotion="werror"] .notif-mascot {
-    background: #D5A0A0;
-    animation: panicShake 0.3s ease-in-out infinite;
+.notification[data-emotion="annoyed"] .mascot-label,
+.notification[data-emotion="angry"] .mascot-label,
+.notification.emotion-annoyed .mascot-label,
+.notification.emotion-angry .mascot-label {
+    background: #7A5A5A;
 }
 
-@keyframes panicShake {
+/* Panic/Error - Intense red with pulse */
+.notification[data-emotion="panic"] .mascot-container,
+.notification[data-emotion="werror"] .mascot-container,
+.notification.emotion-panic .mascot-container,
+.notification.emotion-werror .mascot-container {
+    background: #D5A0A0;
+    animation: panicPulse 0.5s infinite;
+}
+
+.notification[data-emotion="panic"] .mascot-label,
+.notification[data-emotion="werror"] .mascot-label,
+.notification.emotion-panic .mascot-label,
+.notification.emotion-werror .mascot-label {
+    background: #8A4A4A;
+    animation: panicPulse 0.5s infinite;
+}
+
+@keyframes panicPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.75; }
+}
+
+/* Dizzy/Confused - Yellow tint */
+.notification[data-emotion="dizzy"] .mascot-container,
+.notification[data-emotion="confused"] .mascot-container,
+.notification.emotion-dizzy .mascot-container,
+.notification.emotion-confused .mascot-container {
+    background: #C5C5A8;
+}
+
+.notification[data-emotion="dizzy"] .mascot-label,
+.notification[data-emotion="confused"] .mascot-label,
+.notification.emotion-dizzy .mascot-label,
+.notification.emotion-confused .mascot-label {
+    background: #7A7A5A;
+}
+
+/* Sleeping - Dark/muted */
+.notification[data-emotion="sleeping"] .mascot-container,
+.notification.emotion-sleeping .mascot-container {
+    background: #A0A0A8;
+}
+
+.notification[data-emotion="sleeping"] .mascot-label,
+.notification.emotion-sleeping .mascot-label {
+    background: #5A5A6A;
+}
+
+.notification[data-emotion="sleeping"] .sprite-face,
+.notification.emotion-sleeping .sprite-face {
+    animation: sleepingBreathe 3s ease-in-out infinite;
+}
+
+@keyframes sleepingBreathe {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.03); opacity: 1; }
+}
+
+/* Smirk/Smug - Orange tint */
+.notification[data-emotion="smirk"] .mascot-container,
+.notification[data-emotion="smug"] .mascot-container,
+.notification.emotion-smirk .mascot-container,
+.notification.emotion-smug .mascot-container {
+    background: #C5B5A8;
+}
+
+.notification[data-emotion="smirk"] .mascot-label,
+.notification[data-emotion="smug"] .mascot-label,
+.notification.emotion-smirk .mascot-label,
+.notification.emotion-smug .mascot-label {
+    background: #8A6A5A;
+}
+
+.notification[data-emotion="smirk"] .sprite-face,
+.notification[data-emotion="smug"] .sprite-face,
+.notification.emotion-smirk .sprite-face,
+.notification.emotion-smug .sprite-face {
+    animation: smugBounce 1s ease-in-out infinite;
+}
+
+@keyframes smugBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    25% { transform: translateY(-3px) rotate(1deg); }
+    75% { transform: translateY(-3px) rotate(-1deg); }
+}
+
+/* Suspicious/Stare - Purple tint */
+.notification[data-emotion="suspicious"] .mascot-container,
+.notification[data-emotion="stare"] .mascot-container,
+.notification.emotion-suspicious .mascot-container,
+.notification.emotion-stare .mascot-container {
+    background: #B5A8C5;
+}
+
+.notification[data-emotion="suspicious"] .mascot-label,
+.notification[data-emotion="stare"] .mascot-label,
+.notification.emotion-suspicious .mascot-label,
+.notification.emotion-stare .mascot-label {
+    background: #6A5A7A;
+}
+
+/* Bug - Glitchy effect */
+.notification[data-emotion="bug"] .mascot-container,
+.notification.emotion-bug .mascot-container {
+    background: #A0A8A8;
+    animation: glitchShake 0.3s ease-in-out infinite;
+}
+
+.notification[data-emotion="bug"] .mascot-label,
+.notification.emotion-bug .mascot-label {
+    background: #4A5A5A;
+}
+
+@keyframes glitchShake {
     0%, 100% { transform: translateX(0); }
     25% { transform: translateX(-2px); }
     75% { transform: translateX(2px); }
 }
 
-.notification-modern[data-emotion="dizzy"] .notif-mascot {
-    background: #C5C5A8;
-}
-
-.notification-modern[data-emotion="sleeping"] .notif-mascot {
-    background: #A0A0A8;
-}
-
-.notification-modern[data-emotion="smirk"] .notif-mascot {
-    background: #C5B5A8;
-}
-
-.notification-modern[data-emotion="suspicious"] .notif-mascot,
-.notification-modern[data-emotion="stare"] .notif-mascot {
-    background: #B5A8C5;
-}
-
-.notification-modern[data-emotion="bug"] .notif-mascot {
-    background: #A0A8A8;
-}
-
-.notification-modern[data-emotion="hollow"] .notif-mascot {
+/* Hollow - Faded/ghostly */
+.notification[data-emotion="hollow"] .mascot-container,
+.notification.emotion-hollow .mascot-container {
     background: #C0C0C0;
     opacity: 0.85;
 }
 
+.notification[data-emotion="hollow"] .mascot-label,
+.notification.emotion-hollow .mascot-label {
+    background: #707070;
+}
+
+.notification[data-emotion="hollow"] #notif-sprite,
+.notification.emotion-hollow #notif-sprite {
+    opacity: 0.7;
+}
+
+/* Normal - Default neutral */
+.notification[data-emotion="normal"] .mascot-container,
+.notification.emotion-normal .mascot-container {
+    background: var(--nier-panel);
+}
+
+.notification[data-emotion="normal"] .mascot-label,
+.notification.emotion-normal .mascot-label {
+    background: var(--nier-black);
+}
+
+/* ==================== TIMESTAMP ==================== */
+.notification-time {
+    font-size: 9px;
+    color: var(--nier-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(87, 83, 74, 0.3);
+    font-family: var(--font-mono);
+}
+
+/* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
-    .notification-modern {
+    .notification {
         bottom: 20px;
         right: 20px;
         left: 20px;
@@ -206,23 +457,35 @@
         flex-direction: column;
     }
     
-    .notif-mascot {
-        width: 100%;
+    .mascot-container {
+        border-left: 3px solid var(--nier-black);
+        border-top: none;
+        min-width: 100%;
         flex-direction: row;
-        border-right: none;
-        border-bottom: 4px solid var(--nier-black);
-        padding: 16px;
+        min-height: 80px;
     }
     
     #notif-sprite {
-        width: 80px;
-        height: 80px;
-        margin-bottom: 0;
-        margin-right: 16px;
+        min-height: 80px;
+        min-width: 100px;
     }
     
-    .notif-content {
-        padding: 20px;
-        min-height: 120px;
+    .mascot-label {
+        flex: 1;
+        border-top: none;
+        border-left: 3px solid var(--nier-black);
     }
+    
+    .bubble {
+        min-height: 100px;
+    }
+}
+
+/* ==================== ANIMATION UTILITIES ==================== */
+.notification-enter {
+    animation: notificationSlideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.notification-exit {
+    animation: notificationSlideDown 0.4s ease forwards;
 }

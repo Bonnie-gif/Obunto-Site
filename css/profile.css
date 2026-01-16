@@ -1,0 +1,265 @@
+.obunto-profile-card {
+    max-width: 800px;
+    margin: 40px auto;
+    background: linear-gradient(135deg, var(--nier-accent), var(--nier-panel));
+    border: 3px solid var(--nier-dark);
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.obunto-security-level {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--nier-black);
+    color: var(--nier-accent);
+    padding: 8px 20px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    border: 2px solid var(--nier-accent);
+    z-index: 10;
+    animation: securityPulse 2s ease-in-out infinite;
+}
+
+@keyframes securityPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+.obunto-profile-card::before {
+    content: '▲';
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 24px;
+    color: rgba(0, 0, 0, 0.1);
+}
+
+.obunto-profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding: 50px 40px 30px 40px;
+    background: linear-gradient(135deg, var(--nier-accent) 0%, var(--nier-panel) 100%);
+    border-bottom: 3px solid var(--nier-dark);
+}
+
+.obunto-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--nier-dark);
+    background: var(--nier-paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.obunto-header-info {
+    flex: 1;
+}
+
+.obunto-username {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--nier-text);
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.obunto-admin-badge {
+    background: var(--nier-black);
+    color: var(--nier-paper);
+    font-size: 11px;
+    padding: 6px 14px;
+    border: 2px solid var(--nier-text);
+    letter-spacing: 1.5px;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.obunto-handle {
+    font-size: 16px;
+    color: var(--nier-dark);
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+}
+
+.obunto-joined {
+    font-size: 11px;
+    color: var(--nier-muted);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.obunto-bio {
+    padding: 32px 40px;
+    background: var(--nier-paper);
+    border-bottom: 2px solid var(--nier-border);
+}
+
+.obunto-bio-text {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--nier-text);
+    font-style: italic;
+    position: relative;
+    padding-left: 20px;
+    border-left: 4px solid var(--nier-accent);
+}
+
+.obunto-bio-text::before {
+    content: '"';
+    position: absolute;
+    left: -8px;
+    top: -10px;
+    font-size: 40px;
+    color: var(--nier-accent);
+    opacity: 0.3;
+    font-style: normal;
+}
+
+.obunto-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--nier-border);
+    padding: 0;
+}
+
+.obunto-stat {
+    background: var(--nier-panel);
+    padding: 24px;
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.obunto-stat:hover {
+    background: var(--nier-muted);
+}
+
+.obunto-stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--nier-text);
+    font-family: var(--font-mono);
+}
+
+.obuntu-stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--nier-text);
+    font-family: var(--font-mono);
+}
+
+.obunto-stat-label {
+    font-size: 10px;
+    color: var(--nier-muted);
+    margin-top: 8px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+.obuntu-stat-label {
+    font-size: 10px;
+    color: var(--nier-muted);
+    margin-top: 8px;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+}
+
+.obunto-actions {
+    display: flex;
+    gap: 2px;
+    padding: 0;
+    background: var(--nier-border);
+}
+
+.obunto-action-btn {
+    flex: 1;
+    padding: 18px;
+    background: var(--nier-panel);
+    border: none;
+    color: var(--nier-text);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    font-family: var(--font-main);
+}
+
+.obunto-action-btn::before {
+    content: attr(data-icon);
+    display: block;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.obunto-action-btn:first-child {
+    background: var(--nier-accent);
+}
+
+.obunto-action-btn:hover {
+    background: var(--nier-dark);
+    color: var(--nier-paper);
+    transform: translateY(-2px);
+}
+
+.obunto-profile-footer {
+    background: var(--nier-black);
+    color: var(--nier-panel);
+    padding: 16px 20px;
+    text-align: center;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    border-top: 3px solid var(--nier-text);
+}
+
+@media (max-width: 768px) {
+    .obunto-profile-card {
+        margin: 20px;
+    }
+    
+    .obunto-profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px 20px;
+    }
+    
+    .obunto-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 48px;
+    }
+    
+    .obunto-username {
+        font-size: 24px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .obunto-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .obunto-actions {
+        flex-direction: column;
+    }
+}
