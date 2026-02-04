@@ -35,6 +35,31 @@
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
+    <div class="music-player-container editable-wrapper">
+        <div class="editable-trigger" onclick="editMusic(event)">✏️</div>
+        
+        <div class="tonearm" id="tonearm"></div>
+        
+        <div class="vinyl-record" id="vinylRecord" onclick="toggleMusic()">
+            <div class="vinyl-grooves"></div>
+            <div class="vinyl-label">
+                <span class="music-note">🎵</span>
+            </div>
+        </div>
+
+        <div class="volume-control-container">
+            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" oninput="setVolume(this.value)">
+        </div>
+
+        <div class="music-controls-btn" onclick="toggleMusic()">
+            <span id="playIcon">▶</span>
+        </div>
+
+        <audio id="audioPlayer" loop>
+            <source src="" type="audio/mpeg">
+        </audio>
+    </div>
+
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="wax-seal-close" onclick="closeModal()">✖</div>

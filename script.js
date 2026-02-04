@@ -15,6 +15,9 @@ var loadTimer = setInterval(function(){
             var dateStr = d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
             var fs = document.getElementById('footerDate');
             if(fs) fs.innerHTML = "CHECKED<br>" + dateStr;
+            
+            // Tenta iniciar a música se estiver configurada (navegadores bloqueiam autoplay sem clique, então depende da interação)
+            renderMusic();
         }, 600);
     }
 }, 150);
@@ -33,9 +36,11 @@ function toggleNightMode() {
     document.body.classList.toggle('night-mode');
 }
 
+// DADOS DO SITE (Incluindo Música Agora)
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
     status: "ABERTO",
+    music: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, // Música padrão de exemplo
     welcome: { 
         title: "Bem-vindo!", 
         sub: "Meu espaço criativo", 
@@ -51,16 +56,13 @@ var data = {
 };
 
 function $(id) { return document.getElementById(id); }
-function loadData() { var s = localStorage.getItem('vintageSiteDatav18'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
-function saveData() { localStorage.setItem('vintageSiteDatav18', JSON.stringify(data)); }
+// Mudei a versão do 'vintageSiteDatav19' para resetar e pegar a estrutura nova com música
+function loadData() { var s = localStorage.getItem('vintageSiteDatav19'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
+function saveData() { localStorage.setItem('vintageSiteDatav19', JSON.stringify(data)); }
 
 function safeHTML(str) {
     if (!str) return '';
-    return str.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 function render() {
@@ -84,112 +86,94 @@ function render() {
     renderPrices(); 
     renderExtras(); 
     renderGallery();
+    renderMusic(); // Atualiza a fonte da música
 }
+
+// --- Lógica do Player de Música ---
+var isPlaying = false;
+
+function renderMusic() {
+    var audio = $('audioPlayer');
+    // Só atualiza o src se mudou, para não reiniciar a música se estiver tocando
+    if(audio && data.music && audio.getAttribute('src') !== data.music.url) {
+        audio.src = data.music.url;
+        audio.load();
+    }
+}
+
+function toggleMusic() {
+    var audio = $('audioPlayer');
+    var container = document.querySelector('.music-player-container');
+    
+    if (!audio) return;
+
+    if (isPlaying) {
+        audio.pause();
+        container.classList.remove('is-playing');
+        isPlaying = false;
+    } else {
+        audio.play().then(() => {
+            container.classList.add('is-playing');
+            isPlaying = true;
+        }).catch(e => {
+            alert("Erro ao tocar: link inválido ou bloqueado pelo navegador.");
+            console.error(e);
+        });
+    }
+}
+
+function editMusic(e) {
+    if(!editorMode) return;
+    e.stopPropagation();
+    openModal('Música do Vinil', 
+        '<div class="modal-form-group"><label class="modal-label">Link do MP3 (URL direta)</label><input class="modal-input" id="inMusicUrl" value="'+(data.music ? data.music.url : '')+'" placeholder="https://exemplo.com/musica.mp3"></div><p style="font-size:12px;color:#666">Dica: Use links diretos de arquivos .mp3 para funcionar melhor.</p>', 
+        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveMusic()">Salvar</button>'
+    );
+}
+
+function saveMusic() {
+    if(!data.music) data.music = {};
+    data.music.url = $('inMusicUrl').value;
+    saveData();
+    render(); // Isso vai chamar renderMusic()
+    closeModal();
+    // Reseta player
+    var container = document.querySelector('.music-player-container');
+    container.classList.remove('is-playing');
+    isPlaying = false;
+}
+
+// --- Resto das funções de renderização ---
 
 function renderLinks() {
     var container = $('socialGrid'); 
     if(!container) return;
     container.innerHTML = ''; 
-
     data.links.items.forEach(function(l) {
         var a = document.createElement('a');
-        
         var safeUrl = '#';
-        try {
-            var urlObj = new URL(l.url);
-            if(['http:', 'https:', 'mailto:'].includes(urlObj.protocol)) {
-                safeUrl = l.url;
-            }
-        } catch(e) { }
-
-        a.href = safeUrl;
-        if(safeUrl !== '#') {
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-        }
-        
-        a.className = 'social-btn ' + (l.color || '');
-        a.textContent = l.icon || '?'; 
-        container.appendChild(a);
+        try { var urlObj = new URL(l.url); if(['http:', 'https:', 'mailto:'].includes(urlObj.protocol)) { safeUrl = l.url; } } catch(e) { }
+        a.href = safeUrl; if(safeUrl !== '#') { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+        a.className = 'social-btn ' + (l.color || ''); a.textContent = l.icon || '?'; container.appendChild(a);
     });
 }
 
 function renderPrices() { 
-    var container = $('pricesList'); 
-    if(!container) return; 
-    container.innerHTML = '';
-    
-    data.prices.forEach(function(p){ 
-        var div = document.createElement('div');
-        div.className = 'menu-item';
-        
-        var nameSpan = document.createElement('span');
-        nameSpan.className = 'menu-item-name';
-        nameSpan.textContent = p.name;
-        
-        var priceSpan = document.createElement('span');
-        priceSpan.className = 'menu-item-price';
-        priceSpan.textContent = p.price;
-        
-        div.appendChild(nameSpan);
-        div.appendChild(priceSpan);
-        container.appendChild(div);
-    }); 
+    var container = $('pricesList'); if(!container) return; container.innerHTML = '';
+    data.prices.forEach(function(p){ var div = document.createElement('div'); div.className = 'menu-item'; var nameSpan = document.createElement('span'); nameSpan.className = 'menu-item-name'; nameSpan.textContent = p.name; var priceSpan = document.createElement('span'); priceSpan.className = 'menu-item-price'; priceSpan.textContent = p.price; div.appendChild(nameSpan); div.appendChild(priceSpan); container.appendChild(div); }); 
 }
 
 function renderExtras() { 
-    var container = $('extrasList'); 
-    if(!container) return; 
-    container.innerHTML = '';
-    
-    data.extras.forEach(function(e){ 
-        var div = document.createElement('div');
-        div.className = 'menu-item';
-        
-        var nameSpan = document.createElement('span');
-        nameSpan.className = 'menu-item-name';
-        nameSpan.textContent = e.name;
-        
-        var priceSpan = document.createElement('span');
-        priceSpan.className = 'menu-item-price';
-        priceSpan.textContent = e.price;
-        
-        div.appendChild(nameSpan);
-        div.appendChild(priceSpan);
-        container.appendChild(div);
-    }); 
+    var container = $('extrasList'); if(!container) return; container.innerHTML = '';
+    data.extras.forEach(function(e){ var div = document.createElement('div'); div.className = 'menu-item'; var nameSpan = document.createElement('span'); nameSpan.className = 'menu-item-name'; nameSpan.textContent = e.name; var priceSpan = document.createElement('span'); priceSpan.className = 'menu-item-price'; priceSpan.textContent = e.price; div.appendChild(nameSpan); div.appendChild(priceSpan); container.appendChild(div); }); 
 }
 
 function renderGallery() { 
-    var container = $('galleryGrid'); 
-    if(!container) return; 
-    container.innerHTML = '';
-    
+    var container = $('galleryGrid'); if(!container) return; container.innerHTML = '';
     data.gallery.forEach(function(g, i){ 
-        var rot = (Math.random() * 6) - 3; 
-        
-        var slide = document.createElement('div');
-        slide.className = 'gallery-slide';
-        slide.style.transform = 'rotate('+rot+'deg)';
-        slide.onclick = function() { editGalleryItem(i); };
-        
-        if(g.data) {
-            var img = document.createElement('img');
-            img.src = g.data; 
-            slide.appendChild(img);
-        } else {
-            var ph = document.createElement('div');
-            ph.className = 'placeholder';
-            ph.textContent = 'ARTE ' + (i+1);
-            slide.appendChild(ph);
-        }
-        
-        var cap = document.createElement('div');
-        cap.className = 'gallery-caption';
-        cap.textContent = 'Fig. ' + (i+1);
-        slide.appendChild(cap);
-        
-        container.appendChild(slide);
+        var rot = (Math.random() * 6) - 3; var slide = document.createElement('div'); slide.className = 'gallery-slide'; slide.style.transform = 'rotate('+rot+'deg)'; slide.onclick = function() { editGalleryItem(i); };
+        if(g.data) { var img = document.createElement('img'); img.src = g.data; slide.appendChild(img); } else { var ph = document.createElement('div'); ph.className = 'placeholder'; ph.textContent = 'ARTE ' + (i+1); slide.appendChild(ph); }
+        var cap = document.createElement('div'); cap.className = 'gallery-caption'; cap.textContent = 'Fig. ' + (i+1); slide.appendChild(cap); container.appendChild(slide);
     }); 
 }
 
@@ -213,10 +197,7 @@ function showPage(page) {
 }
 
 function openModal(title, contentHTML, buttonsHTML) {
-    $('modalTitle').textContent = title; 
-    $('modalContent').innerHTML = contentHTML; 
-    $('modalButtons').innerHTML = buttonsHTML; 
-    $('modalOverlay').classList.add('active');
+    $('modalTitle').textContent = title; $('modalContent').innerHTML = contentHTML; $('modalButtons').innerHTML = buttonsHTML; $('modalOverlay').classList.add('active');
 }
 function closeModal() { $('modalOverlay').classList.remove('active'); }
 $('modalOverlay').addEventListener('click', function(e){ if(e.target === this) closeModal(); });
@@ -232,19 +213,10 @@ function editStatus(e) { if(!editorMode)return; e.stopPropagation(); openModal('
 function saveStatus() { data.status=$('inStat').value; saveData(); render(); closeModal(); }
 
 function editWelcome(e) { if(!editorMode)return; e.stopPropagation(); openModal('Bem-vindo', '<div class="modal-form-group"><label class="modal-label">Título</label><input class="modal-input" id="inWT" value="'+data.welcome.title+'"></div><div class="modal-form-group"><label class="modal-label">Subtítulo</label><input class="modal-input" id="inWS" value="'+data.welcome.sub+'"></div><label class="modal-label">Texto</label>'+richEditor('inWTxt', data.welcome.text), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveWelcome()">Salvar</button>'); }
-function saveWelcome() { 
-    data.welcome.title=$('inWT').value; 
-    data.welcome.sub=$('inWS').value; 
-    data.welcome.text= $('inWTxt').innerHTML; 
-    saveData(); render(); closeModal(); 
-}
+function saveWelcome() { data.welcome.title=$('inWT').value; data.welcome.sub=$('inWS').value; data.welcome.text= $('inWTxt').innerHTML; saveData(); render(); closeModal(); }
 
 function editPromo(e) { if(!editorMode)return; e.stopPropagation(); openModal('Promoção', '<div class="modal-form-group"><label class="modal-label">Título</label><input class="modal-input" id="inPT" value="'+data.promo.title+'"></div><label class="modal-label">Texto</label>'+richEditor('inPTxt', data.promo.text), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="savePromo()">Salvar</button>'); }
-function savePromo() { 
-    data.promo.title=$('inPT').value; 
-    data.promo.text= $('inPTxt').innerHTML; 
-    saveData(); render(); closeModal(); 
-}
+function savePromo() { data.promo.title=$('inPT').value; data.promo.text= $('inPTxt').innerHTML; saveData(); render(); closeModal(); }
 
 function editLinks(e) { if(!editorMode) return; e.stopPropagation(); window.renderLinksModalList = function() { var html = '<div class="modal-links-list">'; data.links.items.forEach(function(link, index){ html += '<div class="modal-link-item"><input class="modal-link-icon" id="lIcon'+index+'" value="'+link.icon+'"><select class="modal-link-select" id="lColor'+index+'"><option value="red" '+(link.color==='red'?'selected':'')+'>Vermelho</option><option value="blue" '+(link.color==='blue'?'selected':'')+'>Azul</option><option value="yellow" '+(link.color==='yellow'?'selected':'')+'>Amarelo</option><option value="black" '+(link.color==='black'?'selected':'')+'>Preto</option><option value="white" '+(link.color==='white'?'selected':'')+'>Branco</option></select><input class="modal-link-url" id="lUrl'+index+'" value="'+link.url+'"><button class="modal-btn-remove" onclick="removeLinkItem('+index+')">X</button></div>'; }); html += '</div><button class="modal-add-link-btn" onclick="addLinkItem()">+ Adicionar Rede</button>'; return html; }; openModal('Redes Sociais', '<div class="modal-form-group"><label class="modal-label">Texto</label><input class="modal-input" id="inLinksText" value="'+data.links.text+'"></div><label class="modal-label">Lista de Links</label><div id="linksListContainer">' + window.renderLinksModalList() + '</div>', '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveLinks()">Salvar</button>'); }
 window.addLinkItem = function() { updateLinksDataTemp(); data.links.items.push({ icon: "?", color: "red", url: "" }); $('linksListContainer').innerHTML = window.renderLinksModalList(); };
@@ -263,34 +235,10 @@ window.rmExtra = function(i){ data.extras.splice(i,1); saveData(); render(); clo
 function addExtra(){ data.extras.push({name:"Extra",price:"R$0"}); saveData(); render(); }
 
 function editTos(e) { if(!editorMode)return; e.stopPropagation(); openModal('Termos', richEditor('inTos', data.tos), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveTos()">Salvar</button>'); }
-function saveTos(){ 
-    data.tos = $('inTos').innerHTML; 
-    saveData(); render(); closeModal(); 
-}
+function saveTos(){ data.tos = $('inTos').innerHTML; saveData(); render(); closeModal(); }
 
 function editGalleryItem(i) { if(!editorMode) return; openModal('Editar Imagem', '<label class="modal-label">Selecionar arquivo</label><input class="modal-input" type="file" onchange="previewImg(this)"><div id="gPrev" style="margin-top:10px;text-align:center"></div>', '<button class="modal-btn delete" onclick="rmGal('+i+')">Excluir</button><button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveGal('+i+')">Salvar</button>'); }
-
-window.previewImg = function(inp){ 
-    if(inp.files[0]){ 
-        var file = inp.files[0];
-        
-        if (!file.type.startsWith('image/')) {
-            alert('Por favor, selecione apenas arquivos de imagem.');
-            inp.value = '';
-            return;
-        }
-        
-        if (file.size > 2 * 1024 * 1024) {
-            alert('A imagem é muito grande (Máximo 2MB).');
-            inp.value = '';
-            return;
-        }
-
-        var r=new FileReader(); 
-        r.onload=e=>{$('gPrev').innerHTML='<img src="'+e.target.result+'" style="max-width:100px">'; $('gPrev').dataset.d=e.target.result;}; 
-        r.readAsDataURL(file); 
-    } 
-}
+window.previewImg = function(inp){ if(inp.files[0]){ var file = inp.files[0]; if (!file.type.startsWith('image/')) { alert('Por favor, selecione apenas arquivos de imagem.'); inp.value = ''; return; } if (file.size > 2 * 1024 * 1024) { alert('A imagem é muito grande (Máximo 2MB).'); inp.value = ''; return; } var r=new FileReader(); r.onload=e=>{$('gPrev').innerHTML='<img src="'+e.target.result+'" style="max-width:100px">'; $('gPrev').dataset.d=e.target.result;}; r.readAsDataURL(file); } }
 window.saveGal = function(i){ if($('gPrev').dataset.d) data.gallery[i].data = $('gPrev').dataset.d; saveData(); render(); closeModal(); }
 window.rmGal = function(i){ data.gallery.splice(i,1); saveData(); render(); closeModal(); }
 function addGalleryItem(){ data.gallery.push({title:"",data:""}); saveData(); render(); }
