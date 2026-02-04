@@ -16,7 +16,6 @@ var loadTimer = setInterval(function(){
             var fs = document.getElementById('footerDate');
             if(fs) fs.innerHTML = "CHECKED<br>" + dateStr;
             
-            // Tenta iniciar a música se estiver configurada (navegadores bloqueiam autoplay sem clique, então depende da interação)
             renderMusic();
         }, 600);
     }
@@ -36,11 +35,10 @@ function toggleNightMode() {
     document.body.classList.toggle('night-mode');
 }
 
-// DADOS DO SITE (Incluindo Música Agora)
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
     status: "ABERTO",
-    music: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, // Música padrão de exemplo
+    music: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
     welcome: { 
         title: "Bem-vindo!", 
         sub: "Meu espaço criativo", 
@@ -56,9 +54,8 @@ var data = {
 };
 
 function $(id) { return document.getElementById(id); }
-// Mudei a versão do 'vintageSiteDatav19' para resetar e pegar a estrutura nova com música
-function loadData() { var s = localStorage.getItem('vintageSiteDatav19'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
-function saveData() { localStorage.setItem('vintageSiteDatav19', JSON.stringify(data)); }
+function loadData() { var s = localStorage.getItem('vintageSiteDatav20'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
+function saveData() { localStorage.setItem('vintageSiteDatav20', JSON.stringify(data)); }
 
 function safeHTML(str) {
     if (!str) return '';
@@ -86,15 +83,12 @@ function render() {
     renderPrices(); 
     renderExtras(); 
     renderGallery();
-    renderMusic(); // Atualiza a fonte da música
+    renderMusic(); 
 }
 
-// --- Lógica do Player de Música ---
 var isPlaying = false;
-
 function renderMusic() {
     var audio = $('audioPlayer');
-    // Só atualiza o src se mudou, para não reiniciar a música se estiver tocando
     if(audio && data.music && audio.getAttribute('src') !== data.music.url) {
         audio.src = data.music.url;
         audio.load();
@@ -116,7 +110,7 @@ function toggleMusic() {
             container.classList.add('is-playing');
             isPlaying = true;
         }).catch(e => {
-            alert("Erro ao tocar: link inválido ou bloqueado pelo navegador.");
+            alert("Erro ao tocar. O navegador bloqueou ou o link é inválido.");
             console.error(e);
         });
     }
@@ -126,7 +120,7 @@ function editMusic(e) {
     if(!editorMode) return;
     e.stopPropagation();
     openModal('Música do Vinil', 
-        '<div class="modal-form-group"><label class="modal-label">Link do MP3 (URL direta)</label><input class="modal-input" id="inMusicUrl" value="'+(data.music ? data.music.url : '')+'" placeholder="https://exemplo.com/musica.mp3"></div><p style="font-size:12px;color:#666">Dica: Use links diretos de arquivos .mp3 para funcionar melhor.</p>', 
+        '<div class="modal-form-group"><label class="modal-label">Link do MP3</label><input class="modal-input" id="inMusicUrl" value="'+(data.music ? data.music.url : '')+'"></div>', 
         '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveMusic()">Salvar</button>'
     );
 }
@@ -135,15 +129,12 @@ function saveMusic() {
     if(!data.music) data.music = {};
     data.music.url = $('inMusicUrl').value;
     saveData();
-    render(); // Isso vai chamar renderMusic()
+    render(); 
     closeModal();
-    // Reseta player
     var container = document.querySelector('.music-player-container');
     container.classList.remove('is-playing');
     isPlaying = false;
 }
-
-// --- Resto das funções de renderização ---
 
 function renderLinks() {
     var container = $('socialGrid'); 

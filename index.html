@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body oncontextmenu="return false;">
+    
     <div id="loading">
         <div class="loading-content">
             <div class="stamp-border">
@@ -35,31 +36,6 @@
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
-    <div class="music-player-container editable-wrapper">
-        <div class="editable-trigger" onclick="editMusic(event)">✏️</div>
-        
-        <div class="tonearm" id="tonearm"></div>
-        
-        <div class="vinyl-record" id="vinylRecord" onclick="toggleMusic()">
-            <div class="vinyl-grooves"></div>
-            <div class="vinyl-label">
-                <span class="music-note">🎵</span>
-            </div>
-        </div>
-
-        <div class="volume-control-container">
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="0.5" oninput="setVolume(this.value)">
-        </div>
-
-        <div class="music-controls-btn" onclick="toggleMusic()">
-            <span id="playIcon">▶</span>
-        </div>
-
-        <audio id="audioPlayer" loop>
-            <source src="" type="audio/mpeg">
-        </audio>
-    </div>
-
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="wax-seal-close" onclick="closeModal()">✖</div>
@@ -69,10 +45,29 @@
         </div>
     </div>
 
+    <div class="music-player-container editable-wrapper">
+        <div class="editable-trigger" onclick="editMusic(event)">✏️</div>
+        
+        <div class="tonearm" id="tonearm"></div>
+        
+        <div class="vinyl-record" id="vinylRecord" onclick="toggleMusic()">
+            <div class="vinyl-label">
+                <span class="music-note">🎵</span>
+            </div>
+        </div>
+
+        <div class="music-controls">
+            <div class="play-btn-visual" id="playBtnVisual">▶</div>
+        </div>
+
+        <audio id="audioPlayer" loop>
+            <source src="" type="audio/mpeg">
+        </audio>
+    </div>
+
     <div class="main-container">
         <div class="coffee-stain"></div>
         <div class="pencil-scribble"></div>
-        
         <div class="dotted-line-top"></div>
 
         <div class="envelope-flap editable-wrapper">
@@ -117,24 +112,19 @@
                         <div class="grid-area-welcome paper-texture ruled-paper editable-wrapper">
                             <div class="editable-trigger" onclick="editWelcome(event)">✏️</div>
                             <div class="paper-clip"></div>
-                            
                             <div class="ruled-content">
                                 <h2 class="welcome-title" id="welcomeTitle">Bem-vindo!</h2>
                                 <p class="welcome-subtitle" id="welcomeSub">Meu espaço criativo</p>
-                                <div class="welcome-text" id="welcomeText">
-                                    Olá! Este é meu portfólio. Sinta-se à vontade para explorar meus trabalhos e conferir a tabela de preços ao lado.
-                                </div>
+                                <div class="welcome-text" id="welcomeText">Carregando texto...</div>
                             </div>
                         </div>
 
                         <div class="grid-area-links postcard-texture editable-wrapper">
                             <div class="editable-trigger" onclick="editLinks(event)">✏️</div>
                             <div class="postcard-divider"></div>
-                            
                             <div class="postcard-left">
                                 <div class="airmail-stamp">AIR MAIL</div>
                             </div>
-
                             <div class="postcard-right">
                                 <h3 class="box-title-dark">REDES</h3>
                                 <div class="social-grid" id="socialGrid"></div>
@@ -146,7 +136,7 @@
                             <div class="editable-trigger" onclick="editPromo(event)">✏️</div>
                             <div class="tape-strip"></div>
                             <h3 class="promo-title" id="promoTitle">Aviso!</h3>
-                            <div class="promo-text" id="promoText">Slots limitados!</div>
+                            <div class="promo-text" id="promoText">...</div>
                         </div>
 
                         <div class="grid-area-badge">
@@ -166,7 +156,6 @@
                              <div id="pricesList" class="card-list"></div>
                              <button class="add-btn-dashed" onclick="addPrice()">+ Serviço</button>
                         </div>
-                        
                         <div class="card-column paper-texture editable-wrapper">
                             <div class="editable-trigger" onclick="editExtras(event)">✏️</div>
                             <div class="card-header-tape blue">EXTRAS</div>
@@ -202,17 +191,10 @@
     </div>
 
     <script src="script.js"></script>
+    
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('dragstart', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-                (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))) {
-                e.preventDefault();
-                return false;
-            }
-        });
     </script>
 </body>
 </html>
