@@ -45,26 +45,6 @@
         </div>
     </div>
 
-    <div class="music-player-container editable-wrapper">
-        <div class="editable-trigger" onclick="editMusic(event)">✏️</div>
-        
-        <div class="tonearm" id="tonearm"></div>
-        
-        <div class="vinyl-record" id="vinylRecord" onclick="toggleMusic()">
-            <div class="vinyl-label">
-                <span class="music-note">🎵</span>
-            </div>
-        </div>
-
-        <div class="music-controls">
-            <div class="play-btn-visual" id="playBtnVisual">▶</div>
-        </div>
-
-        <audio id="audioPlayer" loop>
-            <source src="" type="audio/mpeg">
-        </audio>
-    </div>
-
     <div class="main-container">
         <div class="coffee-stain"></div>
         <div class="pencil-scribble"></div>
@@ -195,6 +175,14 @@
     <script>
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('dragstart', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+                (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))) {
+                e.preventDefault();
+                return false;
+            }
+        });
     </script>
 </body>
 </html>
