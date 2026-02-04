@@ -2,7 +2,7 @@
   "name": "obunto-site",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx serve -s ."
+    "start": "npx serve -s . -l 10000"
   },
   "dependencies": {
     "serve": "^14.0.0"
