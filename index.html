@@ -6,9 +6,8 @@
     <title>Comissões Vintage</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
 </head>
-<body>
+<body oncontextmenu="return false;">
     <div id="loading">
         <div class="loading-content">
             <div class="stamp-border">
@@ -105,7 +104,6 @@
 
                         <div class="grid-area-links postcard-texture editable-wrapper">
                             <div class="editable-trigger" onclick="editLinks(event)">✏️</div>
-                            <div class="postcard-stamp"></div>
                             <div class="postcard-divider"></div>
                             
                             <div class="postcard-left">
@@ -179,5 +177,17 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('dragstart', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+                (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </body>
 </html>
