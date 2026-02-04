@@ -16,7 +16,7 @@ var loadTimer = setInterval(function(){
             var fs = document.getElementById('footerDate');
             if(fs) fs.innerHTML = "CHECKED<br>" + dateStr;
             
-            renderMusic();
+            initMusicPlayer(); // Inicializa o player inteligente
         }, 600);
     }
 }, 150);
@@ -35,10 +35,15 @@ function toggleNightMode() {
     document.body.classList.toggle('night-mode');
 }
 
+// DADOS DO SITE (Agora com Playlist)
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
     status: "ABERTO",
-    music: { url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    // Playlist inicial (Pode usar links ou arquivos locais ex: 'musicas/minha-musica.mp3')
+    music: { 
+        playlist: ["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"], 
+        currentIndex: 0 
+    },
     welcome: { 
         title: "Bem-vindo!", 
         sub: "Meu espaço criativo", 
@@ -54,8 +59,8 @@ var data = {
 };
 
 function $(id) { return document.getElementById(id); }
-function loadData() { var s = localStorage.getItem('vintageSiteDatav20'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
-function saveData() { localStorage.setItem('vintageSiteDatav20', JSON.stringify(data)); }
+function loadData() { var s = localStorage.getItem('vintageSiteDatav21'); if(s) try { data = JSON.parse(s); } catch(e){} render(); }
+function saveData() { localStorage.setItem('vintageSiteDatav21', JSON.stringify(data)); }
 
 function safeHTML(str) {
     if (!str) return '';
@@ -83,58 +88,158 @@ function render() {
     renderPrices(); 
     renderExtras(); 
     renderGallery();
-    renderMusic(); 
+    // A música é gerenciada pelo initMusicPlayer para não reiniciar no render
 }
 
+// --- Lógica Avançada de Playlist ---
 var isPlaying = false;
-function renderMusic() {
-    var audio = $('audioPlayer');
-    if(audio && data.music && audio.getAttribute('src') !== data.music.url) {
-        audio.src = data.music.url;
-        audio.load();
+var audioObj = null;
+
+function initMusicPlayer() {
+    audioObj = $('audioPlayer');
+    if(!audioObj) return;
+
+    // Se não tiver playlist, cria estrutura
+    if(!data.music || !Array.isArray(data.music.playlist)) {
+        data.music = { playlist: ["https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"], currentIndex: 0 };
+    }
+
+    // Carrega a música atual
+    loadTrack(data.music.currentIndex);
+
+    // Evento: Quando acabar a música
+    audioObj.addEventListener('ended', function() {
+        if(data.music.playlist.length > 1) {
+            // Toca a próxima
+            nextTrack();
+        } else {
+            // Se só tem 1, o loop nativo resolve, mas forçamos play
+            this.currentTime = 0;
+            this.play();
+        }
+    });
+}
+
+function loadTrack(index) {
+    if(!audioObj) return;
+    if(index >= data.music.playlist.length) index = 0;
+    
+    var src = data.music.playlist[index];
+    // Evita recarregar se já estiver na mesma (exceto se for para trocar)
+    if(audioObj.getAttribute('current-src') !== src) {
+        audioObj.src = src;
+        audioObj.setAttribute('current-src', src);
+        audioObj.load();
     }
 }
 
 function toggleMusic() {
-    var audio = $('audioPlayer');
     var container = document.querySelector('.music-player-container');
-    
-    if (!audio) return;
+    if (!audioObj) return;
 
     if (isPlaying) {
-        audio.pause();
+        audioObj.pause();
         container.classList.remove('is-playing');
         isPlaying = false;
     } else {
-        audio.play().then(() => {
-            container.classList.add('is-playing');
-            isPlaying = true;
-        }).catch(e => {
-            alert("Erro ao tocar. O navegador bloqueou ou o link é inválido.");
-            console.error(e);
-        });
+        var playPromise = audioObj.play();
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                container.classList.add('is-playing');
+                isPlaying = true;
+            }).catch(error => {
+                console.log("Autoplay bloqueado ou erro na fonte: " + error);
+                // Se der erro, tenta a próxima (caso link esteja quebrado)
+                if(data.music.playlist.length > 1) nextTrack();
+            });
+        }
     }
 }
+
+function nextTrack() {
+    data.music.currentIndex++;
+    if(data.music.currentIndex >= data.music.playlist.length) {
+        data.music.currentIndex = 0; // Volta pro inicio
+    }
+    loadTrack(data.music.currentIndex);
+    if(isPlaying) audioObj.play();
+}
+
+// --- Editor de Playlist ---
 
 function editMusic(e) {
     if(!editorMode) return;
     e.stopPropagation();
-    openModal('Música do Vinil', 
-        '<div class="modal-form-group"><label class="modal-label">Link do MP3</label><input class="modal-input" id="inMusicUrl" value="'+(data.music ? data.music.url : '')+'"></div>', 
+    
+    window.renderPlaylistModal = function() {
+        var html = '<div class="modal-links-list" style="max-height:200px">';
+        if(!data.music.playlist) data.music.playlist = [];
+        
+        data.music.playlist.forEach((track, i) => {
+            html += `<div class="modal-link-item">
+                <span style="font-size:12px; font-weight:bold; color:#888; margin-right:5px;">${i+1}.</span>
+                <input class="modal-link-url" id="mTrack${i}" value="${track}" placeholder="musicas/nome.mp3">
+                <button class="modal-btn-remove" onclick="rmTrack(${i})">X</button>
+            </div>`;
+        });
+        html += '</div>';
+        
+        html += `<div style="margin-top:15px; padding:10px; background:#eee; border-radius:4px; font-size:12px;">
+            <strong>Como adicionar do PC:</strong><br>
+            1. Coloque o arquivo .mp3 na pasta <code>musicas</code> do projeto.<br>
+            2. Escreva o caminho assim: <code>musicas/nome-do-arquivo.mp3</code><br>
+            3. Dê Push para o GitHub.
+        </div>`;
+        
+        html += '<button class="modal-add-link-btn" onclick="addTrack()">+ Adicionar Música</button>';
+        return html;
+    };
+
+    openModal('Playlist do Vinil', 
+        '<div id="playlistContainer">' + window.renderPlaylistModal() + '</div>',
         '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveMusic()">Salvar</button>'
     );
 }
 
+window.addTrack = function() {
+    updatePlaylistTemp();
+    data.music.playlist.push("");
+    $('playlistContainer').innerHTML = window.renderPlaylistModal();
+}
+
+window.rmTrack = function(i) {
+    updatePlaylistTemp();
+    data.music.playlist.splice(i, 1);
+    $('playlistContainer').innerHTML = window.renderPlaylistModal();
+}
+
+function updatePlaylistTemp() {
+    data.music.playlist.forEach((_, i) => {
+        var el = $('mTrack'+i);
+        if(el) data.music.playlist[i] = el.value;
+    });
+}
+
 function saveMusic() {
-    if(!data.music) data.music = {};
-    data.music.url = $('inMusicUrl').value;
+    updatePlaylistTemp();
+    // Limpa vazios
+    data.music.playlist = data.music.playlist.filter(t => t.trim() !== "");
+    // Se ficar vazio, bota padrão
+    if(data.music.playlist.length === 0) data.music.playlist.push("");
+    
+    data.music.currentIndex = 0; // Reinicia playlist ao salvar
     saveData();
-    render(); 
-    closeModal();
+    loadTrack(0); // Recarrega primeira
+    
+    // Reseta visual
     var container = document.querySelector('.music-player-container');
     container.classList.remove('is-playing');
     isPlaying = false;
+    
+    closeModal();
 }
+
+// --- Funções Padrão ---
 
 function renderLinks() {
     var container = $('socialGrid'); 
