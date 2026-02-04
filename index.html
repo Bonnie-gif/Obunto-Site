@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comissões Vintage</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+</head>
+<body>
+    <div id="loading">
+        <div class="loading-content">
+            <div class="stamp-border">
+                <div class="stamp-inner">
+                    <h1 class="loading-title">Ateliê</h1>
+                    <div class="loading-bar-retro">
+                        <div id="loadingBarFill" class="bar-fill"></div>
+                    </div>
+                    <p id="loadingStatus" class="loading-status-text">Organizando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="light-switch-container" onclick="toggleNightMode()">
+        <div class="light-cord"></div>
+        <div class="light-knob"></div>
+    </div>
+
+    <div id="ink-trail-container"></div>
+
+    <div class="editor-indicator" id="editorIndicator">
+        <div class="indicator-icon">✏️</div>
+        <span>MODO EDITOR</span>
+        <button onclick="toggleEditor()">SAIR</button>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="wax-seal-close" onclick="closeModal()">✖</div>
+            <h2 id="modalTitle">Editar</h2>
+            <div id="modalContent"></div>
+            <div class="modal-buttons" id="modalButtons"></div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="coffee-stain"></div>
+        <div class="pencil-scribble"></div>
+        
+        <div class="dotted-line-top"></div>
+
+        <div class="envelope-flap editable-wrapper">
+            <div class="editable-trigger" onclick="editStatus(event)">✏️</div>
+            <div class="flap-content">
+                <span class="flap-label">STATUS ATUAL:</span>
+                <div class="status-stamp-container">
+                    <div class="ink-stamp" id="statusValue">ABERTO</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="inner-wrapper">
+            <nav class="nav-bar sticky-nav">
+                <button class="nav-item active" data-page="home" onclick="showPage('home')">Início</button>
+                <button class="nav-item" data-page="prices" onclick="showPage('prices')">Preços</button>
+                <button class="nav-item" data-page="gallery" onclick="showPage('gallery')">Galeria</button>
+                <button class="nav-item" data-page="tos" onclick="showPage('tos')">Termos</button>
+            </nav>
+
+            <header class="header-section">
+                <div class="banner editable-wrapper">
+                    <div class="editable-trigger" onclick="editBanner(event)">✏️</div>
+                    <div class="banner-shape">
+                        <span class="banner-title-small" id="bannerSmall">ARTIST NAME</span>
+                    </div>
+                    <h1 class="banner-title-main" id="bannerMain">COMISSÕES</h1>
+                    <p class="banner-subtitle" id="bannerSub">Ilustração & Design</p>
+                </div>
+            </header>
+
+            <div class="yellow-divider">
+                <span class="divider-icon">✦</span>
+                <span class="specials-title">DESTAQUES</span>
+                <span class="divider-icon">✦</span>
+            </div>
+
+            <div class="pages-container">
+                
+                <div id="homePage" class="page-content active">
+                    <div class="asymmetrical-grid">
+                        <div class="grid-area-welcome paper-texture ruled-paper editable-wrapper">
+                            <div class="editable-trigger" onclick="editWelcome(event)">✏️</div>
+                            <div class="paper-clip"></div>
+                            
+                            <div class="ruled-content">
+                                <h2 class="welcome-title" id="welcomeTitle">Bem-vindo!</h2>
+                                <p class="welcome-subtitle" id="welcomeSub">Meu espaço criativo</p>
+                                <div class="welcome-text" id="welcomeText">
+                                    Olá! Este é meu portfólio. Sinta-se à vontade para explorar meus trabalhos e conferir a tabela de preços ao lado.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-area-links postcard-texture editable-wrapper">
+                            <div class="editable-trigger" onclick="editLinks(event)">✏️</div>
+                            <div class="postcard-stamp"></div>
+                            <div class="postcard-divider"></div>
+                            
+                            <div class="postcard-left">
+                                <div class="airmail-stamp">AIR MAIL</div>
+                            </div>
+
+                            <div class="postcard-right">
+                                <h3 class="box-title-dark">REDES</h3>
+                                <div class="social-grid" id="socialGrid"></div>
+                                <p class="links-subtext" id="linksText">Me siga!</p>
+                            </div>
+                        </div>
+
+                        <div class="grid-area-promo ticket-texture editable-wrapper">
+                            <div class="editable-trigger" onclick="editPromo(event)">✏️</div>
+                            <div class="tape-strip"></div>
+                            <h3 class="promo-title" id="promoTitle">Aviso!</h3>
+                            <div class="promo-text" id="promoText">Slots limitados!</div>
+                        </div>
+
+                        <div class="grid-area-badge">
+                             <div class="eat-badge">
+                                <span class="eat-badge-text">Art</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pricesPage" class="page-content">
+                    <h3 class="section-header">TABELA DE VALORES</h3>
+                    <div class="cards-layout">
+                        <div class="card-column paper-texture editable-wrapper">
+                             <div class="editable-trigger" onclick="editPrices(event)">✏️</div>
+                             <div class="card-header-tape">SERVIÇOS</div>
+                             <div id="pricesList" class="card-list"></div>
+                             <button class="add-btn-dashed" onclick="addPrice()">+ Serviço</button>
+                        </div>
+                        
+                        <div class="card-column paper-texture editable-wrapper">
+                            <div class="editable-trigger" onclick="editExtras(event)">✏️</div>
+                            <div class="card-header-tape blue">EXTRAS</div>
+                            <div id="extrasList" class="card-list"></div>
+                            <button class="add-btn-dashed" onclick="addExtra()">+ Extra</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="galleryPage" class="page-content">
+                    <h3 class="section-header">GALERIA DE ARTE</h3>
+                    <div class="scattered-layout" id="galleryGrid"></div>
+                    <button class="add-btn-main" onclick="addGalleryItem()">+ Nova Imagem</button>
+                </div>
+
+                <div id="tosPage" class="page-content">
+                    <div class="tos-paper editable-wrapper">
+                        <div class="editable-trigger" onclick="editTos(event)">✏️</div>
+                        <div class="paper-holes"></div>
+                        <h2 class="tos-title">Termos de Uso</h2>
+                        <div id="tosText" class="tos-body"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <footer class="footer">
+                <div class="date-stamp" id="footerDate"></div>
+                <div class="decorative-dots"><span></span><span></span><span></span></div>
+                <p class="footer-text" id="footerText">Obrigado pela visita!</p>
+            </footer>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
