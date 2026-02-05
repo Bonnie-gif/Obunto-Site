@@ -139,11 +139,20 @@ function loadData() {
 function saveData() {
     try {
         localStorage.setItem('vintageSiteDatav3', JSON.stringify(data));
-        showToast('Salvo com sucesso!', 'success');
+        showToast('Salvo localmente! Use o botão SALVAR para copiar o código.', 'success');
     } catch(e) {
         showToast('Erro ao salvar', 'error');
     }
 }
+
+window.exportCode = function() {
+    var c = "var data = " + JSON.stringify(data, null, 4) + ";";
+    navigator.clipboard.writeText(c).then(function() {
+        alert("CÓDIGO COPIADO COM SUCESSO!\n\n1. Abra o arquivo 'script.js' no seu VS Code.\n2. Apague a parte antiga onde diz 'var data = ...'\n3. Cole este novo código.\n4. Faça o Git Push para atualizar o site.");
+    }, function() {
+        alert("Erro ao copiar. Tente novamente.");
+    });
+};
 
 function render() {
     if ($('statusValue')) $('statusValue').textContent = data.status;
@@ -321,7 +330,7 @@ $('modalOverlay').addEventListener('click', function(e) {
 });
 
 function richEditor(id, content) {
-    return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:8px;border-bottom:1px solid #ccc;display:flex;gap:5px"><button type="button" onclick="document.execCommand(\'bold\')" style="padding:5px 10px;font-weight:bold;border:1px solid #ccc;border-radius:3px;background:#fff">B</button><button type="button" onclick="document.execCommand(\'italic\')" style="padding:5px 10px;font-style:italic;border:1px solid #ccc;border-radius:3px;background:#fff">I</button><button type="button" onclick="document.execCommand(\'insertUnorderedList\')" style="padding:5px 10px;border:1px solid #ccc;border-radius:3px;background:#fff">• Lista</button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none">' + content + '</div></div>';
+    return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:8px;border-bottom:1px solid #ccc;display:flex;gap:5px"><button type="button" onclick="document.execCommand(\'bold\')" style="padding:5px 10px;font-weight:bold;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">B</button><button type="button" onclick="document.execCommand(\'italic\')" style="padding:5px 10px;font-style:italic;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">I</button><button type="button" onclick="document.execCommand(\'insertUnorderedList\')" style="padding:5px 10px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">• Lista</button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none;cursor:text">' + content + '</div></div>';
 }
 
 window.editBanner = function(e) {
