@@ -41,12 +41,9 @@ var loadTimer = setInterval(function(){
             var el = document.getElementById('loading');
             if (el) el.classList.add('hide');
             initAnimations();
-            var d = new Date();
-            var ds = document.getElementById('footerDate');
-            if (ds) ds.innerHTML = "CHECKED<br>" + d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
         }, 500);
     }
-}, 120);
+}, 100);
 
 setTimeout(typeWriter, 500);
 
@@ -76,14 +73,6 @@ function initAnimations() {
     els.forEach(function(el) { observer.observe(el); });
 }
 
-window.addEventListener('scroll', function() {
-    var btn = document.getElementById('backTop');
-    if (btn) {
-        if (window.scrollY > 400) btn.classList.add('show');
-        else btn.classList.remove('show');
-    }
-});
-
 window.scrollToTop = function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -103,19 +92,6 @@ function showToast(msg, type) {
     setTimeout(function() { toast.remove(); }, 3000);
 }
 
-var data = {
-    banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
-    status: "ABERTO",
-    welcome: { title: "Bem-vindo!", sub: "Meu espaço criativo", text: "Olá! Este é meu portfólio. Sinta-se à vontade para explorar meus trabalhos e conferir a tabela de preços." },
-    promo: { title: "Aviso!", text: "Slots limitados para este mês! Peça já o seu." },
-    links: { text: "Me siga nas redes!", items: [{ icon: "t", color: "red", url: "" }, { icon: "𝕏", color: "blue", url: "" }, { icon: "📷", color: "yellow", url: "" }] },
-    tos: "<h3>Pagamento</h3><p>Aceito PIX e PayPal. Pagamento 50% adiantado.</p><h3>Prazos</h3><p>O prazo médio é de 1 a 2 semanas.</p><h3>Revisões</h3><p>Incluso até 2 revisões menores.</p>",
-    prices: [{ name: "Sketch Rápido", price: "R$30" }, { name: "Icon Colorido", price: "R$50" }, { name: "Full Body", price: "R$150" }],
-    extras: [{ name: "Fundo Simples", price: "Grátis" }, { name: "Pet Adicional", price: "+R$20" }],
-    gallery: [{ title: "", data: "" }, { title: "", data: "" }, { title: "", data: "" }, { title: "", data: "" }],
-    footer: "Obrigado pela visita!"
-};
-
 function $(id) { return document.getElementById(id); }
 
 function sanitize(str) {
@@ -125,83 +101,54 @@ function sanitize(str) {
     return div.innerHTML;
 }
 
-window.saveCredentials = function() {
-    var user = $('ghUser').value;
-    var repo = $('ghRepo').value;
-    var token = $('ghToken').value;
-    
-    if(!user || !repo || !token) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-    }
-    
-    localStorage.setItem('gh_config', JSON.stringify({user: user, repo: repo, token: token}));
-    $('githubModal').classList.remove('active');
-    saveGlobal();
-};
+var data = {};
+
+function loadData() {
+    fetch('/api/data')
+        .then(function(response) { return response.json(); })
+        .then(function(json) {
+            data = json;
+            render();
+        })
+        .catch(function(err) {
+            console.error("Erro ao carregar dados:", err);
+            showToast("Erro de conexão", "error");
+        });
+}
 
 window.saveGlobal = function() {
-    var configStr = localStorage.getItem('gh_config');
-    if(!configStr) {
-        $('githubModal').classList.add('active');
-        return;
-    }
-    
-    var config = JSON.parse(configStr);
-    var path = 'script.js'; 
-    var apiUrl = `https://api.github.com/repos/${config.user}/${config.repo}/contents/${path}`;
-    
-    showToast('Conectando ao GitHub...', '');
+    var btn = document.querySelector('#editorIndicator button');
+    var originalText = btn.textContent;
+    btn.textContent = "SALVANDO...";
+    btn.disabled = true;
 
-    fetch(apiUrl, {
-        headers: {
-            'Authorization': `token ${config.token}`,
-            'Accept': 'application/vnd.github.v3+json'
-        }
+    fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
     })
-    .then(response => {
-        if(!response.ok) throw new Error("Erro ao acessar repositório. Verifique as credenciais.");
-        return response.json();
-    })
-    .then(fileData => {
-        var currentContent = decodeURIComponent(escape(atob(fileData.content))); 
-        var sha = fileData.sha;
-
-        var newContent = currentContent.replace(
-            /var data = \{[\s\S]*?\};/, 
-            "var data = " + JSON.stringify(data, null, 4) + ";"
-        );
-
-        var commitData = {
-            message: "Atualização via Site Editor",
-            content: btoa(unescape(encodeURIComponent(newContent))), 
-            sha: sha
-        };
-
-        return fetch(apiUrl, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${config.token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(commitData)
-        });
-    })
-    .then(response => {
-        if(response.ok) {
-            showToast('SUCESSO! O site atualizará em 2min.', 'success');
+    .then(function(response) { return response.json(); })
+    .then(function(result) {
+        if (result.success) {
+            showToast('SITE ATUALIZADO PARA TODOS! 🎉', 'success');
+            toggleEditor();
         } else {
-            throw new Error("Falha ao salvar no GitHub.");
+            showToast('Erro no servidor', 'error');
         }
     })
-    .catch(err => {
+    .catch(function(err) {
+        showToast('Erro de rede', 'error');
         console.error(err);
-        showToast('Erro: ' + err.message, 'error');
-        if(err.message.includes('credenciais')) localStorage.removeItem('gh_config');
+    })
+    .finally(function() {
+        btn.textContent = originalText;
+        btn.disabled = false;
     });
 };
 
 function render() {
+    if (!data.banner) return;
+
     if ($('statusValue')) $('statusValue').textContent = data.status;
     if ($('bannerSmall')) $('bannerSmall').textContent = data.banner.small;
     if ($('bannerMain')) $('bannerMain').textContent = data.banner.main;
@@ -214,6 +161,7 @@ function render() {
     if ($('linksText')) $('linksText').textContent = data.links.text;
     if ($('tosText')) $('tosText').innerHTML = data.tos;
     if ($('footerText')) $('footerText').textContent = data.footer;
+    
     renderLinks();
     renderPrices();
     renderExtras();
@@ -224,113 +172,74 @@ function renderLinks() {
     var c = $('socialGrid');
     if (!c) return;
     c.innerHTML = '';
-    data.links.items.forEach(function(l) {
-        var a = document.createElement('a');
-        a.className = 'social-btn ' + sanitize(l.color);
-        a.href = l.url || '#';
-        if (l.url) a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = l.icon;
-        c.appendChild(a);
-    });
+    if (data.links && data.links.items) {
+        data.links.items.forEach(function(l) {
+            var a = document.createElement('a');
+            a.className = 'social-btn ' + sanitize(l.color);
+            a.href = l.url || '#';
+            if (l.url) a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = l.icon;
+            c.appendChild(a);
+        });
+    }
 }
 
 function renderPrices() {
     var c = $('pricesList');
     if (!c) return;
     c.innerHTML = '';
-    data.prices.forEach(function(p) {
-        var d = document.createElement('div');
-        d.className = 'menu-item';
-        var n = document.createElement('span');
-        n.className = 'menu-item-name';
-        n.textContent = p.name;
-        var pr = document.createElement('span');
-        pr.className = 'menu-item-price';
-        pr.textContent = p.price;
-        d.appendChild(n);
-        d.appendChild(pr);
-        c.appendChild(d);
-    });
+    if (data.prices) {
+        data.prices.forEach(function(p) {
+            var d = document.createElement('div');
+            d.className = 'menu-item';
+            d.innerHTML = '<span class="menu-item-name">' + sanitize(p.name) + '</span><span class="menu-item-price">' + sanitize(p.price) + '</span>';
+            c.appendChild(d);
+        });
+    }
 }
 
 function renderExtras() {
     var c = $('extrasList');
     if (!c) return;
     c.innerHTML = '';
-    data.extras.forEach(function(e) {
-        var d = document.createElement('div');
-        d.className = 'menu-item';
-        var n = document.createElement('span');
-        n.className = 'menu-item-name';
-        n.textContent = e.name;
-        var pr = document.createElement('span');
-        pr.className = 'menu-item-price';
-        pr.textContent = e.price;
-        d.appendChild(n);
-        d.appendChild(pr);
-        c.appendChild(d);
-    });
+    if (data.extras) {
+        data.extras.forEach(function(e) {
+            var d = document.createElement('div');
+            d.className = 'menu-item';
+            d.innerHTML = '<span class="menu-item-name">' + sanitize(e.name) + '</span><span class="menu-item-price">' + sanitize(e.price) + '</span>';
+            c.appendChild(d);
+        });
+    }
 }
 
 function renderGallery() {
     var c = $('galleryGrid');
     if (!c) return;
     c.innerHTML = '';
-    data.gallery.forEach(function(g, i) {
-        var rot = (Math.random() * 6) - 3;
-        var slide = document.createElement('div');
-        slide.className = 'gallery-slide';
-        slide.style.transform = 'rotate(' + rot + 'deg)';
-        slide.onclick = function() { editGalleryItem(i); };
-        if (g.data) {
-            var img = document.createElement('img');
-            img.src = g.data;
-            img.onclick = function(e) {
-                if (!editorMode) {
-                    e.stopPropagation();
-                    openLightbox(g.data);
-                }
-            };
-            slide.appendChild(img);
-        } else {
-            var ph = document.createElement('div');
-            ph.className = 'placeholder';
-            ph.textContent = 'ARTE ' + (i + 1);
-            slide.appendChild(ph);
-        }
-        var cap = document.createElement('div');
-        cap.className = 'gallery-caption';
-        cap.textContent = 'Fig. ' + (i + 1);
-        slide.appendChild(cap);
-        c.appendChild(slide);
-    });
-}
-
-function openLightbox(src) {
-    var lb = $('lightbox');
-    var img = $('lightboxImg');
-    if (lb && img) {
-        img.src = src;
-        lb.classList.add('show');
+    if (data.gallery) {
+        data.gallery.forEach(function(g, i) {
+            var d = document.createElement('div');
+            d.className = 'gallery-slide';
+            d.style.transform = 'rotate(' + ((Math.random() * 6) - 3) + 'deg)';
+            d.onclick = function() { editGalleryItem(i); };
+            
+            var content = g.data 
+                ? '<img src="' + g.data + '" onclick="if(!editorMode){event.stopPropagation();openLightbox(\'' + g.data + '\')}">'
+                : '<div class="placeholder">ARTE ' + (i + 1) + '</div>';
+                
+            d.innerHTML = content + '<div class="gallery-caption">Fig. ' + (i + 1) + '</div>';
+            c.appendChild(d);
+        });
     }
 }
-
-window.closeLightbox = function(e) {
-    if (e && e.target.tagName === 'IMG') return;
-    var lb = $('lightbox');
-    if (lb) lb.classList.remove('show');
-};
 
 var editorMode = false;
 var keySeq = [];
 var code = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown'];
 
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && ['U', 'S', 'P'].includes(e.key))) {
-        
-    }
-    keySeq.push(e.key);
+    if (!editorMode) keySeq.push(e.key);
     if (keySeq.length > 6) keySeq.shift();
     if (keySeq.join(',') === code.join(',')) {
         toggleEditor();
@@ -342,8 +251,11 @@ window.toggleEditor = function() {
     editorMode = !editorMode;
     document.body.classList.toggle('editor-active', editorMode);
     var ind = $('editorIndicator');
-    if (ind) ind.classList.toggle('active', editorMode);
-    showToast(editorMode ? 'Modo editor ativado' : 'Modo visualização');
+    if (ind) {
+        if (editorMode) ind.classList.add('active');
+        else ind.classList.remove('active');
+    }
+    showToast(editorMode ? 'Modo ADMIN ativado' : 'Modo visualização');
 };
 
 window.showPage = function(page) {
@@ -354,9 +266,12 @@ window.showPage = function(page) {
     var nav = document.querySelector('[data-page="' + page + '"]');
     if (nav) nav.classList.add('active');
     setTimeout(function() {
-        document.querySelectorAll('#' + page + 'Page [data-anim]').forEach(function(el) {
-            el.classList.add('show');
-        });
+        var pageEl = document.getElementById(page + 'Page');
+        if (pageEl) {
+            pageEl.querySelectorAll('[data-anim]').forEach(function(el) {
+                el.classList.add('show');
+            });
+        }
     }, 100);
 };
 
@@ -376,75 +291,57 @@ $('modalOverlay').addEventListener('click', function(e) {
 });
 
 function richEditor(id, content) {
-    return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:8px;border-bottom:1px solid #ccc;display:flex;gap:5px"><button type="button" onclick="document.execCommand(\'bold\')" style="padding:5px 10px;font-weight:bold;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">B</button><button type="button" onclick="document.execCommand(\'italic\')" style="padding:5px 10px;font-style:italic;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">I</button><button type="button" onclick="document.execCommand(\'insertUnorderedList\')" style="padding:5px 10px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">• Lista</button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none;cursor:text">' + content + '</div></div>';
+    return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:5px"><button onclick="document.execCommand(\'bold\')"><b>B</b></button> <button onclick="document.execCommand(\'italic\')"><i>I</i></button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none">' + content + '</div></div>';
 }
 
 window.editBanner = function(e) {
     if (!editorMode) return;
     e.stopPropagation();
-    openModal('Banner',
-        '<div class="modal-form-group"><label class="modal-label">Nome Pequeno</label><input class="modal-input" id="inBS" value="' + sanitize(data.banner.small) + '"></div>' +
-        '<div class="modal-form-group"><label class="modal-label">Título Principal</label><input class="modal-input" id="inBM" value="' + sanitize(data.banner.main) + '"></div>' +
-        '<div class="modal-form-group"><label class="modal-label">Subtítulo</label><input class="modal-input" id="inBSub" value="' + sanitize(data.banner.sub) + '"></div>',
-        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveBanner()">Salvar</button>'
-    );
-};
-
-window.saveBanner = function() {
-    data.banner.small = $('inBS').value;
-    data.banner.main = $('inBM').value;
-    data.banner.sub = $('inBSub').value;
-    render();
-    closeModal();
+    openModal('Banner', '<label>Nome Peq.</label><input class="modal-input" id="inBS" value="' + sanitize(data.banner.small) + '"><label>Título</label><input class="modal-input" id="inBM" value="' + sanitize(data.banner.main) + '"><label>Subtítulo</label><input class="modal-input" id="inBSub" value="' + sanitize(data.banner.sub) + '">', '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveDataLocal(\'banner\')">Confirmar</button>');
 };
 
 window.editStatus = function(e) {
     if (!editorMode) return;
     e.stopPropagation();
-    openModal('Status',
-        '<div class="modal-form-group"><label class="modal-label">Status</label><input class="modal-input" id="inStat" value="' + sanitize(data.status) + '"></div>',
-        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveStatus()">Salvar</button>'
-    );
-};
-
-window.saveStatus = function() {
-    data.status = $('inStat').value;
-    render();
-    closeModal();
+    openModal('Status', '<label>Status</label><input class="modal-input" id="inStat" value="' + sanitize(data.status) + '">', '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveDataLocal(\'status\')">Confirmar</button>');
 };
 
 window.editWelcome = function(e) {
     if (!editorMode) return;
     e.stopPropagation();
-    openModal('Bem-vindo',
-        '<div class="modal-form-group"><label class="modal-label">Título</label><input class="modal-input" id="inWT" value="' + sanitize(data.welcome.title) + '"></div>' +
-        '<div class="modal-form-group"><label class="modal-label">Subtítulo</label><input class="modal-input" id="inWS" value="' + sanitize(data.welcome.sub) + '"></div>' +
-        '<label class="modal-label">Texto</label>' + richEditor('inWTxt', data.welcome.text),
-        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveWelcome()">Salvar</button>'
-    );
-};
-
-window.saveWelcome = function() {
-    data.welcome.title = $('inWT').value;
-    data.welcome.sub = $('inWS').value;
-    data.welcome.text = $('inWTxt').innerHTML;
-    render();
-    closeModal();
+    openModal('Bem-vindo', '<label>Título</label><input class="modal-input" id="inWT" value="' + sanitize(data.welcome.title) + '"><label>Sub</label><input class="modal-input" id="inWS" value="' + sanitize(data.welcome.sub) + '"><label>Texto</label>' + richEditor('inWTxt', data.welcome.text), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveDataLocal(\'welcome\')">Confirmar</button>');
 };
 
 window.editPromo = function(e) {
     if (!editorMode) return;
     e.stopPropagation();
-    openModal('Promoção',
-        '<div class="modal-form-group"><label class="modal-label">Título</label><input class="modal-input" id="inPT" value="' + sanitize(data.promo.title) + '"></div>' +
-        '<label class="modal-label">Texto</label>' + richEditor('inPTxt', data.promo.text),
-        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="savePromo()">Salvar</button>'
-    );
+    openModal('Promoção', '<label>Título</label><input class="modal-input" id="inPT" value="' + sanitize(data.promo.title) + '"><label>Texto</label>' + richEditor('inPTxt', data.promo.text), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveDataLocal(\'promo\')">Confirmar</button>');
 };
 
-window.savePromo = function() {
-    data.promo.title = $('inPT').value;
-    data.promo.text = $('inPTxt').innerHTML;
+window.editTos = function(e) {
+    if (!editorMode) return;
+    e.stopPropagation();
+    openModal('Termos', richEditor('inTos', data.tos), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveDataLocal(\'tos\')">Confirmar</button>');
+};
+
+window.saveDataLocal = function(type) {
+    if (type === 'banner') {
+        data.banner.small = $('inBS').value;
+        data.banner.main = $('inBM').value;
+        data.banner.sub = $('inBSub').value;
+    }
+    if (type === 'status') data.status = $('inStat').value;
+    if (type === 'welcome') {
+        data.welcome.title = $('inWT').value;
+        data.welcome.sub = $('inWS').value;
+        data.welcome.text = $('inWTxt').innerHTML;
+    }
+    if (type === 'promo') {
+        data.promo.title = $('inPT').value;
+        data.promo.text = $('inPTxt').innerHTML;
+    }
+    if (type === 'tos') data.tos = $('inTos').innerHTML;
+    
     render();
     closeModal();
 };
@@ -471,11 +368,7 @@ window.editLinks = function(e) {
         h += '</div><button class="modal-add-link-btn" onclick="addLink()">+ Adicionar Rede</button>';
         return h;
     };
-    openModal('Redes Sociais',
-        '<div class="modal-form-group"><label class="modal-label">Texto</label><input class="modal-input" id="inLT" value="' + sanitize(data.links.text) + '"></div>' +
-        '<label class="modal-label">Lista de Links</label><div id="linksContainer">' + window.renderLinksModal() + '</div>',
-        '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveLinks()">Salvar</button>'
-    );
+    openModal('Redes Sociais', '<div class="modal-form-group"><label class="modal-label">Texto</label><input class="modal-input" id="inLT" value="' + sanitize(data.links.text) + '"></div><label class="modal-label">Lista de Links</label><div id="linksContainer">' + window.renderLinksModal() + '</div>', '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveLinks()">Confirmar</button>');
 };
 
 window.addLink = function() {
@@ -518,7 +411,7 @@ window.editPrices = function(e) {
         h += '<div class="modal-link-item"><input class="modal-link-url" id="pN' + i + '" value="' + sanitize(p.name) + '" placeholder="Nome"><input style="width:100px" class="modal-link-icon" id="pP' + i + '" value="' + sanitize(p.price) + '" placeholder="Preço"><button class="modal-btn-remove" onclick="rmPrice(' + i + ')">✕</button></div>';
     });
     h += '</div>';
-    openModal('Preços', h, '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="savePrices()">Salvar</button>');
+    openModal('Preços', h, '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="savePrices()">Confirmar</button>');
 };
 
 window.savePrices = function() {
@@ -553,7 +446,7 @@ window.editExtras = function(e) {
         h += '<div class="modal-link-item"><input class="modal-link-url" id="eN' + i + '" value="' + sanitize(ex.name) + '" placeholder="Nome"><input style="width:100px" class="modal-link-icon" id="eP' + i + '" value="' + sanitize(ex.price) + '" placeholder="Preço"><button class="modal-btn-remove" onclick="rmExtra(' + i + ')">✕</button></div>';
     });
     h += '</div>';
-    openModal('Extras', h, '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveExtras()">Salvar</button>');
+    openModal('Extras', h, '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveExtras()">Confirmar</button>');
 };
 
 window.saveExtras = function() {
@@ -580,62 +473,9 @@ window.addExtra = function() {
     render();
 };
 
-window.editTos = function(e) {
-    if (!editorMode) return;
-    e.stopPropagation();
-    openModal('Termos de Uso', richEditor('inTos', data.tos), '<button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveTos()">Salvar</button>');
-};
-
-window.saveTos = function() {
-    data.tos = $('inTos').innerHTML;
-    render();
-    closeModal();
-};
-
 window.editGalleryItem = function(i) {
     if (!editorMode) return;
-    var current = data.gallery[i] && data.gallery[i].data ? '<img src="' + data.gallery[i].data + '" style="max-width:150px;margin-top:10px;border-radius:4px">' : '';
-    openModal('Editar Imagem',
-        '<label class="modal-label">Selecionar arquivo (máx 2MB)</label>' +
-        '<input class="modal-input" type="file" accept="image/*" onchange="previewGal(this)">' +
-        '<div id="gPrev" style="margin-top:15px;text-align:center">' + current + '</div>',
-        '<button class="modal-btn delete" onclick="rmGal(' + i + ')">Excluir</button><button class="modal-btn cancel" onclick="closeModal()">Cancelar</button><button class="modal-btn save" onclick="saveGal(' + i + ')">Salvar</button>'
-    );
-};
-
-window.previewGal = function(inp) {
-    if (inp.files && inp.files[0]) {
-        var file = inp.files[0];
-        if (!file.type.startsWith('image/')) {
-            showToast('Selecione apenas imagens', 'error');
-            inp.value = '';
-            return;
-        }
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Imagem muito grande (máx 2MB)', 'error');
-            inp.value = '';
-            return;
-        }
-        var r = new FileReader();
-        r.onload = function(e) {
-            $('gPrev').innerHTML = '<img src="' + e.target.result + '" style="max-width:150px;border-radius:4px">';
-            $('gPrev').dataset.img = e.target.result;
-        };
-        r.readAsDataURL(file);
-    }
-};
-
-window.saveGal = function(i) {
-    var prev = $('gPrev');
-    if (prev && prev.dataset.img) data.gallery[i].data = prev.dataset.img;
-    render();
-    closeModal();
-};
-
-window.rmGal = function(i) {
-    data.gallery.splice(i, 1);
-    render();
-    closeModal();
+    openModal('Galeria', '<input class="modal-input" type="file" onchange="previewGal(this)"><div id="gPrev" style="margin-top:10px;text-align:center">' + (data.gallery[i].data ? '<img src="' + data.gallery[i].data + '" style="max-width:100px">' : '') + '</div>', '<button class="modal-btn delete" onclick="data.gallery.splice(' + i + ',1);render();closeModal()">Excluir</button><button class="modal-btn save" onclick="saveGal(' + i + ')">Confirmar</button>');
 };
 
 window.addGalleryItem = function() {
@@ -643,9 +483,32 @@ window.addGalleryItem = function() {
     render();
 };
 
-document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+window.previewGal = function(inp) {
+    if (inp.files && inp.files[0]) {
+        var r = new FileReader();
+        r.onload = function(e) {
+            $('gPrev').innerHTML = '<img src="' + e.target.result + '" style="max-width:100px">';
+            $('gPrev').dataset.d = e.target.result;
+        };
+        r.readAsDataURL(inp.files[0]);
+    }
+};
 
-render();
+window.saveGal = function(i) {
+    if ($('gPrev').dataset.d) data.gallery[i].data = $('gPrev').dataset.d;
+    render();
+    closeModal();
+};
+
+window.openLightbox = function(src) {
+    $('lightboxImg').src = src;
+    $('lightbox').classList.add('show');
+};
+
+window.closeLightbox = function(e) {
+    if (e.target.tagName !== 'IMG') $('lightbox').classList.remove('show');
+};
+
+loadData();
 
 })();

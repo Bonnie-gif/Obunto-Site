@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="noindex, nofollow">
     <title>Comissões Vintage</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -39,8 +38,8 @@
 
     <div class="editor-indicator" id="editorIndicator">
         <span class="pulse"></span>
-        <span>MODO EDITOR</span>
-        <button onclick="saveGlobal()" style="background:#fff;color:#000;">PUBLICAR ALTERAÇÕES</button>
+        <span>MODO ADMIN</span>
+        <button onclick="saveGlobal()" style="background:#fff;color:#000;">PUBLICAR</button>
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
@@ -50,28 +49,6 @@
             <h2 id="modalTitle">Editar</h2>
             <div id="modalContent"></div>
             <div class="modal-buttons" id="modalButtons"></div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="githubModal">
-        <div class="modal" style="max-width: 400px;">
-            <h2>Configurar Acesso</h2>
-            <p style="font-family:'Lato'; font-size:14px; margin-bottom:15px; color:#555;">
-                Para salvar globalmente, preencha com seus dados do GitHub. Isso será salvo apenas no seu navegador.
-            </p>
-            <div class="modal-form-group">
-                <label class="modal-label">Usuário GitHub</label>
-                <input class="modal-input" id="ghUser" placeholder="Ex: Bonnie-gif">
-            </div>
-            <div class="modal-form-group">
-                <label class="modal-label">Nome do Repositório</label>
-                <input class="modal-input" id="ghRepo" placeholder="Ex: Obunto-Site">
-            </div>
-            <div class="modal-form-group">
-                <label class="modal-label">Token de Acesso (PAT)</label>
-                <input class="modal-input" id="ghToken" type="password" placeholder="ghp_...">
-            </div>
-            <button class="modal-btn save" onclick="saveCredentials()">Salvar Configuração</button>
         </div>
     </div>
 
@@ -90,7 +67,7 @@
             <div class="editable-trigger" onclick="editStatus(event)">✏️</div>
             <div class="flap-content">
                 <span class="flap-label">STATUS ATUAL:</span>
-                <div class="ink-stamp" id="statusValue">ABERTO</div>
+                <div class="ink-stamp" id="statusValue">...</div>
             </div>
             <div class="stamp-deco"></div>
         </div>
@@ -107,10 +84,10 @@
                 <div class="banner editable-wrapper">
                     <div class="editable-trigger" onclick="editBanner(event)">✏️</div>
                     <div class="banner-shape">
-                        <span class="banner-small" id="bannerSmall">ARTIST NAME</span>
+                        <span class="banner-small" id="bannerSmall">...</span>
                     </div>
-                    <h1 class="banner-main" id="bannerMain">COMISSÕES</h1>
-                    <p class="banner-sub" id="bannerSub">Ilustração & Design</p>
+                    <h1 class="banner-main" id="bannerMain">...</h1>
+                    <p class="banner-sub" id="bannerSub">...</p>
                     <div class="banner-stars">
                         <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
                     </div>
@@ -124,15 +101,16 @@
             </div>
 
             <div class="pages-container">
+                
                 <div id="homePage" class="page-content active">
                     <div class="home-grid">
                         <div class="grid-welcome paper-texture ruled editable-wrapper" data-anim="fade-right">
                             <div class="editable-trigger" onclick="editWelcome(event)">✏️</div>
                             <div class="paper-clip"></div>
                             <div class="paper-fold"></div>
-                            <h2 class="welcome-title" id="welcomeTitle">Bem-vindo!</h2>
-                            <p class="welcome-sub" id="welcomeSub">Meu espaço criativo</p>
-                            <div class="welcome-text" id="welcomeText">Carregando...</div>
+                            <h2 class="welcome-title" id="welcomeTitle">...</h2>
+                            <p class="welcome-sub" id="welcomeSub">...</p>
+                            <div class="welcome-text" id="welcomeText">...</div>
                         </div>
 
                         <div class="grid-links postcard editable-wrapper" data-anim="fade-left">
@@ -145,7 +123,7 @@
                             <div class="postcard-right">
                                 <h3 class="box-title">REDES</h3>
                                 <div class="social-grid" id="socialGrid"></div>
-                                <p class="links-text" id="linksText">Me siga!</p>
+                                <p class="links-text" id="linksText">...</p>
                             </div>
                         </div>
 
@@ -153,7 +131,7 @@
                             <div class="editable-trigger" onclick="editPromo(event)">✏️</div>
                             <div class="tape"></div>
                             <div class="ticket-tear"></div>
-                            <h3 class="promo-title" id="promoTitle">Aviso!</h3>
+                            <h3 class="promo-title" id="promoTitle">...</h3>
                             <div class="promo-text" id="promoText">...</div>
                         </div>
                     </div>
@@ -200,6 +178,7 @@
                         <div id="tosText" class="tos-body"></div>
                     </div>
                 </div>
+
             </div>
 
             <footer class="footer">
