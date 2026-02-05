@@ -103,6 +103,9 @@ function showToast(msg, type) {
     setTimeout(function() { toast.remove(); }, 3000);
 }
 
+// ------------------------------------------
+// DADOS DO SITE (Sua configuração principal)
+// ------------------------------------------
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
     status: "ABERTO",
@@ -139,18 +142,21 @@ function loadData() {
 function saveData() {
     try {
         localStorage.setItem('vintageSiteDatav3', JSON.stringify(data));
-        showToast('Salvo localmente! Use o botão SALVAR para copiar o código.', 'success');
+        showToast('Salvo localmente! Lembre de exportar.', 'success');
     } catch(e) {
         showToast('Erro ao salvar', 'error');
     }
 }
 
+// NOVA FUNÇÃO: Copia o código para tornar a mudança global
 window.exportCode = function() {
-    var c = "var data = " + JSON.stringify(data, null, 4) + ";";
-    navigator.clipboard.writeText(c).then(function() {
-        alert("CÓDIGO COPIADO COM SUCESSO!\n\n1. Abra o arquivo 'script.js' no seu VS Code.\n2. Apague a parte antiga onde diz 'var data = ...'\n3. Cole este novo código.\n4. Faça o Git Push para atualizar o site.");
-    }, function() {
-        alert("Erro ao copiar. Tente novamente.");
+    var jsonContent = JSON.stringify(data, null, 4);
+    var fullVar = "var data = " + jsonContent + ";";
+    
+    navigator.clipboard.writeText(fullVar).then(function() {
+        alert("CÓDIGO COPIADO!\n\nAgora vá no seu VS Code, abra o arquivo 'script.js', apague a variável 'var data = ...' antiga e cole o que você acabou de copiar.\nDepois faça o Git Push.");
+    }, function(err) {
+        console.error('Erro ao copiar: ', err);
     });
 };
 
