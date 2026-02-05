@@ -3,142 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>Comissões Vintage</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;" ondragstart="return false;">
     
     <div id="loading">
         <div class="loading-content">
             <div class="stamp-border">
-                <div class="stamp-inner">
-                    <h1 class="loading-title">Ateliê</h1>
-                    <div class="loading-bar-retro">
-                        <div id="loadingBarFill" class="bar-fill"></div>
-                    </div>
-                    <p id="loadingStatus" class="loading-status-text">Organizando...</p>
+                <h1 class="loading-title">Ateliê</h1>
+                <div class="typewriter-box">
+                    <span id="typewriterText"></span>
+                    <span class="cursor">|</span>
+                </div>
+                <div class="loading-bar-retro">
+                    <div id="loadingBarFill" class="bar-fill"></div>
+                </div>
+                <div class="loading-icons">
+                    <span>🎨</span>
+                    <span>✏️</span>
+                    <span>🖌️</span>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="particles"></div>
+
     <div class="light-switch-container" onclick="toggleNightMode()">
         <div class="light-cord"></div>
         <div class="light-knob"></div>
+        <span class="switch-tip">Modo Noturno</span>
     </div>
 
-    <div id="ink-trail-container"></div>
+    <button class="back-top" id="backTop" onclick="scrollToTop()">↑</button>
+
+    <div id="toasts"></div>
 
     <div class="editor-indicator" id="editorIndicator">
-        <div class="indicator-icon">✏️</div>
-        <span>MODO EDITOR</span>
+        <span class="pulse"></span>
+        <span>✏️ MODO EDITOR</span>
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
-            <div class="wax-seal-close" onclick="closeModal()">✖</div>
+            <div class="wax-seal" onclick="closeModal()">✕</div>
             <h2 id="modalTitle">Editar</h2>
             <div id="modalContent"></div>
             <div class="modal-buttons" id="modalButtons"></div>
         </div>
     </div>
 
-    <div class="main-container">
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <img id="lightboxImg" src="" alt="">
+        <button class="lightbox-close">✕</button>
+    </div>
+
+    <div class="main-container" data-anim="fade-up">
         <div class="coffee-stain"></div>
+        <div class="coffee-stain-2"></div>
         <div class="pencil-scribble"></div>
         <div class="dotted-line-top"></div>
 
-        <div class="envelope-flap editable-wrapper">
+        <div class="envelope-flap editable-wrapper" data-anim="fade-down">
             <div class="editable-trigger" onclick="editStatus(event)">✏️</div>
             <div class="flap-content">
                 <span class="flap-label">STATUS ATUAL:</span>
-                <div class="status-stamp-container">
-                    <div class="ink-stamp" id="statusValue">ABERTO</div>
-                </div>
+                <div class="ink-stamp" id="statusValue">ABERTO</div>
             </div>
+            <div class="stamp-deco"></div>
         </div>
 
         <div class="inner-wrapper">
-            <nav class="nav-bar sticky-nav">
-                <button class="nav-item active" data-page="home" onclick="showPage('home')">Início</button>
-                <button class="nav-item" data-page="prices" onclick="showPage('prices')">Preços</button>
-                <button class="nav-item" data-page="gallery" onclick="showPage('gallery')">Galeria</button>
-                <button class="nav-item" data-page="tos" onclick="showPage('tos')">Termos</button>
+            <nav class="sticky-nav">
+                <button class="nav-item active" data-page="home" onclick="showPage('home')">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Início</span>
+                </button>
+                <button class="nav-item" data-page="prices" onclick="showPage('prices')">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-text">Preços</span>
+                </button>
+                <button class="nav-item" data-page="gallery" onclick="showPage('gallery')">
+                    <span class="nav-icon">🖼️</span>
+                    <span class="nav-text">Galeria</span>
+                </button>
+                <button class="nav-item" data-page="tos" onclick="showPage('tos')">
+                    <span class="nav-icon">📜</span>
+                    <span class="nav-text">Termos</span>
+                </button>
             </nav>
 
-            <header class="header-section">
+            <header class="header-section" data-anim="zoom">
                 <div class="banner editable-wrapper">
                     <div class="editable-trigger" onclick="editBanner(event)">✏️</div>
                     <div class="banner-shape">
-                        <span class="banner-title-small" id="bannerSmall">ARTIST NAME</span>
+                        <span class="banner-small" id="bannerSmall">ARTIST NAME</span>
                     </div>
-                    <h1 class="banner-title-main" id="bannerMain">COMISSÕES</h1>
-                    <p class="banner-subtitle" id="bannerSub">Ilustração & Design</p>
+                    <h1 class="banner-main" id="bannerMain">COMISSÕES</h1>
+                    <p class="banner-sub" id="bannerSub">Ilustração & Design</p>
+                    <div class="banner-stars">
+                        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
                 </div>
             </header>
 
             <div class="yellow-divider">
-                <span class="divider-icon">✦</span>
+                <span class="divider-icon spin">✦</span>
                 <span class="specials-title">DESTAQUES</span>
-                <span class="divider-icon">✦</span>
+                <span class="divider-icon spin-r">✦</span>
             </div>
 
             <div class="pages-container">
                 
                 <div id="homePage" class="page-content active">
-                    <div class="asymmetrical-grid">
-                        <div class="grid-area-welcome paper-texture ruled-paper editable-wrapper">
+                    <div class="home-grid">
+                        <div class="grid-welcome paper-texture ruled editable-wrapper" data-anim="fade-right">
                             <div class="editable-trigger" onclick="editWelcome(event)">✏️</div>
                             <div class="paper-clip"></div>
-                            <div class="ruled-content">
-                                <h2 class="welcome-title" id="welcomeTitle">Bem-vindo!</h2>
-                                <p class="welcome-subtitle" id="welcomeSub">Meu espaço criativo</p>
-                                <div class="welcome-text" id="welcomeText">Carregando texto...</div>
-                            </div>
+                            <div class="paper-fold"></div>
+                            <h2 class="welcome-title" id="welcomeTitle">Bem-vindo!</h2>
+                            <p class="welcome-sub" id="welcomeSub">Meu espaço criativo</p>
+                            <div class="welcome-text" id="welcomeText">Carregando...</div>
                         </div>
 
-                        <div class="grid-area-links postcard-texture editable-wrapper">
+                        <div class="grid-links postcard editable-wrapper" data-anim="fade-left">
                             <div class="editable-trigger" onclick="editLinks(event)">✏️</div>
-                            <div class="postcard-divider"></div>
+                            <div class="postcard-line"></div>
                             <div class="postcard-left">
-                                <div class="airmail-stamp">AIR MAIL</div>
+                                <div class="airmail">AIR MAIL</div>
+                                <div class="postcard-stamp">✉</div>
                             </div>
                             <div class="postcard-right">
-                                <h3 class="box-title-dark">REDES</h3>
+                                <h3 class="box-title">REDES</h3>
                                 <div class="social-grid" id="socialGrid"></div>
-                                <p class="links-subtext" id="linksText">Me siga!</p>
+                                <p class="links-text" id="linksText">Me siga!</p>
                             </div>
                         </div>
 
-                        <div class="grid-area-promo ticket-texture editable-wrapper">
+                        <div class="grid-promo ticket editable-wrapper" data-anim="fade-up">
                             <div class="editable-trigger" onclick="editPromo(event)">✏️</div>
-                            <div class="tape-strip"></div>
+                            <div class="tape"></div>
+                            <div class="ticket-tear"></div>
                             <h3 class="promo-title" id="promoTitle">Aviso!</h3>
                             <div class="promo-text" id="promoText">...</div>
                         </div>
 
-                        <div class="grid-area-badge">
-                             <div class="eat-badge">
-                                <span class="eat-badge-text">Art</span>
+                        <div class="grid-badge" data-anim="zoom">
+                            <div class="art-badge floating">
+                                <div class="badge-shine"></div>
+                                <span>Art</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="pricesPage" class="page-content">
-                    <h3 class="section-header">TABELA DE VALORES</h3>
-                    <div class="cards-layout">
-                        <div class="card-column paper-texture editable-wrapper">
-                             <div class="editable-trigger" onclick="editPrices(event)">✏️</div>
-                             <div class="card-header-tape">SERVIÇOS</div>
-                             <div id="pricesList" class="card-list"></div>
-                             <button class="add-btn-dashed" onclick="addPrice()">+ Serviço</button>
+                    <h3 class="section-header" data-anim="fade-down">
+                        <span class="hd">◆</span>
+                        TABELA DE VALORES
+                        <span class="hd">◆</span>
+                    </h3>
+                    <div class="cards-grid">
+                        <div class="card paper-texture editable-wrapper" data-anim="fade-right">
+                            <div class="editable-trigger" onclick="editPrices(event)">✏️</div>
+                            <div class="card-tape">SERVIÇOS</div>
+                            <div id="pricesList" class="card-list"></div>
+                            <button class="add-btn-dashed" onclick="addPrice()">+ Serviço</button>
                         </div>
-                        <div class="card-column paper-texture editable-wrapper">
+                        <div class="card paper-texture editable-wrapper" data-anim="fade-left">
                             <div class="editable-trigger" onclick="editExtras(event)">✏️</div>
-                            <div class="card-header-tape blue">EXTRAS</div>
+                            <div class="card-tape blue">EXTRAS</div>
                             <div id="extrasList" class="card-list"></div>
                             <button class="add-btn-dashed" onclick="addExtra()">+ Extra</button>
                         </div>
@@ -146,43 +185,41 @@
                 </div>
 
                 <div id="galleryPage" class="page-content">
-                    <h3 class="section-header">GALERIA DE ARTE</h3>
-                    <div class="scattered-layout" id="galleryGrid"></div>
+                    <h3 class="section-header" data-anim="fade-down">
+                        <span class="hd">◆</span>
+                        GALERIA DE ARTE
+                        <span class="hd">◆</span>
+                    </h3>
+                    <div class="gallery-grid" id="galleryGrid"></div>
                     <button class="add-btn-main" onclick="addGalleryItem()">+ Nova Imagem</button>
                 </div>
 
                 <div id="tosPage" class="page-content">
-                    <div class="tos-paper editable-wrapper">
+                    <div class="tos-paper editable-wrapper" data-anim="fade-up">
                         <div class="editable-trigger" onclick="editTos(event)">✏️</div>
                         <div class="paper-holes"></div>
+                        <div class="tos-icon">§</div>
                         <h2 class="tos-title">Termos de Uso</h2>
                         <div id="tosText" class="tos-body"></div>
+                        <div class="tos-sign">
+                            <div class="sign-line"></div>
+                            <span>Assinatura do Cliente</span>
+                        </div>
                     </div>
                 </div>
 
             </div>
 
             <footer class="footer">
+                <div class="footer-wave"></div>
                 <div class="date-stamp" id="footerDate"></div>
-                <div class="decorative-dots"><span></span><span></span><span></span></div>
+                <div class="dots"><span></span><span></span><span></span></div>
                 <p class="footer-text" id="footerText">Obrigado pela visita!</p>
+                <div class="heart-box"><span class="heart">❤</span></div>
             </footer>
         </div>
     </div>
 
     <script src="script.js"></script>
-    
-    <script>
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('dragstart', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-                (e.ctrlKey && (e.key === 'U' || e.key === 'S' || e.key === 'P'))) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    </script>
 </body>
 </html>
