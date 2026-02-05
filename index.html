@@ -22,11 +22,6 @@
                 <div class="loading-bar-retro">
                     <div id="loadingBarFill" class="bar-fill"></div>
                 </div>
-                <div class="loading-icons">
-                    <span>🎨</span>
-                    <span>✏️</span>
-                    <span>🖌️</span>
-                </div>
             </div>
         </div>
     </div>
@@ -45,7 +40,7 @@
 
     <div class="editor-indicator" id="editorIndicator">
         <span class="pulse"></span>
-        <span>✏️ MODO EDITOR</span>
+        <span>MODO EDITOR</span>
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
@@ -80,22 +75,10 @@
 
         <div class="inner-wrapper">
             <nav class="sticky-nav">
-                <button class="nav-item active" data-page="home" onclick="showPage('home')">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-text">Início</span>
-                </button>
-                <button class="nav-item" data-page="prices" onclick="showPage('prices')">
-                    <span class="nav-icon">💰</span>
-                    <span class="nav-text">Preços</span>
-                </button>
-                <button class="nav-item" data-page="gallery" onclick="showPage('gallery')">
-                    <span class="nav-icon">🖼️</span>
-                    <span class="nav-text">Galeria</span>
-                </button>
-                <button class="nav-item" data-page="tos" onclick="showPage('tos')">
-                    <span class="nav-icon">📜</span>
-                    <span class="nav-text">Termos</span>
-                </button>
+                <button class="nav-item active" data-page="home" onclick="showPage('home')">Início</button>
+                <button class="nav-item" data-page="prices" onclick="showPage('prices')">Preços</button>
+                <button class="nav-item" data-page="gallery" onclick="showPage('gallery')">Galeria</button>
+                <button class="nav-item" data-page="tos" onclick="showPage('tos')">Termos</button>
             </nav>
 
             <header class="header-section" data-anim="zoom">
@@ -136,7 +119,7 @@
                             <div class="postcard-line"></div>
                             <div class="postcard-left">
                                 <div class="airmail">AIR MAIL</div>
-                                <div class="postcard-stamp">✉</div>
+                                <div class="postcard-stamp"></div>
                             </div>
                             <div class="postcard-right">
                                 <h3 class="box-title">REDES</h3>
@@ -201,10 +184,6 @@
                         <div class="tos-icon">§</div>
                         <h2 class="tos-title">Termos de Uso</h2>
                         <div id="tosText" class="tos-body"></div>
-                        <div class="tos-sign">
-                            <div class="sign-line"></div>
-                            <span>Assinatura do Cliente</span>
-                        </div>
                     </div>
                 </div>
 
@@ -215,7 +194,6 @@
                 <div class="date-stamp" id="footerDate"></div>
                 <div class="dots"><span></span><span></span><span></span></div>
                 <p class="footer-text" id="footerText">Obrigado pela visita!</p>
-                <div class="heart-box"><span class="heart">❤</span></div>
             </footer>
         </div>
     </div>

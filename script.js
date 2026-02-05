@@ -90,7 +90,7 @@ window.scrollToTop = function() {
 
 window.toggleNightMode = function() {
     document.body.classList.toggle('night-mode');
-    showToast(document.body.classList.contains('night-mode') ? '🌙 Modo noturno ativado' : '☀️ Modo claro ativado');
+    showToast(document.body.classList.contains('night-mode') ? 'Modo noturno ativado' : 'Modo claro ativado');
 };
 
 function showToast(msg, type) {
@@ -139,9 +139,9 @@ function loadData() {
 function saveData() {
     try {
         localStorage.setItem('vintageSiteDatav3', JSON.stringify(data));
-        showToast('✓ Salvo com sucesso!', 'success');
+        showToast('Salvo com sucesso!', 'success');
     } catch(e) {
-        showToast('✕ Erro ao salvar', 'error');
+        showToast('Erro ao salvar', 'error');
     }
 }
 
@@ -288,7 +288,7 @@ window.toggleEditor = function() {
     document.body.classList.toggle('editor-active', editorMode);
     var ind = $('editorIndicator');
     if (ind) ind.classList.toggle('active', editorMode);
-    showToast(editorMode ? '✏️ Modo editor ativado' : '👁️ Modo visualização');
+    showToast(editorMode ? 'Modo editor ativado' : 'Modo visualização');
 };
 
 window.showPage = function(page) {
