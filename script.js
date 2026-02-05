@@ -1,7 +1,6 @@
 (function(){
 'use strict';
 
-// --- CONFIGURAÇÃO INICIAL E ANIMAÇÕES ---
 var typeTexts = ["Misturando tintas...", "Afiando lápis...", "Ajustando luz...", "Preparando tela...", "Quase pronto!"];
 var typeIndex = 0;
 var charIndex = 0;
@@ -104,9 +103,6 @@ function showToast(msg, type) {
     setTimeout(function() { toast.remove(); }, 3000);
 }
 
-// ------------------------------------------
-// DADOS DO SITE
-// ------------------------------------------
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
     status: "ABERTO",
@@ -129,8 +125,6 @@ function sanitize(str) {
     return div.innerHTML;
 }
 
-// --- INTEGRAÇÃO GLOBAL COM GITHUB ---
-
 window.saveCredentials = function() {
     var user = $('ghUser').value;
     var repo = $('ghRepo').value;
@@ -143,7 +137,6 @@ window.saveCredentials = function() {
     
     localStorage.setItem('gh_config', JSON.stringify({user: user, repo: repo, token: token}));
     $('githubModal').classList.remove('active');
-    // Tenta salvar de novo agora que temos credenciais
     saveGlobal();
 };
 
@@ -160,7 +153,6 @@ window.saveGlobal = function() {
     
     showToast('Conectando ao GitHub...', '');
 
-    // 1. Pega o arquivo atual para obter o SHA (necessário para update)
     fetch(apiUrl, {
         headers: {
             'Authorization': `token ${config.token}`,
@@ -172,20 +164,17 @@ window.saveGlobal = function() {
         return response.json();
     })
     .then(fileData => {
-        var currentContent = decodeURIComponent(escape(atob(fileData.content))); // Decodifica base64
+        var currentContent = decodeURIComponent(escape(atob(fileData.content))); 
         var sha = fileData.sha;
 
-        // 2. Substitui a variável 'data' no conteúdo do arquivo
-        // Regex procura por: var data = { ... }; e troca pelo novo JSON
         var newContent = currentContent.replace(
             /var data = \{[\s\S]*?\};/, 
             "var data = " + JSON.stringify(data, null, 4) + ";"
         );
 
-        // 3. Envia o arquivo atualizado de volta (Commit)
         var commitData = {
             message: "Atualização via Site Editor",
-            content: btoa(unescape(encodeURIComponent(newContent))), // Codifica para base64
+            content: btoa(unescape(encodeURIComponent(newContent))), 
             sha: sha
         };
 
@@ -208,13 +197,11 @@ window.saveGlobal = function() {
     .catch(err => {
         console.error(err);
         showToast('Erro: ' + err.message, 'error');
-        // Se der erro de credencial, limpa para pedir de novo
         if(err.message.includes('credenciais')) localStorage.removeItem('gh_config');
     });
 };
 
 function render() {
-    // Atualiza a tela com os dados atuais
     if ($('statusValue')) $('statusValue').textContent = data.status;
     if ($('bannerSmall')) $('bannerSmall').textContent = data.banner.small;
     if ($('bannerMain')) $('bannerMain').textContent = data.banner.main;
@@ -341,7 +328,7 @@ var code = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDow
 
 document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && ['U', 'S', 'P'].includes(e.key))) {
-        // e.preventDefault(); 
+        
     }
     keySeq.push(e.key);
     if (keySeq.length > 6) keySeq.shift();
@@ -391,8 +378,6 @@ $('modalOverlay').addEventListener('click', function(e) {
 function richEditor(id, content) {
     return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:8px;border-bottom:1px solid #ccc;display:flex;gap:5px"><button type="button" onclick="document.execCommand(\'bold\')" style="padding:5px 10px;font-weight:bold;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">B</button><button type="button" onclick="document.execCommand(\'italic\')" style="padding:5px 10px;font-style:italic;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">I</button><button type="button" onclick="document.execCommand(\'insertUnorderedList\')" style="padding:5px 10px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">• Lista</button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none;cursor:text">' + content + '</div></div>';
 }
-
-// --- EDITOR FUNCTIONS (Chamam render() localmente, saveGlobal() persiste) ---
 
 window.editBanner = function(e) {
     if (!editorMode) return;
@@ -658,6 +643,9 @@ window.addGalleryItem = function() {
     render();
 };
 
-render(); // Renderiza inicial
+document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+render();
 
 })();
