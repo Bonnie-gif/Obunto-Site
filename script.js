@@ -1,6 +1,7 @@
 (function(){
 'use strict';
 
+// --- CONFIGURAÇÃO INICIAL E ANIMAÇÕES ---
 var typeTexts = ["Misturando tintas...", "Afiando lápis...", "Ajustando luz...", "Preparando tela...", "Quase pronto!"];
 var typeIndex = 0;
 var charIndex = 0;
@@ -104,7 +105,7 @@ function showToast(msg, type) {
 }
 
 // ------------------------------------------
-// DADOS DO SITE (Sua configuração principal)
+// DADOS DO SITE
 // ------------------------------------------
 var data = {
     banner: { small: "ARTIST NAME", main: "COMISSÕES", sub: "Ilustração & Design" },
@@ -128,39 +129,92 @@ function sanitize(str) {
     return div.innerHTML;
 }
 
-function loadData() {
-    var s = localStorage.getItem('vintageSiteDatav3');
-    if (s) {
-        try {
-            var parsed = JSON.parse(s);
-            if (parsed && typeof parsed === 'object') data = parsed;
-        } catch(e) {}
-    }
-    render();
-}
+// --- INTEGRAÇÃO GLOBAL COM GITHUB ---
 
-function saveData() {
-    try {
-        localStorage.setItem('vintageSiteDatav3', JSON.stringify(data));
-        showToast('Salvo localmente! Lembre de exportar.', 'success');
-    } catch(e) {
-        showToast('Erro ao salvar', 'error');
-    }
-}
-
-// NOVA FUNÇÃO: Copia o código para tornar a mudança global
-window.exportCode = function() {
-    var jsonContent = JSON.stringify(data, null, 4);
-    var fullVar = "var data = " + jsonContent + ";";
+window.saveCredentials = function() {
+    var user = $('ghUser').value;
+    var repo = $('ghRepo').value;
+    var token = $('ghToken').value;
     
-    navigator.clipboard.writeText(fullVar).then(function() {
-        alert("CÓDIGO COPIADO!\n\nAgora vá no seu VS Code, abra o arquivo 'script.js', apague a variável 'var data = ...' antiga e cole o que você acabou de copiar.\nDepois faça o Git Push.");
-    }, function(err) {
-        console.error('Erro ao copiar: ', err);
+    if(!user || !repo || !token) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+    }
+    
+    localStorage.setItem('gh_config', JSON.stringify({user: user, repo: repo, token: token}));
+    $('githubModal').classList.remove('active');
+    // Tenta salvar de novo agora que temos credenciais
+    saveGlobal();
+};
+
+window.saveGlobal = function() {
+    var configStr = localStorage.getItem('gh_config');
+    if(!configStr) {
+        $('githubModal').classList.add('active');
+        return;
+    }
+    
+    var config = JSON.parse(configStr);
+    var path = 'script.js'; 
+    var apiUrl = `https://api.github.com/repos/${config.user}/${config.repo}/contents/${path}`;
+    
+    showToast('Conectando ao GitHub...', '');
+
+    // 1. Pega o arquivo atual para obter o SHA (necessário para update)
+    fetch(apiUrl, {
+        headers: {
+            'Authorization': `token ${config.token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    })
+    .then(response => {
+        if(!response.ok) throw new Error("Erro ao acessar repositório. Verifique as credenciais.");
+        return response.json();
+    })
+    .then(fileData => {
+        var currentContent = decodeURIComponent(escape(atob(fileData.content))); // Decodifica base64
+        var sha = fileData.sha;
+
+        // 2. Substitui a variável 'data' no conteúdo do arquivo
+        // Regex procura por: var data = { ... }; e troca pelo novo JSON
+        var newContent = currentContent.replace(
+            /var data = \{[\s\S]*?\};/, 
+            "var data = " + JSON.stringify(data, null, 4) + ";"
+        );
+
+        // 3. Envia o arquivo atualizado de volta (Commit)
+        var commitData = {
+            message: "Atualização via Site Editor",
+            content: btoa(unescape(encodeURIComponent(newContent))), // Codifica para base64
+            sha: sha
+        };
+
+        return fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${config.token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(commitData)
+        });
+    })
+    .then(response => {
+        if(response.ok) {
+            showToast('SUCESSO! O site atualizará em 2min.', 'success');
+        } else {
+            throw new Error("Falha ao salvar no GitHub.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('Erro: ' + err.message, 'error');
+        // Se der erro de credencial, limpa para pedir de novo
+        if(err.message.includes('credenciais')) localStorage.removeItem('gh_config');
     });
 };
 
 function render() {
+    // Atualiza a tela com os dados atuais
     if ($('statusValue')) $('statusValue').textContent = data.status;
     if ($('bannerSmall')) $('bannerSmall').textContent = data.banner.small;
     if ($('bannerMain')) $('bannerMain').textContent = data.banner.main;
@@ -287,8 +341,7 @@ var code = ['ArrowUp', 'ArrowDown', 'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDow
 
 document.addEventListener('keydown', function(e) {
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && ['U', 'S', 'P'].includes(e.key))) {
-        e.preventDefault();
-        return false;
+        // e.preventDefault(); 
     }
     keySeq.push(e.key);
     if (keySeq.length > 6) keySeq.shift();
@@ -339,6 +392,8 @@ function richEditor(id, content) {
     return '<div style="border:2px solid #ccc;border-radius:6px;overflow:hidden"><div style="background:#eee;padding:8px;border-bottom:1px solid #ccc;display:flex;gap:5px"><button type="button" onclick="document.execCommand(\'bold\')" style="padding:5px 10px;font-weight:bold;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">B</button><button type="button" onclick="document.execCommand(\'italic\')" style="padding:5px 10px;font-style:italic;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">I</button><button type="button" onclick="document.execCommand(\'insertUnorderedList\')" style="padding:5px 10px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer">• Lista</button></div><div id="' + id + '" contenteditable="true" style="padding:15px;min-height:100px;background:#fff;outline:none;cursor:text">' + content + '</div></div>';
 }
 
+// --- EDITOR FUNCTIONS (Chamam render() localmente, saveGlobal() persiste) ---
+
 window.editBanner = function(e) {
     if (!editorMode) return;
     e.stopPropagation();
@@ -354,7 +409,6 @@ window.saveBanner = function() {
     data.banner.small = $('inBS').value;
     data.banner.main = $('inBM').value;
     data.banner.sub = $('inBSub').value;
-    saveData();
     render();
     closeModal();
 };
@@ -370,7 +424,6 @@ window.editStatus = function(e) {
 
 window.saveStatus = function() {
     data.status = $('inStat').value;
-    saveData();
     render();
     closeModal();
 };
@@ -390,7 +443,6 @@ window.saveWelcome = function() {
     data.welcome.title = $('inWT').value;
     data.welcome.sub = $('inWS').value;
     data.welcome.text = $('inWTxt').innerHTML;
-    saveData();
     render();
     closeModal();
 };
@@ -408,7 +460,6 @@ window.editPromo = function(e) {
 window.savePromo = function() {
     data.promo.title = $('inPT').value;
     data.promo.text = $('inPTxt').innerHTML;
-    saveData();
     render();
     closeModal();
 };
@@ -470,7 +521,6 @@ function updateLinksTemp() {
 window.saveLinks = function() {
     data.links.text = $('inLT').value;
     updateLinksTemp();
-    saveData();
     render();
     closeModal();
 };
@@ -495,21 +545,18 @@ window.savePrices = function() {
             p.price = pr.value;
         }
     });
-    saveData();
     render();
     closeModal();
 };
 
 window.rmPrice = function(i) {
     data.prices.splice(i, 1);
-    saveData();
     render();
     closeModal();
 };
 
 window.addPrice = function() {
     data.prices.push({ name: "Novo Serviço", price: "R$0" });
-    saveData();
     render();
 };
 
@@ -533,21 +580,18 @@ window.saveExtras = function() {
             ex.price = pr.value;
         }
     });
-    saveData();
     render();
     closeModal();
 };
 
 window.rmExtra = function(i) {
     data.extras.splice(i, 1);
-    saveData();
     render();
     closeModal();
 };
 
 window.addExtra = function() {
     data.extras.push({ name: "Extra", price: "+R$0" });
-    saveData();
     render();
 };
 
@@ -559,7 +603,6 @@ window.editTos = function(e) {
 
 window.saveTos = function() {
     data.tos = $('inTos').innerHTML;
-    saveData();
     render();
     closeModal();
 };
@@ -600,27 +643,21 @@ window.previewGal = function(inp) {
 window.saveGal = function(i) {
     var prev = $('gPrev');
     if (prev && prev.dataset.img) data.gallery[i].data = prev.dataset.img;
-    saveData();
     render();
     closeModal();
 };
 
 window.rmGal = function(i) {
     data.gallery.splice(i, 1);
-    saveData();
     render();
     closeModal();
 };
 
 window.addGalleryItem = function() {
     data.gallery.push({ title: "", data: "" });
-    saveData();
     render();
 };
 
-document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-
-loadData();
+render(); // Renderiza inicial
 
 })();

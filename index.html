@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <title>Comissões Vintage</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@400;700&family=Courier+Prime&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -41,7 +40,7 @@
     <div class="editor-indicator" id="editorIndicator">
         <span class="pulse"></span>
         <span>MODO EDITOR</span>
-        <button onclick="exportCode()" style="background:#fff;color:#000;">SALVAR</button>
+        <button onclick="saveGlobal()" style="background:#fff;color:#000;">PUBLICAR ALTERAÇÕES</button>
         <button onclick="toggleEditor()">SAIR</button>
     </div>
 
@@ -51,6 +50,28 @@
             <h2 id="modalTitle">Editar</h2>
             <div id="modalContent"></div>
             <div class="modal-buttons" id="modalButtons"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="githubModal">
+        <div class="modal" style="max-width: 400px;">
+            <h2>Configurar Acesso</h2>
+            <p style="font-family:'Lato'; font-size:14px; margin-bottom:15px; color:#555;">
+                Para que o site possa salvar as alterações globalmente, ele precisa de permissão para escrever no seu GitHub. Essas informações ficarão salvas apenas no seu navegador.
+            </p>
+            <div class="modal-form-group">
+                <label class="modal-label">Usuário GitHub</label>
+                <input class="modal-input" id="ghUser" placeholder="Ex: Bonnie-gif">
+            </div>
+            <div class="modal-form-group">
+                <label class="modal-label">Nome do Repositório</label>
+                <input class="modal-input" id="ghRepo" placeholder="Ex: Obunto-Site">
+            </div>
+            <div class="modal-form-group">
+                <label class="modal-label">Token de Acesso (PAT)</label>
+                <input class="modal-input" id="ghToken" type="password" placeholder="ghp_...">
+            </div>
+            <button class="modal-btn save" onclick="saveCredentials()">Salvar Configuração</button>
         </div>
     </div>
 
@@ -103,7 +124,6 @@
             </div>
 
             <div class="pages-container">
-                
                 <div id="homePage" class="page-content active">
                     <div class="home-grid">
                         <div class="grid-welcome paper-texture ruled editable-wrapper" data-anim="fade-right">
@@ -180,7 +200,6 @@
                         <div id="tosText" class="tos-body"></div>
                     </div>
                 </div>
-
             </div>
 
             <footer class="footer">
